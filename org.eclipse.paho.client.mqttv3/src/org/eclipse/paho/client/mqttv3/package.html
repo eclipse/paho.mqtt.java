@@ -1,0 +1,187 @@
+<body>
+Contains an API for connecting to a server which implements the MQTT V3 
+protocol.
+
+<p>
+The MQ Telemetry Transport (MQTT) is a lightweight publish/subscribe protocol 
+flowing over TCP/IP for remote sensors and control devices through low 
+bandwidth communications. MQTT is used by specialized applications on 
+small footprint devices that require a low bandwidth communication, 
+typically for remote data acquisition and process control.
+</p>
+<p>
+A typical system might comprise several hundred client devices communicating 
+with a single server or "broker", where each client is identified 
+by a unique ID. 
+</p>
+<p>The basic means of operating the client is as follows:</p>
+<ol>
+	<li>Create an instance of {@link MqttClient}, providing
+	the address of the server and a unique client identifier.</li>
+	<li>{@link #connect(MqttConnectOptions) Connect} to the server</li>
+	<li>Exchange messages with the server.
+		<ul>
+			<li>Send {@link MqttMessage messages} to the server, 
+			via {@link MqttTopic topics}.</li>
+			<li>Receive messages from the server.  This is done asynchronously
+			using  
+			{@link MqttClient#subscribe(String, MqttSubscriptionOptions) subscriptions},
+			combined with a {@link #setCallback(MqttCallback) callback}.
+			</li>
+		</ul>
+	</li>
+<li>{@link #disconnect() Disconnect} from the server.</li>
+</ol>
+</p>
+<h3>Examples</h3>
+<h4>Publish a message, at most once</h4>
+<p>In the following code snippet, a simple message is published to the server,
+using defaults wherever possible.</p>
+<code><pre>	MqttClient client = new MqttClient("tcp://localhost:1883", "SampleClient");
+	client.connect();
+	MqttMessage message = new MqttMessage("Hello world");
+	message.setQos(0);
+	client.getTopic("foo/bar").publish(message);
+	client.disconnect();</pre></code>
+
+<p>This is the fastest way of publishing messages,
+but is also the least reliable.  There is no assurance that the message will actually be
+delivered, and no exception will be thrown if the server refuses the message, or if the
+network connection fails.</p>
+
+<h4>Publish a message, once and only once (single threaded)</h4>
+<p>In the following code snippet, a message is published to the server
+at QoS 2, which is the most reliable delivery mechanism.
+In order to achieve this, the message needs to be persisted by the client.
+A default implementation of persistence is provided by {@link MqttDefaultFilePersistence}.
+This will be used by the client unless an alternative is supplied.</p>
+<p>Publishing reliably is more complex, and most of the code is used to handle
+error conditions.  The key thing to notice is the two-stage delivery: the first
+stage gives the message to the client.  After this, the client is responsible for
+delivering the message to the server.  The second stage is about determining 
+success or failure.</p>
+
+<code><pre>
+	MqttClient client = null;
+	try {
+		// Create a client to communicate with a broker at the specified address
+		client = new MqttClient("tcp://localhost:1883", "SampleClient");
+		// Connect to the broker
+		client.connect();
+	} catch (MqttException ex) {
+		System.err.println("Could not connect");
+	}
+	
+	if ((client != null) && client.isConnected()) {
+		MqttTopic topic = client.getTopic("foo/bar");
+		MqttDeliveryToken token = null;
+		// Create message and set quality of service to deliver the message once
+		MqttMessage message = new MqttMessage("Hello world");
+		message.setQos(2);
+		
+		try {
+			// Give the message to the client for publishing.  For QoS 2,
+			// this will involve multiple network calls, which will happen 
+			// asynchronously after this method has returned.
+			token = topic.publish(message);
+		}
+		catch (MqttException ex) {
+			// Client has not accepted the message due to a failure
+			// Depending on the exception's reason code, we could always retry
+			System.err.println("Failed to send message");
+		}
+		
+		if (token != null) {
+			boolean keepTrying = true;
+			do {
+				try {
+					// Wait for the message delivery to complete
+					token.waitForCompletion();
+					System.out.println("Message delivery complete");
+				}
+				catch (MqttException deliveryException) {
+					int reasonCode = deliveryException.getReasonCode();
+					// TODO: Retry the message, or decide to stop trying
+					System.err.println("Message delivery failed");
+					if (client.isConnected() == false) {
+						try {
+							// Re-connect to the server
+							client.connect();
+						}
+						catch (MqttException connectException) {
+							// Can't reconnect, so give up.  If and when the 
+							// client does reconnect, the message delivery
+							// will automatically continue
+							keepTrying = false;
+						}
+					}
+				}
+			} while (!token.isComplete() && keepTrying);
+		}
+	}</pre></code>
+	
+<h4>Publish a message, once and only once (multi-threaded)</h4>
+<p>In the following code snippet, a message is published to the server
+at QoS 2, which is the most reliable delivery mechanism.
+The application uses a {@link MqttCallback callback} to be notified of
+delivery success or failure.  Since callbacks are asynchronous, on a different
+thread to the publisher, this approach means that message ordering can be
+compromised.  This can happen if a message delivery fails, and is retried from
+within the {@link MqttCallback#deliveryFailed(MqttDeliveryToken, MqttException)} method -
+messages can continue to be published, even though the failure has occurred.</p>
+
+<p>
+A default implementation of persistence is provided by {@link MqttDefaultFilePersistence}.
+This will be used by the client unless an alternative is supplied.</p>
+
+<code><pre>
+public class SampleClient implements MqttCallback {
+	public void run() {
+		MqttClient client = null;
+		try {
+			// Create a client to communicate with a broker at the specified address
+			client = new MqttClient("tcp://localhost:1883", "SampleClient");
+
+			// Connect to the broker
+			client.connect();
+
+			// Setup a callback
+			client.setCallback(this);
+
+		} catch (MqttException ex) {
+			System.err.println("Could not connect");
+		}
+		
+		if ((client != null) && client.isConnected()) {
+			MqttTopic topic = client.getTopic("foo/bar");
+			// Create message and set quality of service to deliver the message once
+			MqttMessage message = new MqttMessage("Hello world");
+			message.setQos(2);
+	
+			try {
+				// Give the message to the client for publishing. For QoS 2, this
+				// will involve multiple network calls, which will happen
+				// asynchronously after this method has returned.
+				topic.publish(message);
+			} catch (MqttException ex) {
+				// Client has not accepted the message due to a failure
+				// Depending on the exception's reason code, we could always retry
+				System.err.println("Failed to send message");
+			}
+		}
+	}
+
+	public void connectionLost(Throwable cause) {
+		// TODO: Implement reconnection logic
+		System.err.println("Connection lost");
+	}
+
+	public void deliveryComplete(MqttDeliveryToken token) {
+		System.out.println("Delivery complete");
+	}
+
+	public void messageArrived(MqttTopic topic, MqttMessage message) throws Exception {
+	}
+}</pre></code>
+
+</body>

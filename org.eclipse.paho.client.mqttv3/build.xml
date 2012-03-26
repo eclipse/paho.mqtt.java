@@ -1,0 +1,81 @@
+<project name="org.eclipse.paho.client.mqttv3" default="full">
+	
+	<property name="property.file" value="antbuild.properties"/>
+	<property file="${property.file}"/>
+	
+	<property name="source.folder" value="./" />
+	<property name="output.folder" value="/tmp/out" />
+	<property name="ship.folder" value="/tmp/out/ship" />
+	<property name="jar.copyright" value="Copyright (c) 2009, 2012 IBM Corp." />
+	<property name="mqttv3.client.release.version" value="1.0.0" />
+	<property name="bundleVersion" value="1.0.0" />
+	<property name="micro-client-v3-plain-jar" value="org.eclipse.paho.client.mqttv3.jar" />
+
+	<property name="javac_target" value="1.2" />
+	<property name="javac_source" value="1.2" />
+	<property name="javac_debug" value="on" />
+	<property name="javac_debuglevel" value="lines,vars,source" />
+
+	<target name="updateManifest" description="Update manifest file.">
+		<manifest file="${folder}/META-INF/MANIFEST.MF" mode="update">
+			<attribute name="Bundle-Copyright" value="${jar.copyright}" />
+			<attribute name="Bundle-Version" value="${bundleVersion}" />
+			<attribute name="Bundle-Vendor" value="Eclipse.org" />
+			<attribute name="Bundle-ManifestVersion" value="2" />
+			<attribute name="Bundle-ClassPath" value="${bundle_classpath}" />
+			<attribute name="Implementation-Version" value="${mqttv3.client.release.version}" />
+		</manifest>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${output.folder}/micro-client-v3/src" />
+		<mkdir dir="${output.folder}/micro-client-v3/bin" />
+		<copy overwrite="true" todir="${output.folder}/micro-client-v3/src">
+			<fileset dir="${source.folder}/src" />
+		</copy>
+		
+		<javac srcdir="${output.folder}/micro-client-v3/src" destdir="${output.folder}/micro-client-v3/bin" classpath="${output.folder}/micro-client-v3/tmp;" source="${javac_source}" target="${javac_target}" debug="${javac_debug}" debuglevel="${javac_debuglevel}" />
+		<copy overwrite="true" todir="${output.folder}/micro-client-v3/bin">
+			<fileset dir="${source.folder}">
+				<include name="META-INF/*" />
+			</fileset>
+			<fileset dir="${source.folder}/src">
+				<include name="**/*.properties" />
+			</fileset>
+		</copy>
+
+		<antcall target="updateManifest">
+			<param name="folder" value="${output.folder}/micro-client-v3/bin" />
+			<param name="bundle_classpath" value="." />
+		</antcall>
+		
+	</target>
+	
+	
+	<target name="javadoc">
+		<mkdir dir="${ship.folder}/doc/javadoc" />
+		<javadoc access="public" defaultexcludes="yes" destdir="${ship.folder}/doc/javadoc" author="false" version="true" breakiterator="true" use="true" bottom="Copyright &amp;#169; 2011 IBM Corp. All Rights Reserved." windowtitle="MQTTv3 Client API">
+			<classpath>
+				<pathelement location="${output.folder}/mqtt-client-v3/bin" />
+			</classpath>
+			<packageset dir="${output.folder}/micro-client-v3/src/">
+				<include name="org/eclipse/paho/client/mqttv3/**" />
+				<exclude name="**/internal/**" />
+			</packageset>
+			<group title="MQTT v3 Client" packages="org.eclipse.paho.client.mqttv3" />
+		</javadoc>
+	</target>
+		
+	<target name="package">
+		<mkdir dir="${ship.folder}" />
+
+		<jar jarfile="${ship.folder}/${micro-client-v3-plain-jar}" excludes="" basedir="${output.folder}/micro-client-v3/bin" manifest="${output.folder}/micro-client-v3/bin/META-INF/MANIFEST.MF" />
+	</target>
+	
+	<target name="clean">
+		<delete dir="${output.folder}/micro-client-v3" />
+	</target>
+		
+	<target name="full" depends="compile,javadoc,package,clean" />
+
+</project>
