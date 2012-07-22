@@ -50,7 +50,7 @@ public class Sample implements MqttCallback {
 		String topic = "";
 		String message = "Message from MQTTv3 Java client";
 		int qos = 2;
-		String broker = "localhost";
+		String broker = "m2m.eclipse.org";
 		int port = 1883;
 		
 		// Parse the arguments - 
