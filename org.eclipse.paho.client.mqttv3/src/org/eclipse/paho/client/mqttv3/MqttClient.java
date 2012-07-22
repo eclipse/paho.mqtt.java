@@ -56,13 +56,11 @@ public class MqttClient implements DestinationProvider {
 	/**
 	 * Creates an MqttClient to connect to the specified address, using the
 	 * specified client identifer.  The address
-	 * should be a URI, using a scheme of either "tcp://" for a TCP connection,
-	 * "ssl://" for a TCP connection secured by SSL/TLS, or "local://" 
-	 * if the server is a MicroBroker running in the same JVM. For example:
+	 * should be a URI, using a scheme of either "tcp://" for a TCP connection
+	 * or "ssl://" for a TCP connection secured by SSL/TLS. For example:
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
-	 * 	<li><code>local://FirstBroker</code></li>
 	 * </ul>
 	 * <p>
 	 * If the port is not specified, it will
@@ -109,9 +107,8 @@ public class MqttClient implements DestinationProvider {
 	/**
 	 * Creates an MqttClient to connect to the specified address, using the
 	 * specified client identifer and persistence implementation.  The address
-	 * should be a URI, using a scheme of either "tcp://" for a TCP connection,
-	 * "ssl://" for a TCP connection secured by SSL/TLS, or "local://" 
-	 * if the server is a MicroBroker running in the same JVM. For example:
+	 * should be a URI, using a scheme of either "tcp://" for a TCP connection
+	 * or "ssl://" for a TCP connection secured by SSL/TLS. For example:
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>

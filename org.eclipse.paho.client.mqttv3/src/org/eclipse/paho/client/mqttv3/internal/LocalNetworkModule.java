@@ -20,7 +20,16 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 
 /**
- * Connects directly into MicroBroker comms, within the same JVM.
+ * Special comms class that allows an MQTT client to use a non TCP / optimised 
+ * mechanism to talk to an MQTT server when running in the same JRE instance as the 
+ * MQTT server.  
+ *
+ * This class checks for the existence of the optimised comms adatper class i.e. the one
+ * that provides the optimised communication mechanism.  If not available the request
+ * to connect using the optimised mechanism is rejected.  
+ *  
+ * The only known server that implements this is the microbroker:- an MQTT server that 
+ * ships with a number of IBM products.
  */
 public class LocalNetworkModule implements NetworkModule {
 	private Class LocalListener;

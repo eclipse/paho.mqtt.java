@@ -7,5 +7,3 @@ Import-Package: javax.net;resolution:=optional,
  javax.net.ssl;resolution:=optional
 Bundle-Classpath: ., bin
 Export-Package: org.eclipse.paho.client.mqttv3
-
-

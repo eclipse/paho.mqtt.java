@@ -13,13 +13,10 @@ package org.eclipse.paho.client.mqttv3.internal.logging;
 
 /**
  * A Logger object is used to send log and trace messages to the platform
- * specific logging implementation and to the MicroBroker's own internal trace
- * mechanism (used to provide context for FFDCs) for a specific MicroBroker
- * component. Loggers are named, using a hierarchical dot-separated name-space.
+ * specific logging implementation. Loggers are named, using a hierarchical 
+ * dot-separated name-space.
  * Logger names can be arbitrary strings, but they should normally be based on
- * the MicroBroker component or the package name of the logged component, such
- * as com.ibm.micro.internal.persistence or
- * com.ibm.micro.internal.pubsubengine.matchspace.
+ * the component or the package name of the logged component
  * 
  * Logger objects may be obtained by calls on one of the getLogger factory
  * methods. These will either create a new Logger or return a suitable existing

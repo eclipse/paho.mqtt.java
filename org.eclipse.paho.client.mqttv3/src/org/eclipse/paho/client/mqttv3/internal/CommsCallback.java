@@ -59,7 +59,7 @@ public class CommsCallback implements Runnable {
 		if (running == false) {
 			running = true;
 			quiescing = false;
-			callbackThread = new Thread(this, "Micro Client Callback");
+			callbackThread = new Thread(this, "MQTT Client Callback");
 			callbackThread.start();
 		}
 	}

@@ -142,12 +142,8 @@ public class MqttConnectOptions {
 	 * <p>The default value is 60 seconds</p>
 	 * 
 	 * @param keepAliveInterval the interval, measured in seconds.
-	 * @throws IllegalArgumentException if the interval is less than 10 seconds.
 	 */
 	public void setKeepAliveInterval(int keepAliveInterval) {
-		if (keepAliveInterval < 10) {
-			throw new IllegalArgumentException();
-		}
 		this.keepAliveInterval = keepAliveInterval;
 	}
 	
@@ -168,12 +164,8 @@ public class MqttConnectOptions {
 	 * {@link MqttClient#unsubscribe(String[])) unsubscribe} to complete.
 	 * The default timeout is 30 seconds.
 	 * @param connectionTimeout the timeout value, measured in seconds.
-	 * @throws IllegalArgumentException if the value is less than 10 seconds.
 	 */
 	public void setConnectionTimeout(int connectionTimeout) {
-		if (connectionTimeout < 10) {
-			throw new IllegalArgumentException();
-		}
 		this.connectionTimeout = connectionTimeout;
 	}
 	

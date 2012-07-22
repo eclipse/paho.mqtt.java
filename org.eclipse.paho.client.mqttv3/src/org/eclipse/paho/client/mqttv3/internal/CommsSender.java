@@ -49,7 +49,7 @@ public class CommsSender implements Runnable {
 	public void start() {
 		if (running == false) {
 			running = true;
-			new Thread(this, "Micro Client Comms Sender").start();
+			new Thread(this, "MQTT Client Comms Sender").start();
 		}
 	}
 

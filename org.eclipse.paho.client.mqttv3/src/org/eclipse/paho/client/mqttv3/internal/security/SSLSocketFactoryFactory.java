@@ -69,11 +69,9 @@ import org.eclipse.paho.client.mqttv3.internal.logging.Logger;
  * The methods should be called in the following order:
  * <ol>
  * <li><b>isSupportedOnJVM()</b>: to check whether this class is supported on
- * the runtime platform. This should be Desktop platforms (i.e. Java SE 6.0, SE
- * 5.0, SE 1.42, and Expeditor Desktop EE (jclDesktop) 6.2).</li>
- * <li><b>SSLSocketFactoryFactory()</b>: the constructor, which should be
- * called once per MicroBroker. Clients (in the same JVM) may share an
- * SSLSocketFactoryFactory, or have one each.</li>
+ * the runtime platform. Not all runtimes support SSL/TLS.</li>
+ * <li><b>SSLSocketFactoryFactory()</b>: the constructor. Clients 
+ * (in the same JVM) may share an SSLSocketFactoryFactory, or have one each.</li>
  * <li><b>initialize(properties, configID)</b>: to initialize this object with
  * the required SSL properties for a configuration. This may be called multiple
  * times, once for each required configuration (e.g. once per Listener, once per
@@ -83,7 +81,7 @@ import org.eclipse.paho.client.mqttv3.internal.logging.Logger;
  * cipher suites on the socket [see below].</li>
  * </ol>
  * <ul>
- * <li><i>MicroBroker Server:</i></li>
+ * <li><i>For an MQTT server:</i></li>
  * <ol>
  * <li><b>getKeyStore(configID)</b>: Optionally, to check that if there is no
  * keystore, then that all the enabled cipher suits are anonymous.</li>
@@ -93,7 +91,7 @@ import org.eclipse.paho.client.mqttv3.internal.logging.Logger;
  * SSLServerSocket (itself created from the SSLServerSocketFactory) whether
  * client authentication is needed.</li>
  * </ol>
- * <li><i>Client:</i></li>
+ * <li><i>For an MQTT client:</i></li>
  * <ol>
  * <li><b>createSocketFactory(configID)</b>: to create an SSLSocketFactory.</li>
  * </ol>
@@ -102,7 +100,7 @@ import org.eclipse.paho.client.mqttv3.internal.logging.Logger;
 public class SSLSocketFactoryFactory {
 	private final static String CLASS_NAME = "org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory";
 	/**
-	 * Property keys specific to the MicroBroker (and client).
+	 * Property keys specific to the client).
 	 */
 	public final static String SSLPROTOCOL="com.ibm.ssl.protocol";
 	public final static String JSSEPROVIDER="com.ibm.ssl.contextProvider";
@@ -152,9 +150,8 @@ public class SSLSocketFactoryFactory {
 
 
 	/**
-	 * Not all of the JVM/Platforms that MicroBroker runs on support all of its
-	 * security features. This allows the MicroBroker to determine whether SSL
-	 * is supported.
+	 * Not all of the JVM/Platforms support all of its
+	 * security features. This method determines if is supported.
 	 * 
 	 * @return whether dependent classes can be instantiated on the current
 	 *         JVM/platform.

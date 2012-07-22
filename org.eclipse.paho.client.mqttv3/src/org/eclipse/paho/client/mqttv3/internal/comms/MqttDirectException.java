@@ -68,13 +68,13 @@ public class MqttDirectException extends Exception {
     }
     
 	/**
-	 * @return Returns the MicroBroker log message inserts or null
+	 * @return Returns the log message inserts or null
 	 */
 	public Object[] getInserts() {
 		return inserts;
 	}
 	/**
-	 * @return Returns the MicroBroker log message identifier or 0.
+	 * @return Returns the log message identifier or 0.
 	 */
 	public long getMsgId() {
 		return msgId;

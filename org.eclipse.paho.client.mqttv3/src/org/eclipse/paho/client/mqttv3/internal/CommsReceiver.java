@@ -50,7 +50,7 @@ public class CommsReceiver implements Runnable {
 	public void start() {
 		if (running == false) {
 			running = true;
-			new Thread(this, "Micro Client Comms Receiver").start();
+			new Thread(this, "MQTT Client Comms Receiver").start();
 		}
 	}
 
