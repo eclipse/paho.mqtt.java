@@ -1073,7 +1073,7 @@ public class SSLSocketFactoryFactory {
 	 * @param configID
 	 *            The configuration identifier for selecting a configuration or
 	 *            null for the default configuration.
-	 * @return
+	 * @return an array with the enabled ciphers
 	 */
 	public String[] getEnabledCipherSuites(String configID) {
 		String ciphers = getProperty(configID, CIPHERSUITES, null);

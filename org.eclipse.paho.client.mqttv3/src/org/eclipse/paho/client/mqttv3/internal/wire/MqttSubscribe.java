@@ -26,7 +26,9 @@ public class MqttSubscribe extends MqttWireMessage {
 	private int[] qos;
 
 	/**
-	 * @param queueSub whether or not this subscription is for queues.
+	 * Constructor for on an on hte wire MQTT subscribe message
+	 * @param names - one or more topics to subscribe to 
+	 * @param qos - the max QOS that each each topic will be subscribed at 
 	 */
 	public MqttSubscribe(String[] names, int[] qos) {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);

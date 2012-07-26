@@ -129,8 +129,6 @@ public class MqttMessage {
 	 * but should only be used for messages which are not valuable - note that  
 	 * if the server cannot process the message (for example, there
 	 * is an authorization problem), then an 
-	 * exception will <em>not</em> be thrown, nor will a call be made to
-	 * {@link MqttCallback#deliveryFailed(MqttDeliveryToken, MqttException)} or
 	 * {@link MqttCallback#deliveryComplete(MqttDeliveryToken)}. 
 	 * Also known as "fire and forget".</li>
 	 * 
@@ -151,6 +149,12 @@ public class MqttMessage {
 	 * persistence using <code>MqttConnectOptions</code>.
 	 * If a persistence mechanism is not specified, the message will not be 
 	 * delivered in the event of a client failure.</li>
+	 * 
+	 * If persistence is not configured, QOS 1 and 2 messages will still be delivered
+	 * in the event of a network or server problem as the client will hold state in memory.
+	 * If the MQTT client is shutdown or fails and persistence is not configured then 
+	 * delivery of QOS 1 and 2 messages can not be maintained as client side state will 
+	 * be lost. 
 	 * 
 	 * @param qos the "quality of service" to use.  Set to 0, 1, 2.
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.

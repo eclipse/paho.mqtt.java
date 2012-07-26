@@ -55,7 +55,7 @@ public class MqttClient implements DestinationProvider {
 	
 	/**
 	 * Creates an MqttClient to connect to the specified address, using the
-	 * specified client identifer.  The address
+	 * specified client identifier.  The address
 	 * should be a URI, using a scheme of either "tcp://" for a TCP connection
 	 * or "ssl://" for a TCP connection secured by SSL/TLS. For example:
 	 * <ul>

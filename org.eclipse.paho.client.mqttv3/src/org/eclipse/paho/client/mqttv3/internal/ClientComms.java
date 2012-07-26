@@ -60,7 +60,6 @@ public class ClientComms {
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle
 	 * the network calls.
-	 * @param client an instance of either MqttClient or MqttMIDPClient
 	 */
 	public ClientComms(DestinationProvider destinationProvider, MqttClientPersistence persistence, Trace trace) throws MqttException {
 		this.trace = trace;

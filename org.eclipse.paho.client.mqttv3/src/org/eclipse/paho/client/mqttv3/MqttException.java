@@ -96,7 +96,7 @@ public class MqttException extends Exception {
 	 * made from within a method on {@link MqttCallback}.  These methods are invoked
 	 * by the client's thread, and must not be used to control disconnection.
 	 * 
-	 * @see MqttCallback#messageArrived(MqttDestination, MqttMessage)
+	 * @see MqttCallback#messageArrived(MqttTopic, MqttMessage)
 	 */
 	public static final short REASON_CODE_CLIENT_DISCONNECT_PROHIBITED  = 32107;
 
@@ -140,7 +140,7 @@ public class MqttException extends Exception {
 	/**
 	 * Constructs a new <code>MqttException</code> with the specified 
 	 * <code>Throwable</code> as the underlying reason.
-	 * @param reasonCode the reason code for the exception.
+	 * @param reason the reason code for the exception.
 	 * @param cause the underlying cause of the exception.
 	 */
 	public MqttException(int reason, Throwable cause) {

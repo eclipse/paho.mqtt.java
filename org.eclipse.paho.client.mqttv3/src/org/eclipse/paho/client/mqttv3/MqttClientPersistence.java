@@ -14,16 +14,16 @@ package org.eclipse.paho.client.mqttv3;
 import java.util.Enumeration;
 
 /**
- * Represents a persistent data store, used to store outbound and inbound
- * messages, in order to achieve reliable messaging.  You can specify an implementation
- * of this interface using {@link MqttConnectOptions#setPersistence(MqttClientPersistence)},
+ * Represents a persistent data store, used to store outbound and inbound messages while they
+ * are in flight, enabling delivery to the QOS specified. You can specify an implementation
+ * of this interface using {@link MqttClient#MqttClient(String, String, MqttClientPersistence)},
  * which the {@link MqttClient} will use to persist QoS 1 and 2 messages.
  * <p>
  * If the methods defined throw the MqttPersistenceException then the state of the data persisted
  * should remain as prior to the method being called. For example, if {@link #put(String, MqttPersistable)}
  * throws an exception at any point then the data will be assumed to not be in the persistent store.
  * Similarly if {@link #remove(String)} throws an exception then the data will be
- * asssumed to still be held in the persistent store.</p>
+ * assumed to still be held in the persistent store.</p>
  * <p>
  * It is up to the persistence interface to log any exceptions or error information 
  * which may be required when diagnosing a persistence failure.</p>

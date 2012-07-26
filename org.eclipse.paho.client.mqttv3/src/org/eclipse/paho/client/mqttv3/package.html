@@ -16,21 +16,21 @@ by a unique ID.
 </p>
 <p>The basic means of operating the client is as follows:</p>
 <ol>
-	<li>Create an instance of {@link MqttClient}, providing
+	<li>Create an instance of {@link org.eclipse.paho.client.mqttv3.MqttClient}, providing
 	the address of the server and a unique client identifier.</li>
-	<li>{@link #connect(MqttConnectOptions) Connect} to the server</li>
+	<li>{@link org.eclipse.paho.client.mqttv3.MqttClient#connect(MqttConnectOptions) Connect} to the server</li>
 	<li>Exchange messages with the server.
 		<ul>
-			<li>Send {@link MqttMessage messages} to the server, 
-			via {@link MqttTopic topics}.</li>
+			<li>Send {@link org.eclipse.paho.client.mqttv3.MqttMessage messages} to the server, 
+			via {@link org.eclipse.paho.client.mqttv3.MqttTopic topics}.</li>
 			<li>Receive messages from the server.  This is done asynchronously
 			using  
-			{@link MqttClient#subscribe(String, MqttSubscriptionOptions) subscriptions},
-			combined with a {@link #setCallback(MqttCallback) callback}.
+			{@link org.eclipse.paho.client.mqttv3.MqttClient#subscribe(String, int) subscriptions},
+			combined with a {@link org.eclipse.paho.client.mqttv3.MqttClient#setCallback(MqttCallback) callback}.
 			</li>
 		</ul>
 	</li>
-<li>{@link #disconnect() Disconnect} from the server.</li>
+<li>{@link org.eclipse.paho.client.mqttv3.MqttClient#disconnect() Disconnect} from the server.</li>
 </ol>
 </p>
 <h3>Examples</h3>
@@ -53,7 +53,7 @@ network connection fails.</p>
 <p>In the following code snippet, a message is published to the server
 at QoS 2, which is the most reliable delivery mechanism.
 In order to achieve this, the message needs to be persisted by the client.
-A default implementation of persistence is provided by {@link MqttDefaultFilePersistence}.
+A default implementation of persistence is provided by {@link org.eclipse.paho.client.mqttv3.MqttDefaultFilePersistence}.
 This will be used by the client unless an alternative is supplied.</p>
 <p>Publishing reliably is more complex, and most of the code is used to handle
 error conditions.  The key thing to notice is the two-stage delivery: the first
@@ -123,15 +123,11 @@ success or failure.</p>
 <h4>Publish a message, once and only once (multi-threaded)</h4>
 <p>In the following code snippet, a message is published to the server
 at QoS 2, which is the most reliable delivery mechanism.
-The application uses a {@link MqttCallback callback} to be notified of
-delivery success or failure.  Since callbacks are asynchronous, on a different
-thread to the publisher, this approach means that message ordering can be
-compromised.  This can happen if a message delivery fails, and is retried from
-within the {@link MqttCallback#deliveryFailed(MqttDeliveryToken, MqttException)} method -
-messages can continue to be published, even though the failure has occurred.</p>
+The application uses a {@link org.eclipse.paho.client.mqttv3.MqttCallback callback} to asynchronously be notified 
+when delivery of a message has been {@link org.eclipse.paho.client.mqttv3.MqttCallback#deliveryComplete completed}.</p>
 
 <p>
-A default implementation of persistence is provided by {@link MqttDefaultFilePersistence}.
+A default implementation of persistence is provided by {@link org.eclipse.paho.client.mqttv3.MqttDefaultFilePersistence}.
 This will be used by the client unless an alternative is supplied.</p>
 
 <code><pre>

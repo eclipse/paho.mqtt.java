@@ -159,9 +159,9 @@ public class MqttConnectOptions {
 	/**
 	 * Sets the connection timeout value.
 	 * This value, measured in seconds, defines the maximum time interval
-	 * the client will wait for calls to {@link MqttClient#connect(MqttConnectOptions)) connect}, 
-	 * {@link MqttClient#subscribe(String[], int[])) subscribe} and 
-	 * {@link MqttClient#unsubscribe(String[])) unsubscribe} to complete.
+	 * the client will wait for calls to {@link MqttClient#connect(MqttConnectOptions) connect}, 
+	 * {@link MqttClient#subscribe(String[], int[]) subscribe} and 
+	 * {@link MqttClient#unsubscribe(String[]) unsubscribe} to complete.
 	 * The default timeout is 30 seconds.
 	 * @param connectionTimeout the timeout value, measured in seconds.
 	 */
