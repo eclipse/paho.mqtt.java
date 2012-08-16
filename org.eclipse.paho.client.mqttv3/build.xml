@@ -52,7 +52,7 @@
 	
 	<target name="javadoc" depends="compile" >
 		<mkdir dir="${ship.folder}/doc/javadoc" />
-		<javadoc access="public" defaultexcludes="yes" destdir="${ship.folder}/doc/javadoc" author="false" version="true" breakiterator="true" use="true" bottom="" windowtitle="MQTT v3 Client API">
+		<javadoc access="public" defaultexcludes="yes" destdir="${ship.folder}/doc/javadoc" author="false" version="true" breakiterator="true" use="true" windowtitle="MQTT v3 Client API">
 			<classpath>
 				<pathelement location="${output.folder}/bin" />
 			</classpath>
