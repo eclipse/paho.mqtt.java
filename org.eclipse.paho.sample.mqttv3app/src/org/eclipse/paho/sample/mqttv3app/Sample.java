@@ -14,7 +14,6 @@ package org.eclipse.paho.sample.mqttv3app;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Date;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -128,6 +127,11 @@ public class Sample implements MqttCallback {
 				sampleClient.subscribe(topic,qos);
 			}
 		} catch(MqttException me) {
+			System.out.println("reason "+me.getReasonCode());
+			System.out.println("msg "+me.getMessage());
+			System.out.println("loc "+me.getLocalizedMessage());
+			System.out.println("casue "+me.getCause());
+			System.out.println("excep "+me);
 			me.printStackTrace();
 		}
 	}

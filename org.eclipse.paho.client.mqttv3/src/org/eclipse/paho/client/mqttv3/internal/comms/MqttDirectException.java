@@ -18,6 +18,7 @@ package org.eclipse.paho.client.mqttv3.internal.comms;
  */
 public class MqttDirectException extends Exception {
 
+	private static final long serialVersionUID = 1L;
 	protected long msgId=0;
 	protected Object[] inserts=null;
 	protected Throwable linkt=null;

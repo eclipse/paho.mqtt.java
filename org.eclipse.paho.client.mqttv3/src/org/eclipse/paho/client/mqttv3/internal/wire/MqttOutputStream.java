@@ -12,7 +12,6 @@
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
 import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 

@@ -17,6 +17,9 @@ package org.eclipse.paho.client.mqttv3.internal.comms;
  */
 public class MqttSSLInitException extends MqttDirectException {
 
+
+	private static final long serialVersionUID = 1L;
+
 	public MqttSSLInitException() {
 	}
 

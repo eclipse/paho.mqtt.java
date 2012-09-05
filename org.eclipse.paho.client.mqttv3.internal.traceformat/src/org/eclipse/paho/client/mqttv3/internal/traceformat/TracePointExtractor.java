@@ -107,7 +107,6 @@ public class TracePointExtractor {
 					System.out.println(" "+classname+":"+lineNo);
 					throw new Exception();
 				}
-				String value = m.group(2);
 				out.println(number+".class="+classname);
 				out.println(number+".line="+lineNo);
 				out.println(number+".value="+m.group(2));
