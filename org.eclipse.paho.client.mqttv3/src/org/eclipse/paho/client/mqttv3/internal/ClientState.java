@@ -807,6 +807,9 @@ public class ClientState {
 			}
 			pendingMessages.clear();
 			pendingFlows.clear();
+			// Reset pingOutstanding to allow reconnects to assume no previous ping.
+		    pingOutstanding = false;
+		    
 			// Wait until there are no threads in token.waitUntilSent calls.
 			// This allows them to undo their work, if needed, before we
 			// close persistence.
