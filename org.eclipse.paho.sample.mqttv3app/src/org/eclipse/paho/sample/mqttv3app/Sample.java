@@ -13,6 +13,8 @@
 package org.eclipse.paho.sample.mqttv3app;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -183,7 +185,7 @@ public class Sample implements MqttCallback {
     	
     	// Connect to the server
     	client.connect();
-    	log("Connected to "+brokerUrl);
+    	log("Connected to "+brokerUrl + " with client ID "+client.getClientId());
     	
     	// Get an instance of the topic
     	MqttTopic topic = client.getTopic(topicName);
@@ -192,7 +194,8 @@ public class Sample implements MqttCallback {
     	message.setQos(qos);
 	
     	// Publish the message
-    	log("Publishing at: "+System.currentTimeMillis()+ " to topic \""+topicName+"\" qos "+qos);
+    	String time = new Timestamp(System.currentTimeMillis()).toString();
+    	log("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
     	MqttDeliveryToken token = topic.publish(message);
 	
     	// Wait until the message has been delivered to the server
@@ -213,7 +216,7 @@ public class Sample implements MqttCallback {
     	
     	// Connect to the server
     	client.connect();
-    	log("Connected to "+brokerUrl);
+    	log("Connected to "+brokerUrl+" with client ID "+client.getClientId());
 
     	// Subscribe to the topic
     	log("Subscribing to topic \""+topicName+"\" qos "+qos);
@@ -256,7 +259,7 @@ public class Sample implements MqttCallback {
 		// An application may choose to implement reconnection
 		// logic at this point.
 		// This sample simply exits.
-		log("Connection to " + brokerUrl + " lost!");
+		log("Connection to " + brokerUrl + " lost!" + cause);
 		System.exit(1);
 	}
 
@@ -280,7 +283,9 @@ public class Sample implements MqttCallback {
 	public void messageArrived(MqttTopic topic, MqttMessage message) throws MqttException {
 		// Called when a message arrives from the server.
 		
-		System.out.println("Time:\t" +System.currentTimeMillis() +
+		String time = new Timestamp(System.currentTimeMillis()).toString();
+		
+		System.out.println("Time:\t" +time +
                            "  Topic:\t" + topic.getName() + 
                            "  Message:\t" + new String(message.getPayload()) +
                            "  QoS:\t" + message.getQos());

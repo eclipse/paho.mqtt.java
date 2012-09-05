@@ -11,6 +11,7 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
+import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,10 +24,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * <code>MqttWireMessage</code>. 
  */
 public class MqttOutputStream extends OutputStream {
-	private DataOutputStream out;
+	private BufferedOutputStream out;
 	
 	public MqttOutputStream(OutputStream out) {
-		this.out = new DataOutputStream(out);
+		this.out = new BufferedOutputStream(out);
 	}
 	
 	public void close() throws IOException {
@@ -55,8 +56,10 @@ public class MqttOutputStream extends OutputStream {
 	public void write(MqttWireMessage message) throws IOException, MqttException {
 		byte[] bytes = message.getHeader();
 		byte[] pl = message.getPayload();
-		out.write(message.getHeader());
-		out.write(message.getPayload());
+//		out.write(message.getHeader());
+//		out.write(message.getPayload());
+		out.write(bytes,0,bytes.length);
+		out.write(pl,0,pl.length);
 	}
 }
 
