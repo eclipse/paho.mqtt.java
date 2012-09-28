@@ -233,14 +233,14 @@ public class CommsCallback implements Runnable {
 		// If disconnect() was called within a previous call to messageArrived,
 		// we may just need to skip the processing of any messages we have in memory.
 		if (clientComms.isConnected() && (mqttCallback != null)) {
-			// Handle getting an MqttDestination object...
-			String destName = publishMessage.getTopicName();
-			MqttTopic destination = null;
-			if (destName != null) {
-				destination = clientComms.getTopic(destName);
-			}
-			
 			try {
+				// Handle getting an MqttDestination object...
+				String destName = publishMessage.getTopicName();
+				MqttTopic destination = null;
+				if (destName != null) {
+					destination = clientComms.getTopic(destName);
+				}
+
 				if (trace.isOn()) {
 					// @TRACE 713=handleMessage: messageArrived topic={0} id={1}
 					trace.trace(Trace.FINE,713,new Object[]{destination.getName(),new Integer(publishMessage.getMessageId())});
