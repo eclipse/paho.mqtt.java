@@ -53,6 +53,7 @@ public class Sample implements MqttCallback {
 		int qos = 2;
 		String broker = "m2m.eclipse.org";
 		int port = 1883;
+		String clientId = null;
 		
 		// Parse the arguments - 
 		for (int i=0; i<args.length; i++) {
@@ -77,6 +78,7 @@ public class Sample implements MqttCallback {
 				case 's': qos = Integer.parseInt(args[++i]);  break;
 				case 'b': broker = args[++i];                 break;
 				case 'p': port = Integer.parseInt(args[++i]); break;
+				case 'i': clientId = args[++i];               break;
 				default: 
 					System.out.println("Unrecognised argument: "+args[i]);
 					printHelp(); 
@@ -109,9 +111,11 @@ public class Sample implements MqttCallback {
 			}
 		}
 		
-		
 		String url = "tcp://"+broker+":"+port;
-		String clientId = "SampleJavaV3_"+action;
+		
+		if (clientId == null || clientId.equals("")) {
+			clientId = "SampleJavaV3_"+action;
+		}
 
 		// With a valid set of arguments, the real work of 
 		// driving the client API can begin
@@ -127,11 +131,6 @@ public class Sample implements MqttCallback {
 				sampleClient.subscribe(topic,qos);
 			}
 		} catch(MqttException me) {
-			System.out.println("reason "+me.getReasonCode());
-			System.out.println("msg "+me.getMessage());
-			System.out.println("loc "+me.getLocalizedMessage());
-			System.out.println("casue "+me.getCause());
-			System.out.println("excep "+me);
 			me.printStackTrace();
 		}
 	}
@@ -305,7 +304,7 @@ public class Sample implements MqttCallback {
         System.out.println(
             "Syntax:\n\n"+
             "    Sample [-h] [-a publish|subscribe] [-t <topic>] [-m <message text>]\n"+
-            "            [-s 0|1|2] -b <hostname|IP address>] [-p <brokerport>]\n\n"+
+            "            [-s 0|1|2] -b <hostname|IP address>] [-p <brokerport>] [-i <clientID>]\n\n"+
             "    -h  Print this help text and quit\n"+
             "    -q  Quiet mode (default is false)\n"+
             "    -a  Perform the relevant action (default is publish)\n" +
@@ -316,6 +315,7 @@ public class Sample implements MqttCallback {
             "    -s  Use this QoS instead of the default (2)\n" +
             "    -b  Use this name/IP address instead of the default (localhost)\n" +
             "    -p  Use this port instead of the default (1883)\n\n" +
+            "    -i  Use this client ID instead of SampleJavaV3_<action>\n" +
             "Delimit strings containing spaces with \"\"\n\n"+
             "Publishers transmit a single message then disconnect from the server.\n"+
             "Subscribers remain connected to the server and receive appropriate\n"+
