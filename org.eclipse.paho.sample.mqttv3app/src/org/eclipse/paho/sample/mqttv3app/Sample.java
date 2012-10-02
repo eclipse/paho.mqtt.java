@@ -35,7 +35,6 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
  *
  */
 public class Sample implements MqttCallback {
-	Object waiter = new Object();
 	
 	/**
 	 * The main entry point of the sample.
@@ -131,6 +130,11 @@ public class Sample implements MqttCallback {
 				sampleClient.subscribe(topic,qos);
 			}
 		} catch(MqttException me) {
+			System.out.println("reason "+me.getReasonCode());
+			System.out.println("msg "+me.getMessage());
+			System.out.println("loc "+me.getLocalizedMessage());
+			System.out.println("casue "+me.getCause());
+			System.out.println("excep "+me);
 			me.printStackTrace();
 		}
 	}
