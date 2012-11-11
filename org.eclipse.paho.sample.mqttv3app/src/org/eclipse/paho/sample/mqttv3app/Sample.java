@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2009, 2012 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
@@ -28,22 +28,26 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 /**
  * This sample application demonstrates basic usage
  * of the MQTT v3 Client api.
- * 
+ *
  * It can be run in one of two modes:
  *  - as a publisher, sending a single message to a topic on the server
  *  - as a subscriber, listening for messages from the server
  *
  */
 public class Sample implements MqttCallback {
-	
+
+	// default values for broker connection
+	static String broker = "m2m.eclipse.org";
+	static int port = 1883;
+
 	/**
 	 * The main entry point of the sample.
-	 * 
+	 *
 	 * This method handles parsing the arguments specified on the
 	 * command-line before performing the specified action.
 	 */
 	public static void main(String[] args) {
-		
+
 		// Default settings:
 		boolean quietMode = false;
 		String action = "publish";
@@ -53,8 +57,8 @@ public class Sample implements MqttCallback {
 		String broker = "m2m.eclipse.org";
 		int port = 1883;
 		String clientId = null;
-		
-		// Parse the arguments - 
+
+		// Parse the arguments -
 		for (int i=0; i<args.length; i++) {
 			// Check this is a valid argument
 			if (args[i].length() == 2 && args[i].startsWith("-")) {
@@ -78,18 +82,18 @@ public class Sample implements MqttCallback {
 				case 'b': broker = args[++i];                 break;
 				case 'p': port = Integer.parseInt(args[++i]); break;
 				case 'i': clientId = args[++i];               break;
-				default: 
+				default:
 					System.out.println("Unrecognised argument: "+args[i]);
-					printHelp(); 
+					printHelp();
 					return;
 				}
 			} else {
 				System.out.println("Unrecognised argument: "+args[i]);
-				printHelp(); 
+				printHelp();
 				return;
 			}
 		}
-		
+
 		// Validate the provided arguments
 		if (!action.equals("publish") && !action.equals("subscribe")) {
 			System.out.println("Invalid action: "+action);
@@ -109,20 +113,20 @@ public class Sample implements MqttCallback {
 				topic = "Sample/#";
 			}
 		}
-		
+
 		String url = "tcp://"+broker+":"+port;
-		
+
 		if (clientId == null || clientId.equals("")) {
 			clientId = "SampleJavaV3_"+action;
 		}
 
-		// With a valid set of arguments, the real work of 
+		// With a valid set of arguments, the real work of
 		// driving the client API can begin
-		
+
 		try {
 			// Create an instance of the Sample client wrapper
 			Sample sampleClient = new Sample(url,clientId,quietMode);
-			
+
 			// Perform the specified action
 			if (action.equals("publish")) {
 				sampleClient.publish(topic,qos,message.getBytes());
@@ -133,18 +137,18 @@ public class Sample implements MqttCallback {
 			System.out.println("reason "+me.getReasonCode());
 			System.out.println("msg "+me.getMessage());
 			System.out.println("loc "+me.getLocalizedMessage());
-			System.out.println("casue "+me.getCause());
+			System.out.println("cause "+me.getCause());
 			System.out.println("excep "+me);
 			me.printStackTrace();
 		}
 	}
-    
+
 	// Private instance variables
 	private MqttClient client;
 	private String brokerUrl;
 	private boolean quietMode;
 	private MqttConnectOptions conOpt;
-	
+
 	/**
 	 * Constructs an instance of the sample client wrapper
 	 * @param brokerUrl the url to connect to
@@ -155,25 +159,25 @@ public class Sample implements MqttCallback {
     public Sample(String brokerUrl, String clientId, boolean quietMode) throws MqttException {
     	this.brokerUrl = brokerUrl;
     	this.quietMode = quietMode;
-    	
+
     	//This sample stores files in a temporary directory...
-    	//..a real application ought to store them somewhere 
+    	//..a real application ought to store them somewhere
     	//where they are not likely to get deleted or tampered with
     	String tmpDir = System.getProperty("java.io.tmpdir");
-    	MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(tmpDir); 
-    	
+    	MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(tmpDir);
+
     	try {
-    		// Construct the object that contains connection parameters 
+    		// Construct the object that contains connection parameters
     		// such as cleansession and LWAT
 	    	conOpt = new MqttConnectOptions();
 	    	conOpt.setCleanSession(false);
 
     		// Construct the MqttClient instance
 			client = new MqttClient(this.brokerUrl,clientId, dataStore);
-			
+
 			// Set this wrapper as the callback handler
 	    	client.setCallback(this);
-	    	
+
 		} catch (MqttException e) {
 			e.printStackTrace();
 			log("Unable to set up client: "+e.toString());
@@ -185,34 +189,34 @@ public class Sample implements MqttCallback {
      * Performs a single publish
      * @param topicName the topic to publish to
      * @param qos the qos to publish at
-     * @param payload the payload of the message to publish 
+     * @param payload the payload of the message to publish
      * @throws MqttException
      */
     public void publish(String topicName, int qos, byte[] payload) throws MqttException {
-    	
+
     	// Connect to the server
     	client.connect();
     	log("Connected to "+brokerUrl + " with client ID "+client.getClientId());
-    	
+
     	// Get an instance of the topic
     	MqttTopic topic = client.getTopic(topicName);
 
    		MqttMessage message = new MqttMessage(payload);
     	message.setQos(qos);
-	
+
     	// Publish the message
     	String time = new Timestamp(System.currentTimeMillis()).toString();
     	log("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
     	MqttDeliveryToken token = topic.publish(message);
-	
+
     	// Wait until the message has been delivered to the server
     	token.waitForCompletion();
-    	
+
     	// Disconnect the client
     	client.disconnect();
     	log("Disconnected");
     }
-    
+
     /**
      * Subscribes to a topic and blocks until Enter is pressed
      * @param topicName the topic to subscribe to
@@ -220,7 +224,7 @@ public class Sample implements MqttCallback {
      * @throws MqttException
      */
     public void subscribe(String topicName, int qos) throws MqttException {
-    	
+
     	// Connect to the server
     	client.connect();
     	log("Connected to "+brokerUrl+" with client ID "+client.getClientId());
@@ -236,7 +240,7 @@ public class Sample implements MqttCallback {
 		} catch (IOException e) {
 			//If we can't read we'll just exit
 		}
-		
+
 		// Disconnect the client
 		client.disconnect();
 		log("Disconnected");
@@ -253,11 +257,11 @@ public class Sample implements MqttCallback {
     }
 
 
-	
+
 	/****************************************************************/
 	/* Methods to implement the MqttCallback interface              */
 	/****************************************************************/
-    
+
     /**
      * @see MqttCallback#connectionLost(Throwable)
      */
@@ -277,9 +281,9 @@ public class Sample implements MqttCallback {
 		// Called when a message has completed delivery to the
 		// server. The token passed in here is the same one
 		// that was returned in the original call to publish.
-		// This allows applications to perform asychronous 
+		// This allows applications to perform asychronous
 		// delivery without blocking until delivery completes.
-		
+
 		// This sample demonstrates synchronous delivery, by
 		// using the token.waitForCompletion() call in the main thread.
 	}
@@ -289,11 +293,11 @@ public class Sample implements MqttCallback {
      */
 	public void messageArrived(MqttTopic topic, MqttMessage message) throws MqttException {
 		// Called when a message arrives from the server.
-		
+
 		String time = new Timestamp(System.currentTimeMillis()).toString();
-		
+
 		System.out.println("Time:\t" +time +
-                           "  Topic:\t" + topic.getName() + 
+                           "  Topic:\t" + topic.getName() +
                            "  Message:\t" + new String(message.getPayload()) +
                            "  QoS:\t" + message.getQos());
 	}
@@ -302,7 +306,7 @@ public class Sample implements MqttCallback {
 	/* End of MqttCallback methods                                  */
 	/****************************************************************/
 
-	
+
 
     static void printHelp() {
         System.out.println(
@@ -317,8 +321,8 @@ public class Sample implements MqttCallback {
             "    -m  Use <message text> instead of the default\n" +
             "            (\"Message from MQTTv3 Java client\")\n" +
             "    -s  Use this QoS instead of the default (2)\n" +
-            "    -b  Use this name/IP address instead of the default (localhost)\n" +
-            "    -p  Use this port instead of the default (1883)\n\n" +
+            "    -b  Use this name/IP address instead of the default (" + broker +")\n" +
+            "    -p  Use this port instead of the default (" + port +")\n\n" +
             "    -i  Use this client ID instead of SampleJavaV3_<action>\n" +
             "Delimit strings containing spaces with \"\"\n\n"+
             "Publishers transmit a single message then disconnect from the server.\n"+
