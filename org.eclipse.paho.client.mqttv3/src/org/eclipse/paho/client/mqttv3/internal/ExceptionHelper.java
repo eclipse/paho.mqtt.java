@@ -23,9 +23,8 @@ public class ExceptionHelper {
 			(reasonCode == MqttException.REASON_CODE_NOT_AUTHORIZED)) {
 			return new MqttSecurityException(reasonCode);
 		}
-		else {
-			return new MqttException(reasonCode);
-		}
+		
+		return new MqttException(reasonCode);
 	}
 
 	public static MqttException createMqttException(Throwable cause) {

@@ -12,7 +12,7 @@
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
 /**
- * Represents a Multi-Byte Integer (MBI), as defined by the MQTT V5
+ * Represents a Multi-Byte Integer (MBI), as defined by the MQTT V3
  * specification.
  */
 public class MultiByteInteger {

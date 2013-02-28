@@ -84,9 +84,8 @@ public class MqttPersistentData implements MqttPersistable {
 	public int getPayloadLength() {
 		if ( payload == null ) {
 			return 0;
-		} else {
-			return pLength;
 		}
+		return pLength;
 	}
 
 	public int getPayloadOffset() {

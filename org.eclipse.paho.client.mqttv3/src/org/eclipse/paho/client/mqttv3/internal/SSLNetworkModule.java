@@ -17,8 +17,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.internal.trace.Trace;
-
+import org.eclipse.paho.client.mqttv3.logging.Logger;
+import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 /**
  * A network module for connecting over SSL.
@@ -26,14 +26,18 @@ import org.eclipse.paho.client.mqttv3.internal.trace.Trace;
 public class SSLNetworkModule extends TCPNetworkModule {
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
-	
+
+	final static String className = SSLNetworkModule.class.getName();
+	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
+
 	/**
 	 * Constructs a new SSLNetworkModule using the specified host and
 	 * port.  The supplied SSLSocketFactory is used to supply the network
 	 * socket.
 	 */
-	public SSLNetworkModule(Trace trace, SSLSocketFactory factory, String host, int port) {
-		super(trace, factory, host, port);
+	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext) {
+		super(factory, host, port, resourceContext);
+		log.setResourceName(resourceContext);
 	}
 
 	/**
@@ -47,9 +51,10 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	 * Sets the enabled cipher suites on the underlying network socket.
 	 */
 	public void setEnabledCiphers(String[] enabledCiphers) {
+		final String methodName = "setEnabledCiphers";
 		this.enabledCiphers = enabledCiphers;
 		if ((socket != null) && (enabledCiphers != null)) {
-			if (trace.isOn()) {
+			if (log.isLoggable(Logger.FINE)) {
 				String ciphers = "";
 				for (int i=0;i<enabledCiphers.length;i++) {
 					if (i>0) {
@@ -58,7 +63,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 					ciphers+=enabledCiphers[i];
 				}
 				//@TRACE 260=setEnabledCiphers ciphers={0}
-				trace.trace(Trace.FINE,260,new Object[]{ciphers});
+				log.fine(className,methodName,"260",new Object[]{ciphers});
 			}
 			((SSLSocket) socket).setEnabledCipherSuites(enabledCiphers);
 		}

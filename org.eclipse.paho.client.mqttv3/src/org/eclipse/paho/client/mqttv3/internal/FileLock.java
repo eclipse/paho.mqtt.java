@@ -10,22 +10,36 @@
  *    Dave Locke - initial API and implementation and/or initial documentation
  */
 package org.eclipse.paho.client.mqttv3.internal;
-
+/**
+ * FileLock - used to obtain a lock that can be used to prevent other MQTT clients
+ * using the same persistent store. If the lock is already held then an exception
+ * is thrown. 
+ * 
+ * Some Java runtimes such as JME MIDP do not support file locking or even 
+ * the Java classes that support locking.  The class is coded to both compile 
+ * and work on all Java runtimes.  In Java runtimes that do not support 
+ * locking it will look as though a lock has been obtained but in reality
+ * no lock has been obtained. 
+ */
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 
 public class FileLock {
+	private File lockFile;
 	private RandomAccessFile file;
 	private Object fileLock;
 	
 	/**
-	 * Creates an NIO FileLock on the specified file.
-	 * @param lockFile the file to lock
+	 * Creates an NIO FileLock on the specified file if on a suitable Java runtime. 
+	 * @param clientDir the a File of the directory to contain the lock file. 
+	 * @param lockFilename name of the the file to lock
 	 * @throws Exception if the lock could not be obtained for any reason
 	 */
-	public FileLock(File lockFile) throws Exception {
+	public FileLock(File clientDir, String lockFilename) throws Exception {
+		// Create a file to obtain a lock on. 
+		lockFile = new File(clientDir,lockFilename);
 		if (ExceptionHelper.isClassAvailable("java.nio.channels.FileLock")) {
 			try {
 				this.file = new RandomAccessFile(lockFile,"rw");
@@ -33,13 +47,17 @@ public class FileLock {
 				Object channel = m.invoke(file,new Object[]{});
 				m = channel.getClass().getMethod("tryLock",new Class[]{});
 				this.fileLock = m.invoke(channel, new Object[]{});
-				file.close();
 			} catch(NoSuchMethodException nsme) {
 				this.fileLock = null;
 			} catch(IllegalArgumentException iae) {
 				this.fileLock = null;
 			} catch(IllegalAccessException iae) {
 				this.fileLock = null;
+			}
+			if (fileLock == null) {
+				// Lock not obtained
+				release();
+				throw new Exception("Problem obtaining file lock");
 			}
 		}
 	}
@@ -52,6 +70,7 @@ public class FileLock {
 			if (fileLock != null) {
 				Method m = fileLock.getClass().getMethod("release",new Class[]{});
 				m.invoke(fileLock, new Object[]{});
+				fileLock =  null;
 			}
 		} catch (Exception e) {
 			// Ignore exceptions
@@ -61,7 +80,13 @@ public class FileLock {
 				file.close();
 			} catch (IOException e) {
 			}
+			file = null;
 		}
+
+		if (lockFile != null && lockFile.exists()) {
+			lockFile.delete();
+		}
+		lockFile = null;
 	}
 	
 }

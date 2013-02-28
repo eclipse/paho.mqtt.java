@@ -35,9 +35,8 @@ public class MqttException extends Exception {
 	/** Authentication with the server has failed, due to a bad user name or password. */
 	public static final short REASON_CODE_FAILED_AUTHENTICATION			= 0x04; 
 	/** Not authorized to perform the requested operation */
-	public static final short REASON_CODE_NOT_AUTHORIZED					= 0x05;
+	public static final short REASON_CODE_NOT_AUTHORIZED				= 0x05;
 
-	
 	/** An unexpected error has occurred. */
 	public static final short REASON_CODE_UNEXPECTED_ERROR				= 0x06;
 	
@@ -54,7 +53,7 @@ public class MqttException extends Exception {
 	/**
 	 * The client is already connected.
 	 */
-	public static final short REASON_CODE_CLIENT_ALREADY_CONNECTED      = 32100;
+	public static final short REASON_CODE_CLIENT_CONNECTED      = 32100;
 	/**
 	 * The client is already disconnected.
 	 */
@@ -96,7 +95,7 @@ public class MqttException extends Exception {
 	 * made from within a method on {@link MqttCallback}.  These methods are invoked
 	 * by the client's thread, and must not be used to control disconnection.
 	 * 
-	 * @see MqttCallback#messageArrived(MqttTopic, MqttMessage)
+	 * @see MqttCallback#messageArrived(String, MqttMessage)
 	 */
 	public static final short REASON_CODE_CLIENT_DISCONNECT_PROHIBITED  = 32107;
 
@@ -113,6 +112,32 @@ public class MqttException extends Exception {
 	 */
 	public static final short REASON_CODE_CONNECTION_LOST               = 32109;
 	
+	/**
+	 * A connect operation in already in progress, only one connect can happen
+	 * at a time.
+	 */
+	public static final short REASON_CODE_CONNECT_IN_PROGRESS           = 32110;
+	
+	/**
+	 * The client is closed - no operations are permitted on the client in this
+	 * state.  New up a new client to continue.
+	 */
+	public static final short REASON_CODE_CLIENT_CLOSED		           = 32111;
+	
+	/**
+	 * A request has been made to use a token that is already associated with
+	 * another action.  If the action is complete the reset() can ve called on the
+	 * token to allow it to be reused.  
+	 */
+	public static final short REASON_CODE_TOKEN_INUSE		           = 32201;
+	
+	/**
+	 * A request has been made to send a message but the maximum number of inflight 
+	 * messages has already been reached. Once one or more messages have been moved
+	 * then new messages can be sent.   
+	 */
+	public static final short REASON_CODE_MAX_INFLIGHT    			= 32202;
+
 	private int reasonCode;
 	private Throwable cause;
 	

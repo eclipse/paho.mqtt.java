@@ -48,4 +48,8 @@ public class MqttConnack extends MqttAck {
 	public boolean isMessageIdRequired() {
 		return false;
 	}
+	
+	public String getKey() {
+		return new String("Con");
+	}
 }

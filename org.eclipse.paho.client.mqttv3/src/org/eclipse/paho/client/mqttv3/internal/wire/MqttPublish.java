@@ -25,7 +25,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
  * An on-the-wire representation of an MQTT SEND message.
  */
 public class MqttPublish extends MqttPersistableWireMessage {
-	public static final byte DESTINATION_TYPE_TOPIC = 0;
 	
 	private MqttMessage message;
 	private String topicName;
@@ -57,13 +56,13 @@ public class MqttPublish extends MqttPersistableWireMessage {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream dis = new DataInputStream(counter);
-		topicName = dis.readUTF();
+		topicName = this.decodeUTF8(dis);
 		if (message.getQos() > 0) {
 			msgId = dis.readUnsignedShort();
 		}
-		dis.close();
 		byte[] payload = new byte[data.length-counter.getCounter()];
 		dis.readFully(payload);
+		dis.close();
 		message.setPayload(payload);
 	}
 	
@@ -72,7 +71,7 @@ public class MqttPublish extends MqttPersistableWireMessage {
 		if (message.isRetained()) {
 			info |= 0x01;
 		}
-		if (message.isDuplicate()) {
+		if (message.isDuplicate() || duplicate ) {
 			info |= 0x08;
 		}
 		
@@ -87,38 +86,12 @@ public class MqttPublish extends MqttPersistableWireMessage {
 		return message;
 	}
 	
-	protected static byte[] encodePayload(MqttMessage message) throws MqttException {
-//		byte payloadType = message.getPayloadType();
-//		if (payloadType == MqttMessage.PAYLOAD_EMPTY) {
-//			return new byte[0];
-//		}
-//		else if (payloadType == MqttMessage.PAYLOAD_BYTES) {
+	protected static byte[] encodePayload(MqttMessage message) {
 		return message.getPayload();
-//		}
-//		else if (payloadType == MqttMessage.PAYLOAD_TEXT) {
-//			try {
-//				return message.getStringPayload().getBytes(STRING_ENCODING);
-//			} catch(UnsupportedEncodingException uee) {
-//				throw new MqttException(uee);
-//			}
-//		}
-//		else if (payloadType == MqttMessage.PAYLOAD_MAP) {
-//			try {
-//				return encodeUserProperties(message.getMapPayload());
-//			}
-//			catch (IOException ex) {
-//				throw new MqttException(ex);
-//			}
-//		}
-//		else {
-//			// TODO: This is actually an error.  Throw an exception?
-//			return new byte[0];
-//		}
 	}
 
 	public byte[] getPayload() throws MqttException {
 		if (encodedPayload == null) {
-			// TODO: inefficient, as this puts two copies in memory
 			encodedPayload = encodePayload(message);
 		}
 		return encodedPayload;
@@ -144,7 +117,7 @@ public class MqttPublish extends MqttPersistableWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			dos.writeUTF(topicName);
+			this.encodeUTF8(dos, topicName);
 			if (message.getQos() > 0) {
 				dos.writeShort(msgId);
 			}

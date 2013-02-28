@@ -51,17 +51,12 @@ public class MqttUnsubscribe extends MqttWireMessage {
 	}
 
 	public byte[] getPayload() throws MqttException {
-		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			for (int i=0; i<names.length; i++) {
-				dos.writeUTF(names[i]);
+				this.encodeUTF8(dos, names[i]);
 			}
 			return baos.toByteArray();
-		}
-		catch (IOException ex) {
-			throw new MqttException(ex);
-		}
 	}
 	public boolean isRetryable() {
 		return true;

@@ -12,7 +12,7 @@
 package org.eclipse.paho.client.mqttv3;
 
 /**
- * This exception should be thrown by the implementor of the persistence
+ * This exception is thrown by the implementor of the persistence
  * interface if there is a problem reading or writing persistent data.
  */
 public class MqttPersistenceException extends MqttException {
@@ -44,5 +44,13 @@ public class MqttPersistenceException extends MqttException {
 	public MqttPersistenceException(Throwable cause) {
 		super(cause);
 	}
-
+	/**
+	 * Constructs a new <code>MqttPersistenceException</code> with the specified 
+	 * <code>Throwable</code> as the underlying reason.
+	 * @param reason the reason code for the exception.
+	 * @param cause the underlying cause of the exception.
+	 */
+	public MqttPersistenceException(int reason, Throwable cause) {
+		super(reason, cause);
+	}
 }

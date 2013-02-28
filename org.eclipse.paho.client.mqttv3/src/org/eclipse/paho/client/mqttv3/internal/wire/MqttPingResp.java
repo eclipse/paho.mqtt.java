@@ -11,8 +11,6 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
-import java.io.IOException;
-
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 
@@ -20,7 +18,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * An on-the-wire representation of an MQTT PINGRESP.
  */
 public class MqttPingResp extends MqttAck {
-	public MqttPingResp(byte info, byte[] variableHeader) throws IOException {
+	public MqttPingResp(byte info, byte[] variableHeader) {
 		super(MqttWireMessage.MESSAGE_TYPE_PINGRESP);
 	}
 	
@@ -34,5 +32,9 @@ public class MqttPingResp extends MqttAck {
 	 */
 	public boolean isMessageIdRequired() {
 		return false;
+	}
+	
+	public String getKey() {
+		return new String("Ping");
 	}
 }

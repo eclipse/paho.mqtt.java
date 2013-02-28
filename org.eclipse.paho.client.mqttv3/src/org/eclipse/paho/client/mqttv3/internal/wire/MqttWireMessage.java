@@ -17,6 +17,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistable;
@@ -92,6 +93,16 @@ public abstract class MqttWireMessage {
 	 */
 	public void setMessageId(int msgId) {
 		this.msgId = msgId;
+	}
+	
+	/** 
+	 * Returns a key associated with the message. For most message types
+	 * this will be unique. For connect, disconnect and ping only one 
+	 * message of this type is allowed so a fixed key will be returned
+	 * @return key a key associated with the message
+	 */
+	public String getKey() {
+		return new Integer(getMessageId()).toString();
 	}
 	
 	public byte[] getHeader() throws MqttException {
@@ -205,17 +216,18 @@ public abstract class MqttWireMessage {
 		
 	protected static byte[] encodeMBI( long number) {
 		int numBytes = 0;
+		long no = number;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		// Encode the remaining length fields in the four bytes
 		do {
-			byte digit = (byte)(number % 128);
-			number = number / 128;
-			if (number > 0) {
+			byte digit = (byte)(no % 128);
+			no = no / 128;
+			if (no > 0) {
 				digit |= 0x80;
 			}
 			bos.write(digit);
 			numBytes++;
-		} while ( (number > 0) && (numBytes<4) );
+		} while ( (no > 0) && (numBytes<4) );
 		
 		return bos.toByteArray();
 	}
@@ -255,4 +267,63 @@ public abstract class MqttWireMessage {
 	public boolean isRetryable() {
 		return false;
 	}
+	
+	public void setDuplicate(boolean duplicate) {
+		this.duplicate = duplicate;
+	}
+
+	/**
+	 * Encodes a String given into UTF-8, before writing this to the DataOutputStream the length of the
+	 * encoded string is encoded into two bytes and then written to the DataOutputStream. @link{DataOutputStream#writeUFT(String)}
+	 * should be no longer used. @link{DataOutputStream#writeUFT(String)} does not correctly encode UTF-16 surrogate characters.
+	 * 
+	 * @param dos The stream to write the encoded UTF-8 String to.
+	 * @param stringToEncode The String to be encoded 
+	 * @throws MqttException Thrown when an error occurs with either the encoding or writing the data to the stream
+	 */
+	protected void encodeUTF8(DataOutputStream dos, String stringToEncode) throws MqttException
+	{
+		try {
+
+			byte[] encodedString = stringToEncode.getBytes("UTF-8");
+			byte byte1 = (byte) ((encodedString.length >>> 8) & 0xFF);
+			byte byte2 =  (byte) ((encodedString.length >>> 0) & 0xFF);  
+			
+
+			dos.write(byte1);
+			dos.write(byte2);
+			dos.write(encodedString);
+		}
+		catch(UnsupportedEncodingException ex)
+		{
+			throw new MqttException(ex);
+		} catch (IOException ex) {
+			throw new MqttException(ex);
+		}
+	}
+	
+	/**
+	 * Decodes a UTF-8 string from the DataInputStream provided. @link(DataInoutStream#readUTF()) should be no longer used, because  @link(DataInoutStream#readUTF()) 
+	 * does not decode UTF-16 surrogate characters correctly.
+	 * 
+	 * @param input The input stream from which to read the encoded string
+	 * @return a decoded String from the DataInputStream
+	 * @throws MqttException thrown when an error occurs with either reading from the stream or
+	 * decoding the encoded string.
+	 */
+	protected String decodeUTF8(DataInputStream input) throws MqttException
+	{
+		int encodedLength;
+		try {
+			encodedLength = input.readUnsignedShort();
+
+			byte[] encodedString = new byte[encodedLength];
+				input.readFully(encodedString);
+
+			return new String(encodedString, "UTF-8");
+		} catch (IOException ex) {
+			throw new MqttException(ex);
+		}
+	}
+
 }

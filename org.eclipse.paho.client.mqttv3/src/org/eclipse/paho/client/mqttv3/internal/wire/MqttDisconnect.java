@@ -17,6 +17,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * An on-the-wire representation of an MQTT DISCONNECT message.
  */
 public class MqttDisconnect extends MqttWireMessage {
+	public static String KEY="Disc";
 	
 	public MqttDisconnect() {
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
@@ -35,5 +36,9 @@ public class MqttDisconnect extends MqttWireMessage {
 	 */
 	public boolean isMessageIdRequired() {
 		return false;
+	}
+	
+	public String getKey() {
+		return new String(KEY);
 	}
 }

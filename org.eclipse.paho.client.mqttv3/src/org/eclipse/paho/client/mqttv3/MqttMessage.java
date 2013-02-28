@@ -12,7 +12,9 @@
 package org.eclipse.paho.client.mqttv3;
 
 /**
- * An MQTT message.  The message includes a "payload" (the body of the message)
+ * An MQTT message holds the application payload and options 
+ * specifying how the message is to be delivered  
+ * The message includes a "payload" (the body of the message)
  * represented as a byte[].
  */
 public class MqttMessage {
@@ -27,7 +29,7 @@ public class MqttMessage {
 	 * Utility method to validate the supplied QoS value.
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 */
-	protected static void validateQos(int qos) {
+	public static void validateQos(int qos) {
 		if ((qos < 0) || (qos > 2)) {
 			throw new IllegalArgumentException();
 		}
@@ -60,7 +62,7 @@ public class MqttMessage {
 	 * 
 	 * @return the payload as a byte array.
 	 */
-	public byte[] getPayload() throws MqttException {
+	public byte[] getPayload() {
 		return payload;
 	}
 	
@@ -78,9 +80,13 @@ public class MqttMessage {
 	 * 
 	 * @param payload the payload for this message.
 	 * @throws IllegalStateException if this message cannot be edited
+	 * @throws NullPointerException if no payload is provided
 	 */
 	public void setPayload(byte[] payload) {
 		checkMutable();
+		if (payload == null) {
+			throw new NullPointerException();
+		}
 		this.payload = payload;
 	}
 	
@@ -129,7 +135,7 @@ public class MqttMessage {
 	 * but should only be used for messages which are not valuable - note that  
 	 * if the server cannot process the message (for example, there
 	 * is an authorization problem), then an 
-	 * {@link MqttCallback#deliveryComplete(MqttDeliveryToken)}. 
+	 * {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)}. 
 	 * Also known as "fire and forget".</li>
 	 * 
 	 * <li>Quality of service 1 - indicates that a message should 
@@ -167,7 +173,10 @@ public class MqttMessage {
 	}
 
 	/**
-	 * Returns a string representation of this message.
+	 * Returns a string representation of this messages payload.
+	 * Makes an attempt to return the payload as a string. As the
+	 * MQTT client has no control over the content of the payload 
+	 * it may fail. 
 	 * @return a string representation of this message.
 	 */
 	public String toString() {

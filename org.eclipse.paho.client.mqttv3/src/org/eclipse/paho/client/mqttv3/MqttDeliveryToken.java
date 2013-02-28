@@ -12,54 +12,38 @@
 package org.eclipse.paho.client.mqttv3;
 
 /**
- * Provides a mechanism for tracking the delivery of messages.
+ * Provides a mechanism to track the delivery progress of a message.
  * 
- * Calls to {@link MqttTopic#publish(MqttMessage)}
- * return after the message has been sent, but do not wait for acknowledgements
- * to be received.  This allows the 
- * client to have multiple messages in-flight at one time.
- * 
- * In order to track the delivery of a message, those methods
- * return an instance of this class which can be used in one of two ways:
- * <ul>
- * <li>calling {@link #waitForCompletion()} to block the current thread 
- *    until delivery has completed</li>
- * <li>matching this object to the one passed to the delivery callback methods
- *    of {@link MqttCallback}.</li>
- * </ul>
+ * <p>
+ * Used to track the the delivery progress of a message when a publish is 
+ * executed in a non-blocking manner (run in the background)</p>
+ *  
+ * @see MqttToken
  */
-public interface MqttDeliveryToken {
+public class MqttDeliveryToken extends MqttToken implements IMqttDeliveryToken {
+		
 	
-	/**
-	 * Blocks the current thread until the message this is the token
-	 * for completes delivery.
-	 * @throws MqttException if there was a problem completing delivery of the message.
-	 */
-	public void waitForCompletion() throws MqttException, MqttSecurityException;
+	public MqttDeliveryToken() {
+		super();
+	}
 	
+	public MqttDeliveryToken(String logContext) {
+		super(logContext);
+	}
+
 	/**
-	 * Blocks the current thread until the message this is the token
-	 * for completes delivery.
-	 * This will only block for specified timeout period. If the delivery has not
-	 * completed before the timeout occurs, this method will return - the 
-	 * {@link #isComplete()} method can be used to determine if the delivery is
-	 * complete, or if the wait has timed out.
-	 * @param timeout the maximum amount of time to wait for, in milliseconds.
-	 * @throws MqttException if there was a problem completing delivery of the message
-	 */
-	public void waitForCompletion(long timeout) throws MqttException, MqttSecurityException;
-	
-	/**
-	 * Returns whether or not the delivery has finished.  Note that a token will
-	 * be marked as complete even if the delivery failed.
-	 */
-	public boolean isComplete();
-	
-	/**
-	 * Returns the message associated with this token, or <code>null</code> if the message has
-	 * already been successfully sent.
-	 * @return the message associated with this token
+	 * Returns the message associated with this token.
+	 * <p>Until the message has been delivered, the message being delivered will
+	 * be returned. Once the message has been delivered <code>null</code> will be 
+	 * returned.
+	 * @return the message associated with this token or null if already delivered.
 	 * @throws MqttException if there was a problem completing retrieving the message
 	 */
-	public MqttMessage getMessage() throws MqttException;
+	public MqttMessage getMessage() throws MqttException {
+		return internalTok.getMessage();
+	}
+	
+	protected void setMessage(MqttMessage msg) {
+		internalTok.setMessage(msg);
+	}
 }

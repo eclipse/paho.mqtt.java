@@ -1,183 +1,127 @@
 <body>
-Contains an API for connecting to a server which implements the MQTT V3 
-protocol.
+Contains a programming interface enabling applications to communicate with an MQTT server
 
 <p>
-The MQ Telemetry Transport (MQTT) is a lightweight publish/subscribe protocol 
-flowing over TCP/IP for remote sensors and control devices through low 
-bandwidth communications. MQTT is used by specialized applications on 
-small footprint devices that require a low bandwidth communication, 
-typically for remote data acquisition and process control.
-</p>
-<p>
-A typical system might comprise several hundred client devices communicating 
-with a single server or "broker", where each client is identified 
-by a unique ID. 
-</p>
-<p>The basic means of operating the client is as follows:</p>
+The MQ Telemetry Transport (MQTT) is a lightweight broker-based publish/subscribe 
+messaging protocol designed to be open, simple, lightweight and easy to implement. 
+These characteristics make it ideal for use in constrained environments, for example, 
+but not limited to:
+<ul>
+  <li>Where the network is expensive, has low bandwidth or is unreliable such as mobile and vsat networks
+  <li>When run on an embedded or mobile device with limited processor, memory or battery
+</ul>
+<p>Features of the protocol include:
+<ul>
+  <li>The publish/subscribe message pattern to provide one-to-many message 
+  distribution and decoupling of applications
+  <li>A messaging transport that is agnostic to the content of the payload
+  <li>The use of TCP/IP to provide network connectivity
+  <li>The use of SSL/TLS to provide network security and trust
+  <li>Three qualities of service for message delivery which are maintained across 
+  network, client and server breaks.
+  <ul>
+    <li>"At most once", where messages are delivered according to the best efforts 
+     of the underlying TCP/IP network. Message loss or duplication can occur. 
+     This level could be used, for example, with ambient sensor data where it 
+     does not matter if an individual reading is lost as the next one will be published soon after.
+    <li>"At least once", where messages are assured to arrive but duplicates may occur.
+    <li>"Exactly once", where message are assured to arrive exactly once. This 
+     level could be used, for example, with billing systems where duplicate or 
+     lost messages could lead to incorrect charges being applied.
+  </ul>
+  The quality of service for message delivery is met even if the network connection 
+  breaks, or the client or the server stop while a message is being delivered
+  <li>A small transport overhead (the fixed-length header is just 2 bytes), and 
+   protocol exchanges minimised to reduce network traffic
+  <li>A mechanism to notify interested parties to an abnormal disconnection of
+   a client using the Last Will and Testament feature
+</ul>
+
+<p>The basic means of operating the client is:</p>
 <ol>
-	<li>Create an instance of {@link org.eclipse.paho.client.mqttv3.MqttClient}, providing
-	the address of the server and a unique client identifier.</li>
-	<li>{@link org.eclipse.paho.client.mqttv3.MqttClient#connect(MqttConnectOptions) Connect} to the server</li>
-	<li>Exchange messages with the server.
-		<ul>
-			<li>Send {@link org.eclipse.paho.client.mqttv3.MqttMessage messages} to the server, 
-			via {@link org.eclipse.paho.client.mqttv3.MqttTopic topics}.</li>
-			<li>Receive messages from the server.  This is done asynchronously
-			using  
-			{@link org.eclipse.paho.client.mqttv3.MqttClient#subscribe(String, int) subscriptions},
-			combined with a {@link org.eclipse.paho.client.mqttv3.MqttClient#setCallback(MqttCallback) callback}.
-			</li>
-		</ul>
-	</li>
-<li>{@link org.eclipse.paho.client.mqttv3.MqttClient#disconnect() Disconnect} from the server.</li>
+  <li>Create an instance of {@link org.eclipse.paho.client.mqttv3.MqttClient} or 
+	{@link org.eclipse.paho.client.mqttv3.MqttAsyncClient}, providing
+	the address of an MQTT server and a unique client identifier.</li>
+  <li><code>connect</code> to the server</li>
+  <li>Exchange messages with the server:
+  <ul>
+	<li><code>publish messages</code> to the server, 
+	 via a <code>topic</code>.</li>
+	<li><code>subscribe</code> to one more <code>topics</code>. The server will send any messages
+	 it receives on those topics to the client. The client will be informed when a message 
+	 arrives via a <code>callback</code> 
+  </ul>
+  <li><code>disconnect</code> from the server.</li>
 </ol>
-</p>
-<h3>Examples</h3>
-<h4>Publish a message, at most once</h4>
-<p>In the following code snippet, a simple message is published to the server,
-using defaults wherever possible.</p>
-<code><pre>	MqttClient client = new MqttClient("tcp://localhost:1883", "SampleClient");
-	client.connect();
-	MqttMessage message = new MqttMessage("Hello world");
-	message.setQos(0);
-	client.getTopic("foo/bar").publish(message);
-	client.disconnect();</pre></code>
 
-<p>This is the fastest way of publishing messages,
-but is also the least reliable.  There is no assurance that the message will actually be
-delivered, and no exception will be thrown if the server refuses the message, or if the
-network connection fails.</p>
-
-<h4>Publish a message, once and only once (single threaded)</h4>
-<p>In the following code snippet, a message is published to the server
-at QoS 2, which is the most reliable delivery mechanism.
-In order to achieve this, the message needs to be persisted by the client.
-A default implementation of persistence is provided by {@link org.eclipse.paho.client.mqttv3.MqttDefaultFilePersistence}.
-This will be used by the client unless an alternative is supplied.</p>
-<p>Publishing reliably is more complex, and most of the code is used to handle
-error conditions.  The key thing to notice is the two-stage delivery: the first
-stage gives the message to the client.  After this, the client is responsible for
-delivering the message to the server.  The second stage is about determining 
-success or failure.</p>
-
-<code><pre>
-	MqttClient client = null;
-	try {
-		// Create a client to communicate with a broker at the specified address
-		client = new MqttClient("tcp://localhost:1883", "SampleClient");
-		// Connect to the broker
-		client.connect();
-	} catch (MqttException ex) {
-		System.err.println("Could not connect");
-	}
-	
-	if ((client != null) && client.isConnected()) {
-		MqttTopic topic = client.getTopic("foo/bar");
-		MqttDeliveryToken token = null;
-		// Create message and set quality of service to deliver the message once
-		MqttMessage message = new MqttMessage("Hello world");
-		message.setQos(2);
-		
-		try {
-			// Give the message to the client for publishing.  For QoS 2,
-			// this will involve multiple network calls, which will happen 
-			// asynchronously after this method has returned.
-			token = topic.publish(message);
-		}
-		catch (MqttException ex) {
-			// Client has not accepted the message due to a failure
-			// Depending on the exception's reason code, we could always retry
-			System.err.println("Failed to send message");
-		}
-		
-		if (token != null) {
-			boolean keepTrying = true;
-			do {
-				try {
-					// Wait for the message delivery to complete
-					token.waitForCompletion();
-					System.out.println("Message delivery complete");
-				}
-				catch (MqttException deliveryException) {
-					int reasonCode = deliveryException.getReasonCode();
-					// TODO: Retry the message, or decide to stop trying
-					System.err.println("Message delivery failed");
-					if (client.isConnected() == false) {
-						try {
-							// Re-connect to the server
-							client.connect();
-						}
-						catch (MqttException connectException) {
-							// Can't reconnect, so give up.  If and when the 
-							// client does reconnect, the message delivery
-							// will automatically continue
-							keepTrying = false;
-						}
-					}
-				}
-			} while (!token.isComplete() && keepTrying);
-		}
-	}</pre></code>
-	
-<h4>Publish a message, once and only once (multi-threaded)</h4>
-<p>In the following code snippet, a message is published to the server
-at QoS 2, which is the most reliable delivery mechanism.
-The application uses a {@link org.eclipse.paho.client.mqttv3.MqttCallback callback} to asynchronously be notified 
-when delivery of a message has been {@link org.eclipse.paho.client.mqttv3.MqttCallback#deliveryComplete completed}.</p>
-
-<p>
-A default implementation of persistence is provided by {@link org.eclipse.paho.client.mqttv3.MqttDefaultFilePersistence}.
-This will be used by the client unless an alternative is supplied.</p>
-
-<code><pre>
-public class SampleClient implements MqttCallback {
-	public void run() {
-		MqttClient client = null;
-		try {
-			// Create a client to communicate with a broker at the specified address
-			client = new MqttClient("tcp://localhost:1883", "SampleClient");
-
-			// Connect to the broker
-			client.connect();
-
-			// Setup a callback
-			client.setCallback(this);
-
-		} catch (MqttException ex) {
-			System.err.println("Could not connect");
-		}
-		
-		if ((client != null) && client.isConnected()) {
-			MqttTopic topic = client.getTopic("foo/bar");
-			// Create message and set quality of service to deliver the message once
-			MqttMessage message = new MqttMessage("Hello world");
-			message.setQos(2);
-	
-			try {
-				// Give the message to the client for publishing. For QoS 2, this
-				// will involve multiple network calls, which will happen
-				// asynchronously after this method has returned.
-				topic.publish(message);
-			} catch (MqttException ex) {
-				// Client has not accepted the message due to a failure
-				// Depending on the exception's reason code, we could always retry
-				System.err.println("Failed to send message");
-			}
-		}
-	}
-
-	public void connectionLost(Throwable cause) {
-		// TODO: Implement reconnection logic
-		System.err.println("Connection lost");
-	}
-
-	public void deliveryComplete(MqttDeliveryToken token) {
-		System.out.println("Delivery complete");
-	}
-
-	public void messageArrived(MqttTopic topic, MqttMessage message) throws Exception {
-	}
-}</pre></code>
+<p>The programming model and concepts like the protocol are small and easy to use. Key concepts 
+to use when creating MQTT application include:
+<ul>
+  <li>Every client instance that connects to an MQTT server must have a unique client identifier.
+    If a second instance of a client with the same ID connects to a server the first instance will be
+    disconnected.
+  <li>For message delivery to be reliable and withstand both abnormal network breaks and clients/server
+    outages the client must use a persistent store to hold messages while they are being delivered. This is 
+    the default case where a file based persistent store 
+    {@link org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence MqttDefaultFilePersistence} is used. 
+  <li>When connecting the {@link org.eclipse.paho.client.mqttv3.MqttConnectOptions#setCleanSession(boolean) cleansession}
+   option has a big impact on the operation of the client. If set to false:
+  <ul>
+    <li>Message delivery will match the quality of service specified when the message was published even across
+      failures of the network, client or server
+    <li>The server will store messages for active subscriptions on behalf of the client when the client is not connected.
+      The server will deliver these messages to the client the next time it connects.
+  </ul>
+  If set to true:
+  <ul>
+    <li>Any state stored on the client and server related to the client will be cleansed 
+      before the connection is fully started.  Subscriptions from earlier sessions will be unsubscribed
+      and any messages still in-flight from previous sessions will be deleted.
+    <li>When the client disconnects either as the result of the application requesting a disconnect
+      or a network failure, state related to the client will be cleansed just as at connect time. 
+    <li>Messages will only be delivered to the quality of service requested at publish time if 
+      the connection is maintained while the message is being delivered
+  </ul>
+  <li>When subscribing for messages the subscription can be for an absolute topic or a wildcarded topic.
+  <li>When unsubscribing the topic to be unsubscribed must match one specified on an earlier subscribe.
+  <li>There are two MQTT client libraries to choose from:
+  <ol>
+    <li>{@link org.eclipse.paho.client.mqttv3.IMqttAsyncClient MqttAsyncClient} which provides a non-blocking interface where
+      methods return before the requested operation has completed. The completion of the operation
+      can be monitored by in several ways:
+    <ul>
+      <li>Use the {@link org.eclipse.paho.client.mqttv3.IMqttToken#waitForCompletion waitForCompletion}
+       call on the token returned from the operation. This will block 
+        until the operation completes. 
+      <li>Pass a {@link org.eclipse.paho.client.mqttv3.IMqttActionListener IMqttActionListener}
+        to the operation. The listener will then be called back when the operation completes.
+      <li>Set a {@link org.eclipse.paho.client.mqttv3.MqttCallback MqttCallback} on the client. It
+        will be notified when a message arrive, a message have been delivered to the server and when the
+        connection to the server is lost.
+    </ul>
+    <li>{@link org.eclipse.paho.client.mqttv3.IMqttClient MqttClient} where methods block until
+      the operation has completed.
+  </ol>
+  <li>For both the blocking and non-blocking clients some operations are asynchronous.  This includes:
+  <ul>
+    <li>Notification that a new message has arrived:
+      {@link org.eclipse.paho.client.mqttv3.MqttCallback#messageArrived messageArrived}.
+    <li>Notification that the connection to the server has broken:
+      {@link org.eclipse.paho.client.mqttv3.MqttCallback#connectionLost connectionLost}.
+    <li>Notification that a message has been delivered to the server: 
+      {@link org.eclipse.paho.client.mqttv3.MqttCallback#deliveryComplete deliveryComplete}.
+  </ul>
+  A client registers interest in these notifications by registering a 
+  {@link org.eclipse.paho.client.mqttv3.MqttCallback MqttCallback} on the client
+  <li>There are a number of programs that demonstrate the different modes of 
+    writing MQTT applications
+  <ul>
+    <li>{@link org.eclipse.paho.sample.mqttv3app.Sample} uses the blocking client interface
+    <li>{@link org.eclipse.paho.sample.mqttv3app.SampleAsyncCallBack} uses the asynchronous client with
+      callbacks which are notified when an operation completes
+    <li>{@link org.eclipse.paho.sample.mqttv3app.SampleAsyncWait} uses the asynchronous client and
+      shows how to use the token returned from each operation to block until the operation completes.
+  </ul>
+</ul>
 
 </body>

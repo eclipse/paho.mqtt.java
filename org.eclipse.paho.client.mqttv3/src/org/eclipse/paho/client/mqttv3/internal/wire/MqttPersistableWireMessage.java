@@ -39,9 +39,9 @@ public abstract class MqttPersistableWireMessage extends MqttWireMessage
 		return 0;
 	}
 
-	public String getKey() throws MqttPersistenceException {
-		return new Integer(getMessageId()).toString();
-	}
+//	public String getKey() throws MqttPersistenceException {
+//		return new Integer(getMessageId()).toString();
+//	}
 
 	public byte[] getPayloadBytes() throws MqttPersistenceException {
 		try {

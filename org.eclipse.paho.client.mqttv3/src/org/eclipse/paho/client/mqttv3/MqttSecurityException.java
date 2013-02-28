@@ -35,4 +35,13 @@ public class MqttSecurityException extends MqttException {
 	public MqttSecurityException(Throwable cause) {
 		super(cause);
 	}
+	/**
+	 * Constructs a new <code>MqttSecurityException</code> with the specified 
+	 * code and <code>Throwable</code> as the underlying reason.
+	 * @param reasonCode the reason code for the exception.
+	 * @param cause the underlying cause of the exception.
+	 */
+	public MqttSecurityException(int reasonCode, Throwable cause) {
+		super(reasonCode, cause);
+	}
 }

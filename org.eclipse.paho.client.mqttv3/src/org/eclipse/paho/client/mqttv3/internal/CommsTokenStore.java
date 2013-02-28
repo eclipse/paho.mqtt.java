@@ -17,237 +17,239 @@ import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.internal.trace.Trace;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingResp;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
+import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
+import org.eclipse.paho.client.mqttv3.logging.Logger;
+import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 
 /**
- * Provides a "token" based system for handling the
- * threading.  When a message is sent, a token is derived from that message
- * and saved using the {@link #saveToken(MqttWireMessage)} method.  The sending
- * method then calls {@link Object#wait()} on that token.  The {@link CommsReceiver}
- * class, on another thread, reads responses back from the network.  It uses 
- * the response to find the relevant token, which it can then 
- * {@link Object#notify()}.
+ * Provides a "token" based system for storing and tracking actions across 
+ * multiple threads. 
+ * When a message is sent, a token is associated with the message
+ * and saved using the {@link #saveToken(MqttToken, MqttWireMessage)} method. Anyone interested
+ * in tacking the state can call one of the wait methods on the token or using 
+ * the asynchronous listener callback method on the operation. 
+ * The {@link CommsReceiver} class, on another thread, reads responses back from 
+ * the network. It uses the response to find the relevant token, which it can then 
+ * notify. 
+ * 
+ * Note:
+ *   Ping, connect and disconnect do not have a unique message id as
+ *   only one outstanding request of each type is allowed to be outstanding
  */
 public class CommsTokenStore {
 	/** Maps message-specific data (usually message IDs) to tokens */
 	private Hashtable tokens;
-	private MqttDeliveryTokenImpl pingToken;
-	private MqttDeliveryTokenImpl connectToken;
-	private MqttDeliveryTokenImpl disconnectToken;
+	private String logContext;
+	private MqttException closedResponse = null;
 	
-	private MqttException noMoreResponsesException = null;
-	private boolean noMoreResponses = false;
-	
-	private Trace trace;
+	final static String className = CommsTokenStore.class.getName();
+	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, className);
 
-	public CommsTokenStore(Trace trace) {
+	public CommsTokenStore(String logContext) {
+		final String methodName = "<Init>";
+
+		log.setResourceName(logContext);
 		this.tokens = new Hashtable();
-		this.trace = trace;
-		pingToken = new MqttDeliveryTokenImpl(trace);
-		connectToken = new MqttDeliveryTokenImpl(trace);
-		disconnectToken = new MqttDeliveryTokenImpl(trace);
+		this.logContext = logContext;
+		//@TRACE 308=<>
+		log.fine(className,methodName,"308");//,new Object[]{message});
+
 	}
 
-	public MqttDeliveryTokenImpl getToken(MqttWireMessage message) {
-		Object key;
-		if (message instanceof MqttAck) {
-			return getTokenForAck((MqttAck)message);
-		}
-		else if (message instanceof MqttPingReq) {
-			key = pingToken;
-		}
-		else if (message instanceof MqttConnect) {
-			key = connectToken;
-		}
-		else if (message instanceof MqttDisconnect) {
-			key = disconnectToken;
-		}
-		else {
-			key = new Integer(message.getMessageId());
-		}
-		return (MqttDeliveryTokenImpl)tokens.get(key);
+	/**
+	 * Based on the message type that has just been received return the associated
+	 * token from the token store or null if one does not exist.
+	 * @param message whose token is to be returned 
+	 * @return token for the requested message
+	 */
+	public MqttToken getToken(MqttWireMessage message) {
+		String key = message.getKey(); 
+		return (MqttToken)tokens.get(key);
 	}
-	
-	private MqttDeliveryTokenImpl getTokenForAck(MqttWireMessage message) {
-		MqttDeliveryTokenImpl token;
-		if (message instanceof MqttPingResp) {
-			token = pingToken;
-		}
-		else if (message instanceof MqttConnack) {
-			token = connectToken;
-		}
-		else {
-			token = (MqttDeliveryTokenImpl)tokens.get(new Integer(message.getMessageId()));
-		}
-		return token;
-	}
-	
-	public MqttDeliveryTokenImpl removeToken(MqttWireMessage message) {
-		Object key;
-		if (message instanceof MqttConnack) {
-			key = connectToken;
-		} else if (message instanceof MqttDisconnect) {
-			key = disconnectToken;
-		} else {
-			key = new Integer(message.getMessageId());
-		}
 
-		if (trace.isOn()) {
-			//@TRACE 301=removeToken message={0} key={1}
-			trace.trace(Trace.FINE,301,new Object[]{message,key});
-		}
+	public MqttToken getToken(String key) {
+		return (MqttToken)tokens.get(key);
+	}
 
-		return (MqttDeliveryTokenImpl) tokens.remove(key);
+	
+	public MqttToken removeToken(MqttWireMessage message) {
+		if (message != null) {
+			return removeToken(message.getKey());
+		}
+		return null;
 	}
 	
+	public MqttToken removeToken(String key) {
+		final String methodName = "removeToken";
+		//@TRACE 306=key={0}
+		log.fine(className,methodName,"306",new Object[]{key});
+
+		if (key != null) {
+			synchronized(tokens) {
+				MqttToken tok = (MqttToken)tokens.get(key);
+				if (tok != null) {
+					synchronized(tok) {
+	
+						return (MqttToken) tokens.remove(key);
+					}
+				}
+			}
+		}
+		return null;
+	}
+		
 	/**
 	 * Restores a token after a client restart.  This method could be called
 	 * for a SEND of CONFIRM, but either way, the original SEND is what's 
 	 * needed to re-build the token.
 	 */
-	protected MqttDeliveryTokenImpl restoreToken(MqttPublish message) {
-		MqttDeliveryTokenImpl token;
-		Object key = new Integer(message.getMessageId());
-		if (this.tokens.containsKey(key)) {
-			token = (MqttDeliveryTokenImpl)this.tokens.get(key);
-			if (trace.isOn()) {
-				//@TRACE 302=restoreToken existing message={0} key={1} token={2}
-				trace.trace(Trace.FINE,302,new Object[]{message,key,token});
-			}
-		} else {
-			token = new MqttDeliveryTokenImpl(trace, message);
-			this.tokens.put(key, token);
-			if (trace.isOn()) {
-				//@TRACE 303=restoreToken creating new message={0} key={1} token={2}
-				trace.trace(Trace.FINE,303,new Object[]{message,key,token});
-			}
-		}
-		return token;
-	}
-	
-	protected MqttDeliveryTokenImpl saveToken(MqttWireMessage message) {
-		Object key;
-		MqttDeliveryTokenImpl token;
-		if (message instanceof MqttPingReq) {
-			token = pingToken;
-			key = token;
-		}
-		else if (message instanceof MqttConnect) {
-			noMoreResponses = false;
-			noMoreResponsesException = null;
-			connectToken = new MqttDeliveryTokenImpl(trace);
-			token = connectToken;
-			key = token;
-		}
-		else if (message instanceof MqttDisconnect) {
-			disconnectToken = new MqttDeliveryTokenImpl(trace);
-			token = disconnectToken;
-			key = token;
-		}
-		else if (message instanceof MqttPubRel) {
-			// TODO: This could be brittle, as the key might not always be a message ID
-			key = new Integer(message.getMessageId());
-			token = getToken(message);
-		}
-		else if (message instanceof MqttPublish) {
-			key = new Integer(message.getMessageId());
-			token = new MqttDeliveryTokenImpl(trace, (MqttPublish) message);
-		} 
-		else {
-			key = new Integer(message.getMessageId());
-			token = new MqttDeliveryTokenImpl(trace);
-		}
-		if (trace.isOn()) {
-			//@TRACE 300=saveToken message={0} key={1} token={2}
-			trace.trace(Trace.FINE,300,new Object[]{message,key,token.toString()});
-		}
-		this.tokens.put(key, token);
-		if (noMoreResponses) {
-			token.notifyException(noMoreResponsesException);
-		}
-		return token;
-	}
-	
-	/**
-	 * Called by the Receiver's thread to indicate the the specified
-	 * response has been received.  The MQTTAck object contains the 
-	 * details of what is being responded to.
-	 */
-	protected void responseReceived(MqttAck ack) {
-		MqttDeliveryTokenImpl token = getTokenForAck(ack);
-		removeToken(ack);
-		
-		if (token != null) {
-			token.notifyReceived(ack);
-		}
-		//Else token == null - the only way the token will ever be null is if the
-		//server has sent a message the client knows nothing about - which the server
-		//should never do (unless it's broken somehow).
-		//As there's no ability to log in the client and we can't notify the app using
-		//the client in any other way, the only other choice is to swallow the problem.
-	}
-	
-	/**
-	 * Called by the Receiver's thread to indicate that no more responses are
-	 * expected, due to a shutdown of the receiver;
-	 */
-	protected void noMoreResponses(MqttException reason) {
-		noMoreResponses = true;
-		noMoreResponsesException = reason;
-		Enumeration enumeration = tokens.elements();
-		Object token;
-		//@TRACE 304=noMoreResponses
-		trace.trace(Trace.FINE,304,null,reason);
-
-		while (enumeration.hasMoreElements()) {
-			token = enumeration.nextElement();
-			if (token != null) {
-				synchronized (token) {
-					((MqttDeliveryTokenImpl)token).notifyException(reason);
-				}
-			}
-		}
-	}
-	
-	public MqttDeliveryToken[] getOutstandingTokens() {
-		Vector list = new Vector();
-		Enumeration enumeration = tokens.elements();
+	protected MqttDeliveryToken restoreToken(MqttPublish message) {
+		final String methodName = "restoreToken";
 		MqttDeliveryToken token;
-		while(enumeration.hasMoreElements()) {
-			token = (MqttDeliveryToken)enumeration.nextElement();
-			if (token != null) {
-				if (!(token.equals(pingToken) ||
-						token.equals(connectToken) ||
-						token.equals(disconnectToken))) {
+		synchronized(tokens) {
+			String key = new Integer(message.getMessageId()).toString();
+			if (this.tokens.containsKey(key)) {
+				token = (MqttDeliveryToken)this.tokens.get(key);
+				//@TRACE 302=existing key={0} message={1} token={2}
+				log.fine(className,methodName, "302",new Object[]{key, message,token});
+			} else {
+				token = new MqttDeliveryToken(logContext);
+				token.internalTok.setKey(key);
+				this.tokens.put(key, token);
+				//@TRACE 303=creating new token key={0} message={1} token={2}
+				log.fine(className,methodName,"303",new Object[]{key, message, token});
+			}
+		}
+		return token;
+	}
+	
+	// For outbound messages store the token in the token store 
+	// For pubrel use the existing publish token 
+	protected void saveToken(MqttToken token, MqttWireMessage message) throws MqttException {
+		final String methodName = "saveToken";
+
+		synchronized(tokens) {
+			if (closedResponse == null) {
+				String key = message.getKey();
+				//@TRACE 300=key={0} message={1}
+				log.fine(className,methodName,"300",new Object[]{key, message});
+				
+				saveToken(token,key);
+			} else {
+				throw closedResponse;
+			}
+		}
+	}
+	
+	protected void saveToken(MqttToken token, String key) {
+		final String methodName = "saveToken";
+
+		synchronized(tokens) {
+			//@TRACE 307=key={0} token={1}
+			log.fine(className,methodName,"307",new Object[]{key,token.toString()});
+			token.internalTok.setKey(key);
+			this.tokens.put(key, token);
+		}
+	}
+
+	protected void quiesce(MqttException quiesceResponse) {
+		final String methodName = "quiesce";
+
+		synchronized(tokens) {
+			//@TRACE 309=resp={0}
+			log.fine(className,methodName,"309",new Object[]{quiesceResponse});
+
+			closedResponse = quiesceResponse;
+		}
+	}
+	
+	public void open() {
+		final String methodName = "open";
+
+		synchronized(tokens) {
+			//@TRACE 310=>
+			log.fine(className,methodName,"310");
+
+			closedResponse = null;
+		}
+	}
+
+	public MqttDeliveryToken[] getOutstandingDelTokens() {
+		final String methodName = "getOutstandingDelTokens";
+
+		synchronized(tokens) {
+			//@TRACE 311=>
+			log.fine(className,methodName,"311");
+
+			Vector list = new Vector();
+			Enumeration enumeration = tokens.elements();
+			MqttToken token;
+			while(enumeration.hasMoreElements()) {
+				token = (MqttToken)enumeration.nextElement();
+				if (token != null 
+					&& token instanceof MqttDeliveryToken 
+					&& !token.internalTok.isNotified()) {
+					
 					list.addElement(token);
 				}
 			}
+	
+			MqttDeliveryToken[] result = new MqttDeliveryToken[list.size()];
+			return (MqttDeliveryToken[]) list.toArray(result);
 		}
-		MqttDeliveryToken[] result = new MqttDeliveryToken[list.size()];
-		for(int i=0;i<list.size();i++) {
-			result[i] = (MqttDeliveryToken)list.elementAt(i);
-		}
-		return result;
 	}
 	
+	public Vector getOutstandingTokens() {
+		final String methodName = "getOutstandingTokens";
+
+		synchronized(tokens) {
+			//@TRACE 312=>
+			log.fine(className,methodName,"312");
+
+			Vector list = new Vector();
+			Enumeration enumeration = tokens.elements();
+			MqttToken token;
+			while(enumeration.hasMoreElements()) {
+				token = (MqttToken)enumeration.nextElement();
+				if (token != null) {
+						list.addElement(token);
+				}
+			}
+			return list;
+		}
+	}
+
 	/**
 	 * Empties the token store without notifying any of the tokens.
-	 * This should only be called when the client has disconnected
-	 * cleanSession.
 	 */
 	public void clear() {
-		//@TRACE 305=clear
-		trace.trace(Trace.FINE,305);
-		tokens.clear();
+		final String methodName = "clear";
+		//@TRACE 305=> {0} tokens
+		log.fine(className, methodName, "305", new Object[] {new Integer(tokens.size())});
+		synchronized(tokens) {
+			tokens.clear();
+		}
+	}
+	
+	public int count() {
+		synchronized(tokens) {
+			return tokens.size();
+		}
+	}
+	public String toString() {
+		String lineSep = System.getProperty("line.separator","\n");
+		StringBuffer toks = new StringBuffer();
+		synchronized(tokens) {
+			Enumeration enumeration = tokens.elements();
+			MqttToken token;
+			while(enumeration.hasMoreElements()) {
+				token = (MqttToken)enumeration.nextElement();
+					toks.append("{"+token.internalTok+"}"+lineSep);
+			}
+			return toks.toString();
+		}
 	}
 }

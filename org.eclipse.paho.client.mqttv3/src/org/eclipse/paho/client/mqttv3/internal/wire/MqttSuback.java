@@ -22,7 +22,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * An on-the-wire representation of an MQTT SUBACK.
  */
 public class MqttSuback extends MqttAck {
-	private int[] grantedQos;
+	private int[] grantedQos;		// Not currently made available to anyone. 
 	
 	public MqttSuback(byte info, byte[] data) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBACK);

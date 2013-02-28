@@ -14,8 +14,6 @@ package org.eclipse.paho.client.mqttv3.internal.security;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -32,14 +30,14 @@ import java.util.Vector;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.eclipse.paho.client.mqttv3.internal.comms.MqttDirectException;
-import org.eclipse.paho.client.mqttv3.internal.comms.MqttSSLInitException;
-import org.eclipse.paho.client.mqttv3.internal.logging.Logger;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
+//import org.eclipse.paho.client.mqttv3.internal.comms.MqttDirectException;
+//import org.eclipse.paho.client.mqttv3.internal.comms.MqttSSLInitException;
+import org.eclipse.paho.client.mqttv3.logging.Logger;
 
 
 /**
@@ -74,8 +72,7 @@ import org.eclipse.paho.client.mqttv3.internal.logging.Logger;
  * (in the same JVM) may share an SSLSocketFactoryFactory, or have one each.</li>
  * <li><b>initialize(properties, configID)</b>: to initialize this object with
  * the required SSL properties for a configuration. This may be called multiple
- * times, once for each required configuration (e.g. once per Listener, once per
- * Pipe, once per Client). It may be called again to change the required SSL
+ * times, once for each required configuration.It may be called again to change the required SSL
  * properties for a particular configuration</li>
  * <li><b>getEnabledCipherSuites(configID)</b>: to later set the enabled
  * cipher suites on the socket [see below].</li>
@@ -413,11 +410,6 @@ public class SSLSocketFactoryFactory {
 	/**
 	 * Initializes the SSLSocketFactoryFactory with the provided properties for
 	 * the provided configuration.
-	 * 
-	 * This may be called multiple times, once for each required configuration
-	 * (e.g. once per Listener, once per Pipe, once per Client). It may be
-	 * called again to change the required SSL properties for a particular
-	 * configuration
 	 * 
 	 * @param props
 	 *            A properties object containing IBM SSL properties that are
@@ -863,50 +855,50 @@ public class SSLSocketFactoryFactory {
 		return getProperty(configID, JSSEPROVIDER, null);
 	}
 
-	/**
-	 * Get the XPD Keystore if running on the XPD platform (otherwise null).
-	 * 
-	 * @return the XPD Keystore if running on the XPD platform (otherwise null).
-	 * @throws MqttDirectException
-	 */
-	private KeyStore getXPDKeystore() throws MqttDirectException {
-		KeyStore keyStore = null;
-		try {
-			Class secPlatClass = Class.forName("com.ibm.rcp.security.auth.SecurePlatform");
-			Method m = secPlatClass.getMethod("getKeyStore", null);
-			Object secPlat = m.invoke(null,null); // getKeyStore is static
-			m = secPlatClass.getMethod("isLoggedIn", null);
-			Boolean b = (Boolean) m.invoke(secPlat, null);
-			if (b.booleanValue()) {
-				// login to secure platform was done.
-				m = secPlatClass.getMethod("getKeyStore", null);
-				keyStore = (KeyStore) m.invoke(secPlat, null);
-			}
-		} catch (ClassNotFoundException e) {
-			/*
-			 * DEVELOPER NOTE: This is not an error. This means that we are not
-			 * running on XPD runtime and therefore we can not get XPD keystore.
-			 * [Next step for the caller, is try to get the keystore from System
-			 * properties (see getKeyStore() method).]
-			 */
-		} catch (IllegalAccessException e) {
-			Object[] inserts = { e.getLocalizedMessage() };
-			throw new MqttSSLInitException(3026, inserts, e);
-		} catch (SecurityException e) {
-			Object[] inserts = { e.getLocalizedMessage() };
-			throw new MqttSSLInitException(3026, inserts, e);
-		} catch (NoSuchMethodException e) {
-			Object[] inserts = { e.getLocalizedMessage() };
-			throw new MqttSSLInitException(3026, inserts, e);
-		} catch (IllegalArgumentException e) {
-			Object[] inserts = { e.getLocalizedMessage() };
-			throw new MqttSSLInitException(3026, inserts, e);
-		} catch (InvocationTargetException e) {
-			Object[] inserts = { e.getLocalizedMessage() };
-			throw new MqttSSLInitException(3026, inserts, e);
-		}
-		return keyStore;
-	}
+//	/**
+//	 * Get the XPD Keystore if running on the XPD platform (otherwise null).
+//	 * 
+//	 * @return the XPD Keystore if running on the XPD platform (otherwise null).
+//	 * @throws MqttDirectException
+//	 */
+//	private KeyStore getXPDKeystore() throws MqttDirectException {
+//		KeyStore keyStore = null;
+//		try {
+//			Class secPlatClass = Class.forName("com.ibm.rcp.security.auth.SecurePlatform");
+//			Method m = secPlatClass.getMethod("getKeyStore", null);
+//			Object secPlat = m.invoke(null,null); // getKeyStore is static
+//			m = secPlatClass.getMethod("isLoggedIn", null);
+//			Boolean b = (Boolean) m.invoke(secPlat, null);
+//			if (b.booleanValue()) {
+//				// login to secure platform was done.
+//				m = secPlatClass.getMethod("getKeyStore", null);
+//				keyStore = (KeyStore) m.invoke(secPlat, null);
+//			}
+//		} catch (ClassNotFoundException e) {
+//			/*
+//			 * DEVELOPER NOTE: This is not an error. This means that we are not
+//			 * running on XPD runtime and therefore we can not get XPD keystore.
+//			 * [Next step for the caller, is try to get the keystore from System
+//			 * properties (see getKeyStore() method).]
+//			 */
+//		} catch (IllegalAccessException e) {
+//			Object[] inserts = { e.getLocalizedMessage() };
+//			throw new MqttSSLInitException(3026, inserts, e);
+//		} catch (SecurityException e) {
+//			Object[] inserts = { e.getLocalizedMessage() };
+//			throw new MqttSSLInitException(3026, inserts, e);
+//		} catch (NoSuchMethodException e) {
+//			Object[] inserts = { e.getLocalizedMessage() };
+//			throw new MqttSSLInitException(3026, inserts, e);
+//		} catch (IllegalArgumentException e) {
+//			Object[] inserts = { e.getLocalizedMessage() };
+//			throw new MqttSSLInitException(3026, inserts, e);
+//		} catch (InvocationTargetException e) {
+//			Object[] inserts = { e.getLocalizedMessage() };
+//			throw new MqttSSLInitException(3026, inserts, e);
+//		}
+//		return keyStore;
+//	}
 
 	/**
 	 * Gets the name of the keystore file that is used.
@@ -916,7 +908,7 @@ public class SSLSocketFactoryFactory {
 	 *            null for the default configuration.
 	 * @return The name of the file that contains the keystore.
 	 */
-	public String getKeyStore(String configID) throws MqttDirectException {
+	public String getKeyStore(String configID) { //throws MqttDirectException {
 		String ibmKey = KEYSTORE;
 		String sysProperty = SYSKEYSTORE;
 		
@@ -926,12 +918,12 @@ public class SSLSocketFactoryFactory {
 			return res;
 		}
 		
-		// check for the XPD keystore here
-		if ( ibmKey != null && ibmKey.equals(KEYSTORE) ) {
-			KeyStore keyStore = getXPDKeystore();
-			if (keyStore != null)
-				return res = "Lotus Expeditor";
-		}
+//		// check for the XPD keystore here
+//		if ( ibmKey != null && ibmKey.equals(KEYSTORE) ) {
+//			KeyStore keyStore = getXPDKeystore();
+//			if (keyStore != null)
+//				return res = "Lotus Expeditor";
+//		}
 		
 		// scan system property, if it exists.
 		if (sysProperty != null) {
@@ -1110,7 +1102,7 @@ public class SSLSocketFactoryFactory {
 	 * @throws MqttDirectException
 	 */
 	private SSLContext getSSLContext(String configID)
-			throws MqttDirectException {
+			throws MqttSecurityException{
 		final String METHOD_NAME = "getSSLContext";
 		SSLContext ctx = null;
 		
@@ -1141,19 +1133,19 @@ public class SSLSocketFactoryFactory {
 			KeyStore keyStore=null;
 			KeyManagerFactory keyMgrFact=null;
 			KeyManager[] keyMgr=null;
-			if(keyStoreName==null) {
-				// try to instantiate XPD keyStore.
-				keyStore=getXPDKeystore();
-				if (logger != null) {
-					if (keyStore == null) {
-						// 12002 "SSL initialization: configID = {0}, XPD keystore not available"
-						logger.fine(CLASS_NAME, METHOD_NAME, "12002", new Object[]{configID!=null ? configID : "null (broker defaults)"});
-					} else {
-						// 12003 "SSL initialization: configID = {0}, XPD keystore available"
-						logger.fine(CLASS_NAME, METHOD_NAME, "12003", new Object[]{configID!=null ? configID : "null (broker defaults)"});
-					}
-				}
-			}
+//			if(keyStoreName==null) {
+//				// try to instantiate XPD keyStore.
+//				keyStore=getXPDKeystore();
+//				if (logger != null) {
+//					if (keyStore == null) {
+//						// 12002 "SSL initialization: configID = {0}, XPD keystore not available"
+//						logger.fine(CLASS_NAME, METHOD_NAME, "12002", new Object[]{configID!=null ? configID : "null (broker defaults)"});
+//					} else {
+//						// 12003 "SSL initialization: configID = {0}, XPD keystore available"
+//						logger.fine(CLASS_NAME, METHOD_NAME, "12003", new Object[]{configID!=null ? configID : "null (broker defaults)"});
+//					}
+//				}
+//			}
 			
 			if(keyStore==null) {
 				if(keyStoreName==null) {
@@ -1193,7 +1185,7 @@ public class SSLSocketFactoryFactory {
 					keyMgrAlgo = keyManager;
 				}
 				
-				if(keyStoreName!=null && keyStoreType!=null && keyStorePwd!=null && keyMgrAlgo!=null) {
+				if(keyStoreName!=null && keyStoreType!=null  && keyMgrAlgo!=null) {
 					try {
 						keyStore=KeyStore.getInstance(keyStoreType);
 						keyStore.load(new FileInputStream(keyStoreName), keyStorePwd);
@@ -1213,15 +1205,15 @@ public class SSLSocketFactoryFactory {
 						keyMgrFact.init(keyStore, keyStorePwd);
 						keyMgr=keyMgrFact.getKeyManagers();
 					} catch (KeyStoreException e) {
-						throw new MqttSSLInitException(3016, null, e);
+						throw new MqttSecurityException(e);
 					} catch (CertificateException e) {
-						throw new MqttSSLInitException(3019, null, e);
+						throw new MqttSecurityException(e);
 					} catch (FileNotFoundException e) {
-						throw new MqttSSLInitException(3020, null, e);
+						throw new MqttSecurityException(e);
 					} catch (IOException e) {
-						throw new MqttSSLInitException(3021, null, e);
+						throw new MqttSecurityException(e);
 					} catch (UnrecoverableKeyException e) {
-						throw new MqttSSLInitException(3022, null, e);
+						throw new MqttSecurityException(e);
 					}
 				}
 			}
@@ -1259,7 +1251,7 @@ public class SSLSocketFactoryFactory {
 				trustMgrAlgo = trustManager;
 			}
 					
-			if(trustStoreName!=null && trustStoreType!=null && trustStorePwd!=null && trustMgrAlgo!=null) {
+			if(trustStoreName!=null && trustStoreType!=null && trustMgrAlgo!=null) {
 				try {
 					trustStore=KeyStore.getInstance(trustStoreType);
 					trustStore.load(new FileInputStream(trustStoreName), trustStorePwd);
@@ -1281,56 +1273,56 @@ public class SSLSocketFactoryFactory {
 					trustMgrFact.init(trustStore);
 					trustMgr=trustMgrFact.getTrustManagers();
 				} catch (KeyStoreException e) {
-					throw new MqttSSLInitException(3027, null, e);
+					throw new MqttSecurityException(e);
 				} catch (CertificateException e) {
-					throw new MqttSSLInitException(3028, null, e);
+					throw new MqttSecurityException(e);
 				} catch (FileNotFoundException e) {
-					throw new MqttSSLInitException(3029, null, e);
+					throw new MqttSecurityException(e);
 				} catch (IOException e) {
-					throw new MqttSSLInitException(3030, null, e);
+					throw new MqttSecurityException(e);
 				} 
 			}
 			// done.
 			ctx.init(keyMgr, trustMgr, null);
 		} catch (NoSuchAlgorithmException e) {
-			throw new MqttSSLInitException(3018, null, e);
+			throw new MqttSecurityException(e);
 		} catch (NoSuchProviderException e) {
-			throw new MqttSSLInitException(3023, null, e);
+			throw new MqttSecurityException(e);
 		} catch (KeyManagementException e) {
-			throw new MqttSSLInitException(3024, null, e);
+			throw new MqttSecurityException(e);
 		}
 		return ctx;
 	}
 
-	/**
-	 * Returns an SSL server socket factory for the given configuration. If no
-	 * SSLProtocol is already set, uses DEFAULT_PROTOCOL. Throws
-	 * IllegalArgumentException if the server socket factory could not be
-	 * created due to underlying configuration problems.
-	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
-	 * 
-	 * @param configID
-	 *            The configuration identifier for selecting a configuration.
-	 * @return An SSLServerSocketFactory
-	 * @throws MqttDirectException
-	 */
-	public SSLServerSocketFactory createServerSocketFactory(String configID)
-			throws MqttDirectException {
-		final String METHOD_NAME = "createServerSocketFactory";
-		SSLContext ctx = getSSLContext(configID);
-		if (logger != null) {
-			// 12018 "SSL initialization: configID = {0}, application-enabled cipher suites = {1}"
-			logger.fine(CLASS_NAME, METHOD_NAME, "12018", new Object[]{configID!=null ? configID : "null (broker defaults)", 
-					getEnabledCipherSuites(configID)!=null ? getProperty(configID, CIPHERSUITES, null) : "null (using platform-enabled cipher suites)"});
-			
-			// 12019 "SSL initialization: configID = {0}, client authentication = {1}"
-			logger.fine(CLASS_NAME, METHOD_NAME, "12019", new Object[]{configID!=null ? configID : "null (broker defaults)", 
-					new Boolean (getClientAuthentication(configID)).toString()});
-		}
-		
-		return ctx.getServerSocketFactory();
-	}
+//	/**
+//	 * Returns an SSL server socket factory for the given configuration. If no
+//	 * SSLProtocol is already set, uses DEFAULT_PROTOCOL. Throws
+//	 * IllegalArgumentException if the server socket factory could not be
+//	 * created due to underlying configuration problems.
+//	 * 
+//	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
+//	 * 
+//	 * @param configID
+//	 *            The configuration identifier for selecting a configuration.
+//	 * @return An SSLServerSocketFactory
+//	 * @throws MqttDirectException
+//	 */
+//	public SSLServerSocketFactory createServerSocketFactory(String configID)
+//			throws MqttDirectException {
+//		final String METHOD_NAME = "createServerSocketFactory";
+//		SSLContext ctx = getSSLContext(configID);
+//		if (logger != null) {
+//			// 12018 "SSL initialization: configID = {0}, application-enabled cipher suites = {1}"
+//			logger.fine(CLASS_NAME, METHOD_NAME, "12018", new Object[]{configID!=null ? configID : "null (broker defaults)", 
+//					getEnabledCipherSuites(configID)!=null ? getProperty(configID, CIPHERSUITES, null) : "null (using platform-enabled cipher suites)"});
+//			
+//			// 12019 "SSL initialization: configID = {0}, client authentication = {1}"
+//			logger.fine(CLASS_NAME, METHOD_NAME, "12019", new Object[]{configID!=null ? configID : "null (broker defaults)", 
+//					new Boolean (getClientAuthentication(configID)).toString()});
+//		}
+//		
+//		return ctx.getServerSocketFactory();
+//	}
 
 	/**
 	 * Returns an SSL socket factory for the given configuration. If no
@@ -1345,7 +1337,7 @@ public class SSLSocketFactoryFactory {
 	 * @throws MqttDirectException
 	 */
 	public SSLSocketFactory createSocketFactory(String configID) 
-			throws MqttDirectException {
+			throws MqttSecurityException {
 		final String METHOD_NAME = "createSocketFactory";
 		SSLContext ctx = getSSLContext(configID);
 		if (logger != null) {

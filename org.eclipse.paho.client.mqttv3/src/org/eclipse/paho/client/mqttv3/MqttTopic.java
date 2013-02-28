@@ -22,7 +22,7 @@ public class MqttTopic {
 	private ClientComms comms;
 	private String name;
 	
-	MqttTopic(String name, ClientComms comms) {
+	public MqttTopic(String name, ClientComms comms) {
 		this.comms = comms;
 		this.name = name;
 	}
@@ -49,17 +49,22 @@ public class MqttTopic {
 	}
 	
 	/**
-	 * Publishes the specified message to this topic, but doesn't wait for
-	 * a response.  The returned {@link MqttDeliveryToken token} can be used
-	 * to track the delivery status of the message.  Once this message has 
+	 * Publishes the specified message to this topic, but does not wait for delivery 
+	 * of the message to complete. The returned {@link MqttDeliveryToken token} can be used
+	 * to track the delivery status of the message.  Once this method has 
 	 * returned cleanly, the message has been accepted for publication by the
-	 * client - as long as a connection is available, it will try and deliver it.
-
+	 * client. Message delivery will be completed in the background when a connection 
+	 * is available.
+	 * 
 	 * @param message the message to publish
 	 * @return an MqttDeliveryToken for tracking the delivery of the message
 	 */
 	public MqttDeliveryToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
-		return comms.sendNoWait(createPublish(message));
+		MqttDeliveryToken token = new MqttDeliveryToken(comms.getClient().getClientId());
+		token.setMessage(message);
+		comms.sendNoWait(createPublish(message), token);
+		token.internalTok.waitUntilSent();
+		return token;
 	}
 	
 	/**

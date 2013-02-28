@@ -15,19 +15,34 @@ import java.util.Properties;
 
 import javax.net.SocketFactory;
 
+import org.eclipse.paho.client.mqttv3.util.Debug;
+
 /**
- * Stores options used when connecting to a server.
+ * Holds options that control how the client connects to a server.
  */
 public class MqttConnectOptions {
-	private int keepAliveInterval = 60;
-	private MqttTopic willDestination = null;
+	/**
+	 * The default keep alive interval in seconds if one is not specified
+	 */
+	public static final int KEEP_ALIVE_INTERVAL_DEFAULT = 60;
+	/**
+	 * The default connection timeout in seconds if one is not specified
+	 */
+	public static final int CONNECTION_TIMEOUT_DEFAULT = 30;
+	/**
+	 * The default clean session setting if one is not specified
+	 */
+	public static final boolean CLEAN_SESSION_DEFAULT = true;
+	
+	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
+	private String willDestination = null;
 	private MqttMessage willMessage = null;
 	private String userName;
 	private char[] password;
 	private SocketFactory socketFactory;
 	private Properties sslClientProps = null;
-	private boolean cleanSession = true;
-	private int connectionTimeout = 30;
+	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
+	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the 
@@ -94,6 +109,23 @@ public class MqttConnectOptions {
 	 * @param retained whether or not the message should be retained.
 	 */
 	public void setWill(MqttTopic topic, byte[] payload, int qos, boolean retained) {
+		String topicS = topic.getName();
+		validateWill(topicS, payload);
+		this.setWill(topicS, new MqttMessage(payload), qos, retained);
+	}
+	
+	/**
+	 * Sets the "Last Will and Testament" (LWT) for the connection.
+	 * In the event that this client unexpectedly loses its connection to the 
+	 * server, the server will publish a message to itself using the supplied
+	 * details.
+	 * 
+	 * @param topic the topic to publish to.
+	 * @param payload the byte payload for the message.
+	 * @param qos the quality of service to publish the message at (0, 1 or 2).
+	 * @param retained whether or not the message should be retained.
+	 */
+	public void setWill(String topic, byte[] payload, int qos, boolean retained) {
 		validateWill(topic, payload);
 		this.setWill(topic, new MqttMessage(payload), qos, retained);
 	}
@@ -102,16 +134,17 @@ public class MqttConnectOptions {
 	/**
 	 * Validates the will fields.
 	 */
-	private void validateWill(MqttTopic dest, Object payload) {
+	private void validateWill(String dest, Object payload) {
 		if ((dest == null) || (payload == null)) {
 			throw new IllegalArgumentException();
 		}
+		MqttAsyncClient.validateTopic(dest);
 	}
 
 	/**
 	 * Sets up the will information, based on the supplied parameters.
 	 */
-	private void setWill(MqttTopic topic, MqttMessage msg, int qos, boolean retained) {
+	protected void setWill(String topic, MqttMessage msg, int qos, boolean retained) {
 		willDestination = topic;
 		willMessage = msg;
 		willMessage.setQos(qos);
@@ -133,17 +166,21 @@ public class MqttConnectOptions {
 	 * Sets the "keep alive" interval.
 	 * This value, measured in seconds, defines the maximum time interval 
 	 * between messages sent or received. It enables the client to 
-	 * detect that if the server is no longer available, without 
-	 * having to wait for the long TCP/IP timeout. The client will ensure
+	 * detect if the server is no longer available, without 
+	 * having to wait for the TCP/IP timeout. The client will ensure
 	 * that at least one message travels across the network within each
 	 * keep alive period.  In the absence of a data-related message during 
 	 * the time period, the client sends a very small "ping" message, which
 	 * the server will acknowledge.
+	 * A value of 0 disables keepalive processing in the client. 
 	 * <p>The default value is 60 seconds</p>
 	 * 
-	 * @param keepAliveInterval the interval, measured in seconds.
+	 * @param keepAliveInterval the interval, measured in seconds, must be >= 0.
 	 */
-	public void setKeepAliveInterval(int keepAliveInterval) {
+	public void setKeepAliveInterval(int keepAliveInterval)throws IllegalArgumentException {
+		if (keepAliveInterval <0 ) {
+			throw new IllegalArgumentException();
+		}
 		this.keepAliveInterval = keepAliveInterval;
 	}
 	
@@ -159,9 +196,7 @@ public class MqttConnectOptions {
 	/**
 	 * Sets the connection timeout value.
 	 * This value, measured in seconds, defines the maximum time interval
-	 * the client will wait for calls to {@link MqttClient#connect(MqttConnectOptions) connect}, 
-	 * {@link MqttClient#subscribe(String[], int[]) subscribe} and 
-	 * {@link MqttClient#unsubscribe(String[]) unsubscribe} to complete.
+	 * the client will wait for the network connection to the MQTT server to be established. 
 	 * The default timeout is 30 seconds.
 	 * @param connectionTimeout the timeout value, measured in seconds.
 	 */
@@ -193,7 +228,7 @@ public class MqttConnectOptions {
 	 * @return the MqttTopic to use, or <code>null</code> if LWT is not set.
 	 * @see #setWill(MqttTopic, byte[], int, boolean)
 	 */
-	public MqttTopic getWillDestination() {
+	public String getWillDestination() {
 		return willDestination;
 	}
 
@@ -303,5 +338,29 @@ public class MqttConnectOptions {
  	 */
 	public void setCleanSession(boolean cleanSession) {
 		this.cleanSession = cleanSession;
+	}
+	
+	public Properties getDebug() {
+		Properties p = new Properties();
+		p.put("CleanSession", new Boolean(isCleanSession()));
+		p.put("ConTimeout", new Integer(getConnectionTimeout()));
+		p.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
+		p.put("UserName", (getUserName()==null)?"null":getUserName());
+		p.put("WillDestintation", (getWillDestination()==null)?"null":getWillDestination());
+		if (getSocketFactory()==null) {
+			p.put("SocketFactory", "null");	
+		} else {
+			p.put("SocketFactory", getSocketFactory());
+		}
+		if (getSSLProperties()==null) {
+			p.put("SSLProperties", "null");
+		} else {
+			p.put("SSLProperties", getSSLProperties());
+		}
+		return p;
+	}
+	
+	public String toString() {
+		return Debug.dumpProperties(getDebug(), "Connection options");
 	}
 }

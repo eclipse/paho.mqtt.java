@@ -11,129 +11,136 @@
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
-import java.io.IOException;
 import java.io.OutputStream;
-
-import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.internal.trace.Trace;
+import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttOutputStream;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
+import org.eclipse.paho.client.mqttv3.logging.Logger;
+import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 
 public class CommsSender implements Runnable {
 	/**
-	 * Receives MQTT packets from the server.
+	 * Sends MQTT packets to the server on its own thread
 	 */
-	private boolean running = false;
-	private Object lifecycle = new Object();
+	private boolean running 		= false;
+	private Object lifecycle 		= new Object();
 	private ClientState clientState = null;
 	private MqttOutputStream out;
 	private ClientComms clientComms = null;
 	private CommsTokenStore tokenStore = null;
-	private Trace trace;
+	private Thread 	sendThread		= null;
 	
-	public CommsSender(Trace trace, ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out) {
-		this.trace = trace;
+	private final static String className = CommsSender.class.getName();
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, className);
+	
+	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out) {
 		this.out = new MqttOutputStream(out);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
+		log.setResourceName(clientComms.getClient().getClientId());
 	}
 	
 	/**
 	 * Starts up the Sender thread.
 	 */
-	public void start() {
-		if (running == false) {
-			running = true;
-			new Thread(this, "MQTT Client Comms Sender").start();
+	public void start(String threadName) {
+		synchronized (lifecycle) {
+			if (running == false) {
+				running = true;
+				sendThread = new Thread(this, threadName);
+				sendThread.start();
+			}
 		}
 	}
 
 	/**
 	 * Stops the Sender's thread.  This call will block.
 	 */
-	public void stop() throws IOException {
+	public void stop() {
+		final String methodName = "stop";
+		
 		synchronized (lifecycle) {
 			//@TRACE 800=stopping sender
-			trace.trace(Trace.FINE,800);
+			log.fine(className,methodName,"800");
 			if (running) {
 				running = false;
-				try {
-					//@TRACE 801=stop: wait on lifecycle
-					trace.trace(Trace.FINE,801);
-					// Wait for the thread to finish.
-					lifecycle.wait();
-				}
-				catch (InterruptedException ex) {
+				if (!Thread.currentThread().equals(sendThread)) {
+					try {
+						// first notify get routine to finish
+						clientState.notifyQueueLock();
+						// Wait for the thread to finish.
+						sendThread.join();
+					}
+					catch (InterruptedException ex) {
+					}
 				}
 			}
+			sendThread=null;
+			//@TRACE 801=stopped
+			log.fine(className,methodName,"801");
 		}
 	}
 	
 	public void run() {
+		final String methodName = "run";
 		MqttWireMessage message = null;
 		while (running && (out != null)) {
 			try {
-				//@TRACE 802=run: get message
-				trace.trace(Trace.FINE,802);
 				message = clientState.get();
 				if (message != null) {
+					//@TRACE 802=network send key={0} msg={1}
+					log.fine(className,methodName,"802", new Object[] {message.getKey(),message});
+
 					if (message instanceof MqttAck) {
 						out.write(message);
 						out.flush();
-					}
-					else {
-						MqttDeliveryToken token = tokenStore.getToken(message);
-						synchronized (token) {
-							out.write(message);
-							out.flush();
-							clientState.notifySent(message);
+					} else {
+						MqttToken token = tokenStore.getToken(message);
+						// While quiescing the tokenstore can be cleared so need 
+						// to check for null for the case where clear occurs
+						// while trying to send a message.
+						if (token != null) {
+							synchronized (token) {
+								out.write(message);
+								out.flush();
+								clientState.notifySent(message);
+							}
 						}
 					}
-					
-					if (message instanceof MqttDisconnect) {
-						synchronized (lifecycle) {
-							//@TRACE 803=run: sent disconnect
-							trace.trace(Trace.FINE,803);
-							running = false;
-						}
-					}
-				} else {
-					synchronized (lifecycle) {
-						running = false;
-					}
-				}
-			} catch (MqttException me) {
-				synchronized (lifecycle) {
+				} else { // null message
+					//@TRACE 803=get message returned null, stopping}
+					log.fine(className,methodName,"803");
+
 					running = false;
 				}
-				clientComms.shutdownConnection(me);
-			} catch (Exception ioe) {
-				//@TRACE 804=run: exception
-				trace.trace(Trace.FINE,804,null,ioe);
-				if (message != null && message instanceof MqttDisconnect) {
-					// An IO exception whilst sending the disconnect will
-					// cause the application thread to stay blocked
-					// on the token if we don't pretend it has successfully
-					// been sent.
-					clientState.notifySent(message);
-				}
-				running = false;
-				clientComms.shutdownConnection(new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
+			} catch (MqttException me) {
+				handleRunException(message, me);
+			} catch (Exception ex) {		
+				handleRunException(message, ex);	
 			}
-		}
-		synchronized (lifecycle) {
-			//@TRACE 805=run: notify lifecycle
-			trace.trace(Trace.FINE,805);
-			lifecycle.notifyAll();
-		}
+		} // end while
+		
+		//@TRACE 805=<
+		log.fine(className, methodName,"805");
+
 	}
-	
-	public boolean isRunning() {
-		return running;
+
+	private void handleRunException(MqttWireMessage message, Exception ex) {
+		final String methodName = "handleRunException";
+		//@TRACE 804=exception
+		log.fine(className,methodName,"804",null, ex);
+		MqttException mex;
+		if ( !(ex instanceof MqttException)) {
+			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);
+		} else {
+			mex = (MqttException)ex;
+		}
+
+		running = false;
+		clientComms.shutdownConnection(null, mex);
 	}
 }

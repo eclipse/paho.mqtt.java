@@ -13,9 +13,11 @@ package org.eclipse.paho.client.mqttv3;
 
 
 /**
- * Asynchronous message listener.  Classes implementing this interface
- * can be passed to {@link MqttClient#setCallback(MqttCallback)},
- * which will create a call back on this interface.
+ * Enables an application to be notified when asynchronous 
+ * events related to the client occur.
+ * Classes implementing this interface
+ * can be registered on both types of client: {@link IMqttClient#setCallback(MqttCallback)} 
+ * and {@link IMqttAsyncClient#setCallback(MqttCallback)} 
  */
 public interface MqttCallback {
 	/**
@@ -30,12 +32,12 @@ public interface MqttCallback {
 	 * 
 	 * <p>
 	 * This method is invoked synchronously by the MQTT client. An
-	 * acknowledgment on the network is not sent back to the server until this
+	 * acknowledgement is not sent back to the server until this
 	 * method returns cleanly.</p>
 	 * <p>
 	 * If an implementation of this method throws an <code>Exception</code>, then the
 	 * client will be shut down.  When the client is next re-connected, any QoS
-	 * 1 or 2 messages will be redelivered.</p>
+	 * 1 or 2 messages will be redelivered by the server.</p>
 	 * <p>
 	 * Any additional messages which arrive while an
 	 * implementation of this method is running, will build up in memory, and
@@ -51,21 +53,23 @@ public interface MqttCallback {
 	 * disconnect the client, as it will be impossible to send an acknowledgement for
 	 * the message being processed, and a deadlock will occur.</p>
 	 * 
-	 * @param topic the topic on which the message arrived.
+	 * @param topic name of the topic on the message was published to
 	 * @param message the actual message.
 	 * @throws Exception if a terminal error has occurred, and the client should be
 	 * shut down.
 	 */
-	public void messageArrived(MqttTopic topic, MqttMessage message) throws Exception;
+	public void messageArrived(String topic, MqttMessage message) throws Exception;
 	
 	/**
 	 * Called when delivery for a message has been completed, and all 
-	 * acknowledgements have been received.  The supplied token will be same
-	 * token which was returned when the message was first sent, if it was
-	 * sent using {@link MqttTopic#publish(MqttMessage)}.
+	 * acknowledgements have been received. For QOS 0 messages it is 
+	 * called once the message has been handed to the network for
+	 * delivery. For QOS 1 it is called when PUBACK is received and
+	 * for QOS 2 when PUBCOMP is received. The token will be the same
+	 * token as that returned when the message was published. 
 	 * 
 	 * @param token the delivery token associated with the message.
 	 */
-	public void deliveryComplete(MqttDeliveryToken token);
+	public void deliveryComplete(IMqttDeliveryToken token);
 	
 }

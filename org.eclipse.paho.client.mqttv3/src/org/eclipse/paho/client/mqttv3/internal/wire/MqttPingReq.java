@@ -36,4 +36,9 @@ public class MqttPingReq extends MqttWireMessage {
 	protected byte getMessageInfo() {
 		return 0;
 	}
+	
+	public String getKey() {
+		return new String("Ping");
+	}
 }
+

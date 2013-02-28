@@ -17,8 +17,6 @@ import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
-
 
 /**
  * An on-the-wire representation of an MQTT CONNECT message.
@@ -30,7 +28,8 @@ public class MqttConnect extends MqttWireMessage {
 	private String userName;
 	private char[] password;
 	private int keepAliveInterval;
-	private MqttTopic willDestination;
+	private String willDestination;
+	public static String KEY="Con";
 	
 	
 	public MqttConnect(String clientId,
@@ -39,7 +38,7 @@ public class MqttConnect extends MqttWireMessage {
 			String userName,
 			char[] password,
 			MqttMessage willMessage,
-			MqttTopic willDestination) {
+			String willDestination) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.cleanSession = cleanSession;
@@ -62,7 +61,7 @@ public class MqttConnect extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			dos.writeUTF("MQIsdp");
+			this.encodeUTF8(dos,"MQIsdp");			
 			dos.write(3);
 			byte connectFlags = 0;
 			
@@ -97,18 +96,18 @@ public class MqttConnect extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			dos.writeUTF(clientId);
+			this.encodeUTF8(dos,clientId);
 			
 			if (willMessage != null) {
-				dos.writeUTF(willDestination.getName());
+				this.encodeUTF8(dos,willDestination);
 				dos.writeShort(willMessage.getPayload().length);
 				dos.write(willMessage.getPayload());
 			}
 			
 			if (userName != null) {
-				dos.writeUTF(userName);
+				this.encodeUTF8(dos,userName);
 				if (password != null) {
-					dos.writeUTF(new String(password));
+					this.encodeUTF8(dos,new String(password));
 				}
 			}
 			dos.flush();
@@ -124,5 +123,9 @@ public class MqttConnect extends MqttWireMessage {
 	 */
 	public boolean isMessageIdRequired() {
 		return false;
+	}
+	
+	public String getKey() {
+		return new String(KEY);
 	}
 }

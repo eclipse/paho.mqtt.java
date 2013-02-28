@@ -16,6 +16,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 
 /**
@@ -34,6 +35,14 @@ public class MqttSubscribe extends MqttWireMessage {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
 		this.names = names;
 		this.qos = qos;
+		
+		if (names.length != qos.length) {
+		throw new IllegalArgumentException();
+		}
+		
+		for (int i=0;i<qos.length;i++) {
+			MqttMessage.validateQos(qos[i]);
+		}
 	}
 	
 	protected byte getMessageInfo() {
@@ -58,7 +67,7 @@ public class MqttSubscribe extends MqttWireMessage {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			for (int i=0; i<names.length; i++) {
-				dos.writeUTF(names[i]);
+				this.encodeUTF8(dos,names[i]);
 				dos.writeByte(qos[i]);
 			}
 			return baos.toByteArray();

@@ -14,14 +14,13 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.internal.trace.Trace;
+import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttInputStream;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
-
+import org.eclipse.paho.client.mqttv3.logging.Logger;
+import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 /**
  * Receives MQTT packets from the server.
@@ -33,111 +32,119 @@ public class CommsReceiver implements Runnable {
 	private ClientComms clientComms = null;
 	private MqttInputStream in;
 	private CommsTokenStore tokenStore = null;
-	private boolean disconnecting = false;
-	private Trace trace;
+	private Thread recThread = null;
 	
-	public CommsReceiver(Trace trace, ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, InputStream in) {
+	private final static String className = CommsReceiver.class.getName();
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
+	
+	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
 		this.in = new MqttInputStream(in);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
-		this.trace = trace;
+		log.setResourceName(clientComms.getClient().getClientId());
 	}
 	
 	/**
 	 * Starts up the Receiver's thread.
 	 */
-	public void start() {
-		if (running == false) {
-			running = true;
-			new Thread(this, "MQTT Client Comms Receiver").start();
+	public void start(String threadName) {
+		final String methodName = "start";
+		//@TRACE 855=starting
+		log.fine(className,methodName, "855");
+		synchronized (lifecycle) {
+			if (running == false) {
+				running = true;
+				recThread = new Thread(this, threadName);
+				recThread.start();
+			}
 		}
 	}
 
 	/**
 	 * Stops the Receiver's thread.  This call will block.
 	 */
-	public void stop() throws IOException {
+	public void stop() {
+		final String methodName = "stop";
 		synchronized (lifecycle) {
-			//@TRACE 850=stopping receiver
-			trace.trace(Trace.FINE,850);
+			//@TRACE 850=stopping
+			log.fine(className,methodName, "850");
 			if (running) {
 				running = false;
-				try {
-					//@TRACE 851=stop: wait on lifecycle
-					trace.trace(Trace.FINE,851);
-					// Wait for the thread to finish.
-					lifecycle.wait();
-				}
-				catch (InterruptedException ex) {
+				if (!Thread.currentThread().equals(recThread)) {
+					try {
+						// Wait for the thread to finish.
+						recThread.join();
+					}
+					catch (InterruptedException ex) {
+					}
 				}
 			}
 		}
+		recThread = null;
+		//@TRACE 851=stopped
+		log.fine(className,methodName,"851");
 	}
 	
 	/**
 	 * Run loop to receive messages from the server.
 	 */
 	public void run() {
+		final String methodName = "run";
+		MqttToken token = null;
+		
 		while (running && (in != null)) {
 			try {
-				//@TRACE 852=run: read message
-				trace.trace(Trace.FINE,852);
+				//@TRACE 852=network read message
+				log.fine(className,methodName,"852");
 				MqttWireMessage message = in.readMqttWireMessage();
+				
 				if (message instanceof MqttAck) {
-					MqttDeliveryToken token = tokenStore.getToken(message);
+					token = tokenStore.getToken(message);
 					if (token!=null) {
 						synchronized (token) {
-							clientState.notifyReceived(message);
-							if (message instanceof MqttConnack && ((MqttConnack)message).getReturnCode() != 0) {
-								synchronized (lifecycle) {
-									running = false;
-								}
-							}
+							// Ensure the notify processing is done under a lock on the token
+							// This ensures that the send processing can complete  before the 
+							// receive processing starts! ( request and ack and ack processing
+							// can occur before request processing is complete if not!
+							clientState.notifyReceivedAck((MqttAck)message);
 						}
 					} else {
-						clientState.notifyReceived(message);
+						// It its an ack and there is no token then something is not right.
+						// An ack should always have a token assoicated with it.
+						throw new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 					}
-				}
-				else {
-					clientState.notifyReceived(message);
+				} else {
+					// A new message has arrived
+					clientState.notifyReceivedMsg(message);
 				}
 			}
 			catch (MqttException ex) {
+				//@TRACE 856=Stopping, MQttException
+				log.fine(className,methodName,"856",null,ex);
 				running = false;
-				clientComms.shutdownConnection(ex);
+				// Token maybe null but that is handled in shutdown
+				clientComms.shutdownConnection(token, ex);
 			} 
 			catch (IOException ioe) {
-				//@TRACE 853=run: IOException
-				trace.trace(Trace.FINE,853,null,ioe);
+				//@TRACE 853=Stopping due to IOException
+				log.fine(className,methodName,"853");
 
 				running = false;
 				// An EOFException could be raised if the broker processes the 
-				// DISCONNECT before we receive the ACK for it. As such,
+				// DISCONNECT and ends the socket before we complete. As such,
 				// only shutdown the connection if we're not already shutting down.
-				if (!disconnecting) {
-					clientComms.shutdownConnection(new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
-				} else {
-					clientComms.shutdownConnection(null);
-				}
-
+				if (!clientComms.isDisconnecting()) {
+					clientComms.shutdownConnection(token, new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
+				} // else {
 			}
 		}
-		synchronized (lifecycle) {
-			//@TRACE 854=run: notify lifecycle
-			trace.trace(Trace.FINE,854);
-			lifecycle.notifyAll();
-		}
+		
+		//@TRACE 854=<
+		log.fine(className,methodName,"854");
 	}
 	
 	public boolean isRunning() {
 		return running;
 	}
-	
-	public void setDisconnecting(boolean disconnecting) {
-		//@TRACE 855=setDisconnecting disconnecting={0}
-		trace.trace(Trace.FINE,855, new Object[]{new Boolean(disconnecting)});
-		this.disconnecting = disconnecting;
-	}
-
 }
