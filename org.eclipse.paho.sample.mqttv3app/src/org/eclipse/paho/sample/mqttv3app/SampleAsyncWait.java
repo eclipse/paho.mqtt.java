@@ -16,15 +16,17 @@ import java.io.IOException;
 import java.sql.Timestamp;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
 /**
- * A sample application that demonstrates how to use the MQTT v3 Client blocking api.
+ * A sample application that demonstrates how to use the MQTT v3 Client api in
+ * non-blocking waiter mode.
  * 
  * It can be run from the command line in one of two modes: 
  *  - as a publisher, sending a single message to a topic on the server
@@ -43,12 +45,13 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
  *  If the application is run with the -h parameter then info is displayed that 
  *  describes all of the options / parameters. 
  */
-public class Sample implements MqttCallback {
+
+public class SampleAsyncWait implements MqttCallback {
 	
 	/**
 	 * The main entry point of the sample.
 	 * 
-	 * This method handles parsing of the arguments specified on the
+	 * This method handles parsing the arguments specified on the
 	 * command-line before performing the specified action.
 	 */
 	public static void main(String[] args) {
@@ -57,7 +60,7 @@ public class Sample implements MqttCallback {
 		boolean quietMode 	= false;
 		String action 		= "publish";
 		String topic 		= "";
-		String message 		= "Message from blocking MQTTv3 Java client sample";
+		String message 		= "Message from async waiter MQTTv3 Java client sample";
 		int qos 			= 2;
 		String broker 		= "m2m.eclipse.org";
 		int port 			= 1883;
@@ -66,8 +69,9 @@ public class Sample implements MqttCallback {
 		String pubTopic 	= "Sample/Java/v3";
 		boolean cleanSession = true;			// Non durable subscriptions 
 		boolean ssl = false;
-		String password = null;
 		String userName = null;
+		String password = null;
+		
 		// Parse the arguments - 
 		for (int i=0; i<args.length; i++) {
 			// Check this is a valid argument
@@ -95,10 +99,10 @@ public class Sample implements MqttCallback {
 					case 'p': port = Integer.parseInt(args[++i]); break;
 					case 'i': clientId = args[++i];				  break;
 					case 'c': cleanSession = Boolean.valueOf(args[++i]).booleanValue();  break;
-          case 'k': System.getProperties().put("javax.net.ssl.keyStore", args[++i]); break;
-          case 'w': System.getProperties().put("javax.net.ssl.keyStorePassword", args[++i]); break;
-          case 'r': System.getProperties().put("javax.net.ssl.trustStore", args[++i]); break;
-          case 'v': ssl = Boolean.valueOf(args[++i]).booleanValue(); break;
+	        case 'k': System.getProperties().put("javax.net.ssl.keyStore", args[++i]); break;
+	        case 'w': System.getProperties().put("javax.net.ssl.keyStorePassword", args[++i]); break;
+	        case 'r': System.getProperties().put("javax.net.ssl.trustStore", args[++i]);  break;
+	        case 'v': ssl = Boolean.valueOf(args[++i]).booleanValue();  break;
           case 'u': userName = args[++i];               break;
           case 'z': password = args[++i];               break;
 					default: 
@@ -149,16 +153,16 @@ public class Sample implements MqttCallback {
 		// driving the client API can begin
 		try {
 			// Create an instance of this class
-			Sample sampleClient = new Sample(url, clientId, cleanSession, quietMode,userName,password);
+			SampleAsyncWait sampleClient = new SampleAsyncWait(url,clientId,cleanSession, quietMode,userName,password);
 			
-			// Perform the requested action
+			// Perform the specified action
 			if (action.equals("publish")) {
 				sampleClient.publish(topic,qos,message.getBytes());
 			} else if (action.equals("subscribe")) {
 				sampleClient.subscribe(topic,qos);
 			}
 		} catch(MqttException me) {
-			// Display full details of any exception that occurs 
+			// Display full details of any exception that occurs			
 			System.out.println("reason "+me.getReasonCode());
 			System.out.println("msg "+me.getMessage());
 			System.out.println("loc "+me.getLocalizedMessage());
@@ -169,7 +173,7 @@ public class Sample implements MqttCallback {
 	}
     
 	// Private instance variables
-	private MqttClient 			client;
+	private MqttAsyncClient 	client;
 	private String 				brokerUrl;
 	private boolean 			quietMode;
 	private MqttConnectOptions 	conOpt;
@@ -179,20 +183,21 @@ public class Sample implements MqttCallback {
 	
 	/**
 	 * Constructs an instance of the sample client wrapper
-	 * @param brokerUrl the url of the server to connect to
+	 * @param brokerUrl the url to connect to
 	 * @param clientId the client id to connect with
-	 * @param cleanSession clear state at end of connection or not (durable or non-durable subscriptions) 
+	 * @param cleanSession clear state at end of connection or not (durable or non-durable subscriptions)
 	 * @param quietMode whether debug should be printed to standard out
    * @param userName the username to connect with
-   * @param password the password for the user
+	 * @param password the password for the user
 	 * @throws MqttException
 	 */
-    public Sample(String brokerUrl, String clientId, boolean cleanSession, boolean quietMode, String userName, String password) throws MqttException {
+    public SampleAsyncWait(String brokerUrl, String clientId, boolean cleanSession, 
+    		boolean quietMode, String userName, String password) throws MqttException {
     	this.brokerUrl = brokerUrl;
     	this.quietMode = quietMode;
     	this.clean 	   = cleanSession;
-    	this.password = password;
     	this.userName = userName;
+    	this.password = password;
     	//This sample stores in a temporary directory... where messages temporarily
     	// stored until the message has been delivered to the server. 
     	//..a real application ought to store them somewhere 
@@ -206,14 +211,14 @@ public class Sample implements MqttCallback {
 	    	conOpt = new MqttConnectOptions();
 	    	conOpt.setCleanSession(clean);
 	    	if(password != null ) {
-	    	  conOpt.setPassword(this.password.toCharArray());
-	    	}
-	    	if(userName != null) {
-	    	  conOpt.setUserName(this.userName);	   
-	    	}
+          conOpt.setPassword(this.password.toCharArray());
+        }
+        if(userName != null) {
+          conOpt.setUserName(this.userName);     
+        }
 
-    		// Construct an MQTT blocking mode client
-			client = new MqttClient(this.brokerUrl,clientId, dataStore);
+    		// Construct a non blocking MQTT client instance
+			client = new MqttAsyncClient(this.brokerUrl,clientId, dataStore);
 			
 			// Set this wrapper as the callback handler
 	    	client.setCallback(this);
@@ -234,25 +239,35 @@ public class Sample implements MqttCallback {
      */
     public void publish(String topicName, int qos, byte[] payload) throws MqttException {
     	
-    	// Connect to the MQTT server
+    	// Connect to the MQTT server 
+    	// issue a non-blocking connect and then use the token to wait until the
+    	// connect completes. An exception is thrown if connect fails.
     	log("Connecting to "+brokerUrl + " with client ID "+client.getClientId());
-    	client.connect(conOpt);
+    	IMqttToken conToken = client.connect(conOpt,null,null);
+    	conToken.waitForCompletion();
     	log("Connected");
-    	
-    	String time = new Timestamp(System.currentTimeMillis()).toString();
+ 
+       	String time = new Timestamp(System.currentTimeMillis()).toString();
     	log("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
     	
-    	// Create and configure a message
+    	// Construct the message to send
    		MqttMessage message = new MqttMessage(payload);
     	message.setQos(qos);
- 
-    	// Send the message to the server, control is not returned until
-    	// it has been delivered to the server meeting the specified
-    	// quality of service.
-    	client.publish(topicName, message);
+	
+    	// Send the message to the server, control is returned as soon 
+    	// as the MQTT client has accepted to deliver the message. 
+    	// Use the delivery token to wait until the message has been
+    	// delivered	
+    	IMqttDeliveryToken pubToken = client.publish(topicName, message, null, null);
+    	pubToken.waitForCompletion(); 	
+    	log("Published");   
     	
     	// Disconnect the client
-    	client.disconnect();
+    	// Issue the disconnect and then use a token to wait until 
+    	// the disconnect completes.
+    	log("Disconnecting");
+    	IMqttToken discToken = client.disconnect(null, null);
+    	discToken.waitForCompletion();
     	log("Disconnected");
     }
     
@@ -267,17 +282,22 @@ public class Sample implements MqttCallback {
      */
     public void subscribe(String topicName, int qos) throws MqttException {
     	
-    	// Connect to the MQTT server
-    	client.connect(conOpt);
-    	log("Connected to "+brokerUrl+" with client ID "+client.getClientId());
+    	// Connect to the MQTT server 
+    	// issue a non-blocking connect and then use the token to wait until the
+    	// connect completes. An exception is thrown if connect fails.
+    	log("Connecting to "+brokerUrl + " with client ID "+client.getClientId());
+    	IMqttToken conToken = client.connect(conOpt,null, null);
+    	conToken.waitForCompletion();
+    	log("Connected");
 
-    	// Subscribe to the requested topic
-    	// The QOS specified is the maximum level that messages will be sent to the client at. 
-    	// For instance if QOS 1 is specified, any messages originally published at QOS 2 will 
-    	// be downgraded to 1 when delivering to the client but messages published at 1 and 0 
-    	// will be received at the same level they were published at. 
+    	// Subscribe to the requested topic.
+    	// Control is returned as soon client has accepted to deliver the subscription. 
+    	// Use a token to wait until the subscription is in place.
     	log("Subscribing to topic \""+topicName+"\" qos "+qos);
-    	client.subscribe(topicName, qos);
+  
+    	IMqttToken subToken = client.subscribe(topicName, qos, null, null);
+    	subToken.waitForCompletion();
+    	log("Subscribed to topic \""+topicName);
 
     	// Continue waiting for messages until the Enter is pressed
     	log("Press <Enter> to exit");
@@ -287,9 +307,13 @@ public class Sample implements MqttCallback {
 			//If we can't read we'll just exit
 		}
 		
-		// Disconnect the client from the server
-		client.disconnect();
-		log("Disconnected");
+    	// Disconnect the client
+    	// Issue the disconnect and then use the token to wait until 
+    	// the disconnect completes.
+    	log("Disconnecting");
+    	IMqttToken discToken = client.disconnect(null, null);
+    	discToken.waitForCompletion();
+    	log("Disconnected");
     }
 
     /**
@@ -337,6 +361,11 @@ public class Sample implements MqttCallback {
 		// delivery of a message will complete after the client has re-connected.
 		// The getPendinTokens method will provide tokens for any messages
 		// that are still to be delivered.
+		try {
+			log("Delivery complete callback: Publish Completed "+token.getMessage());
+		} catch (Exception ex) {
+			log("Exception in delivery complete callback"+ex);
+		}
 	}
 
     /**
@@ -345,7 +374,7 @@ public class Sample implements MqttCallback {
 	public void messageArrived(String topic, MqttMessage message) throws MqttException {
 		// Called when a message arrives from the server that matches any
 		// subscription made by the client		
-		String time = new Timestamp(System.currentTimeMillis()).toString();
+		String time = new Timestamp(System.currentTimeMillis()).toString();	
 		System.out.println("Time:\t" +time +
                            "  Topic:\t" + topic + 
                            "  Message:\t" + new String(message.getPayload()) +
@@ -356,37 +385,37 @@ public class Sample implements MqttCallback {
 	/* End of MqttCallback methods                                  */
 	/****************************************************************/
 
-	   static void printHelp() {
-	      System.out.println(
-	          "Syntax:\n\n" +
-	              "    Sample [-h] [-a publish|subscribe] [-t <topic>] [-m <message text>]\n" +
-	              "            [-s 0|1|2] -b <hostname|IP address>] [-p <brokerport>] [-i <clientID>]\n\n" +
-	              "    -h  Print this help text and quit\n" +
-	              "    -q  Quiet mode (default is false)\n" +
-	              "    -a  Perform the relevant action (default is publish)\n" +
-	              "    -t  Publish/subscribe to <topic> instead of the default\n" +
-	              "            (publish: \"Sample/Java/v3\", subscribe: \"Sample/#\")\n" +
-	              "    -m  Use <message text> instead of the default\n" +
-	              "            (\"Message from MQTTv3 Java client\")\n" +
-	              "    -s  Use this QoS instead of the default (2)\n" +
-	              "    -b  Use this name/IP address instead of the default (localhost)\n" +
-	              "    -p  Use this port instead of the default (1883)\n\n" +
-	              "    -i  Use this client ID instead of SampleJavaV3_<action>\n" +
-	              "    -c  Connect to the server with a clean session (default is false)\n" +
-	              "     \n\n Security Options \n" +
-	              "     -u Username \n" +
-	              "     -z Password \n" +
-	              "     \n\n SSL Options \n" +
-	              "    -v  SSL enabled; true - (default is false) " +
-	              "    -k  Use this JKS format key store to verify the client\n" +
-	              "    -w  Passpharse to verify certificates in the keys store\n" +
-	              "    -r  Use this JKS format keystore to verify the server\n" +
-	              " If javax.net.ssl properties have been set only the -v flag needs to be set\n" +
-	              "Delimit strings containing spaces with \"\"\n\n" +
-	              "Publishers transmit a single message then disconnect from the server.\n" +
-	              "Subscribers remain connected to the server and receive appropriate\n" +
-	              "messages until <enter> is pressed.\n\n"
-	          );
+    static void printHelp() {
+      System.out.println(
+          "Syntax:\n\n" +
+              "    Sample [-h] [-a publish|subscribe] [-t <topic>] [-m <message text>]\n" +
+              "            [-s 0|1|2] -b <hostname|IP address>] [-p <brokerport>] [-i <clientID>]\n\n" +
+              "    -h  Print this help text and quit\n" +
+              "    -q  Quiet mode (default is false)\n" +
+              "    -a  Perform the relevant action (default is publish)\n" +
+              "    -t  Publish/subscribe to <topic> instead of the default\n" +
+              "            (publish: \"Sample/Java/v3\", subscribe: \"Sample/#\")\n" +
+              "    -m  Use <message text> instead of the default\n" +
+              "            (\"Message from MQTTv3 Java client\")\n" +
+              "    -s  Use this QoS instead of the default (2)\n" +
+              "    -b  Use this name/IP address instead of the default (localhost)\n" +
+              "    -p  Use this port instead of the default (1883)\n\n" +
+              "    -i  Use this client ID instead of SampleJavaV3_<action>\n" +
+              "    -c  Connect to the server with a clean session (default is false)\n" +
+              "     \n\n Security Options \n" +
+              "     -u Username \n" +
+              "     -z Password \n" +
+              "     \n\n SSL Options \n" +
+              "    -v  SSL enabled; true - (default is false) " +
+              "    -k  Use this JKS format key store to verify the client\n" +
+              "    -w  Passpharse to verify certificates in the keys store\n" +
+              "    -r  Use this JKS format keystore to verify the server\n" +
+              " If javax.net.ssl properties have been set only the -v flag needs to be set\n" +
+              "Delimit strings containing spaces with \"\"\n\n" +
+              "Publishers transmit a single message then disconnect from the server.\n" +
+              "Subscribers remain connected to the server and receive appropriate\n" +
+              "messages until <enter> is pressed.\n\n"
+          );
     }
 
 }
