@@ -1,0 +1,100 @@
+<project name="org.eclipse.paho.client.mqttv3.internal.traceformat" default="full">
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+
+	<property name="source.folder" value="./" />
+	<property name="output.folder" value="./target/work" />
+	<property name="ship.folder" value="./target/ship" />
+	<!-- classpath.folder = ship.folder of org.eclipse.paho.client.mqttv3 build.xml -->
+	<property name="classpath.folder" value="../org.eclipse.paho.client.mqttv3/target/ship" />
+ 
+	<property name="client.release.version" value="0.9.0" />
+	<property name="bundleVersion" value="0.9.0" />
+	<property name="bundleVendor" value="Eclipse.org" />
+	<property name="build.level" value="LYYMMDD" />
+	<property name="paho-client-v3-trace-jar" value="org.eclipse.paho.client.mqttv3.trace.jar" />
+	<property name="paho-client-v3-trace-source-jar" value="org.eclipse.paho.client.mqttv3.tracesource.jar" />
+	
+	<property name="javac_target" value="1.2" />
+	<property name="javac_source" value="1.2" />
+
+	<path id="classpath">
+		<fileset dir="${classpath.folder}">
+			<include name="*.jar" />
+		</fileset>	
+	</path>
+	
+	<pathconvert pathsep="${line.separator}|   |-- " property="formatted.classpath" refid="classpath" />
+	<echo message="|-- classpath:" />
+	<echo message="|   |-- ${formatted.classpath}" />
+	
+	<target name="updateManifest" description="Update manifest file.">
+		<manifest file="${folder}/META-INF/MANIFEST.MF" mode="update">
+			<attribute name="Bundle-Version" value="${bundleVersion}" />
+			<attribute name="Bundle-Vendor" value="${bundleVendor}" />
+			<attribute name="Bundle-ManifestVersion" value="2" />
+			<attribute name="Bundle-ClassPath" value="${bundle_classpath}" />
+			<attribute name="Implementation-Version" value="${client.release.version}" />
+			<attribute name="Build-Level" value="${build.level}" />
+		</manifest>
+		<if><isset property="jar.copyright"/>
+			<then>
+				<manifest file="${folder}/META-INF/MANIFEST.MF" mode="update">
+					<attribute name="Bundle-Copyright" value="${jar.copyright}" />
+				</manifest>
+			</then>
+		</if>
+	</target>
+	
+	<target name="compile">
+		<mkdir dir="${output.folder}/bin" />
+		<mkdir dir="${output.folder}/src" />
+		<copy overwrite="true" todir="${output.folder}/src">
+			<fileset dir="${source.folder}/src">
+				<exclude name="**/TestTrace.java" />
+			</fileset>
+			<fileset dir="${source.folder}/src">
+				<include name="**/TracePoint.java" />
+			</fileset>
+		</copy>
+		<javac srcdir="${output.folder}/src" 
+		    destdir="${output.folder}/bin" 
+		    source="${javac_source}" 
+		    target="${javac_target}" 
+		    debug="true" 
+		    includeantruntime="false">
+		
+			<classpath refid="classpath" />
+		</javac>
+		
+		<delete file="${output.folder}/bin/org/eclipse/paho/client/mqttv3/internal/trace/TracePointExtractor.class" />
+		<mkdir dir="${output.folder}/bin/META-INF" />
+		
+		<antcall target="updateManifest">
+			<param name="folder" value="${output.folder}/bin" />
+			<param name="bundle_classpath" value="." />
+		</antcall>
+	</target>
+
+		
+	<target name="package">
+		<mkdir dir="${ship.folder}" />
+		<jar jarfile="${ship.folder}/${paho-client-v3-trace-jar}" 
+			basedir="${output.folder}/bin"
+			manifest="${output.folder}/bin/META-INF/MANIFEST.MF" >
+		</jar>
+		<jar jarfile="${ship.folder}/${paho-client-v3-trace-source-jar}" 
+			basedir="${source.folder}/src">
+		</jar>
+	</target>
+	
+	
+	<target name="clean">
+		<delete dir="${output.folder}" />
+		<delete file="${ship.folder}/${paho-client-v3-trace-jar}" />
+		<delete file="${ship.folder}/${paho-client-v3-trace-source-jar}" />
+	</target>
+		
+	<target name="full" depends="compile,package" />
+
+</project>
