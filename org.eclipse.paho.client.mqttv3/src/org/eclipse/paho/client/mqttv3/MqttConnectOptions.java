@@ -18,7 +18,7 @@ import javax.net.SocketFactory;
 import org.eclipse.paho.client.mqttv3.util.Debug;
 
 /**
- * Holds options that control how the client connects to a server.
+ * Holds the set of options that control how the client connects to a server.
  */
 public class MqttConnectOptions {
 	/**
