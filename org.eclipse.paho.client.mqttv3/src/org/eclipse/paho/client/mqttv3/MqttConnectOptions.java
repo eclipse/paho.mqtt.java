@@ -346,7 +346,7 @@ public class MqttConnectOptions {
 		p.put("ConTimeout", new Integer(getConnectionTimeout()));
 		p.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
 		p.put("UserName", (getUserName()==null)?"null":getUserName());
-		p.put("WillDestintation", (getWillDestination()==null)?"null":getWillDestination());
+		p.put("WillDestination", (getWillDestination()==null)?"null":getWillDestination());
 		if (getSocketFactory()==null) {
 			p.put("SocketFactory", "null");	
 		} else {
