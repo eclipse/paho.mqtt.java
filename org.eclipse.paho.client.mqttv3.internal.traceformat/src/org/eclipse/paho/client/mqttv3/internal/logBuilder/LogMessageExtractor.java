@@ -21,10 +21,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** 
- * Scan all Paho source files and extrace NLSable trace records.
+ * Scan all Paho source files and extract NLSable trace and log records. 
  * 
  * This needs to be run any time new trace/log records are added
- * or changed. 
+ * or changed. The logcat.properties file in the mqttv3.internal.nls 
+ * is updated to match the trace records in the paho source files. 
  */
 public class LogMessageExtractor {
 
@@ -80,7 +81,7 @@ public class LogMessageExtractor {
 		this.points = new HashMap();
 	}
 	public void parse() throws Exception {
-		System.out.println("Scanning Source dirtories: "+this.basedir);
+		System.out.println("Scanning source directories: "+this.basedir);
 		System.out.println("Outputing results to: "+this.outputfile);
 		this.out = new PrintStream(new FileOutputStream(this.outputfile));
 		out.println("0=MQTT Catalog");
@@ -143,6 +144,8 @@ public class LogMessageExtractor {
 			}
 			lineNo++;
 		}
+		in.close();
+		
 		return rc;
 	}
 }
