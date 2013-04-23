@@ -24,7 +24,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
 /**
- * A sample application that demonstrates how to use the MQTT v3 Client blocking api.
+ * A sample application that demonstrates how to use the Paho MQTT v3.1 Client blocking API.
  * 
  * It can be run from the command line in one of two modes: 
  *  - as a publisher, sending a single message to a topic on the server
@@ -202,7 +202,7 @@ public class Sample implements MqttCallback {
     	
     	try {
     		// Construct the connection options object that contains connection parameters 
-    		// such as cleansession and LWAT
+    		// such as cleanSession and LWT
 	    	conOpt = new MqttConnectOptions();
 	    	conOpt.setCleanSession(clean);
 	    	if(password != null ) {
@@ -272,8 +272,8 @@ public class Sample implements MqttCallback {
     	log("Connected to "+brokerUrl+" with client ID "+client.getClientId());
 
     	// Subscribe to the requested topic
-    	// The QOS specified is the maximum level that messages will be sent to the client at. 
-    	// For instance if QOS 1 is specified, any messages originally published at QOS 2 will 
+    	// The QoS specified is the maximum level that messages will be sent to the client at. 
+    	// For instance if QoS 1 is specified, any messages originally published at QoS 2 will 
     	// be downgraded to 1 when delivering to the client but messages published at 1 and 0 
     	// will be received at the same level they were published at. 
     	log("Subscribing to topic \""+topicName+"\" qos "+qos);
@@ -335,7 +335,7 @@ public class Sample implements MqttCallback {
 		// 
 		// If the connection to the server breaks before delivery has completed
 		// delivery of a message will complete after the client has re-connected.
-		// The getPendinTokens method will provide tokens for any messages
+		// The getPendingTokens method will provide tokens for any messages
 		// that are still to be delivered.
 	}
 

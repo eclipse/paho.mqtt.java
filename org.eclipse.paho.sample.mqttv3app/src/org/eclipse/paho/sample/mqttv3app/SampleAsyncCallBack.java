@@ -14,6 +14,7 @@ package org.eclipse.paho.sample.mqttv3app;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -26,7 +27,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
 /**
- * A sample application that demonstrates how to use the MQTT v3 Client api in
+ * A sample application that demonstrates how to use the Paho MQTT v3.1 Client API in
  * non-blocking callback/notification mode.
  * 
  * It can be run from the command line in one of two modes: 
@@ -36,10 +37,10 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
  *  There are three versions of the sample that implement the same features
  *  but do so using using different programming styles:
  *  <ol>
- *  <li>Sample (this one) which uses the API which blocks until the operation completes</li>
+ *  <li>Sample which uses the API which blocks until the operation completes</li>
  *  <li>SampleAsyncWait shows how to use the asynchronous API with waiters that block until 
  *  an action completes</li>
- *  <li>SampleAsyncCallBack shows how to use the asynchronous API where events are
+ *  <li>SampleAsyncCallBack (this one) shows how to use the asynchronous API where events are
  *  used to notify the application when an action completes<li>
  *  </ol>
  *  
@@ -80,8 +81,8 @@ public class SampleAsyncCallBack implements MqttCallback {
 		String pubTopic 	= "Sample/Java/v3";
 		boolean cleanSession = true;			// Non durable subscriptions 
 		boolean ssl = false;
-    String password = null;
-    String userName = null;
+		String password = null;
+		String userName = null;
 		
 		// Parse the arguments - 
 		for (int i=0; i<args.length; i++) {
@@ -224,7 +225,7 @@ public class SampleAsyncCallBack implements MqttCallback {
     	
     	try {
     		// Construct the object that contains connection parameters 
-    		// such as cleansession and LWAT
+    		// such as cleanSession and LWT
 	    	conOpt = new MqttConnectOptions();
 	    	conOpt.setCleanSession(clean);
 	    	if(password != null ) {
@@ -260,12 +261,12 @@ public class SampleAsyncCallBack implements MqttCallback {
     	while (state != FINISH) {
     		switch (state) {
     			case BEGIN:
-    				// Connect using a non blocking connect
+    				// Connect using a non-blocking connect
     		    	MqttConnector con = new MqttConnector();
     		    	con.doConnect();
     				break;
     			case CONNECTED:
-    				// Publish using a non blocking publisher
+    				// Publish using a non-blocking publisher
     				Publisher pub = new Publisher();
     				pub.doPublish(topicName, qos, payload);
     				break;
@@ -330,12 +331,12 @@ public class SampleAsyncCallBack implements MqttCallback {
     	while (state != FINISH) {
     		switch (state) {
     			case BEGIN:
-    				// Connect using a non blocking connect
+    				// Connect using a non-blocking connect
     		    	MqttConnector con = new MqttConnector();
     		    	con.doConnect();
     				break;
     			case CONNECTED:
-    				// Subscribe using a non blocking subscribe
+    				// Subscribe using a non-blocking subscribe
     				Subscriber sub = new Subscriber();
     				sub.doSubscribe(topicName, qos);
     				break;
@@ -409,7 +410,9 @@ public class SampleAsyncCallBack implements MqttCallback {
 		// The deliveryComplete method will also be called if 
 		// the callback is set on the client
 		// 
-		log("Delivery complete callback: Publish Completed "+token.getTopics());	
+		// note that token.getTopics() returns an array so we convert to a string
+		// before printing it on the console
+		log("Delivery complete callback: Publish Completed "+Arrays.toString(token.getTopics()));	
 	}
 
     /**
@@ -431,7 +434,7 @@ public class SampleAsyncCallBack implements MqttCallback {
     static void printHelp() {
       System.out.println(
           "Syntax:\n\n" +
-              "    Sample [-h] [-a publish|subscribe] [-t <topic>] [-m <message text>]\n" +
+              "    SampleAsyncCallBack [-h] [-a publish|subscribe] [-t <topic>] [-m <message text>]\n" +
               "            [-s 0|1|2] -b <hostname|IP address>] [-p <brokerport>] [-i <clientID>]\n\n" +
               "    -h  Print this help text and quit\n" +
               "    -q  Quiet mode (default is false)\n" +
@@ -462,7 +465,7 @@ public class SampleAsyncCallBack implements MqttCallback {
     }
         	
 	/**
-	 * Connect in a non blocking way and then sit back and wait to be 
+	 * Connect in a non-blocking way and then sit back and wait to be 
 	 * notified that the action has completed.
 	 */
     public class MqttConnector {
@@ -499,10 +502,10 @@ public class SampleAsyncCallBack implements MqttCallback {
 			};
 	    			
 	    	try {
-	    		// Connect using a non blocking connect
+	    		// Connect using a non-blocking connect
 	    		client.connect(conOpt,"Connect sample context", conListener);
 			} catch (MqttException e) {
-				// If though it is a non blocking connect an exception can be 
+				// If though it is a non-blocking connect an exception can be 
 				// thrown if validation of parms fails or other checks such 
 				// as already connected fail.
 				state = ERROR;
@@ -513,7 +516,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 	}
 
 	/**
-	 * Publish in a non blocking way and then sit back and wait to be 
+	 * Publish in a non-blocking way and then sit back and wait to be 
 	 * notified that the action has completed.
 	 */
 	public class Publisher {
@@ -564,7 +567,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 	}
 	
 	/**
-	 * Subscribe in a non blocking way and then sit back and wait to be 
+	 * Subscribe in a non-blocking way and then sit back and wait to be 
 	 * notified that the action has completed.
 	 */
 	public class Subscriber {
@@ -607,7 +610,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 	}
 	
 	/**
-	 * Disconnect in a non blocking way and then sit back and wait to be 
+	 * Disconnect in a non-blocking way and then sit back and wait to be 
 	 * notified that the action has completed.
 	 */
 	public class Disconnector {

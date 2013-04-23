@@ -25,7 +25,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
 /**
- * A sample application that demonstrates how to use the MQTT v3 Client api in
+ * A sample application that demonstrates how to use the Paho MQTT v3.1 Client API in
  * non-blocking waiter mode.
  * 
  * It can be run from the command line in one of two modes: 
@@ -35,8 +35,8 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
  *  There are three versions of the sample that implement the same features
  *  but do so using using different programming styles:
  *  <ol>
- *  <li>Sample (this one) which uses the API which blocks until the operation completes</li>
- *  <li>SampleAsyncWait shows how to use the asynchronous API with waiters that block until 
+ *  <li>Sample which uses the API which blocks until the operation completes</li>
+ *  <li>SampleAsyncWait (this one) shows how to use the asynchronous API with waiters that block until 
  *  an action completes</li>
  *  <li>SampleAsyncCallBack shows how to use the asynchronous API where events are
  *  used to notify the application when an action completes<li>
@@ -207,7 +207,7 @@ public class SampleAsyncWait implements MqttCallback {
     	
     	try {
     		// Construct the connection options object that contains connection parameters 
-    		// such as cleansession and LWAT
+    		// such as cleanSession and LWT
 	    	conOpt = new MqttConnectOptions();
 	    	conOpt.setCleanSession(clean);
 	    	if(password != null ) {
@@ -217,7 +217,7 @@ public class SampleAsyncWait implements MqttCallback {
           conOpt.setUserName(this.userName);     
         }
 
-    		// Construct a non blocking MQTT client instance
+    		// Construct a non-blocking MQTT client instance
 			client = new MqttAsyncClient(this.brokerUrl,clientId, dataStore);
 			
 			// Set this wrapper as the callback handler
@@ -388,7 +388,7 @@ public class SampleAsyncWait implements MqttCallback {
     static void printHelp() {
       System.out.println(
           "Syntax:\n\n" +
-              "    Sample [-h] [-a publish|subscribe] [-t <topic>] [-m <message text>]\n" +
+              "    SampleAsyncWait [-h] [-a publish|subscribe] [-t <topic>] [-m <message text>]\n" +
               "            [-s 0|1|2] -b <hostname|IP address>] [-p <brokerport>] [-i <clientID>]\n\n" +
               "    -h  Print this help text and quit\n" +
               "    -q  Quiet mode (default is false)\n" +
