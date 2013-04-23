@@ -1,7 +1,7 @@
 package org.eclipse.paho.client.mqttv3;
 
 /**
- * Enables an application to communicate with an MQTT server using using non-blocking methods. 
+ * Enables an application to communicate with an MQTT server using non-blocking methods. 
  * <p>
  * It provides applications a simple programming interface to all features of the MQTT version 3.1
  * specification including: 
@@ -16,18 +16,18 @@ package org.eclipse.paho.client.mqttv3;
  * <p>
  * There are two styles of MQTT client, this one and {@link IMqttClient}.
  * <ul>
- * <li>IMqttAsyncClient provides a set of non blocking methods that return control to the
+ * <li>IMqttAsyncClient provides a set of non-blocking methods that return control to the
  * invoking application after initial validation of parameters and state. The main processing is
- * performed in the background so as not to block the application programs thread. This non 
+ * performed in the background so as not to block the application program's thread. This non- 
  * blocking approach is handy when the application needs to carry on processing while the 
  * MQTT action takes place. For instance connecting to an MQTT server can take time, using 
- * the non blocking connect method allows an application to display a busy indicator while the
- * connect action takes place in the background. Non blocking methods are particularly useful 
+ * the non-blocking connect method allows an application to display a busy indicator while the
+ * connect action takes place in the background. non-blocking methods are particularly useful 
  * in event oriented programs and graphical programs where invoking methods that take time 
  * to complete on the the main or GUI thread can cause problems. The non-blocking interface
  * can also be used in blocking form.</li>
  * <li>IMqttClient provides a set of methods that block and return control to the application
- * program once the MQTT action has completed. It is a thin layer that sits on top of  
+ * program once the MQTT action has completed. It is a thin layer that sits on top of the
  * IMqttAsyncClient implementation and is provided mainly for compatibility with earlier
  * versions of the MQTT client. In most circumstances it is recommended to use IMqttAsyncClient
  * based clients which allow an application to mix both non-blocking and blocking calls. </li>
@@ -74,7 +74,7 @@ package org.eclipse.paho.client.mqttv3;
  *     notified when the action succeeds or fails. The callback is invoked on the thread 
  *     managed by the MQTT client so it is important that processing is minimised in the 
  *     callback. If not the operation of the MQTT client will be inhibited. For example
- *      to be notified (called back) when a connect completes: 
+ *     to be notified (called back) when a connect completes: 
  *     <code><pre>
  *     	IMqttToken conToken;	
  *	    conToken = asyncClient.connect("some context",new new MqttAsyncActionListener() {			
@@ -86,11 +86,11 @@ package org.eclipse.paho.client.mqttv3;
  *				log ("connect failed" +exception);
  *			}
  *		  });
+ *      </pre></code> 
  *	    An optional context object can be passed into the method which will then be made
  *      available in the callback. The context is stored by the MQTT client) in the token
  *      which is then returned to the invoker. The token is provided to the callback methods
- *      where the context can then be accessed. 
- *     </pre></code> 
+ *      where the context can then be accessed.
  *     </p> 
  *   </li>
  * </ol>
@@ -199,7 +199,7 @@ public interface IMqttAsyncClient {
 	 * existing work to finish before disconnecting.  A value of zero or less 
 	 * means the client will not quiesce.  
 	 * @return token used to track and wait for disconnect to complete. The token
-	 * will be passed to the callback methtods if a callback is set.
+	 * will be passed to the callback methods if a callback is set.
 	 * @throws MqttException for problems encountered while disconnecting 
 	 * @see #disconnect(long, Object, IMqttActionListener)
 	 */
@@ -229,12 +229,12 @@ public interface IMqttAsyncClient {
 	 * <p>
 	 * The client will wait for {@link MqttCallback} methods to 
 	 * complete. It will then wait for up to the quiesce timeout to allow for
-	 * work which has already been initiated to complete. For instance when a QOS 2
-	 * message has started flowing to the server but the QOS 2 flow has not completed.It 
+	 * work which has already been initiated to complete. For instance when a QoS 2
+	 * message has started flowing to the server but the QoS 2 flow has not completed.It 
 	 * prevents new messages being accepted and does not send any messages that have 
 	 * been accepted but not yet started delivery across the network to the server. When 
 	 * work has completed or after the quiesce timeout, the client will disconnect from 
-	 * the server. If the cleansession flag was set to false and is set to false the 
+	 * the server. If the cleanSession flag was set to false and is set to false the 
 	 * next time a connection is made QoS 1 and 2 messages that 
 	 * were not previously delivered will be delivered.</p>
 	 * <p>This method must not be called from inside {@link MqttCallback} methods.</p>
@@ -369,7 +369,7 @@ public interface IMqttAsyncClient {
 	 * set to false
 	 * <li>The connection is re-established with (@link MqttConnectOptions#setCleanSession(boolean)} 
 	 * set to false
-	 * <liDepending when the failure occurs QOS 0 messages may not be delivered.
+	 * <liDepending when the failure occurs QoS 0 messages may not be delivered.
 	 * </ul> 
 	 * </p>
 	 * 
@@ -386,7 +386,7 @@ public interface IMqttAsyncClient {
 	 * 	<li>A leading "/" creates a distinct topic.  For example, <em>/finance</em> is
 	 * 	different from <em>finance</em>. <em>/finance</em> matches "+/+" and "/+", but
 	 * 	not "+".</li>
-	 * 	<li>Do not include the null character (Unicode<samp class="codeph"> \x0000</samp>) in
+	 * 	<li>Do not include the null character (Unicode <samp class="codeph">\x0000</samp>) in
 	 * 	any topic.</li>
 	 * </ul>
 	 * 
@@ -418,7 +418,7 @@ public interface IMqttAsyncClient {
 	 * @param callback optional listener that will be notified when message delivery
 	 * has completed to the requested quality of service
 	 * @return token used to track and wait for the publish to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
  	 * @throws MqttPersistenceException when a problem occurs storing the message
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
@@ -436,10 +436,10 @@ public interface IMqttAsyncClient {
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages 
 	 * published at a lower quality of service will be received at the published 
-	 * QOS.  Messages published at a higher quality of service will be received using 
-	 * the QOS specified on the subscribe.
+	 * QoS.  Messages published at a higher quality of service will be received using 
+	 * the QoS specified on the subscribe.
 	 * @return token used to track and wait for the subscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
@@ -452,14 +452,14 @@ public interface IMqttAsyncClient {
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages 
 	 * published at a lower quality of service will be received at the published 
-	 * QOS.  Messages published at a higher quality of service will be received using 
-	 * the QOS specified on the subscribe.
+	 * QoS.  Messages published at a higher quality of service will be received using 
+	 * the QoS specified on the subscribe.
 	 * @param userContext optional object used to pass context to the callback. Use 
 	 * null if not required.
 	 * @param callback optional listener that will be notified when subscribe 
 	 * has completed  
 	 * @return token used to track and wait for the subscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback)
@@ -476,17 +476,17 @@ public interface IMqttAsyncClient {
 	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
 	 * @param qos the maximum quality of service at which to subscribe. Messages 
 	 * published at a lower quality of service will be received at the published 
-	 * QOS.  Messages published at a higher quality of service will be received using 
-	 * the QOS specified on the subscribe.
+	 * QoS.  Messages published at a higher quality of service will be received using 
+	 * the QoS specified on the subscribe.
 	 * @return token used to track and wait for the subscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
- 	 * <p>Provides an optimised way to subscribe to multiple topics compared to 
+ 	 * <p>Provides an optimized way to subscribe to multiple topics compared to 
 	 * subscribing to each one individually.</p> 
 	 * <p>The {@link #setCallback(MqttCallback)} method 
 	 * should be called before this method, otherwise any received messages 
@@ -506,10 +506,10 @@ public interface IMqttAsyncClient {
 	 * when connecting to the server then the subscription remains in place
 	 * until either:
 	 * <ul>
-	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
-	 * <li>The next time the client connects with CleanSession set to true</ul>
+	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
+	 * <li>The next time the client connects with cleanSession set to true</ul>
 	 * </li>
-	 * With CleanSession set to false the MQTT server will store messages on 
+	 * With cleanSession set to false the MQTT server will store messages on 
 	 * behalf of the client when the client is not connected. The next time the 
 	 * client connects with the <bold>same client ID</bold> the server will 
 	 * deliver the stored messages to the client.
@@ -578,14 +578,14 @@ public interface IMqttAsyncClient {
 	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
 	 * @param qos the maximum quality of service to subscribe each topic at.Messages 
 	 * published at a lower quality of service will be received at the published 
-	 * QOS.  Messages published at a higher quality of service will be received using 
-	 * the QOS specified on the subscribe.
+	 * QoS.  Messages published at a higher quality of service will be received using 
+	 * the QoS specified on the subscribe.
 	 * @param userContext optional object used to pass context to the callback. Use 
 	 * null if not required.
 	 * @param callback optional listener that will be notified when subscribe 
 	 * has completed  
 	 * @return token used to track and wait for the subscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
@@ -599,7 +599,7 @@ public interface IMqttAsyncClient {
  	 * @param topicFilter the topic to unsubscribe from. It must match a topicFilter
 	 * specified on an earlier subscribe.
 	 * @return token used to track and wait for the unsubscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
 	public IMqttToken unsubscribe(String topicFilter) throws MqttException;
@@ -612,7 +612,7 @@ public interface IMqttAsyncClient {
 	 * @param topicFilters one or more topics to unsubscribe from. Each topicFilter
 	 * must match one specified on an earlier subscribe.	 * 
 	 * @return token used to track and wait for the unsubscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */	
 	public IMqttToken unsubscribe(String[] topicFilters) throws MqttException;
@@ -629,7 +629,7 @@ public interface IMqttAsyncClient {
 	 * @param callback optional listener that will be notified when unsubscribe 
 	 * has completed  
 	 * @return token used to track and wait for the unsubscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */		
 	public IMqttToken unsubscribe(String topicFilter, Object userContext, IMqttActionListener callback)
@@ -661,7 +661,7 @@ public interface IMqttAsyncClient {
 	 * @param callback optional listener that will be notified when unsubscribe 
 	 * has completed  
 	 * @return token used to track and wait for the unsubscribe to complete. The token
-	 * will be passed to callback methtods if set. 
+	 * will be passed to callback methods if set. 
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
 	public IMqttToken unsubscribe(String[] topicFilters, Object userContext, IMqttActionListener callback)
@@ -683,7 +683,7 @@ public interface IMqttAsyncClient {
 	 * each non-blocking method or using setting a {@link IMqttActionListener} on the 
 	 * non-blocking method.<p>
 	 * @see MqttCallback
-	 * @param callback which will be invoked for certain asyncrhonous events
+	 * @param callback which will be invoked for certain asynchronous events
 	 */
 	public void setCallback(MqttCallback callback);
 
@@ -695,9 +695,9 @@ public interface IMqttAsyncClient {
 	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)} 
 	 * callback can be used to track the delivery of outstanding messages.
 	 * </p>
-	 * <p>If a client connects with cleansession true then there will be no
-	 * delivery tokens as the cleansession option deletes all earlier state.
-	 * For state to be remembered the client must connect with cleansession
+	 * <p>If a client connects with cleanSession true then there will be no
+	 * delivery tokens as the cleanSession option deletes all earlier state.
+	 * For state to be remembered the client must connect with cleanSession
 	 * set to false</P>
 	 * @return zero or more delivery tokens 
 	 */

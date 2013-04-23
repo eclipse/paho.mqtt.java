@@ -43,7 +43,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  * </p>
  * <p>If connecting with {@link MqttConnectOptions#setCleanSession(boolean)} set to true it 
  * is safe to use memory persistence as all state it cleared when a client disconnects. If
- * connecting with cleansession set to false, to provide reliable message delivery 
+ * connecting with cleanSession set to false, to provide reliable message delivery 
  * then a persistent message store should be used such as the default one. </p>
  * <p>The message store interface is pluggable. Different stores can be used by implementing
  * the {@link MqttClientPersistence} interface and passing it to the clients constructor. 
@@ -53,7 +53,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  */
 public class MqttClient implements IMqttClient { //), DestinationProvider {
 	
-	protected MqttAsyncClient aClient = null;  // Delegate implementation to MqttAshyncClient
+	protected MqttAsyncClient aClient = null;  // Delegate implementation to MqttAsyncClient
 	protected long timeToWait = -1;				// How long each method should wait for action to complete	
 	
 	final static String className = MqttClient.class.getName();
@@ -160,7 +160,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * must be specified in order for delivery of messages to be reliable. In
 	 * addition {@link MqttConnectOptions#setCleanSession(boolean)} must be set
 	 * to false. In the event that only QoS 0 messages are sent or received or 
-	 * cleansession is set to true then a safe store is not needed. 
+	 * cleanSession is set to true then a safe store is not needed. 
 	 * </p>
 	 * <p>An implementation of file-based persistence is provided in 
 	 * class {@link MqttDefaultFilePersistence} which will work in all Java SE based 

@@ -15,7 +15,7 @@ import java.util.Enumeration;
 
 /**
  * Represents a persistent data store, used to store outbound and inbound messages while they
- * are in flight, enabling delivery to the QOS specified. You can specify an implementation
+ * are in flight, enabling delivery to the QoS specified. You can specify an implementation
  * of this interface using {@link MqttClient#MqttClient(String, String, MqttClientPersistence)},
  * which the {@link MqttClient} will use to persist QoS 1 and 2 messages.
  * <p>

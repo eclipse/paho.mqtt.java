@@ -3,7 +3,7 @@ package org.eclipse.paho.client.mqttv3;
 /**
  * Enables an application to communicate with an MQTT server using using blocking methods. 
  * <p>
- * This interface allows applications to utilise all features of the MQTT version 3.1
+ * This interface allows applications to utilize all features of the MQTT version 3.1
  * specification including: 
  * <ul>
  * <li>connect
@@ -18,20 +18,20 @@ package org.eclipse.paho.client.mqttv3;
  * <ul>
  * <li>IMqttClient provides a set of methods that block and return control to the application
  * program once the MQTT action has completed.</li> 
- * <li>IMqttAsyncClient provides a set of non blocking methods that return control to the
+ * <li>IMqttAsyncClient provides a set of non-blocking methods that return control to the
  * invoking application after initial validation of parameters and state. The main processing is
  * performed in the background so as not to block the application programs thread. This non 
  * blocking approach is handy when the application wants to carry on processing while the 
  * MQTT action takes place. For instance connecting to an MQTT server can take time, using 
- * the non blocking connect method allows an application to display a busy indicator while the
- * connect action is occurring. Non blocking methods are particularly useful in event oriented 
+ * the non-blocking connect method allows an application to display a busy indicator while the
+ * connect action is occurring. non-blocking methods are particularly useful in event oriented 
  * programs and graphical programs where issuing methods that take time to complete on the the 
  * main or GUI thread can cause problems.</li>
  * </ul>
  * </p>
  * <p>
  * The non-blocking client can also be used in a blocking form by turning a non-blocking 
- * method into a blocking invocation using the following pettern:
+ * method into a blocking invocation using the following pattern:
  *     <code><pre>
  *     IMqttToken token;
  *     token = asyncClient.method(parms).waitForCompletion();
@@ -90,7 +90,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * work which has already been initiated to complete - for example, it will
 	 * wait for the QoS 2 flows from earlier publications to complete. When work has 
 	 * completed or after the quiesce timeout, the client will disconnect from 
-	 * the server. If the cleansession flag was set to false and is set to false the 
+	 * the server. If the cleanSession flag was set to false and is set to false the 
 	 * next time a connection is made QoS 1 and 2 messages that 
 	 * were not previously delivered will be delivered.</p>
 	 * 
@@ -104,7 +104,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
   public void disconnect(long quiesceTimeout) throws MqttException;
 
 	/**
-	 * Subscribe to a topic, which may include wildcards using a QOS of 1.
+	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 * 
 	 * @see #subscribe(String[], int[])
 	 * 
@@ -114,7 +114,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
   public void subscribe(String topicFilter) throws MqttException, MqttSecurityException;
 
 	/**
-	 * Subscribes to a one or more topics, which may include wildcards using a QOS of 1.
+	 * Subscribes to a one or more topics, which may include wildcards using a QoS of 1.
 	 * 
 	 * @see #subscribe(String[], int[])
 	 * 
@@ -131,8 +131,8 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages 
 	 * published at a lower quality of service will be received at the published 
-	 * QOS.  Messages published at a higher quality of service will be received using 
-	 * the QOS specified on the subscribe.  
+	 * QoS.  Messages published at a higher quality of service will be received using 
+	 * the QoS specified on the subscribe.  
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
   public void subscribe(String topicFilter, int qos) throws MqttException;
@@ -157,10 +157,10 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:
 	 * <ul>
-	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
-	 * <li>The client connects with CleanSession set to true</ul>
+	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
+	 * <li>The client connects with cleanSession set to true</ul>
 	 * </li>
-	 * With CleanSession set to false the MQTT server will store messages on 
+	 * With cleanSession set to false the MQTT server will store messages on 
 	 * behalf of the client when the client is not connected. The next time the 
 	 * client connects with the <bold>same client ID</bold> the server will 
 	 * deliver the stored messages to the client.
@@ -224,8 +224,8 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * @param topicFilters one or more topics to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service to subscribe each topic at.Messages 
 	 * published at a lower quality of service will be received at the published 
-	 * QOS.  Messages published at a higher quality of service will be received using 
-	 * the QOS specified on the subscribe.  
+	 * QoS.  Messages published at a higher quality of service will be received using 
+	 * the QoS specified on the subscribe.  
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
@@ -370,7 +370,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:
 	 * <ul>
 	 * <li>{@link MqttClient#publish(String, MqttMessage)} to publish a message in a blocking manner
-	 * <li>or use publish methods on the non blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, IMqttActionListener)}
+	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, IMqttActionListener)}
 	 * </ul>
 	 * </p>
 	 * <p>When building an application,
@@ -444,9 +444,9 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)} 
 	 * callback can be used to track the delivery of outstanding messages.
 	 * </p>
-	 * <p>If a client connects with cleansession true then there will be no
-	 * delivery tokens as the cleansession option deletes all earlier state.
-	 * For state to be remembered the client must connect with cleansession
+	 * <p>If a client connects with cleanSession true then there will be no
+	 * delivery tokens as the cleanSession option deletes all earlier state.
+	 * For state to be remembered the client must connect with cleanSession
 	 * set to false</P>
 	 * @return zero or more delivery tokens 
 	 */

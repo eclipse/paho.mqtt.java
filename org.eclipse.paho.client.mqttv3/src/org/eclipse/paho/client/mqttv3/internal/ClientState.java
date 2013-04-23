@@ -53,14 +53,14 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * 
  * 2) When the client or specifically ClientState is instantiated the messages are 
  * read from the persistent store into:
- * - outboundqos2 hashtable if a qos 2 publish or pubrel
- * - outboundqos1 hashtable if a qos 1 publish
+ * - outboundqos2 hashtable if a QoS 2 PUBLISH or PUBREL
+ * - outboundqos1 hashtable if a QoS 1 PUBLISH
  * (see restoreState)
  * 
  * 3) On Connect, copy messages from the outbound hashtables to the pendingMessages or 
  * pendingFlows vector in messageid order.
  * - Initial message publish goes onto the pendingmessages buffer. 
- * - Pubrel goes onto the pendingflows buffer
+ * - PUBREL goes onto the pendingflows buffer
  * (see restoreInflightMessages)
  * 
  * 4) Sender thread reads messages from the pendingflows and pendingmessages buffer
@@ -69,13 +69,13 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * messages are stored in memory. (Persistence is only used at start up)
  *  
  * 5) Receiver thread - receives wire messages: 
- *  - if QOS 1 then remove from persistence and outboundqos1
- *  - if QOS 2 pubrec send pubrel. Updating the outboundqos2 entry with the pubrel
+ *  - if QoS 1 then remove from persistence and outboundqos1
+ *  - if QoS 2 PUBREC send PUBREL. Updating the outboundqos2 entry with the PUBREL
  *    and update persistence.
- *  - if QOS 2 pubcomp remove from persistence and outboundqos2  
+ *  - if QoS 2 PUBCOMP remove from persistence and outboundqos2  
  * 
  * Notes:
- * because of the multi threaded nature of the client it is vital that any changes to this
+ * because of the multithreaded nature of the client it is vital that any changes to this
  * class take concurrency into account.  For instance as soon as a flow / message is put on 
  * the wire it is possible for the receiving thread to receive the ack and to be processing 
  * the response before the sending side has finished processing.  For instance a connect may
@@ -504,8 +504,8 @@ public class ClientState {
 	 * Need to send a ping if nothing has been sent or received  
 	 * in the last keepalive interval. It is important to check for 
 	 * both sent and received packets in order to catch the case where an 
-	 * app is solely sending QOS 0 messages or receiving QOS 0 messages.
-	 * QOS 0 message are not good enough for checking a connection is
+	 * app is solely sending QoS 0 messages or receiving QoS 0 messages.
+	 * QoS 0 message are not good enough for checking a connection is
 	 * alive as they are one way messages.
 	 * 
 	 * If a ping has been sent but no data has been received in the 
@@ -583,7 +583,7 @@ public class ClientState {
 
 				// Check if there is a need to send a ping to keep the session alive. 
 				// Note this check is done before processing messages. If not done first
-				// an app that only publishes QOS 0 messages will prevent keepalive processing
+				// an app that only publishes QoS 0 messages will prevent keepalive processing
 				// from functioning.
 				checkForActivity();
 				
@@ -676,7 +676,7 @@ public class ClientState {
 		token.internalTok.notifySent();
 		if (message instanceof MqttPublish) {
 			if (((MqttPublish)message).getMessage().getQos() == 0) {
-				// once a QOS 0 message is sent we can clean up its records straight away as
+				// once a QoS 0 message is sent we can clean up its records straight away as
 				// we won't be hearing about it again
 				token.internalTok.markComplete(null, null);
 				callback.asyncOperationComplete(token);
@@ -734,9 +734,9 @@ public class ClientState {
 		MqttException mex = null;
 
 		if (ack instanceof MqttPubRec) {
-			// Complete the QOS 2 flow. Unlike all other
-			// flows, QOS is a 2 phase flow. The second phase sends a
-			// pubrel - the operation is not complete until a pubcomp
+			// Complete the QoS 2 flow. Unlike all other
+			// flows, QoS is a 2 phase flow. The second phase sends a
+			// PUBREL - the operation is not complete until a PUBCOMP
 			// is received
 			MqttPubRel rel = new MqttPubRel((MqttPubRec) ack);
 			this.send(rel, token);
@@ -790,7 +790,7 @@ public class ClientState {
 
 	/**
 	 * Called by the CommsReceiver when a message has been received.
-	 * Handles inbound messages and other flows such as pubrel. 
+	 * Handles inbound messages and other flows such as PUBREL. 
 	 * 
 	 * @param message
 	 * @throws MqttException
@@ -920,7 +920,6 @@ public class ClientState {
 	}
 	
 	/**
-	 * 
 	 * Called during shutdown to work out if there are any tokens still
 	 * to be notified and waiters to be unblocked.  Notifying and unblocking 
 	 * takes place after most shutdown processing has completed. The tokenstore
@@ -1066,7 +1065,7 @@ public class ClientState {
 				}
 			}
 			
-			// Quiesce time up or inflight messsages delivered.  Ensure pending delivery
+			// Quiesce time up or inflight messages delivered.  Ensure pending delivery
 			// vectors are cleared ready for disconnect to be sent as the final flow.
 			synchronized (queueLock) {
 				pendingMessages.clear();
