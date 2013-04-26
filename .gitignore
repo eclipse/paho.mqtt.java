@@ -53,4 +53,6 @@ Icon
 *.war
 *.ear
 
-
+org.eclipse.paho.client.mqttv3/bin/
+org.eclipse.paho.client.mqttv3/build/
+org.eclipse.paho.sample.mqttv3app/bin/
