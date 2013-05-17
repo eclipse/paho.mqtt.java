@@ -28,8 +28,8 @@ public class MqttPersistentData implements MqttPersistable {
 	private int    pLength = 0;
 
 	/**
-	 * Construct a data object to pass across the MQTT client persistence
-	 * interface.<BR>
+	 * Construct a data object to pass across the MQTT client persistence interface.
+	 * 
 	 * When this Object is passed to the persistence implementation the key is
 	 * used by the client to identify the persisted data to which further
 	 * update or deletion requests are targeted.<BR>

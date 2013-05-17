@@ -156,10 +156,10 @@ public class MqttMessage {
 	 * If a persistence mechanism is not specified, the message will not be 
 	 * delivered in the event of a client failure.</li>
 	 * 
-	 * If persistence is not configured, QOS 1 and 2 messages will still be delivered
+	 * If persistence is not configured, QoS 1 and 2 messages will still be delivered
 	 * in the event of a network or server problem as the client will hold state in memory.
 	 * If the MQTT client is shutdown or fails and persistence is not configured then 
-	 * delivery of QOS 1 and 2 messages can not be maintained as client side state will 
+	 * delivery of QoS 1 and 2 messages can not be maintained as client side state will 
 	 * be lost. 
 	 * 
 	 * @param qos the "quality of service" to use.  Set to 0, 1, 2.

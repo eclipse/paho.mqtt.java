@@ -34,6 +34,10 @@ public class MqttConnectOptions {
 	 */
 	public static final boolean CLEAN_SESSION_DEFAULT = true;
 	
+	protected static final int URI_TYPE_TCP = 0;
+	protected static final int URI_TYPE_SSL = 1;
+	protected static final int URI_TYPE_LOCAL = 2;
+  
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
 	private String willDestination = null;
 	private MqttMessage willMessage = null;
@@ -43,7 +47,8 @@ public class MqttConnectOptions {
 	private Properties sslClientProps = null;
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
-	
+	private String[] serverURIs = null;
+
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the 
 	 * default values.
@@ -198,9 +203,14 @@ public class MqttConnectOptions {
 	 * This value, measured in seconds, defines the maximum time interval
 	 * the client will wait for the network connection to the MQTT server to be established. 
 	 * The default timeout is 30 seconds.
-	 * @param connectionTimeout the timeout value, measured in seconds.
+	 * A value of 0 disables timeout processing meaning the client will wait until the
+	 * network connection is made successfully or fails. 
+	 * @param connectionTimeout the timeout value, measured in seconds. It must be >0;
 	 */
 	public void setConnectionTimeout(int connectionTimeout) {
+		if (connectionTimeout <0 ) {
+			throw new IllegalArgumentException();
+		}
 		this.connectionTimeout = connectionTimeout;
 	}
 	
@@ -325,7 +335,7 @@ public class MqttConnectOptions {
 	}
 	
 	/**
-	 * Returns whether the server should remember state for the client across reconnects.
+	 * Returns whether the client and server should remember state for the client across reconnects.
 	 * @return the clean session flag
 	 */
 	public boolean isCleanSession() {
@@ -333,13 +343,103 @@ public class MqttConnectOptions {
 	}
 	
 	/**
-	 * Sets whether the server should remember state for the client across reconnects.
-	 * This includes subscriptions and the state of any in-flight messages.
+	 * Sets whether the client and server should remember state across restarts and reconnects.
+	 * <ul>
+	 * <li>If set to false both the client and server will maintain state across 
+	 * restarts of the client, the server and the connection. As state is maintained:
+	 * <ul>
+	 * <li>Message delivery will be reliable meeting 
+	 * the specified QOS even if the client, server or connection are restarted. 
+	 * <li> The server will treat a subscription as durable.
+	 * </ul> 
+	 * <lI>If set to true the client and server will not maintain state across 
+	 * restarts of the client, the server or the connection. This means
+	 * <ul>
+	 * <li>Message delivery to the specified QOS cannot be maintained if the 
+	 * client, server or connection are restarted
+	 * <lI>The server will treat a subscription as non-durable  
+	 * </ul>
  	 */
 	public void setCleanSession(boolean cleanSession) {
 		this.cleanSession = cleanSession;
 	}
-	
+
+	/**
+	 * Return a list of serverURIs the client may connect to
+	 * @return the serverURIs or null if not set
+	 */
+	public String[] getServerURIs() {
+		return serverURIs;
+	}
+
+	/**
+	 * Set a list of one or more serverURIs the client may connect to.
+	 * <p>
+	 * Each <code>serverURI</code> specifies the address of a server that the client may 
+	 * connect to. Two types of 
+	 * connection are supported <code>tcp://</code> for a TCP connection and 
+	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS. 
+	 * For example:
+	 * <ul>
+	 * 	<li><code>tcp://localhost:1883</code></li>
+	 * 	<li><code>ssl://localhost:8883</code></li>
+	 * </ul> 
+	 * If the port is not specified, it will
+	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
+	 * <p>
+	 * If serverURIs is set then it overrides the serverURI parameter passed in on the 
+	 * constructor of the MQTT client. 
+	 * <p>
+	 * When an attempt to connect is initiated the client will start with the first 
+	 * serverURI in the list and work through
+	 * the list until a connection is established with a server. If a connection cannot be made to 
+	 * any of the servers then the connect attempt fails.  
+	 * <p>
+	 * Specifying a list of servers that a client may connect to has several uses: 
+	 * <ol> 
+	 * <li>High Availability and reliable message delivery
+	 * <p>Some MQTT servers support a high availability feature where two or more 
+	 * "equal" MQTT servers share state. An MQTT client can connect to any of the "equal" 
+	 * servers and be assured that messages are reliably delivered and durable subscriptions
+	 * are maintained no matter which server the client connects to. 
+	 * <p>The cleansession flag must be set to false if durable subscriptions and/or reliable
+	 * message delivery is required. 
+	 * <li>Hunt List 
+	 * <p>A set of servers may be specified that are not "equal" (as in the high availability
+	 * option). As no state is shared across the servers reliable message delivery and 
+	 * durable subscriptions are not valid. The cleansession flag must be set to true if the 
+	 * hunt list mode is used
+	 * </ol>
+	 * </p>
+	 * @param array of serverURIs
+	 */
+	public void setServerURIs(String[] array) {
+		for (int i = 0; i < array.length; i++) {
+			validateURI(array[i]);
+		}
+		this.serverURIs = array;
+	}
+
+	/**
+	 * Validate a URI 
+	 * @param srvURI
+	 * @return the URI type
+	 */
+	protected static int validateURI(String srvURI) {
+		if (srvURI.startsWith("tcp://")) {
+			return URI_TYPE_TCP;
+		}
+		else if (srvURI.startsWith("ssl://")) {
+			return URI_TYPE_SSL;
+		}
+		else if (srvURI.startsWith("local://")) {
+			return URI_TYPE_LOCAL;
+		}
+		else {
+			throw new IllegalArgumentException(srvURI);
+		}
+	}
+
 	public Properties getDebug() {
 		Properties p = new Properties();
 		p.put("CleanSession", new Boolean(isCleanSession()));

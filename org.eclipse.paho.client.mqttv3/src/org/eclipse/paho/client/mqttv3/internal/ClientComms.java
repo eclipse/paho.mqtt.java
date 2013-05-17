@@ -41,7 +41,8 @@ public class ClientComms {
 	public static String 		BUILD_LEVEL = "@@BUILDLEVEL@@";
 	
 	private IMqttAsyncClient 	client;
-	NetworkModule 				networkModule;
+	private int 			networkModuleIndex;
+	private NetworkModule[]		networkModules;
 	CommsReceiver 				receiver;
 	CommsSender 				sender;
 	CommsCallback 				callback;
@@ -51,14 +52,14 @@ public class ClientComms {
 	CommsTokenStore 			tokenStore;
 	boolean 					stoppingComms = false;
 	
-	final static byte CONNECTED		=0;
-	final static byte CONNECTING	=1;
-	final static byte DISCONNECTING	=2;
-	final static byte DISCONNECTED	=3;
-	final static byte CLOSED		=4;
+	final static byte CONNECTED	= 0;
+	final static byte CONNECTING	= 1;
+	final static byte DISCONNECTING	= 2;
+	final static byte DISCONNECTED	= 3;
+	final static byte CLOSED	= 4;
 	
 	private byte 	conState = DISCONNECTED;
-	Object 			conLock = new Object();  	// Used to syncrhonize connection state
+	Object       conLock = new Object();  	// Used to synchronize connection state
 	private boolean closePending  = false;
 	
 	final static String className = ClientComms.class.getName();
@@ -133,9 +134,10 @@ public class ClientComms {
 	}
 	
 	/**
-	 * Tidy up
-	 * - call each main class and let it tidy up e.g. releasing the token 
-	 *   store which normally survives a disconnect. 
+	 * Close and tidy up. 
+	 * 
+	 * Call each main class and let it tidy up e.g. releasing the token 
+	 * store which normally survives a disconnect. 
 	 * @throws MqttException  if not disconnected
 	 */
 	public void close() throws MqttException {
@@ -166,7 +168,7 @@ public class ClientComms {
 				persistence = null;
 				sender = null;
 				receiver = null;
-				networkModule = null;
+				networkModules = null;
 				conOptions = null;
 				tokenStore = null;
 			}
@@ -278,8 +280,13 @@ public class ClientComms {
 
 		// Stop the network module, send and receive now not possible
 		try { 
-			if (networkModule != null) {networkModule.stop();}
-		}catch(Exception ioe) {
+			if (networkModules != null) { 
+				NetworkModule networkModule = networkModules[networkModuleIndex];
+				if (networkModule != null) { 
+					networkModule.stop(); 
+				}
+			} 
+		} catch (Exception ioe) {
 			// Ignore as we are shutting down
 		}
 		
@@ -441,8 +448,17 @@ public class ClientComms {
 	protected MqttTopic getTopic(String topic) {
 		return new MqttTopic(topic, this);
 	}
-	public void setNetworkModule(NetworkModule networkModule) {
-		this.networkModule = networkModule;
+	public void setNetworkModuleIndex(int index) {
+		this.networkModuleIndex = index;
+	}
+	public int getNetworkModuleIndex() {
+		return networkModuleIndex;
+	}
+	public NetworkModule[] getNetworkModules() {
+		return networkModules;
+	}
+	public void setNetworkModules(NetworkModule[] networkModules) {
+		this.networkModules = networkModules;
 	}
 	public MqttDeliveryToken[] getPendingDeliveryTokens() {
 		return tokenStore.getOutstandingDelTokens();
@@ -512,12 +528,13 @@ public class ClientComms {
 					toks[i].internalTok.setException(null);
 				}
 				
-				// Save the conncet token in tokenStore as failure can occur before send
+				// Save the connect token in tokenStore as failure can occur before send
 				tokenStore.saveToken(conToken,conPacket);
 				
 				// Connect to the server at the network level e.g. TCP socket and then
 				// start the background processing threads before sending the connect
 				// packet.
+				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
 				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream());
 				receiver.start("MQTT Rec: "+getClient().getClientId());

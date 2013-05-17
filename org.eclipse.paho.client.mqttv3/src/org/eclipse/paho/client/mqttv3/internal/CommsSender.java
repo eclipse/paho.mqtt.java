@@ -11,10 +11,13 @@
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
+import java.io.IOException;
 import java.io.OutputStream;
+
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttOutputStream;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -106,7 +109,14 @@ public class CommsSender implements Runnable {
 						if (token != null) {
 							synchronized (token) {
 								out.write(message);
-								out.flush();
+								try {
+									out.flush();
+								} catch (IOException ex) {
+									// The flush has been seen to fail on disconnect of a SSL socket
+									// as disconnect is in progress this should not be treated as an error
+									if (!(message instanceof MqttDisconnect))
+										throw ex;
+								}
 								clientState.notifySent(message);
 							}
 						}

@@ -43,7 +43,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  * </p>
  * <p>If connecting with {@link MqttConnectOptions#setCleanSession(boolean)} set to true it 
  * is safe to use memory persistence as all state it cleared when a client disconnects. If
- * connecting with cleansession set to false, to provide reliable message delivery 
+ * connecting with cleanSession set to false, to provide reliable message delivery 
  * then a persistent message store should be used such as the default one. </p>
  * <p>The message store interface is pluggable. Different stores can be used by implementing
  * the {@link MqttClientPersistence} interface and passing it to the clients constructor. 
@@ -53,7 +53,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  */
 public class MqttClient implements IMqttClient { //), DestinationProvider {
 	
-	protected MqttAsyncClient aClient = null;  // Delegate implementation to MqttAshyncClient
+	protected MqttAsyncClient aClient = null;  // Delegate implementation to MqttAsyncClient
 	protected long timeToWait = -1;				// How long each method should wait for action to complete	
 	
 	final static String className = MqttClient.class.getName();
@@ -62,24 +62,43 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	
 	/**
 	 * Create an MqttClient that can be used to communicate with an MQTT server.
-	 * <p> 
-	 * The address of the server should be a URI, using a scheme of either 
-	 * "tcp://" for a TCP connection or "ssl://" for a TCP connection secured by SSL/TLS. 
+	 * <p>
+	 * The address of a server can be specified on the constructor. Alternatively 
+	 * a list containing one or more servers can be specified using the
+	 * {@link MqttConnectOptions#setServerURIs(String[]) setServerURIs} method 
+	 * on MqttConnectOptions.
+	 * 
+	 * <p>The <code>serverURI</code> parameter is typically used with the   
+	 * the <code>clientId</code> parameter to form a key. The key 
+	 * is used to store and reference messages while they are being delivered.
+	 * Hence the serverURI specified on the constructor must still be specified even if a list
+	 * of servers is specified on an MqttConnectOptions object.
+	 * The serverURI on the constructor must remain the same across
+	 * restarts of the client for delivery of messages to be maintained from a given 
+	 * client to a given server or set of servers.
+	 * 
+	 * <p>The address of the server to connect to is specified as a URI. Two types of 
+	 * connection are supported <code>tcp://</code> for a TCP connection and 
+	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS. 
 	 * For example:
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
 	 * </ul> 
 	 * If the port is not specified, it will
-	 * default to 1883 for "tcp://" URIs, and 8883 for "ssl://" URIs.
+	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
 	 * </p>
+	 * 
 	 * <p>
-	 * A client identified to connect to an MQTT server, it 
-	 * must be unique across all clients connecting to the same
-	 * server. A convenience method is provided to generate a random client id that
+	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.   
+	 * It must be unique across all clients connecting to the same
+	 * server. The clientId is used by the server to store data related to the client, 
+	 * hence it is important that the clientId remain the same when connecting to a server 
+	 * if durable subscriptions or reliable messaging are required. 
+	 * <p>A convenience method is provided to generate a random client id that
 	 * should satisfy this criteria - {@link #generateClientId()}. As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client must use the
-	 * same identifier between connections if durable subscriptions are used and reliable 
+	 * same identifier between connections if durable subscriptions or reliable 
 	 * delivery of messages is required.
 	 * </p>
 	 * <p>
@@ -98,11 +117,13 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * 
 	 * <p>In Java ME, the platform settings are used for SSL connections.</p>
 	 *  
-	 * <p>A default instance of {@link MqttDefaultFilePersistence} is used by
-	 * the client. To specify a different persistence implementation, or to turn
-	 * off persistence, use the {@link #MqttClient(String, String, MqttClientPersistence)} constructor.
+	 * <p>An instance of the default persistence mechanism {@link MqttDefaultFilePersistence} 
+	 * is used by the client. To specify a different persistence mechanism or to turn
+	 * off persistence, use the {@link #MqttClient(String, String, MqttClientPersistence)} 
+	 * constructor.
 	 *  
-	 * @param serverURI the address of the server to connect to, specified as a URI
+	 * @param serverURI the address of the server to connect to, specified as a URI. Can be overridden using 
+	 * {@link MqttConnectOptions#setServerURIs(String[])}
 	 * @param clientId a client identifier that is unique on the server being connected to
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://".
@@ -114,25 +135,44 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	}
 	
 	/**
-	 * Create an MqttAsyncClient that can be used to communicate with an MQTT server.
-	 * <p> 
-	 * The address of the server should be a URI, using a scheme of either 
-	 * "tcp://" for a TCP connection or "ssl://" for a TCP connection secured by SSL/TLS. 
+	 * Create an MqttClient that can be used to communicate with an MQTT server.
+	 * <p>
+	 * The address of a server can be specified on the constructor. Alternatively 
+	 * a list containing one or more servers can be specified using the
+	 * {@link MqttConnectOptions#setServerURIs(String[]) setServerURIs} method 
+	 * on MqttConnectOptions.
+	 * 
+	 * <p>The <code>serverURI</code> parameter is typically used with the   
+	 * the <code>clientId</code> parameter to form a key. The key 
+	 * is used to store and reference messages while they are being delivered.
+	 * Hence the serverURI specified on the constructor must still be specified even if a list
+	 * of servers is specified on an MqttConnectOptions object.
+	 * The serverURI on the constructor must remain the same across
+	 * restarts of the client for delivery of messages to be maintained from a given 
+	 * client to a given server or set of servers.
+	 * 
+	 * <p>The address of the server to connect to is specified as a URI. Two types of 
+	 * connection are supported <code>tcp://</code> for a TCP connection and 
+	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS. 
 	 * For example:
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
 	 * </ul> 
 	 * If the port is not specified, it will
-	 * default to 1883 for "tcp://" URIs, and 8883 for "ssl://" URIs.
+	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
 	 * </p>
+	 * 
 	 * <p>
-	 * A client identified to connect to an MQTT server, it 
-	 * must be unique across all clients connecting to the same
-	 * server. A convenience method is provided to generate a random client id that
+	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.   
+	 * It must be unique across all clients connecting to the same
+	 * server. The clientId is used by the server to store data related to the client, 
+	 * hence it is important that the clientId remain the same when connecting to a server 
+	 * if durable subscriptions or reliable messaging are required. 
+	 * <p>A convenience method is provided to generate a random client id that
 	 * should satisfy this criteria - {@link #generateClientId()}. As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client must use the
-	 * same identifier between connections if durable subscriptions are used and reliable 
+	 * same identifier between connections if durable subscriptions or reliable 
 	 * delivery of messages is required.
 	 * </p>
 	 * <p>
@@ -151,27 +191,30 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * 
 	 * <p>In Java ME, the platform settings are used for SSL connections.</p>
 	 * <p> 
-	 * The persistence mechanism is used to enable reliable messaging. 
-	 * For qualities of server (QoS) 1 or 2 to work, messages must be persisted
-	 * to disk by both the client and the server.  If this is not done, then
+	 * A persistence mechanism is used to enable reliable messaging. 
+	 * For messages sent at qualities of service (QoS) 1 or 2 to be reliably delivered,
+	 * messages must be stored (on both the client and server) until the delivery of the message
+	 * is complete. If messages are not safely stored when being delivered then
 	 * a failure in the client or server can result in lost messages. A pluggable 
 	 * persistence mechanism is supported via the {@link MqttClientPersistence} 
-	 * interface. A implementer of this interface that safely stores messages
+	 * interface. An implementer of this interface that safely stores messages
 	 * must be specified in order for delivery of messages to be reliable. In
 	 * addition {@link MqttConnectOptions#setCleanSession(boolean)} must be set
 	 * to false. In the event that only QoS 0 messages are sent or received or 
-	 * cleansession is set to true then a safe store is not needed. 
+	 * cleansession is set to true then a safe store is not needed.  
 	 * </p>
 	 * <p>An implementation of file-based persistence is provided in 
 	 * class {@link MqttDefaultFilePersistence} which will work in all Java SE based 
 	 * systems. If no persistence is needed, the persistence parameter 
 	 * can be explicitly set to <code>null</code>.</p>
 	 * 
-	 * @param serverURI the address of the server to connect to, specified as a URI
+	 * @param serverURI the address of the server to connect to, specified as a URI. Can be overridden using 
+	 * {@link MqttConnectOptions#setServerURIs(String[])}
 	 * @param clientId a client identifier that is unique on the server being connected to
- 	 * @param persistence the persistence mechanism to use.
+ 	 * @param persistence the persistence class to use to store in-flight message. If null then the 
+ 	 * default persistence mechanism is used
 	 * @throws IllegalArgumentException if the URI does not start with
-	 * "tcp://", "ssl://" or "local://".
+	 * "tcp://", "ssl://" or "local://"
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 23 characters in length
 	 * @throws MqttException if any other problem was encountered 
 	 */
@@ -273,7 +316,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	}
 	
 	/**
-	 * Set the maximum time to wait for an action to complete
+	 * Set the maximum time to wait for an action to complete.
 	 * <p>Set the maximum time to wait for an action to complete before
 	 * returning control to the invoking application. Control is returned
 	 * when: 
@@ -291,7 +334,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * the action finishes and not timeout. 
 	 */
 	public void setTimeToWait(long timeToWaitInMillis) throws IllegalArgumentException{
-		if (timeToWait < -1) {
+		if (timeToWaitInMillis < -1) {
 			throw new IllegalArgumentException();
 		}
 		this.timeToWait = timeToWaitInMillis;

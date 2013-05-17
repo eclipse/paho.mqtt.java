@@ -1,6 +1,6 @@
 package org.eclipse.paho.client.mqttv3;
 /**
- * Provides a mechanism for tracking the delivery of a message
+ * Provides a mechanism for tracking the delivery of a message.
  * 
  * <p>A subclass of IMqttToken that allows the delivery of a message to be tracked. 
  * Unlike instances of IMqttToken delivery tokens can be used across connection

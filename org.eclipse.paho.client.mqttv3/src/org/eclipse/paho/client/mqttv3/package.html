@@ -1,5 +1,5 @@
 <body>
-Contains a programming interface enabling applications to communicate with an MQTT server
+Contains a programming interface enabling applications to communicate with an MQTT server.
 
 <p>
 The MQ Telemetry Transport (MQTT) is a lightweight broker-based publish/subscribe 
@@ -45,8 +45,8 @@ but not limited to:
   <li><code>connect</code> to the server</li>
   <li>Exchange messages with the server:
   <ul>
-	<li><code>publish messages</code> to the server, 
-	 via a <code>topic</code>.</li>
+	<li><code>publish messages</code> to the server 
+	 specifying a <code>topic</code> as the destination on the server</li>
 	<li><code>subscribe</code> to one more <code>topics</code>. The server will send any messages
 	 it receives on those topics to the client. The client will be informed when a message 
 	 arrives via a <code>callback</code> 
@@ -60,8 +60,8 @@ to use when creating MQTT application include:
   <li>Every client instance that connects to an MQTT server must have a unique client identifier.
     If a second instance of a client with the same ID connects to a server the first instance will be
     disconnected.
-  <li>For message delivery to be reliable and withstand both abnormal network breaks and clients/server
-    outages the client must use a persistent store to hold messages while they are being delivered. This is 
+  <li>For message delivery to be reliable and withstand normal and abnormal network breaks together with client 
+    and server outages the client must use a persistent store to hold messages while they are being delivered. This is 
     the default case where a file based persistent store 
     {@link org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence MqttDefaultFilePersistence} is used. 
   <li>When connecting the {@link org.eclipse.paho.client.mqttv3.MqttConnectOptions#setCleanSession(boolean) cleansession}
@@ -96,7 +96,7 @@ to use when creating MQTT application include:
       <li>Pass a {@link org.eclipse.paho.client.mqttv3.IMqttActionListener IMqttActionListener}
         to the operation. The listener will then be called back when the operation completes.
       <li>Set a {@link org.eclipse.paho.client.mqttv3.MqttCallback MqttCallback} on the client. It
-        will be notified when a message arrive, a message have been delivered to the server and when the
+        will be notified when a message arrives, a message has been delivered to the server and when the
         connection to the server is lost.
     </ul>
     <li>{@link org.eclipse.paho.client.mqttv3.IMqttClient MqttClient} where methods block until
@@ -122,6 +122,15 @@ to use when creating MQTT application include:
     <li>{@link org.eclipse.paho.sample.mqttv3app.SampleAsyncWait} uses the asynchronous client and
       shows how to use the token returned from each operation to block until the operation completes.
   </ul>
+  <li>{@link org.eclipse.paho.client.mqttv3.MqttConnectOptions MqttConnectOptions} can be used to override the 
+  default connection options. This includes:
+    <ul>
+    	<li>Setting the cleansession flag
+    	<li>Specifying a list of MQTT servers that the client can attempt to connect to
+    	<li>Set a keepalive interval 
+    	<li>Setting the last will and testament
+    	<li>Setting security credentials
+    </ul>
 </ul>
 
 </body>

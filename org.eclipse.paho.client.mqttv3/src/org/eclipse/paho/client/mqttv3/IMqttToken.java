@@ -68,7 +68,7 @@ public interface IMqttToken {
 	public boolean isComplete();
 		
 	/**
-	 * Returns an exception providing more detail if an operation failed 
+	 * Returns an exception providing more detail if an operation failed.
 	 * <p>While an action in in progress and when an action completes successfully
 	 * null will be returned. Certain errors like timeout or shutting down will not
 	 * set the exception as the action has not failed or completed at that time

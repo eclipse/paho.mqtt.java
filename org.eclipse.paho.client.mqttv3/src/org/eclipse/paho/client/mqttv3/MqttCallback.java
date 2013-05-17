@@ -32,7 +32,7 @@ public interface MqttCallback {
 	 * 
 	 * <p>
 	 * This method is invoked synchronously by the MQTT client. An
-	 * acknowledgement is not sent back to the server until this
+	 * acknowledgment is not sent back to the server until this
 	 * method returns cleanly.</p>
 	 * <p>
 	 * If an implementation of this method throws an <code>Exception</code>, then the
@@ -46,11 +46,11 @@ public interface MqttCallback {
 	 * If an application needs to persist data, then it
 	 * should ensure the data is persisted prior to returning from this method, as
 	 * after returning from this method, the message is considered to have been
-	 * delivered, and will not be reproducable.</p>
+	 * delivered, and will not be reproducible.</p>
 	 * <p>
 	 * It is possible to send a new message within an implementation of this callback
 	 * (for example, a response to this message), but the implementation must not 
-	 * disconnect the client, as it will be impossible to send an acknowledgement for
+	 * disconnect the client, as it will be impossible to send an acknowledgment for
 	 * the message being processed, and a deadlock will occur.</p>
 	 * 
 	 * @param topic name of the topic on the message was published to
@@ -62,10 +62,10 @@ public interface MqttCallback {
 	
 	/**
 	 * Called when delivery for a message has been completed, and all 
-	 * acknowledgements have been received. For QOS 0 messages it is 
+	 * acknowledgments have been received. For QoS 0 messages it is 
 	 * called once the message has been handed to the network for
-	 * delivery. For QOS 1 it is called when PUBACK is received and
-	 * for QOS 2 when PUBCOMP is received. The token will be the same
+	 * delivery. For QoS 1 it is called when PUBACK is received and
+	 * for QoS 2 when PUBCOMP is received. The token will be the same
 	 * token as that returned when the message was published. 
 	 * 
 	 * @param token the delivery token associated with the message.
