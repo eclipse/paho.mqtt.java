@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2009, 2012 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
@@ -29,27 +29,27 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 /**
  * A sample application that demonstrates how to use the Paho MQTT v3.1 Client API in
  * non-blocking callback/notification mode.
- * 
- * It can be run from the command line in one of two modes: 
+ *
+ * It can be run from the command line in one of two modes:
  *  - as a publisher, sending a single message to a topic on the server
  *  - as a subscriber, listening for messages from the server
- *  
+ *
  *  There are three versions of the sample that implement the same features
  *  but do so using using different programming styles:
  *  <ol>
  *  <li>Sample which uses the API which blocks until the operation completes</li>
- *  <li>SampleAsyncWait shows how to use the asynchronous API with waiters that block until 
+ *  <li>SampleAsyncWait shows how to use the asynchronous API with waiters that block until
  *  an action completes</li>
  *  <li>SampleAsyncCallBack (this one) shows how to use the asynchronous API where events are
  *  used to notify the application when an action completes<li>
  *  </ol>
- *  
- *  If the application is run with the -h parameter then info is displayed that 
- *  describes all of the options / parameters. 
+ *
+ *  If the application is run with the -h parameter then info is displayed that
+ *  describes all of the options / parameters.
  */
 public class SampleAsyncCallBack implements MqttCallback {
-	
-	int state = BEGIN;	
+
+	int state = BEGIN;
 
 	static final int BEGIN = 0;
 	static final int CONNECTED = 1;
@@ -59,32 +59,32 @@ public class SampleAsyncCallBack implements MqttCallback {
 	static final int FINISH = 5;
 	static final int ERROR = 6;
 	static final int DISCONNECT = 7;
-	
+
 	/**
 	 * The main entry point of the sample.
-	 * 
+	 *
 	 * This method handles parsing the arguments specified on the
 	 * command-line before performing the specified action.
 	 */
 	public static void main(String[] args) {
-		
+
 		// Default settings:
 		boolean quietMode 	= false;
 		String action 		= "publish";
 		String topic 		= "";
-		String message 		= "Message from async calback MQTTv3 Java client sample";
+		String message 		= "Message from async callback Paho MQTTv3 Java client sample";
 		int qos 			= 2;
 		String broker 		= "m2m.eclipse.org";
 		int port 			= 1883;
 		String clientId 	= null;
 		String subTopic		= "Sample/#";
 		String pubTopic 	= "Sample/Java/v3";
-		boolean cleanSession = true;			// Non durable subscriptions 
+		boolean cleanSession = true;			// Non durable subscriptions
 		boolean ssl = false;
 		String password = null;
 		String userName = null;
-		
-		// Parse the arguments - 
+
+		// Parse the arguments -
 		for (int i=0; i<args.length; i++) {
 			// Check this is a valid argument
 			if (args[i].length() == 2 && args[i].startsWith("-")) {
@@ -94,8 +94,8 @@ public class SampleAsyncCallBack implements MqttCallback {
 					case 'h': case '?':	printHelp(); return;
 					case 'q': quietMode = true;	continue;
 				}
-				
-				// Now handle the arguments that take a value and 
+
+				// Now handle the arguments that take a value and
 				// ensure one is specified
 				if (i == args.length -1 || args[i+1].charAt(0) == '-') {
 					System.out.println("Missing value for argument: "+args[i]);
@@ -117,18 +117,18 @@ public class SampleAsyncCallBack implements MqttCallback {
           case 'v': ssl = Boolean.valueOf(args[++i]).booleanValue();  break;
           case 'u': userName = args[++i];               break;
           case 'z': password = args[++i];               break;
-					default: 
+					default:
 						System.out.println("Unrecognised argument: "+args[i]);
-						printHelp(); 
+						printHelp();
 						return;
 				}
 			} else {
 				System.out.println("Unrecognised argument: "+args[i]);
-				printHelp(); 
+				printHelp();
 				return;
 			}
 		}
-		
+
 		// Validate the provided arguments
 		if (!action.equals("publish") && !action.equals("subscribe")) {
 			System.out.println("Invalid action: "+action);
@@ -148,7 +148,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 				topic = subTopic;
 			}
 		}
-			
+
 		String protocol = "tcp://";
 
     if (ssl) {
@@ -156,17 +156,17 @@ public class SampleAsyncCallBack implements MqttCallback {
     }
 
     String url = protocol + broker + ":" + port;
-		
+
 		if (clientId == null || clientId.equals("")) {
 			clientId = "SampleJavaV3_"+action;
 		}
 
-		// With a valid set of arguments, the real work of 
+		// With a valid set of arguments, the real work of
 		// driving the client API can begin
 		try {
 			// Create an instance of the Sample client wrapper
 			SampleAsyncCallBack sampleClient = new SampleAsyncCallBack(url,clientId,cleanSession, quietMode,userName,password);
-			
+
 			// Perform the specified action
 			if (action.equals("publish")) {
 				sampleClient.publish(topic,qos,message.getBytes());
@@ -186,8 +186,8 @@ public class SampleAsyncCallBack implements MqttCallback {
 			th.printStackTrace();
 		}
 	}
-    
-	// Private instance variables	
+
+	// Private instance variables
 	MqttAsyncClient 	client;
 	String 				brokerUrl;
 	private boolean 			quietMode;
@@ -198,7 +198,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 	boolean 			donext = false;
 	private String password;
 	private String userName;
-	
+
 	/**
 	 * Constructs an instance of the sample client wrapper
 	 * @param brokerUrl the url to connect to
@@ -209,7 +209,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 	 * @param password the password for the user
 	 * @throws MqttException
 	 */
-    public SampleAsyncCallBack(String brokerUrl, String clientId, boolean cleanSession, 
+    public SampleAsyncCallBack(String brokerUrl, String clientId, boolean cleanSession,
     		boolean quietMode, String userName, String password) throws MqttException {
     	this.brokerUrl = brokerUrl;
     	this.quietMode = quietMode;
@@ -217,14 +217,14 @@ public class SampleAsyncCallBack implements MqttCallback {
       this.password = password;
       this.userName = userName;
     	//This sample stores in a temporary directory... where messages temporarily
-    	// stored until the message has been delivered to the server. 
-    	//..a real application ought to store them somewhere 
+    	// stored until the message has been delivered to the server.
+    	//..a real application ought to store them somewhere
     	// where they are not likely to get deleted or tampered with
     	String tmpDir = System.getProperty("java.io.tmpdir");
-    	MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(tmpDir); 
-    	
+    	MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(tmpDir);
+
     	try {
-    		// Construct the object that contains connection parameters 
+    		// Construct the object that contains connection parameters
     		// such as cleanSession and LWT
 	    	conOpt = new MqttConnectOptions();
 	    	conOpt.setCleanSession(clean);
@@ -232,15 +232,15 @@ public class SampleAsyncCallBack implements MqttCallback {
           conOpt.setPassword(this.password.toCharArray());
         }
         if(userName != null) {
-          conOpt.setUserName(this.userName);     
+          conOpt.setUserName(this.userName);
         }
-	    	
+
     		// Construct the MqttClient instance
 			client = new MqttAsyncClient(this.brokerUrl,clientId, dataStore);
-			
+
 			// Set this wrapper as the callback handler
 	    	client.setCallback(this);
-	    	
+
 		} catch (MqttException e) {
 			e.printStackTrace();
 			log("Unable to set up client: "+e.toString());
@@ -252,11 +252,11 @@ public class SampleAsyncCallBack implements MqttCallback {
      * Publish / send a message to an MQTT server
      * @param topicName the name of the topic to publish to
      * @param qos the quality of service to delivery the message at (0,1,2)
-     * @param payload the set of bytes to send to the MQTT server 
+     * @param payload the set of bytes to send to the MQTT server
      * @throws MqttException
      */
     public void publish(String topicName, int qos, byte[] payload) throws Throwable {
-    	// Use a state machine to decide which step to do next. State change occurs 
+    	// Use a state machine to decide which step to do next. State change occurs
     	// when a notification is received that an MQTT action has completed
     	while (state != FINISH) {
     		switch (state) {
@@ -283,14 +283,14 @@ public class SampleAsyncCallBack implements MqttCallback {
     			case DISCONNECTED:
     				state = FINISH;
     				donext = true;
-    				break;		
+    				break;
     		}
-    		
+
 //    		if (state != FINISH) {
     			// Wait until notified about a state change and then perform next action
     			waitForStateChange(10000);
 //    		}
-    	}	
+    	}
     }
 
     /**
@@ -307,7 +307,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 					log("timed out");
 					e.printStackTrace();
 				}
-				
+
 				if (ex != null) {
 					throw (MqttException)ex;
 				}
@@ -318,15 +318,15 @@ public class SampleAsyncCallBack implements MqttCallback {
 
     /**
      * Subscribe to a topic on an MQTT server
-     * Once subscribed this method waits for the messages to arrive from the server 
-     * that match the subscription. It continues listening for messages until the enter key is 
+     * Once subscribed this method waits for the messages to arrive from the server
+     * that match the subscription. It continues listening for messages until the enter key is
      * pressed.
      * @param topicName to subscribe to (can be wild carded)
-     * @param qos the maximum quality of service to receive messages at for this subscription 
+     * @param qos the maximum quality of service to receive messages at for this subscription
      * @throws MqttException
      */
     public void subscribe(String topicName, int qos) throws Throwable {
-    	// Use a state machine to decide which step to do next. State change occurs 
+    	// Use a state machine to decide which step to do next. State change occurs
     	// when a notification is received that an MQTT action has completed
     	while (state != FINISH) {
     		switch (state) {
@@ -360,13 +360,13 @@ public class SampleAsyncCallBack implements MqttCallback {
     			case DISCONNECTED:
     				state = FINISH;
     				donext = true;
-    				break;		
+    				break;
     		}
-    		
+
 //    		if (state != FINISH && state != DISCONNECT) {
     			waitForStateChange(10000);
     		}
-//    	}    	
+//    	}
     }
 
     /**
@@ -382,7 +382,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 	/****************************************************************/
 	/* Methods to implement the MqttCallback interface              */
 	/****************************************************************/
-    
+
     /**
      * @see MqttCallback#connectionLost(Throwable)
      */
@@ -401,18 +401,18 @@ public class SampleAsyncCallBack implements MqttCallback {
 		// Called when a message has been delivered to the
 		// server. The token passed in here is the same one
 		// that was returned from the original call to publish.
-		// This allows applications to perform asynchronous 
+		// This allows applications to perform asynchronous
 		// delivery without blocking until delivery completes.
 		//
-		// This sample demonstrates asynchronous deliver, registering 
+		// This sample demonstrates asynchronous deliver, registering
 		// a callback to be notified on each call to publish.
 		//
-		// The deliveryComplete method will also be called if 
+		// The deliveryComplete method will also be called if
 		// the callback is set on the client
-		// 
+		//
 		// note that token.getTopics() returns an array so we convert to a string
 		// before printing it on the console
-		log("Delivery complete callback: Publish Completed "+Arrays.toString(token.getTopics()));	
+		log("Delivery complete callback: Publish Completed "+Arrays.toString(token.getTopics()));
 	}
 
     /**
@@ -420,10 +420,10 @@ public class SampleAsyncCallBack implements MqttCallback {
      */
 	public void messageArrived(String topic, MqttMessage message) throws MqttException {
 		// Called when a message arrives from the server that matches any
-		// subscription made by the client		
+		// subscription made by the client
 		String time = new Timestamp(System.currentTimeMillis()).toString();
 		System.out.println("Time:\t" +time +
-                           "  Topic:\t" + topic + 
+                           "  Topic:\t" + topic +
                            "  Message:\t" + new String(message.getPayload()) +
                            "  QoS:\t" + message.getQos());
 	}
@@ -444,7 +444,7 @@ public class SampleAsyncCallBack implements MqttCallback {
               "    -m  Use <message text> instead of the default\n" +
               "            (\"Message from MQTTv3 Java client\")\n" +
               "    -s  Use this QoS instead of the default (2)\n" +
-              "    -b  Use this name/IP address instead of the default (localhost)\n" +
+              "    -b  Use this name/IP address instead of the default (m2m.eclipse.org)\n" +
               "    -p  Use this port instead of the default (1883)\n\n" +
               "    -i  Use this client ID instead of SampleJavaV3_<action>\n" +
               "    -c  Connect to the server with a clean session (default is false)\n" +
@@ -463,36 +463,36 @@ public class SampleAsyncCallBack implements MqttCallback {
               "messages until <enter> is pressed.\n\n"
           );
     }
-        	
+
 	/**
-	 * Connect in a non-blocking way and then sit back and wait to be 
+	 * Connect in a non-blocking way and then sit back and wait to be
 	 * notified that the action has completed.
 	 */
     public class MqttConnector {
-		
+
 		public MqttConnector() {
 		}
-		
+
 		public void doConnect() {
 	    	// Connect to the server
 			// Get a token and setup an asynchronous listener on the token which
 			// will be notified once the connect completes
 	    	log("Connecting to "+brokerUrl + " with client ID "+client.getClientId());
-	
-	    	IMqttActionListener conListener = new IMqttActionListener() {			
+
+	    	IMqttActionListener conListener = new IMqttActionListener() {
 				public void onSuccess(IMqttToken asyncActionToken) {
 			    	log("Connected");
 			    	state = CONNECTED;
 			    	carryOn();
 				}
-				
+
 				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 					ex = exception;
 					state = ERROR;
 					log ("connect failed" +exception);
 					carryOn();
 				}
-				
+
 				public void carryOn() {
 			    	synchronized (waiter) {
 			    		donext=true;
@@ -500,13 +500,13 @@ public class SampleAsyncCallBack implements MqttCallback {
 			    	}
 				}
 			};
-	    			
+
 	    	try {
 	    		// Connect using a non-blocking connect
 	    		client.connect(conOpt,"Connect sample context", conListener);
 			} catch (MqttException e) {
-				// If though it is a non-blocking connect an exception can be 
-				// thrown if validation of parms fails or other checks such 
+				// If though it is a non-blocking connect an exception can be
+				// thrown if validation of parms fails or other checks such
 				// as already connected fail.
 				state = ERROR;
 				donext = true;
@@ -516,7 +516,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 	}
 
 	/**
-	 * Publish in a non-blocking way and then sit back and wait to be 
+	 * Publish in a non-blocking way and then sit back and wait to be
 	 * notified that the action has completed.
 	 */
 	public class Publisher {
@@ -526,27 +526,27 @@ public class SampleAsyncCallBack implements MqttCallback {
 			// will be notified once the message has been delivered
 	   		MqttMessage message = new MqttMessage(payload);
 	    	message.setQos(qos);
-		
+
 
 	    	String time = new Timestamp(System.currentTimeMillis()).toString();
 	    	log("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
 
 	    	// Setup a listener object to be notified when the publish completes.
-	    	// 
-	    	IMqttActionListener pubListener = new IMqttActionListener() {	
+	    	//
+	    	IMqttActionListener pubListener = new IMqttActionListener() {
 				public void onSuccess(IMqttToken asyncActionToken) {
 			    	log("Publish Completed");
 			    	state = PUBLISHED;
 			    	carryOn();
 				}
-				
+
 				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 					ex = exception;
 					state = ERROR;
 					log ("Publish failed" +exception);
 					carryOn();
 				}
-				
+
 				public void carryOn() {
 			    	synchronized (waiter) {
 			    		donext=true;
@@ -565,14 +565,14 @@ public class SampleAsyncCallBack implements MqttCallback {
 			}
 		}
 	}
-	
+
 	/**
-	 * Subscribe in a non-blocking way and then sit back and wait to be 
+	 * Subscribe in a non-blocking way and then sit back and wait to be
 	 * notified that the action has completed.
 	 */
 	public class Subscriber {
 		public void doSubscribe(String topicName, int qos) {
-		 	// Make a subscription 
+		 	// Make a subscription
 			// Get a token and setup an asynchronous listener on the token which
 			// will be notified once the subscription is in place.
 	    	log("Subscribing to topic \""+topicName+"\" qos "+qos);
@@ -583,14 +583,14 @@ public class SampleAsyncCallBack implements MqttCallback {
 			    	state = SUBSCRIBED;
 			    	carryOn();
 				}
-				
+
 				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 					ex = exception;
 					state = ERROR;
 					log ("Subscribe failed" +exception);
 					carryOn();
 				}
-				
+
 				public void carryOn() {
 			    	synchronized (waiter) {
 			    		donext=true;
@@ -598,7 +598,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 			    	}
 				}
 			};
-	    	
+
 	    	try {
 	    		client.subscribe(topicName, qos, "Subscribe sample context", subListener);
 	    	} catch (MqttException e) {
@@ -608,9 +608,9 @@ public class SampleAsyncCallBack implements MqttCallback {
 			}
 		}
 	}
-	
+
 	/**
-	 * Disconnect in a non-blocking way and then sit back and wait to be 
+	 * Disconnect in a non-blocking way and then sit back and wait to be
 	 * notified that the action has completed.
 	 */
 	public class Disconnector {
@@ -618,13 +618,13 @@ public class SampleAsyncCallBack implements MqttCallback {
 	    	// Disconnect the client
 	    	log("Disconnecting");
 
-	    	IMqttActionListener discListener = new IMqttActionListener() {		
+	    	IMqttActionListener discListener = new IMqttActionListener() {
 				public void onSuccess(IMqttToken asyncActionToken) {
 			    	log("Disconnect Completed");
 			    	state = DISCONNECTED;
 			    	carryOn();
 				}
-				
+
 				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 					ex = exception;
 					state = ERROR;
@@ -638,7 +638,7 @@ public class SampleAsyncCallBack implements MqttCallback {
 			    	}
 				}
 			};
-	    	
+
 	    	try {
 	    		client.disconnect("Disconnect sample context", discListener);
 	    	} catch (MqttException e) {
