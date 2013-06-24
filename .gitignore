@@ -1,7 +1,5 @@
 ### /.gitignore-boilerplates/Global/Eclipse.gitignore
-
 *.pydevproject
-.project
 .metadata
 bin/**
 tmp/**
@@ -11,8 +9,6 @@ tmp/**/*
 *.swp
 *~.nib
 local.properties
-.classpath
-.settings/
 .loadpath
 
 # External tool builders
@@ -27,14 +23,11 @@ local.properties
 # PDT-specific
 .buildpath
 
-
 ### .gitignore-boilerplates/Global/OSX.gitignore
-
 .DS_Store
 .AppleDouble
 .LSOverride
 Icon
-
 
 # Thumbnails
 ._*
@@ -43,9 +36,7 @@ Icon
 .Spotlight-V100
 .Trashes
 
-
 ### .gitignore-boilerplates/Java.gitignore
-
 *.class
 
 # Package Files #
@@ -53,4 +44,16 @@ Icon
 *.war
 *.ear
 
+# Eclipse
+.classpath
+.project
+.settings/
 
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Maven
+log/
+target/
