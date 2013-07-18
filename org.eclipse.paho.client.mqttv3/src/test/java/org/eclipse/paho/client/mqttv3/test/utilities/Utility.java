@@ -95,7 +95,7 @@ public class Utility {
     try {
       if (handler == null) {
         handler = new FileHandler("framework.log", true);
-        handler.setFormatter(new org.eclipse.paho.client.mqttv3.test.log.HumanFormatter());
+        handler.setFormatter(new org.eclipse.paho.client.mqttv3.test.logging.HumanFormatter());
       }
     }
     catch (IOException exception) {

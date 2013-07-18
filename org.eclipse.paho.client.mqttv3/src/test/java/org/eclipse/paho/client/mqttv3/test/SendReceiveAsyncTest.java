@@ -18,9 +18,10 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
@@ -32,20 +33,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * This test expects an MQTT Server to be listening on the port 
- * given by the SERVER_URI property (which is 1883 by default)
+ *
  */
-public class SendReceiveTest {
+public class SendReceiveAsyncTest {
 
-  static final Class<?> cclass = SendReceiveTest.class;
-  private static final String className = cclass.getName();
-  private static final Logger log = Logger.getLogger(className);
+  static final Class<?> cclass = SendReceiveAsyncTest.class;
+  static final String className = cclass.getName();
+  static final Logger log = Logger.getLogger(className);
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
 
   /**
-   * @throws Exception 
+   * @throws Exception
    */
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -84,9 +84,10 @@ public class SendReceiveTest {
   }
 
   /**
-   * Tests that a client can be constructed and that it can connect to and disconnect from the
-   * service
-   * @throws Exception 
+   * Tests that a client can be constructed and that it can connect to and
+   * disconnect from the service
+   * 
+   * @throws Exception
    */
   @Test
   public void testConnect() throws Exception {
@@ -94,17 +95,27 @@ public class SendReceiveTest {
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
 
-    IMqttClient mqttClient = null;
+    IMqttAsyncClient mqttClient = null;
     try {
-      mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+      mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+      IMqttToken connectToken = null;
+      IMqttToken disconnectToken = null;
+
+      connectToken = mqttClient.connect(null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-      mqttClient.connect();
+      connectToken.waitForCompletion();
+
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
-      mqttClient.disconnect();
+      disconnectToken.waitForCompletion();
+
+      connectToken = mqttClient.connect(null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-      mqttClient.connect();
+      connectToken.waitForCompletion();
+
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
-      mqttClient.disconnect();
+      disconnectToken.waitForCompletion();
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -112,7 +123,7 @@ public class SendReceiveTest {
     }
     finally {
       if (mqttClient != null) {
-    	log.info("Close...");
+        log.info("Close...");
         mqttClient.close();
       }
     }
@@ -122,7 +133,8 @@ public class SendReceiveTest {
 
   /**
    * Test connection using a remote host name for the local host.
-   * @throws Exception 
+   * 
+   * @throws Exception
    */
   @Test
   public void testRemoteConnect() throws Exception {
@@ -130,37 +142,54 @@ public class SendReceiveTest {
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
 
-    IMqttClient mqttClient = null;
+    IMqttAsyncClient mqttClient = null;
     try {
-      mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+      mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+      IMqttToken connectToken = null;
+      IMqttToken subToken = null;
+      IMqttDeliveryToken pubToken = null;
+      IMqttToken disconnectToken = null;
+
+      connectToken = mqttClient.connect(null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-      mqttClient.connect();
+      connectToken.waitForCompletion();
+
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
-      mqttClient.disconnect();
+      disconnectToken.waitForCompletion();
 
       MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
       mqttClient.setCallback(mqttV3Receiver);
+
       MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
       mqttConnectOptions.setCleanSession(false);
+
+      connectToken = mqttClient.connect(mqttConnectOptions, null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
-      mqttClient.connect(mqttConnectOptions);
+      connectToken.waitForCompletion();
 
       String[] topicNames = new String[]{methodName + "/Topic"};
       int[] topicQos = {0};
+      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
-      mqttClient.subscribe(topicNames, topicQos);
+      subToken.waitForCompletion();
 
       byte[] payload = ("Message payload " + className + "." + methodName).getBytes();
-      MqttTopic mqttTopic = mqttClient.getTopic(topicNames[0]);
+      pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
-      mqttTopic.publish(payload, 1, false);
-      boolean ok = mqttV3Receiver.validateReceipt(topicNames[0], 0, payload);
+      pubToken.waitForCompletion();
+
+      boolean ok = mqttV3Receiver.validateReceipt(topicNames[0], 0,
+          payload);
       if (!ok) {
         Assert.fail("Receive failed");
       }
+
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
-      mqttClient.disconnect();
+      disconnectToken.waitForCompletion();
+
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -168,7 +197,7 @@ public class SendReceiveTest {
     }
     finally {
       if (mqttClient != null) {
-    	log.info("Close...");
+        log.info("Close...");
         mqttClient.close();
       }
     }
@@ -177,7 +206,7 @@ public class SendReceiveTest {
   }
 
   /**
-   * Test client pubSub using largish messages
+   * Test client pubSub using very large messages
    */
   @Test
   public void testLargeMessage() {
@@ -185,45 +214,61 @@ public class SendReceiveTest {
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
 
-    IMqttClient mqttClient = null;
+    IMqttAsyncClient mqttClient = null;
     try {
-      mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+      mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+      IMqttToken connectToken;
+      IMqttToken subToken;
+      IMqttToken unsubToken;
+      IMqttDeliveryToken pubToken;
+
       MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
       mqttClient.setCallback(mqttV3Receiver);
-      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-      mqttClient.connect();
 
-      int largeSize = 10000;
+      connectToken = mqttClient.connect(null, null);
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+      connectToken.waitForCompletion();
+
+      int largeSize = 1000;
       String[] topicNames = new String[]{methodName + "/Topic"};
       int[] topicQos = {0};
       byte[] message = new byte[largeSize];
 
       java.util.Arrays.fill(message, (byte) 's');
 
+      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
-      mqttClient.subscribe(topicNames, topicQos);
-      log.info("Unsubscribing from..." + topicNames[0]);
-      mqttClient.unsubscribe(topicNames);
-      log.info("Subscribing to..." + topicNames[0]);
-      mqttClient.subscribe(topicNames, topicQos);
-      MqttTopic mqttTopic = mqttClient.getTopic(topicNames[0]);
-      log.info("Publishing to..." + topicNames[0]);
-      mqttTopic.publish(message, 0, false);
+      subToken.waitForCompletion();
 
-      boolean ok = mqttV3Receiver.validateReceipt(topicNames[0], 0, message);
+      unsubToken = mqttClient.unsubscribe(topicNames, null, null);
+      log.info("Unsubscribing from..." + topicNames[0]);
+      unsubToken.waitForCompletion();
+
+      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      log.info("Subscribing to..." + topicNames[0]);
+      subToken.waitForCompletion();
+
+      pubToken = mqttClient.publish(topicNames[0], message, 0, false, null, null);
+      log.info("Publishing to..." + topicNames[0]);
+      pubToken.waitForCompletion();
+
+      boolean ok = mqttV3Receiver.validateReceipt(topicNames[0], 0,
+          message);
       if (!ok) {
         Assert.fail("Receive failed");
       }
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
-      Assert.fail("Failed to instantiate:" + methodName + " exception=" + exception);
+      Assert.fail("Failed to instantiate:" + methodName + " exception="+ exception);
     }
     finally {
       try {
-    	  log.info("Disconnecting...");
-        mqttClient.disconnect();
+        IMqttToken disconnectToken;
+        disconnectToken = mqttClient.disconnect(null, null);
+        log.info("Disconnecting...");
+        disconnectToken.waitForCompletion();
         log.info("Close...");
         mqttClient.close();
       }
@@ -235,109 +280,63 @@ public class SendReceiveTest {
     log.exiting(className, methodName);
   }
 
-  /**
-   * Test that QOS values are preserved between MQTT publishers and subscribers.
-   */
-  @Test
-  public void testQoSPreserved() {
-    final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
-
-    IMqttClient mqttClient = null;
-    try {
-      mqttClient = clientFactory.createMqttClient(serverURI, methodName);
-      MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
-      log.info("Assigning callback...");
-      mqttClient.setCallback(mqttV3Receiver);
-      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-      mqttClient.connect();
-
-      String[] topicNames = new String[]{methodName + "/Topic0", methodName + "/Topic1", methodName + "/Topic2"};
-      int[] topicQos = {0, 1, 2};
-      for (int i = 0; i < topicNames.length; i++) {
-    	  log.info("Subscribing to..." + topicNames[i] + " at Qos " + topicQos[i]);
-      }
-      mqttClient.subscribe(topicNames, topicQos);
-
-      for (int i = 0; i < topicNames.length; i++) {
-        byte[] message = ("Message payload " + className + "." + methodName + " " + topicNames[i]).getBytes();
-        MqttTopic mqttTopic = mqttClient.getTopic(topicNames[i]);
-        for (int iQos = 0; iQos < 3; iQos++) {
-          log.info("Publishing to..." + topicNames[i] + " at Qos " + iQos);
-          mqttTopic.publish(message, iQos, false);
-          boolean ok = mqttV3Receiver.validateReceipt(topicNames[i], Math.min(iQos, topicQos[i]), message);
-          if (!ok) {
-            Assert.fail("Receive failed sub Qos=" + topicQos[i] + " PublishQos=" + iQos);
-          }
-        }
-      }
-    }
-    catch (Exception exception) {
-      log.log(Level.SEVERE, "caught exception:", exception);
-      Assert.fail("Failed:" + methodName + " exception=" + exception);
-    }
-    finally {
-      try {
-    	log.info("Disconnecting...");
-        mqttClient.disconnect();
-        log.info("Close...");
-        mqttClient.close();
-      }
-      catch (Exception exception) {
-        log.log(Level.SEVERE, "caught exception:", exception);
-      }
-    }
-
-    log.exiting(className, methodName);
-  }
-  
   /**
    * Multiple publishers and subscribers.
-   * @throws Exception 
    */
   @Test
-  public void testMultipleClients() throws Exception {
+  public void testMultipleClients() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
 
-    IMqttClient[] mqttPublisher = new IMqttClient[2];
-    IMqttClient[] mqttSubscriber = new IMqttClient[10];
+    int publishers = 2;
+    int subscribers = 10;
+
+    IMqttAsyncClient[] mqttPublisher = new IMqttAsyncClient[publishers];
+    IMqttAsyncClient[] mqttSubscriber = new IMqttAsyncClient[subscribers];
+
+    IMqttToken connectToken;
+    IMqttToken subToken;
+    IMqttDeliveryToken pubToken;
+    IMqttToken disconnectToken;
+
     try {
       String[] topicNames = new String[]{methodName + "/Topic"};
       int[] topicQos = {0};
 
-      MqttTopic[] mqttTopic = new MqttTopic[mqttPublisher.length];
       for (int i = 0; i < mqttPublisher.length; i++) {
-        mqttPublisher[i] = clientFactory.createMqttClient(serverURI, "MultiPub" + i);
+        mqttPublisher[i] = clientFactory.createMqttAsyncClient(serverURI, "MultiPub" + i);
+        connectToken = mqttPublisher[i].connect(null, null);
         log.info("Connecting...(serverURI:" + serverURI + ", ClientId: MultiPub" + i);
-        mqttPublisher[i].connect();
-        mqttTopic[i] = mqttPublisher[i].getTopic(topicNames[0]);
+        connectToken.waitForCompletion();
       } // for...
 
       MqttV3Receiver[] mqttV3Receiver = new MqttV3Receiver[mqttSubscriber.length];
       for (int i = 0; i < mqttSubscriber.length; i++) {
-        mqttSubscriber[i] = clientFactory.createMqttClient(serverURI, "MultiSubscriber" + i);
+        mqttSubscriber[i] = clientFactory.createMqttAsyncClient(serverURI, "MultiSubscriber" + i);
         mqttV3Receiver[i] = new MqttV3Receiver(mqttSubscriber[i], LoggingUtilities.getPrintStream());
         log.info("Assigning callback...");
         mqttSubscriber[i].setCallback(mqttV3Receiver[i]);
+        connectToken = mqttSubscriber[i].connect(null, null);
         log.info("Connecting...(serverURI:" + serverURI + ", ClientId: MultiSubscriber" + i);
-        mqttSubscriber[i].connect();
+        connectToken.waitForCompletion();
+        subToken = mqttSubscriber[i].subscribe(topicNames, topicQos, null, null);
         log.info("Subcribing to..." + topicNames[0]);
-        mqttSubscriber[i].subscribe(topicNames, topicQos);
+        subToken.waitForCompletion();
       } // for...
 
       for (int iMessage = 0; iMessage < 10; iMessage++) {
         byte[] payload = ("Message " + iMessage).getBytes();
         for (int i = 0; i < mqttPublisher.length; i++) {
+          pubToken = mqttPublisher[i].publish(topicNames[0], payload, 0, false, null, null);
           log.info("Publishing to..." + topicNames[0]);
-          mqttTopic[i].publish(payload, 0, false);
+          pubToken.waitForCompletion();
         }
 
         for (int i = 0; i < mqttSubscriber.length; i++) {
           for (int ii = 0; ii < mqttPublisher.length; ii++) {
-            boolean ok = mqttV3Receiver[i].validateReceipt(topicNames[0], 0, payload);
+            boolean ok = mqttV3Receiver[i].validateReceipt(
+                topicNames[0], 0, payload);
             if (!ok) {
               Assert.fail("Receive failed");
             }
@@ -348,24 +347,24 @@ public class SendReceiveTest {
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
-      throw exception;
+      Assert.fail("Failed to instantiate:" + methodName + " exception="+ exception);
     }
     finally {
       try {
         for (int i = 0; i < mqttPublisher.length; i++) {
+          disconnectToken = mqttPublisher[i].disconnect(null, null);
           log.info("Disconnecting...MultiPub" + i);
-          mqttPublisher[i].disconnect();
+          disconnectToken.waitForCompletion();
           log.info("Close...");
           mqttPublisher[i].close();
         }
         for (int i = 0; i < mqttSubscriber.length; i++) {
+          disconnectToken = mqttSubscriber[i].disconnect(null, null);
           log.info("Disconnecting...MultiSubscriber" + i);
-          mqttSubscriber[i].disconnect();
+          disconnectToken.waitForCompletion();
           log.info("Close...");
           mqttSubscriber[i].close();
         }
-        
-        Thread.sleep(5000);
       }
       catch (Exception exception) {
         log.log(Level.SEVERE, "caught exception:", exception);
@@ -376,8 +375,8 @@ public class SendReceiveTest {
   }
 
   /**
-   * Test the behaviour of the cleanStart flag, used to clean up before re-connecting.
-   * @throws Exception 
+   * Test the behaviour of the cleanStart flag, used to clean up before
+   * re-connecting.
    */
   @Test
   public void testCleanStart() throws Exception {
@@ -385,76 +384,93 @@ public class SendReceiveTest {
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
 
-    IMqttClient mqttClient = null;
+    IMqttAsyncClient mqttClient = null;
+
+    IMqttToken connectToken;
+    IMqttToken subToken;
+    IMqttDeliveryToken pubToken;
+    IMqttToken disconnectToken;
+
     try {
-      mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+      mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
       mqttClient.setCallback(mqttV3Receiver);
+
       MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-      // Clean start: true  - The broker cleans up all client state, including subscriptions, when the client is disconnected.
+      // Clean start: true - The broker cleans up all client state, including subscriptions, when the client is disconnected.
       // Clean start: false - The broker remembers all client state, including subscriptions, when the client is disconnected.
       //                      Matching publications will get queued in the broker whilst the client is disconnected.
       // For Mqtt V3 cleanSession=false, implies new subscriptions are durable.
       mqttConnectOptions.setCleanSession(false);
+      connectToken = mqttClient.connect(mqttConnectOptions, null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
-      mqttClient.connect(mqttConnectOptions);
+      connectToken.waitForCompletion();
 
       String[] topicNames = new String[]{methodName + "/Topic"};
       int[] topicQos = {0};
+      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
-      mqttClient.subscribe(topicNames, topicQos);
+      subToken.waitForCompletion();
 
       byte[] payload = ("Message payload " + className + "." + methodName + " First").getBytes();
-      MqttTopic mqttTopic = mqttClient.getTopic(topicNames[0]);
+      pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
-      mqttTopic.publish(payload, 1, false);
-      boolean ok = mqttV3Receiver.validateReceipt(topicNames[0], 0, payload);
+      pubToken.waitForCompletion();
+      boolean ok = mqttV3Receiver.validateReceipt(topicNames[0], 0,
+          payload);
       if (!ok) {
         Assert.fail("Receive failed");
       }
 
       // Disconnect and reconnect to make sure the subscription and all queued messages are cleared.
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
-      mqttClient.disconnect();
+      disconnectToken.waitForCompletion();
       log.info("Close");
       mqttClient.close();
 
       // Send a message from another client, to our durable subscription.
-      mqttClient = clientFactory.createMqttClient(serverURI, methodName + "Other");
+      mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName + "Other");
       mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
       mqttClient.setCallback(mqttV3Receiver);
+
       mqttConnectOptions = new MqttConnectOptions();
       mqttConnectOptions.setCleanSession(true);
+      connectToken = mqttClient.connect(mqttConnectOptions, null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + "Other, cleanSession: true");
-      mqttClient.connect(mqttConnectOptions);
+      connectToken.waitForCompletion();
+
       // Receive the publication so that we can be sure the first client has also received it.
       // Otherwise the first client may reconnect with its clean session before the message has arrived.
+      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
-      mqttClient.subscribe(topicNames, topicQos);
+      subToken.waitForCompletion();
       payload = ("Message payload " + className + "." + methodName + " Other client").getBytes();
-      mqttTopic = mqttClient.getTopic(topicNames[0]);
+      pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
-      mqttTopic.publish(payload, 1, false);
+      pubToken.waitForCompletion();
       ok = mqttV3Receiver.validateReceipt(topicNames[0], 0, payload);
       if (!ok) {
         Assert.fail("Receive failed");
       }
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
-      mqttClient.disconnect();
+      disconnectToken.waitForCompletion();
       log.info("Close...");
       mqttClient.close();
 
       // Reconnect and check we have no messages.
-      mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+      mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
       mqttClient.setCallback(mqttV3Receiver);
       mqttConnectOptions = new MqttConnectOptions();
       mqttConnectOptions.setCleanSession(true);
+      connectToken = mqttClient.connect(mqttConnectOptions, null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: true");
-      mqttClient.connect(mqttConnectOptions);
+      connectToken.waitForCompletion();
       MqttV3Receiver.ReceivedMessage receivedMessage = mqttV3Receiver.receiveNext(100);
       if (receivedMessage != null) {
         Assert.fail("Receive messaqe:" + new String(receivedMessage.message.getPayload()));
@@ -462,35 +478,30 @@ public class SendReceiveTest {
 
       // Also check that subscription is cancelled.
       payload = ("Message payload " + className + "." + methodName + " Cancelled Subscription").getBytes();
-      mqttTopic = mqttClient.getTopic(topicNames[0]);
+      pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
-      mqttTopic.publish(payload, 1, false);
+      pubToken.waitForCompletion();
 
       receivedMessage = mqttV3Receiver.receiveNext(100);
       if (receivedMessage != null) {
-        log.info("Message I shouldn't have: " + new String(receivedMessage.message.getPayload()));
+        log.fine("Message I shouldn't have: " + new String(receivedMessage.message.getPayload()));
         Assert.fail("Receive messaqe:" + new String(receivedMessage.message.getPayload()));
       }
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
-      throw exception;
+      Assert.fail("Failed:" + methodName + " exception=" + exception);
     }
     finally {
       try {
-    	log.info("Disconnecting...");
-        mqttClient.disconnect();
-      }
-      catch (Exception exception) {
-        // do nothing
-      }
-
-      try {
-    	log.info("Close...");
+        disconnectToken = mqttClient.disconnect(null, null);
+        log.info("Disconnecting...");
+        disconnectToken.waitForCompletion();
+        log.info("Close...");
         mqttClient.close();
       }
       catch (Exception exception) {
-        // do nothing
+        log.log(Level.SEVERE, "caught exception:", exception);
       }
     }
 
