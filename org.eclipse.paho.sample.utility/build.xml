@@ -50,7 +50,7 @@
 			<fileset dir="${source.folder}/src" />
 		</copy>
 
-		 <replace file="${output.folder}/src/main/java/org/eclipse/paho/sample/utility/MQTTFrame.java"
+		<replace file="${output.folder}/src/main/java/org/eclipse/paho/sample/utility/MQTTFrame.java"
 			token="@@BUILDLEVEL@@"
 			value="${build.level}"/>
 		<replace file="${output.folder}/src/main/java/org/eclipse/paho/sample/utility/MQTTFrame.java"
@@ -68,11 +68,11 @@
 		</javac>
 
 		<!-- Copy additional source files to the output tree -->
-		<copy overwrite="true" todir="${output.folder}/bin">
-			<fileset dir="${source.folder}">
+		<copy overwrite="true" todir="${output.folder}/bin/main/resources">
+			<fileset dir="${source.folder}/src/main/resources">
 				<include name="META-INF/*" />
 			</fileset>
-			<fileset dir="${source.folder}/src">
+			<fileset dir="${source.folder}/src/main/resources">
 				<include name="**/*.properties" />
 			</fileset>
 		</copy>
