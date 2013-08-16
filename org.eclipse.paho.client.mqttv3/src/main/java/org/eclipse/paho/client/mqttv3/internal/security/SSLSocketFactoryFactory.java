@@ -453,7 +453,7 @@ public class SSLSocketFactoryFactory {
 			throws IllegalArgumentException {
 		checkPropertyKeys(props);
 		Properties p = this.defaultProperties;
-		if (configID == null) {
+		if (configID != null) {
 			p = (Properties) this.configs.get(configID);
 		}
 		if (p == null) {
