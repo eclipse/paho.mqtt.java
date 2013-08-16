@@ -98,9 +98,15 @@ public class TestProperties {
    * The following client factories have been defined 
    *     <ul>
    *     <li>{@link org.eclipse.paho.client.mqttv3.test.client.pahoJava.MqttClientFactoryPahoJava PahaJava}  (This is the default)
-   *     </ul
+   *     </ul>
    */
   static public final String KEY_CLIENT_TYPE = "CLIENT_TYPE";
+
+  static public final String KEY_CLIENT_KEY_STORE = "CLIENT_KEY_STORE";
+
+  static public final String KEY_CLIENT_KEY_STORE_PASSWORD = "CLIENT_KEY_STORE_PASSWORD";
+
+  static public final String KEY_CLIENT_TRUST_STORE = "CLIENT_TRUST_STORE";
 
   static private Map<String, String> defaults = new HashMap<String, String>();
 
@@ -318,6 +324,33 @@ public class TestProperties {
   public static File getTemporaryDirectory() {
     String pathname = getInstance().getProperty(KEY_WORKING_DIR);
     return new File(pathname);
+  }
+
+  /**
+   * @return keystore file
+   */
+
+  public static String getClientKeyStore() {
+    URL keyStore = cclass.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_KEY_STORE));
+    return keyStore.getPath();
+  }
+
+  /**
+   * @return keystore file password
+   */
+
+  public static String getClientKeyStorePassword() {
+    String keyStorePassword = getInstance().getProperty(KEY_CLIENT_KEY_STORE_PASSWORD);
+    return keyStorePassword;
+  }
+
+  /**
+   * @return truststore file
+   */
+
+  public static String getClientTrustStore() {
+    URL trustStore = cclass.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_TRUST_STORE));
+    return trustStore.getPath();
   }
 
   /**
