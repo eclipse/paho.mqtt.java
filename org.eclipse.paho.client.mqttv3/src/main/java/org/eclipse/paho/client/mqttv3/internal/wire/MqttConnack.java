@@ -17,7 +17,6 @@ import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 
-
 /**
  * An on-the-wire representation of an MQTT CONNACK.
  */
@@ -51,5 +50,9 @@ public class MqttConnack extends MqttAck {
 	
 	public String getKey() {
 		return new String("Con");
+	}
+	
+	public String toString() {
+		return super.toString() + " return code: " + returnCode;
 	}
 }

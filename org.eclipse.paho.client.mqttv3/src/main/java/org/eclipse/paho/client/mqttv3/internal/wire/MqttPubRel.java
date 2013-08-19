@@ -53,4 +53,8 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 		return (byte)( 2 | (this.duplicate?8:0));
 	}
 
+	public String toString() {
+    	return super.toString() + " msgId " + msgId;
+	}
+
 }

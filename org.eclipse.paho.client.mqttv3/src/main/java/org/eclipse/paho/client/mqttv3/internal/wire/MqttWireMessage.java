@@ -45,6 +45,10 @@ public abstract class MqttWireMessage {
 	public static final byte MESSAGE_TYPE_PINGRESP = 13;
 	public static final byte MESSAGE_TYPE_DISCONNECT = 14;
 	
+	String packet_names[] = { "reserved", "CONNECT", "CONNACK", "PUBLISH",
+			"PUBACK", "PUBREC", "PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK",
+			"UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP", "DISCONNECT" };
+
 	/** The type of the message (e.g. CONNECT, PUBLISH, PUBACK) */
 	private byte type;
 	/** The MQTT message ID */
@@ -178,7 +182,10 @@ public abstract class MqttWireMessage {
 				in.readFully(data, 0, data.length);
 			}
 				
-			if (type == MqttWireMessage.MESSAGE_TYPE_PUBLISH) {
+			if (type == MqttWireMessage.MESSAGE_TYPE_CONNECT) {
+				result = new MqttConnect(info, data);
+			}
+			else if (type == MqttWireMessage.MESSAGE_TYPE_PUBLISH) {
 				result = new MqttPublish(info, data);
 			}
 			else if (type == MqttWireMessage.MESSAGE_TYPE_PUBACK) {
@@ -190,11 +197,20 @@ public abstract class MqttWireMessage {
 			else if (type == MqttWireMessage.MESSAGE_TYPE_CONNACK) {
 				result = new MqttConnack(info, data);
 			}
+			else if (type == MqttWireMessage.MESSAGE_TYPE_PINGREQ) {
+				result = new MqttPingReq(info, data);
+			}
 			else if (type == MqttWireMessage.MESSAGE_TYPE_PINGRESP) {
 				result = new MqttPingResp(info, data);
 			}
+			else if (type == MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE) {
+				result = new MqttSubscribe(info, data);
+			}
 			else if (type == MqttWireMessage.MESSAGE_TYPE_SUBACK) {
 				result = new MqttSuback(info, data);
+			}
+			else if (type == MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE) {
+				result = new MqttUnsubscribe(info, data);
 			}
 			else if (type == MqttWireMessage.MESSAGE_TYPE_UNSUBACK) {
 				result = new MqttUnsubAck(info, data);
@@ -204,6 +220,9 @@ public abstract class MqttWireMessage {
 			}
 			else if (type == MqttWireMessage.MESSAGE_TYPE_PUBREC) {
 				result = new MqttPubRec(info, data);
+			}
+			else if (type == MqttWireMessage.MESSAGE_TYPE_DISCONNECT) {
+				result = new MqttDisconnect(info, data);
 			}
 			else {
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
@@ -324,6 +343,10 @@ public abstract class MqttWireMessage {
 		} catch (IOException ex) {
 			throw new MqttException(ex);
 		}
+	}
+
+	public String toString() {
+		return packet_names[type];
 	}
 
 }

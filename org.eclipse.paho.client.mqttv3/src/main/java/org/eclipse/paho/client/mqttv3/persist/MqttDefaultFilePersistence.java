@@ -91,25 +91,28 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 				keyBuffer.append(c);
 			}
 		}
-		String key = keyBuffer.toString();
 
-		clientDir = new File(dataDir,key);
+		synchronized (this) {
+			if (clientDir == null) {
+				String key = keyBuffer.toString();
+				clientDir = new File(dataDir, key);
 
-		if (!clientDir.exists()) {
-			clientDir.mkdir();
+				if (!clientDir.exists()) {
+					clientDir.mkdir();
+				}
+			}
+
+			try {
+				fileLock = new FileLock(clientDir, LOCK_FILENAME);
+	 		} catch (Exception e) {
+				throw new MqttPersistenceException(MqttPersistenceException.REASON_CODE_PERSISTENCE_IN_USE);
+			}
+
+			// Scan the directory for .backup files. These will
+			// still exist if the JVM exited during addMessage, before
+			// the new message was written to disk and the backup removed.
+			restoreBackups(clientDir);
 		}
-	
-		try {
-			fileLock = new FileLock(clientDir,LOCK_FILENAME);
-		} catch (Exception e) {
-			throw new MqttPersistenceException(MqttPersistenceException.REASON_CODE_PERSISTENCE_IN_USE);
-		}
-
-		// Scan the directory for .backup files. These will
-		// still exist if the JVM exited during addMessage, before
-		// the new message was written to disk and the backup removed.
-		restoreBackups(clientDir);
-		
 	}
 
 	/**
@@ -123,16 +126,18 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	}
 
 	public void close() throws MqttPersistenceException {
+		
+		synchronized (this) {
+			// checkIsOpen();
+			if (fileLock != null) {
+				fileLock.release();
+			}
 
-//		checkIsOpen();
-		if (fileLock != null) {
-			fileLock.release();
+			if (getFiles().length == 0) {
+				clientDir.delete();
+			}
+			clientDir = null;
 		}
-
-		if (getFiles().length == 0) {
-			clientDir.delete();
-		}
-		clientDir = null;
 	}
 
 	/**

@@ -24,4 +24,10 @@ public abstract class MqttAck extends MqttWireMessage {
 		return 0;
 	}
 
+	/**
+	 * @return String representation of the wire message
+	 */
+	public String toString() {
+		return super.toString() + " msgId " + msgId;
+	}
 }

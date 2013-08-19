@@ -11,7 +11,9 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -22,6 +24,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
  * An on-the-wire representation of an MQTT CONNECT message.
  */
 public class MqttConnect extends MqttWireMessage {
+
+	public static String KEY = "Con";
+
 	private String clientId;
 	private boolean cleanSession;
 	private MqttMessage willMessage;
@@ -29,16 +34,29 @@ public class MqttConnect extends MqttWireMessage {
 	private char[] password;
 	private int keepAliveInterval;
 	private String willDestination;
-	public static String KEY="Con";
 	
-	
-	public MqttConnect(String clientId,
-			boolean cleanSession,
-			int keepAliveInterval,
-			String userName,
-			char[] password,
-			MqttMessage willMessage,
-			String willDestination) {
+	/**
+	 * Constructor for an on the wire MQTT connect message
+	 * 
+	 * @param info
+	 * @param data
+	 * @throws IOException
+	 * @throws MqttException
+	 */
+	public MqttConnect(byte info, byte[] data) throws IOException, MqttException {
+		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+
+		String protocol_name = decodeUTF8(dis);
+		int protocol_version = dis.readByte();
+		byte connect_flags = dis.readByte();
+		keepAliveInterval = dis.readUnsignedShort();
+		clientId = decodeUTF8(dis);
+		dis.close();
+	}
+
+	public MqttConnect(String clientId, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.cleanSession = cleanSession;
@@ -47,6 +65,12 @@ public class MqttConnect extends MqttWireMessage {
 		this.password = password;
 		this.willMessage = willMessage;
 		this.willDestination = willDestination;
+	}
+
+	public String toString() {
+		String rc = super.toString();
+		rc += " clientId " + clientId + " keepAliveInterval " + keepAliveInterval;
+		return rc;
 	}
 	
 	protected byte getMessageInfo() {
@@ -61,7 +85,7 @@ public class MqttConnect extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			this.encodeUTF8(dos,"MQIsdp");			
+			encodeUTF8(dos,"MQIsdp");			
 			dos.write(3);
 			byte connectFlags = 0;
 			
@@ -96,24 +120,23 @@ public class MqttConnect extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			this.encodeUTF8(dos,clientId);
+			encodeUTF8(dos,clientId);
 			
 			if (willMessage != null) {
-				this.encodeUTF8(dos,willDestination);
+				encodeUTF8(dos,willDestination);
 				dos.writeShort(willMessage.getPayload().length);
 				dos.write(willMessage.getPayload());
 			}
 			
 			if (userName != null) {
-				this.encodeUTF8(dos,userName);
+				encodeUTF8(dos,userName);
 				if (password != null) {
-					this.encodeUTF8(dos,new String(password));
+					encodeUTF8(dos,new String(password));
 				}
 			}
 			dos.flush();
 			return baos.toByteArray();
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new MqttException(ex);
 		}
 	}

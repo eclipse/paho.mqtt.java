@@ -11,7 +11,9 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -25,6 +27,34 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 public class MqttSubscribe extends MqttWireMessage {
 	private String[] names;
 	private int[] qos;
+	private int count;
+
+	/**
+	 * Constructor for an on the wire MQTT subscribe message
+	 * 
+	 * @param info
+	 * @param data
+	 */
+	public MqttSubscribe(byte info, byte[] data) throws IOException {
+		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bais);
+		msgId = dis.readUnsignedShort();
+
+		count = 0;
+		names = new String[10];
+		qos = new int[10];
+		boolean end = false;
+		while (!end) {
+			try {
+				names[count] = decodeUTF8(dis);
+				qos[count++] = dis.readByte();
+			} catch (Exception e) {
+				end = true;
+			}
+		}
+		dis.close();
+	}
 
 	/**
 	 * Constructor for an on the wire MQTT subscribe message
@@ -44,9 +74,34 @@ public class MqttSubscribe extends MqttWireMessage {
 			MqttMessage.validateQos(qos[i]);
 		}
 	}
+
+	/**
+	 * @return string representation of this subscribe packet
+	 */
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(super.toString());
+		sb.append(" names:[");
+		for (int i = 0; i < count; i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append("\"" + names[i] + "\"");
+		}
+		sb.append("] qos:[");
+		for (int i = 0; i < count; i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append(qos[i]);
+		}
+		sb.append("]");
+
+		return sb.toString();
+	}
 	
 	protected byte getMessageInfo() {
-		return (byte)(2 | (this.duplicate?8:0));
+		return (byte) (2 | (duplicate ? 8 : 0));
 	}
 	
 	protected byte[] getVariableHeader() throws MqttException {
@@ -56,8 +111,7 @@ public class MqttSubscribe extends MqttWireMessage {
 			dos.writeShort(msgId);
 			dos.flush();
 			return baos.toByteArray();
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new MqttException(ex);
 		}
 	}
@@ -67,12 +121,11 @@ public class MqttSubscribe extends MqttWireMessage {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			for (int i=0; i<names.length; i++) {
-				this.encodeUTF8(dos,names[i]);
+				encodeUTF8(dos,names[i]);
 				dos.writeByte(qos[i]);
 			}
 			return baos.toByteArray();
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new MqttException(ex);
 		}
 	}

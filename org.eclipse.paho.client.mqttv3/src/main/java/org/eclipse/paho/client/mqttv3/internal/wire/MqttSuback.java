@@ -44,4 +44,13 @@ public class MqttSuback extends MqttAck {
 		// Not needed, as the client never encodes a SUBACK
 		return new byte[0];
 	}
+
+	public String toString() {
+    String rc = super.toString() + " granted Qos";
+    for (int i = 0; i < grantedQos.length; ++i) {
+    	rc += " " + grantedQos[i];
+    }
+    return rc;
+  }
+
 }

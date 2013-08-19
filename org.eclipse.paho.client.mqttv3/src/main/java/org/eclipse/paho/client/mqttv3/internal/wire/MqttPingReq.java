@@ -11,6 +11,8 @@
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
+import java.io.IOException;
+
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 /**
@@ -18,6 +20,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  */
 public class MqttPingReq extends MqttWireMessage {
 	public MqttPingReq() {
+		super(MqttWireMessage.MESSAGE_TYPE_PINGREQ);
+	}
+
+	public MqttPingReq(byte info, byte[] variableHeader) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_PINGREQ);
 	}
 	

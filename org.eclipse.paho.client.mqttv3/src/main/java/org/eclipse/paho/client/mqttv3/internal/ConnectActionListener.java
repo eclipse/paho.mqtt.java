@@ -100,7 +100,13 @@ public class ConnectActionListener implements IMqttActionListener {
       }
     }
     else {
-      MqttException ex = new MqttException(exception);
+      MqttException ex;
+      if (exception instanceof MqttException) {
+        ex = (MqttException) exception;
+      }
+      else {
+        ex = new MqttException(exception);
+      }
       userToken.internalTok.markComplete(null, ex);
       userToken.internalTok.notifyComplete();
 
