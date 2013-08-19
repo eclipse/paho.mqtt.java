@@ -12,10 +12,10 @@
 package org.eclipse.paho.client.mqttv3;
 
 import java.util.Properties;
-
 import javax.net.SocketFactory;
-
 import org.eclipse.paho.client.mqttv3.util.Debug;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Holds the set of options that control how the client connects to a server.
@@ -426,21 +426,25 @@ public class MqttConnectOptions {
 	 * @return the URI type
 	 */
 
-	/*
-	 *  TODO: currently this is brittle, make more robust and use proper URI objects
-	 *        in particular the code elsewhere does not handle trailing slashes etc
-	 */
 	protected static int validateURI(String srvURI) {
-		if (srvURI.startsWith("tcp://")) {
-			return URI_TYPE_TCP;
-		}
-		else if (srvURI.startsWith("ssl://")) {
-			return URI_TYPE_SSL;
-		}
-		else if (srvURI.startsWith("local://")) {
-			return URI_TYPE_LOCAL;
-		}
-		else {
+		try {
+			URI vURI = new URI(srvURI);
+			if (!vURI.getPath().equals("")) {
+				throw new IllegalArgumentException(srvURI);
+			}
+			if (vURI.getScheme().equals("tcp")) {
+				return URI_TYPE_TCP;
+			}
+			else if (vURI.getScheme().equals("ssl")) {
+				return URI_TYPE_SSL;
+			}
+			else if (vURI.getScheme().equals("local")) {
+				return URI_TYPE_LOCAL;
+			}
+			else {
+				throw new IllegalArgumentException(srvURI);
+			}
+		} catch (URISyntaxException ex) {
 			throw new IllegalArgumentException(srvURI);
 		}
 	}
