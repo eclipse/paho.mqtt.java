@@ -47,6 +47,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 
 import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
 /**
  * This class is the controlling class for the application. It contains the main method
@@ -658,16 +659,16 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
      * The method is part of the MqttCallback interface<BR>
      * Pass the message as is to the SubPanel object which will display it.
      */
-    public void messageArrived( MqttTopic topic, MqttMessage message) {
+    public void messageArrived( String topic, MqttMessage message) {
 	try {
-	subPanelContr.updateReceivedData( topic.getName(), message.getPayload(), message.getQos(), message.isRetained() );
+	subPanelContr.updateReceivedData( topic, message.getPayload(), message.getQos(), message.isRetained() );
 	}
 	catch (Exception e)
 	    {
 	    }
     }	
 
-    public void deliveryComplete( MqttDeliveryToken token ) {
+    public void deliveryComplete( IMqttDeliveryToken token ) {
 	
     }
 
