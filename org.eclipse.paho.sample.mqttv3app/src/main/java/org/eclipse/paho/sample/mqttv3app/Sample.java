@@ -95,12 +95,12 @@ public class Sample implements MqttCallback {
 					case 'p': port = Integer.parseInt(args[++i]); break;
 					case 'i': clientId = args[++i];				  break;
 					case 'c': cleanSession = Boolean.valueOf(args[++i]).booleanValue();  break;
-          case 'k': System.getProperties().put("javax.net.ssl.keyStore", args[++i]); break;
-          case 'w': System.getProperties().put("javax.net.ssl.keyStorePassword", args[++i]); break;
-          case 'r': System.getProperties().put("javax.net.ssl.trustStore", args[++i]); break;
-          case 'v': ssl = Boolean.valueOf(args[++i]).booleanValue(); break;
-          case 'u': userName = args[++i];               break;
-          case 'z': password = args[++i];               break;
+					case 'k': System.getProperties().put("javax.net.ssl.keyStore", args[++i]); break;
+					case 'w': System.getProperties().put("javax.net.ssl.keyStorePassword", args[++i]); break;
+					case 'r': System.getProperties().put("javax.net.ssl.trustStore", args[++i]); break;
+					case 'v': ssl = Boolean.valueOf(args[++i]).booleanValue(); break;
+					case 'u': userName = args[++i];               break;
+					case 'z': password = args[++i];               break;
 					default:
 						System.out.println("Unrecognised argument: "+args[i]);
 						printHelp();
