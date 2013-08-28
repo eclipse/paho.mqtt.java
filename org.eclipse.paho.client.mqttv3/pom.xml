@@ -68,9 +68,6 @@
                     <systemPropertyVariables>
                         <SERVER_URI>${test.server_uri}</SERVER_URI>
                     </systemPropertyVariables>
-                    <excludes>
-                        <exclude>**/BasicSSLTest.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

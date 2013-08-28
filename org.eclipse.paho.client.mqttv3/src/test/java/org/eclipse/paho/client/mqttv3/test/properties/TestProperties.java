@@ -108,6 +108,8 @@ public class TestProperties {
 
   static public final String KEY_CLIENT_TRUST_STORE = "CLIENT_TRUST_STORE";
 
+  static public final String KEY_SERVER_SSL_PORT = "SERVER_SSL_PORT";
+
   static private Map<String, String> defaults = new HashMap<String, String>();
 
   private static TestProperties singleton;
@@ -128,6 +130,7 @@ public class TestProperties {
     putDefault(KEY_WORKING_DIR, temporaryDirectoryName);
     putDefault(KEY_SERVER_URI, defaultServerURI);
     putDefault(KEY_CLIENT_TYPE, MqttClientFactoryPaho.class.getName());
+    putDefault(KEY_SERVER_SSL_PORT, "8883");
 
     // Make sure all the property classes we know about get initialised
     List<String> list = new ArrayList<String>();
@@ -351,6 +354,15 @@ public class TestProperties {
   public static String getClientTrustStore() {
     URL trustStore = cclass.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_TRUST_STORE));
     return trustStore.getPath();
+  }
+
+  /**
+   * @return the SSL port of the server for testing
+   */
+
+  public static int getServerSSLPort() {
+    int port = Integer.parseInt(getInstance().getProperty(KEY_SERVER_SSL_PORT));
+    return port;
   }
 
   /**

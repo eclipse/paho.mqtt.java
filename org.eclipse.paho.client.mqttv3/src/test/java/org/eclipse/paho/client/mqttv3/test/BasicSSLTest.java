@@ -99,7 +99,7 @@ public class BasicSSLTest {
    */
   @Test
   public void testSSL() throws Exception {
-    URI serverURI = new URI("ssl://" + serverHost + ":8883");
+    URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
@@ -162,7 +162,7 @@ public class BasicSSLTest {
    */
   @Test
   public void testSSLWorkload() throws Exception {
-    URI serverURI = new URI("ssl://" + serverHost + ":8883");
+    URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
@@ -258,7 +258,7 @@ public class BasicSSLTest {
    */
   @Test
   public void testSSLLargeMessage() throws Exception {
-    URI serverURI = new URI("ssl://" + serverHost + ":8883");
+    URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
@@ -330,7 +330,7 @@ public class BasicSSLTest {
 
     IMqttClient mqttClient = null;
     try {
-      mqttClient = clientFactory.createMqttClient(new URI("tcp://" + serverHost + ":8883") , methodName);
+      mqttClient = clientFactory.createMqttClient(new URI("tcp://" + serverHost + ":" + TestProperties.getServerSSLPort()) , methodName);
       MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
       mqttClient.setCallback(mqttV3Receiver);
       log.info("Assigning callback...");
@@ -380,7 +380,7 @@ public class BasicSSLTest {
 
     IMqttClient mqttClient = null;
     try {
-      mqttClient = clientFactory.createMqttClient(new URI("ssl://" + serverHost + ":1883"), methodName);
+      mqttClient = clientFactory.createMqttClient(new URI("ssl://" + serverHost + ":18883"), methodName);
       MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
       mqttClient.setCallback(mqttV3Receiver);
