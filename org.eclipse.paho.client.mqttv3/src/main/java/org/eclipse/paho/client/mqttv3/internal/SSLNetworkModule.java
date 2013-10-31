@@ -70,7 +70,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	}
 	
 	public void setSSLhandshakeTimeout(int timeout) {
-		super.setConnectTimeout(timeout)
+		super.setConnectTimeout(timeout);
 		this.handshakeTimeoutSecs = timeout;
 	}
 	
