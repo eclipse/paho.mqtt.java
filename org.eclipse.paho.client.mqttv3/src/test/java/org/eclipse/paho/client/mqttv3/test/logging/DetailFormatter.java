@@ -119,7 +119,9 @@ public class DetailFormatter extends Formatter {
    */
   public void addTimeStamp(LogRecord record, StringBuffer sb) {
     date.setTime(record.getMillis());
-    sb.append(formater.format(date));
+    synchronized (formater) {
+      sb.append(formater.format(date));
+    }
     sb.append(" ");
   }
 

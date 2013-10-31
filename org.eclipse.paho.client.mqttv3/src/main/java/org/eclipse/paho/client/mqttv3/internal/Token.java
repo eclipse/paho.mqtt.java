@@ -112,7 +112,7 @@ public class Token {
 			//@TRACE 400=>key={0} timeout={1} sent={2} completed={3} hasException={4} response={5} token={6}
 			log.fine(className, methodName, "400",new Object[]{getKey(), new Long(timeout),new Boolean(sent),new Boolean(completed),(exception==null)?"false":"true",response,this},exception);
 
-			if (!this.completed) {
+			while (!this.completed) {
 				if (this.exception == null) {
 					try {
 						//@TRACE 408=key={0} wait max={1}
@@ -224,7 +224,7 @@ public class Token {
 				}
 			}
 			
-			if (!sent) {
+			while (!sent) {
 				if (this.exception == null) {
 					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 				}

@@ -222,12 +222,14 @@ public class SendReceiveTest {
     }
     finally {
       try {
-    	  log.info("Disconnecting...");
-        mqttClient.disconnect();
-        log.info("Close...");
-        mqttClient.close();
-      }
-      catch (Exception exception) {
+        if (mqttClient != null) {
+         log.info("Disconnecting...");
+         mqttClient.disconnect();
+         log.info("Close...");
+         mqttClient.close();
+       }
+     }
+     catch (Exception exception) {
         log.log(Level.SEVERE, "caught exception:", exception);
       }
     }
@@ -279,11 +281,13 @@ public class SendReceiveTest {
     }
     finally {
       try {
-    	log.info("Disconnecting...");
-        mqttClient.disconnect();
-        log.info("Close...");
-        mqttClient.close();
-      }
+        if (mqttClient != null) {
+         log.info("Disconnecting...");
+         mqttClient.disconnect();
+         log.info("Close...");
+         mqttClient.close();
+       }
+     }
       catch (Exception exception) {
         log.log(Level.SEVERE, "caught exception:", exception);
       }

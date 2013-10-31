@@ -156,7 +156,7 @@ public class MqttV3Receiver implements MqttCallback {
     if (!java.util.Arrays.equals(sentBytes,
         receivedMessage.message.getPayload())) {
       report("Received invalid payload="
-             + receivedMessage.message.getPayload() + "\n" + "Sent:"
+             + Arrays.toString(receivedMessage.message.getPayload()) + "\n" + "Sent:"
              + new String(sentBytes) + "\n" + "Received:"
              + new String(receivedMessage.message.getPayload()));
       log.exiting(className, methodName, "Return false: " + receivedMessage);

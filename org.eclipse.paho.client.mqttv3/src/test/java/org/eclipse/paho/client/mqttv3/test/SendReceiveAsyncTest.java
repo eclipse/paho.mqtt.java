@@ -265,12 +265,14 @@ public class SendReceiveAsyncTest {
     }
     finally {
       try {
-        IMqttToken disconnectToken;
-        disconnectToken = mqttClient.disconnect(null, null);
-        log.info("Disconnecting...");
-        disconnectToken.waitForCompletion();
-        log.info("Close...");
-        mqttClient.close();
+        if (mqttClient != null) {
+          IMqttToken disconnectToken;
+          disconnectToken = mqttClient.disconnect(null, null);
+          log.info("Disconnecting...");
+          disconnectToken.waitForCompletion();
+          log.info("Close...");
+          mqttClient.close();
+        }
       }
       catch (Exception exception) {
         log.log(Level.SEVERE, "caught exception:", exception);
@@ -494,11 +496,13 @@ public class SendReceiveAsyncTest {
     }
     finally {
       try {
-        disconnectToken = mqttClient.disconnect(null, null);
-        log.info("Disconnecting...");
-        disconnectToken.waitForCompletion();
-        log.info("Close...");
-        mqttClient.close();
+        if (mqttClient != null) {
+          disconnectToken = mqttClient.disconnect(null, null);
+          log.info("Disconnecting...");
+          disconnectToken.waitForCompletion();
+          log.info("Close...");
+          mqttClient.close();
+        }
       }
       catch (Exception exception) {
         log.log(Level.SEVERE, "caught exception:", exception);

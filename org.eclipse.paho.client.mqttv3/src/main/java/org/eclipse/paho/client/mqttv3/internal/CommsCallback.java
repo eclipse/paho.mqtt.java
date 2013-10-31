@@ -279,7 +279,7 @@ public class CommsCallback implements Runnable {
 			// the client protect itself from getting flooded by messages 
 			// from the server.
 			synchronized (spaceAvailable) {
-				if (!quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
+				while (!quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
 					try {
 						// @TRACE 709=wait for spaceAvailable
 						log.fine(className, methodName, "709");

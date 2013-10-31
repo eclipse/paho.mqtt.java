@@ -168,10 +168,12 @@ public class LiveTakeOverTest {
     }
     finally {
       try {
-        mqttClient.disconnect();
-        log.info("Disconnecting...");
-        mqttClient.close();
-        log.info("Close...");
+        if (mqttClient != null) {
+          mqttClient.disconnect();
+          log.info("Disconnecting...");
+          mqttClient.close();
+          log.info("Close...");
+        }
       }
       catch (Exception exception) {
         log.throwing(className, methodName, exception);
