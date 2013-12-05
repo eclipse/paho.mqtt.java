@@ -1,1 +1,1 @@
-Paho Java client for MQTT
+Paho Java client for MQTT.
