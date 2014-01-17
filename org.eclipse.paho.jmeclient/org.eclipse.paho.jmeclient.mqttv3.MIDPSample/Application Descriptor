@@ -1,0 +1,8 @@
+MIDlet-Version: 1.0
+MIDlet-Vendor: IBM
+MIDlet-Jar-URL: IA92.jar
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: IA92,,org.eclipse.paho.jmeclient.mqttv3.sampleMIDP.IA92
+MicroEdition-Profile: MIDP-2.1
+MIDlet-Permissions: javax.microedition.io.Connector.http,javax.microedition.io.Connector.https,javax.microedition.io.Connector.ssl,javax.microedition.io.Connector.serversocket,javax.microedition.io.Connector.socket
+MIDlet-Name: IA92
