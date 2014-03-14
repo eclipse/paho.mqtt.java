@@ -20,7 +20,6 @@ import java.io.IOException;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttProtocolVersion;
-import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 
 /**
  * An on-the-wire representation of an MQTT CONNECT message.
