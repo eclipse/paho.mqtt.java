@@ -550,6 +550,7 @@ public class ConformantTest {
 			Thread.sleep(100);
 			client.disconnect();
 		}catch(MqttException e){
+			e.printStackTrace();
 			successed = false;
 		}finally{
 			if(client != null){
