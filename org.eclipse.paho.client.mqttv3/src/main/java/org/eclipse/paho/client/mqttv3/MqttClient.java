@@ -416,4 +416,13 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public Debug getDebug() {
 		return (aClient.getDebug());
 	}
+	
+	/**
+	 * By default MQTT client support 3.1.1 MQTT specification, fall back to 
+	 * 31 with this method for old MQTT brokers.
+	 * @param true, false by default
+	 */
+	public void fallBack31Spec(boolean isSpec31){
+		aClient.fallBack31Spec(isSpec31);
+	}
 }

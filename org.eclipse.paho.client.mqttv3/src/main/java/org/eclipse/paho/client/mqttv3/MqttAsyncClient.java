@@ -76,6 +76,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	protected ClientComms comms;
 	private Hashtable topics;
 	private MqttClientPersistence persistence;
+	private boolean isSpec31 = false;
 
 	final static String className = MqttAsyncClient.class.getName();
 	public Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
@@ -243,8 +244,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 
 		log.setResourceName(clientId);
 
-		if (clientId == null || clientId.length() == 0) {
-			throw new IllegalArgumentException("Null or zero length clientId");
+		if (clientId == null) { //Support empty client Id, 3.1.1 standard
+			throw new IllegalArgumentException("Null clientId");
 		}
 		// Count characters, surrogate pairs count as one character.
 		int clientIdLength = 0;
@@ -822,5 +823,14 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		}
 		// The topic string does not comply with topic string rules.
 		throw new IllegalArgumentException();
+	}
+	
+	/**
+	 * By default MQTT client support 3.1.1 MQTT specification, fall back to 
+	 * 31 with this method for old MQTT brokers.
+	 * @param true, false by default
+	 */
+	public void fallBack31Spec(boolean isSpec31){
+		this.isSpec31 = isSpec31;
 	}
 }

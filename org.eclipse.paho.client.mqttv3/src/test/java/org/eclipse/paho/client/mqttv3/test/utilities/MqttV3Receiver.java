@@ -136,7 +136,7 @@ public class MqttV3Receiver implements MqttCallback {
    * @throws InterruptedException
    */
   public boolean validateReceipt(String sendTopic, int expectedQos, byte[] sentBytes) throws MqttException, InterruptedException {
-    final String methodName = "validateReceipt";
+     final String methodName = "validateReceipt";
     log.entering(className, methodName, new Object[]{sendTopic, expectedQos, sentBytes});
 
     long waitMilliseconds = 10000;
@@ -430,18 +430,25 @@ public class MqttV3Receiver implements MqttCallback {
         message});
 
     // logger.fine(methodName + ": '" + new String(message.getPayload()) + "'");
-
     receivedMessages.add(new ReceivedMessage(topic, message));
     notify();
 
     log.exiting(className, methodName);
   }
 
+  public synchronized List<ReceivedMessage> getReceivedMessagesInCopy(){
+	return new ArrayList<ReceivedMessage>(receivedMessages);  
+  }
+  
   /**
    * @param text
    */
   public void report(String text) {
     StackTraceElement[] stack = (new Throwable()).getStackTrace();
     reportStream.println(stack[1].getClassName() + ":" + stack[1].getLineNumber() + " " + text);
+  }
+  
+  public int receivedMessageCount(){
+	  return receivedMessages.size();
   }
 }

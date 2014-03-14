@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 
 /**
  * An on-the-wire representation of an MQTT CONNECT message.
@@ -85,8 +86,15 @@ public class MqttConnect extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			encodeUTF8(dos,"MQIsdp");			
-			dos.write(3);
+			boolean fallBackTo31 = TestProperties.getInstance()
+					.getBooleanProperty("SPEC31");
+			if(fallBackTo31){
+				encodeUTF8(dos,"MQIsdp");			
+				dos.write(3);
+			}else{
+				encodeUTF8(dos,"MQTT");			
+				dos.write(4);
+			}
 			byte connectFlags = 0;
 			
 			if (cleanSession) {

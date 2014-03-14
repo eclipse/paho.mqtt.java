@@ -33,7 +33,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
-import org.junit.Assert;
 
 /**
   * Contains the classes and utilities used to configure the MQTT testcases. 
