@@ -12,6 +12,7 @@
 package org.eclipse.paho.client.mqttv3;
 
 import java.util.Properties;
+
 import javax.net.SocketFactory;
 
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -418,11 +419,15 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	}
 	
 	/**
-	 * By default MQTT client support 3.1.1 MQTT specification, fall back to 
-	 * 31 with this method for old MQTT brokers.
-	 * @param true, false by default
+	 * Return Current Mqtt protocol version. Client supports version 3.1 and 3.1.1. 
+	 * This value is V3_1 by default.
+	 * @return return a "type safe enum" class to state current version.
 	 */
-	public void fallBack31Spec(boolean isSpec31){
-		aClient.fallBack31Spec(isSpec31);
+	public MqttProtocolVersion getProtocolVersion() {
+		return aClient.getProtocolVersion();
+	}
+
+	public void setProtocolVersion(MqttProtocolVersion version) {
+		aClient.setProtocolVersion(version);
 	}
 }

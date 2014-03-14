@@ -16,12 +16,14 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.eclipse.paho.client.mqttv3.MqttProtocolVersion;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
@@ -51,6 +53,7 @@ public class ClientComms {
 	private MqttClientPersistence persistence;
 	CommsTokenStore 			tokenStore;
 	boolean 					stoppingComms = false;
+	private MqttProtocolVersion protocol_version = MqttProtocolVersion.V3_1;
 
 	final static byte CONNECTED	= 0;
 	final static byte CONNECTING	= 1;
@@ -77,7 +80,8 @@ public class ClientComms {
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback 	= new CommsCallback(this);
 		this.clientState = new ClientState(persistence, tokenStore, this.callback, this);
-
+		this.protocol_version = ((MqttAsyncClient) client).getProtocolVersion();
+		
 		callback.setClientState(clientState);
 		log.setResourceName(getClient().getClientId());
 	}
@@ -197,7 +201,7 @@ public class ClientComms {
 						options.getUserName(),
 						options.getPassword(),
 						options.getWillMessage(),
-						options.getWillDestination());
+						options.getWillDestination(), protocol_version);
 
 				this.clientState.setKeepAliveSecs(options.getKeepAliveInterval());
 				this.clientState.setCleanSession(options.isCleanSession());

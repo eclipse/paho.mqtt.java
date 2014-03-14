@@ -22,8 +22,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttProtocolVersion;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientPaho;
@@ -525,5 +527,38 @@ public class ConformantTest {
 		ReceivedMessage message = receiver.receiveNext(500);
 		Assert.assertNull("Should not receive any messsage for '$' topics",
 				message);
+	}
+	
+	/**
+	 * Try 3.1 and 3.1.1 connect packet.
+	 */
+	@Test
+	public void v31_and_v311_connectTest() throws Exception{
+		boolean successed = true;
+		MqttClient client = null; 
+		try{
+			//Try v3.1.1
+			client = new MqttClient(serverURI.toString(), "protocol_client");
+			Assert.assertEquals(MqttProtocolVersion.V3_1, client.getProtocolVersion()); //3.1.1 by default.
+			client.connect();
+			Thread.sleep(100);
+			client.disconnect();
+			//Try v3.1
+			client.setProtocolVersion(MqttProtocolVersion.V3_1_1);
+			Assert.assertEquals(MqttProtocolVersion.V3_1_1, client.getProtocolVersion());
+			client.connect();
+			Thread.sleep(100);
+			client.disconnect();
+		}catch(MqttException e){
+			successed = false;
+		}finally{
+			if(client != null){
+				if(client.isConnected()){
+					client.disconnect();
+				}
+				client.close();
+			}
+		}
+		Assert.assertTrue("Connect fail", successed);
 	}
 }
