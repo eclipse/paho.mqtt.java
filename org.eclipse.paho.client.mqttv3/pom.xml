@@ -68,6 +68,9 @@
                     <systemPropertyVariables>
                         <SERVER_URI>${test.server_uri}</SERVER_URI>
                     </systemPropertyVariables>
+                    <excludes>
+                        <exclude>${test.exclude}</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -102,6 +105,9 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <test.exclude>**/*ConformantTest.java</test.exclude>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
