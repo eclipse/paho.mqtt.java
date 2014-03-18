@@ -599,7 +599,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * wildcard character.
 	 */
 	protected MqttTopic getTopic(String topic) {
-		validateTopic(topic);
+		MqttTopic.validate(topic, false/*wildcards NOT allowed*/);
 
 		MqttTopic result = (MqttTopic)topics.get(topic);
 		if (result == null) {
@@ -639,13 +639,18 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		if (topicFilters.length != qos.length) {
 			throw new IllegalArgumentException();
 		}
+		
 		String subs = "";
 		for (int i=0;i<topicFilters.length;i++) {
 			if (i>0) {
 				subs+=", ";
 			}
 			subs+=topicFilters[i]+":"+qos[i];
+			
+			//Check if the topic filter is valid before subscribing
+			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 		}
+		
 		//@TRACE 106=Subscribe topic={0} userContext={1} callback={2}
 		log.fine(className,methodName,"106",new Object[]{subs, userContext, callback});
 
@@ -695,7 +700,14 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 				subs+=", ";
 			}
 			subs+=topicFilters[i];
+			
+			// Check if the topic filter is valid before unsubscribing
+			// Although we already checked when subscribing, but invalid
+			// topic filter is meanless for unsubscribing, just prohibit it
+			// to reduce unnecessary control packet send to broker.
+			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 		}
+		
 		//@TRACE 107=Unsubscribe topic={0} userContext={1} callback={2}
 		log.fine(className, methodName,"107",new Object[]{subs, userContext, callback});
 
@@ -776,7 +788,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		//@TRACE 111=< topic={0} message={1}userContext={1} callback={2}
 		log.fine(className,methodName,"111", new Object[] {topic, userContext, callback});
 
-		validateTopic(topic);
+		//Checks if a topic is valid when publishing a message.
+		MqttTopic.validate(topic, false/*wildcards NOT allowed*/);
 
 		MqttDeliveryToken token = new MqttDeliveryToken(getClientId());
 		token.setActionCallback(callback);
@@ -813,20 +826,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		return new Debug(clientId,comms);
 	}
 
-	/**
-	 * Checks a topic is valid when publishing a message.
-	 * <p>Checks the topic does not contain a wild card character.</p>
-	 * @param topic to validate
-	 * @throws IllegalArgumentException if the topic is not valid
-	 */
-	static public void validateTopic(String topic) {
-		if ((topic.indexOf('#') == -1) && (topic.indexOf('+') == -1)) {
-			return;
-		}
-		// The topic string does not comply with topic string rules.
-		throw new IllegalArgumentException();
-	}
-	
 	/**
 	 * Return Current Mqtt protocol version. Client supports version 3.1 and 3.1.1. 
 	 * This value is V3_1 by default.

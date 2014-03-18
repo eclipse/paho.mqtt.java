@@ -12,8 +12,11 @@
 package org.eclipse.paho.client.mqttv3;
 
 import java.util.Properties;
+
 import javax.net.SocketFactory;
+
 import org.eclipse.paho.client.mqttv3.util.Debug;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -143,7 +146,8 @@ public class MqttConnectOptions {
 		if ((dest == null) || (payload == null)) {
 			throw new IllegalArgumentException();
 		}
-		MqttAsyncClient.validateTopic(dest);
+		
+		MqttTopic.validate(dest, false/*wildcards NOT allowed*/);
 	}
 
 	/**
