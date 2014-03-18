@@ -71,6 +71,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  */
 public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvider {
 
+	private static final String CLIENT_ID_PREFIX = "paho-";
 	private String clientId;
 	private String serverURI;
 	protected ClientComms comms;
@@ -720,8 +721,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	}
 
 	/**
-	 * Returns a randomly generated client identifier based on the current user's login
-	 * name and the system time.
+	 * Returns a randomly generated client identifier based on the the fixed prefix (paho-)
+	 * and the system time.
 	 * <p>When cleanSession is set to false, an application must ensure it uses the
 	 * same client identifier when it reconnects to the server to resume state and maintain
 	 * assured message delivery.</p>
@@ -729,7 +730,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @see MqttConnectOptions#setCleanSession(boolean)
 	 */
 	public static String generateClientId() {
-		return (System.getProperty("user.name") + "." + System.currentTimeMillis());
+		//length of nanoTime = 15, so total length = 20  < 23(defined in spec) 
+		return CLIENT_ID_PREFIX + System.nanoTime();
 	}
 
 	/* (non-Javadoc)
