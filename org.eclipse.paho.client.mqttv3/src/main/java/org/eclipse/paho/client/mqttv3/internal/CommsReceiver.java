@@ -33,6 +33,7 @@ public class CommsReceiver implements Runnable {
 	private MqttInputStream in;
 	private CommsTokenStore tokenStore = null;
 	private Thread recThread = null;
+	private volatile boolean receiving;
 	
 	private final static String className = CommsReceiver.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
@@ -71,6 +72,7 @@ public class CommsReceiver implements Runnable {
 			log.fine(className,methodName, "850");
 			if (running) {
 				running = false;
+				receiving = false;
 				if (!Thread.currentThread().equals(recThread)) {
 					try {
 						// Wait for the thread to finish.
@@ -97,7 +99,9 @@ public class CommsReceiver implements Runnable {
 			try {
 				//@TRACE 852=network read message
 				log.fine(className,methodName,"852");
+				receiving = true;
 				MqttWireMessage message = in.readMqttWireMessage();
+				receiving = false;
 				
 				if (message instanceof MqttAck) {
 					token = tokenStore.getToken(message);
@@ -138,6 +142,9 @@ public class CommsReceiver implements Runnable {
 					clientComms.shutdownConnection(token, new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
 				} // else {
 			}
+			finally {
+				receiving = false;
+			}
 		}
 		
 		//@TRACE 854=<
@@ -146,5 +153,14 @@ public class CommsReceiver implements Runnable {
 	
 	public boolean isRunning() {
 		return running;
+	}
+	
+	/**
+	 * Returns the receiving state.
+	 * 
+	 * @return true if the receiver is receiving data, false otherwise.
+	 */
+	public boolean isReceiving() {
+		return receiving;
 	}
 }
