@@ -516,7 +516,15 @@ public class ClientState {
 
 		if (connected && this.keepAlive > 0) {
 			long time = System.currentTimeMillis();
-		
+			
+			// Fix for receiving large message which MAY cause timeout
+			// any of the conditions is true means the client is active
+			// lastInboundActivity will be updated once receiving is done
+			boolean active = clientComms.receiver.isReceiving() || 
+					         time - lastInboundActivity < keepAlive ||
+					         time - lastOutboundActivity < keepAlive || 
+					         time - lastPing < keepAlive;
+			
 			if (!pingOutstanding) {
 				// Is a ping required? 
 				if (time - lastOutboundActivity >= this.keepAlive ||
@@ -531,7 +539,7 @@ public class ClientState {
 					tokenStore.saveToken(token, pingCommand);
 					pendingFlows.insertElementAt(pingCommand, 0);
 				}
-			} else if (time - lastPing >= this.keepAlive) {
+			} else if (!active) {
 				// A ping is outstanding but no packet has been received in KA so connection is deemed broken
 				//@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}
 				log.severe(className,methodName,"619", new Object[]{new Long(this.keepAlive),new Long(lastOutboundActivity),new Long(lastInboundActivity)});
