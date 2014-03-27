@@ -511,4 +511,81 @@ public class SendReceiveAsyncTest {
 
     log.exiting(className, methodName);
   }
+  
+  /**
+   * Short keep-alive intervals along with very large payloads (some MBis) results in the client being disconnected by
+   * the broker.
+   * 
+   * In order to recreate the issue increase the value of waitMilliseconds in
+   * org.eclipse.paho.client.mqttv3.test.utilities.MqttV3Receiver.validateReceipt to some large value (e.g.
+   * 60*60*1000). This allows the test to wait for a longer time.
+   * 
+   * The issue occurs because while receiving such a large payload no PING is sent by the client to the broker. This
+   * can be seen adding some debug statements in:
+   * org.eclipse.paho.client.mqttv3.internal.ClientState.checkForActivity.
+   * 
+   * Since no other activity (messages from the client to the broker) is generated, the broker disconnects the client.
+   */
+  @Test
+  public void testVeryLargeMessageWithShortKeepAlive() {
+  	final String methodName = Utility.getMethodName();
+  	LoggingUtilities.banner(log, cclass, methodName);
+  	log.entering(className, methodName);
+  
+  	IMqttAsyncClient mqttClient = null;
+  	try {
+  		mqttClient = clientFactory.createMqttAsyncClient(serverURI, "testVeryLargeMessage");
+  		MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
+  		log.info("Assigning callback...");
+  		mqttClient.setCallback(mqttV3Receiver);
+  		
+  		//keepAlive=30s
+  		MqttConnectOptions options = new MqttConnectOptions();
+  		options.setKeepAliveInterval(30);
+  
+  		IMqttToken connectToken = mqttClient.connect(options);
+  		log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+  		connectToken.waitForCompletion();
+  
+  		String topic = "testLargeMsg/Topic";
+  		//10MB
+  		int largeSize = 60 * (1 << 20);
+  		byte[] message = new byte[largeSize];
+  
+  		java.util.Arrays.fill(message, (byte) 's');
+  
+  		IMqttToken subToken = mqttClient.subscribe(topic, 0);
+  		log.info("Subscribing to..." + topic);
+  		subToken.waitForCompletion();
+  
+  		IMqttToken pubToken = mqttClient.publish(topic, message, 0, false, null, null);
+  		log.info("Publishing to..." + topic);
+  		pubToken.waitForCompletion();
+  
+  		boolean ok = mqttV3Receiver.validateReceipt(topic, 0, message);
+  		if (!ok) {
+  			Assert.fail("Receive failed");
+  		}
+  	}
+  	catch (Exception exception) {
+  		log.log(Level.SEVERE, "caught exception:", exception);
+  		Assert.fail("Failed to instantiate:" + methodName + " exception=" + exception);
+  	}
+  	finally {
+  		try {
+  			if (mqttClient != null) {
+  				IMqttToken disconnectToken = mqttClient.disconnect(null, null);
+  				log.info("Disconnecting...");
+  				disconnectToken.waitForCompletion();
+  				mqttClient.close();
+  				log.info("Closed");
+  			}
+  		}
+  		catch (Exception exception) {
+  			log.log(Level.SEVERE, "caught exception:", exception);
+  		}
+  	}
+  
+  	log.exiting(className, methodName);
+  }
 }
