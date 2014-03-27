@@ -91,7 +91,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * </p>
 	 *
 	 * <p>
-	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.
+	 * A client identifier <code>clientId</code> must be specified and be less that 65535 characters.
 	 * It must be unique across all clients connecting to the same
 	 * server. The clientId is used by the server to store data related to the client,
 	 * hence it is important that the clientId remain the same when connecting to a server
@@ -128,7 +128,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @param clientId a client identifier that is unique on the server being connected to
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://".
-	 * @throws IllegalArgumentException if the clientId is null or is greater than 23 characters in length
+	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttClient(String serverURI, String clientId) throws MqttException {
@@ -165,7 +165,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * </p>
 	 *
 	 * <p>
-	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.
+	 * A client identifier <code>clientId</code> must be specified and be less that 65535 characters.
 	 * It must be unique across all clients connecting to the same
 	 * server. The clientId is used by the server to store data related to the client,
 	 * hence it is important that the clientId remain the same when connecting to a server
@@ -216,7 +216,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
  	 * default persistence mechanism is used
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://"
-	 * @throws IllegalArgumentException if the clientId is null or is greater than 23 characters in length
+	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {

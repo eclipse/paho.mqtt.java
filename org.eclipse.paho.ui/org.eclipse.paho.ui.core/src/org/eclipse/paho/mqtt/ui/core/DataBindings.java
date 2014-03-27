@@ -190,7 +190,7 @@ public final class DataBindings {
 			@Override
 			public IStatus validate(Object value) {
 				String clientId = (String) value;
-				if (clientId == null || clientId.length() == 0) {
+				if (clientId == null) {
 					return ValidationStatus.error(Messages.VALIDATION_VALUE_REQUIRED);
 				}
 
@@ -202,7 +202,7 @@ public final class DataBindings {
 					}
 					clientIdLength++;
 				}
-				if (clientIdLength > 23) {
+				if (clientIdLength > 65535) {
 					return ValidationStatus.error(Messages.VALIDATION_INVALID_CLIENT_ID);
 				}
 
