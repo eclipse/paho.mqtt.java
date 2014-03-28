@@ -22,6 +22,7 @@ import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
@@ -587,5 +588,63 @@ public class SendReceiveAsyncTest {
   	}
   
   	log.exiting(className, methodName);
+  }
+  
+  /**
+   * For bug - https://bugs.eclipse.org/bugs/show_bug.cgi?id=414783
+   * Test the behavior of the connection timeout when connecting to a non MQTT server.
+   * i.e. ssh port 22
+   */
+  @Test
+  public void testConnectTimeout() throws Exception {
+	  final String methodName = Utility.getMethodName();
+	  LoggingUtilities.banner(log, cclass, methodName);
+	  log.entering(className, methodName);
+
+	  IMqttAsyncClient mqttClient = null;
+	  // Change the URI to a none MQTT server
+	  URI uri = new URI("tcp://ibmbjclub.org:22");
+	  IMqttToken connectToken = null;
+	  try {
+		  mqttClient = clientFactory.createMqttAsyncClient(uri, methodName);
+		  log.info("Connecting...(serverURI:" + uri + ", ClientId:" + methodName);
+		  connectToken = mqttClient.connect(new MqttConnectOptions());
+		  connectToken.waitForCompletion(5000);
+		  Assert.fail("Should throw an timeout exception.");
+	  }
+	  catch (Exception exception) {
+		  log.log(Level.INFO, "Connect action failed at expected.");
+		  Assert.assertTrue(exception instanceof MqttException);
+		  Assert.assertEquals(MqttException.REASON_CODE_CLIENT_TIMEOUT, ((MqttException) exception).getReasonCode());
+	  }
+	  finally {
+		  if (mqttClient != null) {
+			  log.info("Close..." + mqttClient);
+			  mqttClient.disconnectForcibly(5000, 5000);
+		  }
+	  }
+
+	  //reuse the client instance to reconnect
+	  try {
+		  connectToken = mqttClient.connect(new MqttConnectOptions());
+		  log.info("Connecting again...(serverURI:" + uri + ", ClientId:" + methodName);
+		  connectToken.waitForCompletion(5000);
+	  }
+	  catch (Exception exception) {
+		  log.log(Level.INFO, "Connect action failed at expected.");
+		  Assert.assertTrue(exception instanceof MqttException);
+		  Assert.assertEquals(MqttException.REASON_CODE_CLIENT_TIMEOUT, ((MqttException) exception).getReasonCode());
+	  }
+	  finally {
+		  if (mqttClient != null) {
+			  log.info("Close..." + mqttClient);
+			  mqttClient.disconnectForcibly(5000, 5000);
+			  mqttClient.close();
+		  }
+	  }
+
+	  Assert.assertFalse(mqttClient.isConnected());
+
+	  log.exiting(className, methodName);
   }
 }
