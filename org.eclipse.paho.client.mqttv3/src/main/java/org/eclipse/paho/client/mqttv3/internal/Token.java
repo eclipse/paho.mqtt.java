@@ -91,7 +91,8 @@ public class Token {
 		if (resp == null && !completed) {
 			//@TRACE 406=key={0} timed out token={1}
 			log.fine(className,methodName, "406",new Object[]{getKey(), this});
-			throw new MqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+			exception = new MqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+			throw exception;
 		}
 		checkResult();
 	}
@@ -118,7 +119,7 @@ public class Token {
 						//@TRACE 408=key={0} wait max={1}
 						log.fine(className,methodName,"408",new Object[] {getKey(),new Long(timeout)});
 	
-						if (timeout == -1) {
+						if (timeout <= 0) {
 							responseLock.wait();
 						} else {
 							responseLock.wait(timeout);
@@ -132,6 +133,11 @@ public class Token {
 						//@TRACE 401=failed with exception
 						log.fine(className,methodName,"401",null,exception);
 						throw exception;
+					}
+					
+					if (timeout > 0) {
+						// time up and still not completed
+						break;
 					}
 				}
 			}

@@ -23,7 +23,6 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.eclipse.paho.client.mqttv3.MqttProtocolVersion;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
@@ -422,6 +421,29 @@ public class ClientComms {
 			conState = DISCONNECTING;
 			DisconnectBG discbg = new DisconnectBG(disconnect,quiesceTimeout,token);
 			discbg.start();
+		}
+	}
+	
+	/**
+	 * Disconnect the connection and reset all the states.
+	 */
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
+		// Allow current inbound and outbound work to complete
+		clientState.quiesce(quiesceTimeout);
+		MqttToken token = new MqttToken(client.getClientId());
+		try {
+			// Send disconnect packet
+			internalSend(new MqttDisconnect(), token);
+
+			// Wait util the disconnect packet sent with timeout
+			token.waitForCompletion(disconnectTimeout);
+		}
+		catch (Exception ex) {
+			// ignore, probably means we failed to send the disconnect packet.
+		}
+		finally {
+			token.internalTok.markComplete(null, null);
+			shutdownConnection(token, null);
 		}
 	}
 

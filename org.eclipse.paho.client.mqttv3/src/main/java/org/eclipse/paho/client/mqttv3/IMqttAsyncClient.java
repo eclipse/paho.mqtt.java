@@ -258,7 +258,44 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException for problems encountered while disconnecting
 	 */
 	public IMqttToken disconnect(long quiesceTimeout, Object userContext, IMqttActionListener callback) throws MqttException;
-
+	
+	/**
+	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
+	 * <p>
+	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
+	 * send the disconnect packet. It will wait for a maximum of 30 seconds for work to quiesce before disconnecting and
+	 * wait for a maximum of 10 seconds for sending the disconnect packet to server.
+	 * 
+	 * @throws MqttException if any unexpected error
+	 * @since 0.4.1
+	 */
+	public void disconnectForcibly() throws MqttException;
+	
+	/**
+	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
+	 * <p>
+	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
+	 * send the disconnect packet. It will wait for a maximum of 30 seconds for work to quiesce before disconnecting.
+	 * 
+	 * @param disconnectTimeout the amount of time in milliseconds to allow send disconnect packet to server.
+	 * @throws MqttException if any unexpected error
+	 * @since 0.4.1
+	 */
+	public void disconnectForcibly(long disconnectTimeout) throws MqttException;
+	
+	/**
+	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
+	 * <p>
+	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
+	 * send the disconnect packet.
+	 * 
+	 * @param quiesceTimeout the amount of time in milliseconds to allow for existing work to finish before
+	 * disconnecting. A value of zero or less means the client will not quiesce.
+	 * @param disconnectTimeout the amount of time in milliseconds to allow send disconnect packet to server.
+	 * @throws MqttException if any unexpected error
+	 * @since 0.4.1
+	 */
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
 
 	/**
 	 * Determines if this client is currently connected to the server.

@@ -72,6 +72,8 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
 public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvider {
 
 	private static final String CLIENT_ID_PREFIX = "paho-";
+	private static final long QUIESCE_TIMEOUT = 30000; // ms
+	private static final long DISCONNECT_TIMEOUT = 10000; // ms
 	private String clientId;
 	private String serverURI;
 	protected ClientComms comms;
@@ -492,7 +494,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnect(java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
 	public IMqttToken disconnect( Object userContext, IMqttActionListener callback) throws MqttException {
-		return this.disconnect(30000, userContext, callback);
+		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback);
 	}
 
 	/* (non-Javadoc)
@@ -533,6 +535,30 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		log.fine(className,methodName,"108");
 
 		return token;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly()
+	 */
+	public void disconnectForcibly() throws MqttException {
+		disconnectForcibly(QUIESCE_TIMEOUT, DISCONNECT_TIMEOUT);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long)
+	 */
+	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
+		disconnectForcibly(QUIESCE_TIMEOUT, disconnectTimeout);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long)
+	 */
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException{
+		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
 	/* (non-Javadoc)

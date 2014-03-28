@@ -241,7 +241,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see IMqttClient#disconnect()
 	 */
 	public void disconnect() throws MqttException {
-		this.disconnect(30000);
+		aClient.disconnect();
 	}
 
 	/*
@@ -249,6 +249,33 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 */
 	public void disconnect(long quiesceTimeout) throws MqttException {
 		aClient.disconnect(quiesceTimeout, null, null).waitForCompletion();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly()
+	 */
+	public void disconnectForcibly() throws MqttException {
+		aClient.disconnectForcibly();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long)
+	 */
+	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
+		aClient.disconnectForcibly(disconnectTimeout);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long)
+	 */
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
+		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
 	/*
