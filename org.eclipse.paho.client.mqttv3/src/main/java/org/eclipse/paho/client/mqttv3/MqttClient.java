@@ -241,7 +241,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see IMqttClient#disconnect()
 	 */
 	public void disconnect() throws MqttException {
-		aClient.disconnect();
+		aClient.disconnect().waitForCompletion();
 	}
 
 	/*
