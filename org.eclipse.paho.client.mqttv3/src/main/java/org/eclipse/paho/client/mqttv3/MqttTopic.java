@@ -154,9 +154,8 @@ public class MqttTopic {
 		// - Topic Names and Topic Filters are UTF-8 encoded strings, they MUST
 		// NOT encode to more than 65535 bytes
 		if (topicLen < MIN_TOPIC_LEN || topicLen > MAX_TOPIC_LEN) {
-			throw new IllegalArgumentException(String.format(
-					"Invalid topic length, should be in range[%d, %d]!",
-					MIN_TOPIC_LEN, MAX_TOPIC_LEN));
+			throw new IllegalArgumentException(String.format("Invalid topic length, should be in range[%d, %d]!",
+					new Object[] { Integer.valueOf(MIN_TOPIC_LEN), Integer.valueOf(MAX_TOPIC_LEN) }));
 		}
 
 		// *******************************************************************************
@@ -164,8 +163,7 @@ public class MqttTopic {
 		// *******************************************************************************
 		if (wildcardAllowed) {
 			// Only # or +
-			if (Strings.equalsAny(topicString, MULTI_LEVEL_WILDCARD,
-					SINGLE_LEVEL_WILDCARD)) {
+			if (Strings.equalsAny(topicString, new String[] { MULTI_LEVEL_WILDCARD, SINGLE_LEVEL_WILDCARD })) {
 				return;
 			}
 

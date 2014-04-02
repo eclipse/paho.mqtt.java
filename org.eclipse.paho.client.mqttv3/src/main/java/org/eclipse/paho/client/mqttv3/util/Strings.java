@@ -26,18 +26,15 @@ public final class Strings {
 	 * @param rest the rest CharSequence
 	 * @return true if equals any
 	 */
-	public static boolean equalsAny(CharSequence cs, CharSequence first, CharSequence... rest) {
+	public static boolean equalsAny(CharSequence cs, CharSequence[] strs) {
 		boolean eq = false;
 		if (cs == null) {
-			eq = first == null;
-		}
-		else {
-			eq = cs.equals(first);
+			eq = strs == null;
 		}
 
-		if (rest != null) {
-			for (CharSequence str : rest) {
-				eq = eq || str.equals(cs);
+		if (strs != null) {
+			for (int i = 0; i < strs.length; i++) {
+				eq = eq || strs[i].equals(cs);
 			}
 		}
 
@@ -65,7 +62,7 @@ public final class Strings {
 	 * @param searchChars the chars to search for, may be null
 	 * @return the {@code true} if any of the chars are found, {@code false} if no match or null input
 	 */
-	public static boolean containsAny(CharSequence cs, char... searchChars) {
+	public static boolean containsAny(CharSequence cs, char[] searchChars) {
 		if (isEmpty(cs) || isEmpty(searchChars)) {
 			return false;
 		}
