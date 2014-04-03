@@ -23,6 +23,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistable;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.eclipse.paho.client.mqttv3.MqttPingSender;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
@@ -114,7 +115,7 @@ public class ClientState {
 	private long lastInboundActivity = 0;
 	private long lastPing = 0;
 	private MqttWireMessage pingCommand;
-	private boolean pingOutstanding = false;
+	private Boolean pingOutstanding = Boolean.FALSE;
 
 	private boolean connected = false;
 	
@@ -122,11 +123,13 @@ public class ClientState {
 	private Hashtable outboundQoS1 = null;
 	private Hashtable inboundQoS2 = null;
 	
+	private MqttPingSender pingSender = null;
+	
 	private final static String className = ClientState.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className); 
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, 
-			CommsCallback callback, ClientComms clientComms) throws MqttException {
+			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender) throws MqttException {
 		
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(className, "<Init>", "" );
@@ -144,7 +147,8 @@ public class ClientState {
 		this.persistence = persistence;
 		this.callback = callback;
 		this.tokenStore = tokenStore;
-		this.clientComms = clientComms;		
+		this.clientComms = clientComms;
+		this.pingSender = pingSender;
 		
 		restoreState();
 	}
@@ -510,45 +514,71 @@ public class ClientState {
 	 * 
 	 * If a ping has been sent but no data has been received in the 
 	 * last keepalive interval then the connection is deamed to be broken. 
+	 * 
+	 * @return token of ping command, null if no ping command has been sent.
 	 */
-	private void checkForActivity() throws MqttException {
+	public MqttToken checkForActivity() throws MqttException {
 		final String methodName = "checkForActivity";
 
+		MqttToken token = null;
+		long nextPingTime = getKeepAlive();
+		
 		if (connected && this.keepAlive > 0) {
 			long time = System.currentTimeMillis();
+			//Reduce schedule frequency since System.currentTimeMillis is no accurate, add a buffer
+			//It is 1/10 in minimum keepalive unit.
+			int delta = 100;
 			
-			// Fix for receiving large message which MAY cause timeout
-			// any of the conditions is true means the client is active
-			// lastInboundActivity will be updated once receiving is done
-			boolean active = clientComms.receiver.isReceiving() || 
-					         time - lastInboundActivity < keepAlive ||
-					         time - lastOutboundActivity < keepAlive || 
-					         time - lastPing < keepAlive;
+			synchronized (pingOutstanding) {
 			
-			if (!pingOutstanding) {
-				// Is a ping required? 
-				if (time - lastOutboundActivity >= this.keepAlive ||
-					time - lastInboundActivity >= this.keepAlive) {
-
-					//@TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}
-					log.fine(className,methodName,"620", new Object[]{new Long(this.keepAlive),new Long(lastOutboundActivity),new Long(lastInboundActivity)});
+				if (!pingOutstanding) {
+					//This follow previous Paho code logic. Should we change to the latest activity time? which is
+					//long lastActivity = lastInboundActivity > lastOutboundActivity ? lastInboundActivity: lastOutboundActivity;
+					//So we delay the ping a bit more. In most cases, lastInboundActivity and lastOutboundActivity has a TTL difference.
+					long lastActivity = lastInboundActivity > lastOutboundActivity ? lastOutboundActivity: lastInboundActivity;
 					
-					pingOutstanding = true;
-					lastPing = time;
-					MqttToken token = new MqttToken(clientComms.getClient().getClientId());
-					tokenStore.saveToken(token, pingCommand);
-					pendingFlows.insertElementAt(pingCommand, 0);
+					// Is a ping required? 
+					if (time - lastActivity >= this.keepAlive) {
+		
+						//@TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}
+						log.fine(className,methodName,"620", new Object[]{new Long(this.keepAlive),new Long(lastOutboundActivity),new Long(lastInboundActivity)});
+						pingOutstanding = Boolean.TRUE;
+						lastPing = time;
+						token = new MqttToken(clientComms.getClient().getClientId());
+						tokenStore.saveToken(token, pingCommand);
+						pendingFlows.insertElementAt(pingCommand, 0);
+						
+						nextPingTime = getKeepAlive();
+						
+						//Wake sender thread since it may be in wait state (in ClientState.get())
+						notifyQueueLock();
+					}else{
+						//@Trace 634=ping not needed yet. Schedule next ping.
+						log.fine(className, methodName, "634", null);
+						nextPingTime = getKeepAlive() - (time - lastActivity);
+					}
+				} else if ( !clientComms.receiver.isReceiving() && 
+					(time - lastPing >= keepAlive + delta) &&
+					(time - lastInboundActivity >= keepAlive + delta) &&
+					(time - lastOutboundActivity >= keepAlive + delta)){
+					// any of the conditions is true means the client is active
+					// lastInboundActivity will be updated once receiving is done.
+					//Add a delta, since the timer and System.currentTimeMillis() is not accurate.
+					// A ping is outstanding but no packet has been received in KA so connection is deemed broken
+					//@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}
+					log.severe(className,methodName,"619", new Object[]{new Long(this.keepAlive),new Long(lastOutboundActivity),new Long(lastInboundActivity), new Long(time), new Long(lastPing)});
+					
+					// A ping has already been sent. At this point, assume that the
+					// broker has hung and the TCP layer hasn't noticed.
+					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
 				}
-			} else if (!active) {
-				// A ping is outstanding but no packet has been received in KA so connection is deemed broken
-				//@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}
-				log.severe(className,methodName,"619", new Object[]{new Long(this.keepAlive),new Long(lastOutboundActivity),new Long(lastInboundActivity)});
-				
-				// A ping has already been sent. At this point, assume that the
-				// broker has hung and the TCP layer hasn't noticed.
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
-			}		
+			}
+			//@TRACE 624=Schedule next ping at {0}
+			log.fine(className, methodName,"624", new Object[]{new Long(nextPingTime)});
+			pingSender.schedule(nextPingTime);
 		}
+		
+		return token;
 	}
 	
 	/**
@@ -567,17 +597,20 @@ public class ClientState {
 
 		synchronized (queueLock) {
 			while (result == null) {
+				
 				// If there is no work wait until there is work.
 				// If the inflight window is full and no flows are pending wait until space is freed.
 				// In both cases queueLock will be notified.
 				if ((pendingMessages.isEmpty() && pendingFlows.isEmpty()) || 
 					(pendingFlows.isEmpty() && actualInFlight >= this.maxInflight)) {
 					try {
-						long ttw = getTimeUntilPing();
-						//@TRACE 644=wait for {0} ms for new work or for space in the inflight window 
-						log.fine(className,methodName, "644", new Object[] {new Long(ttw)});						
+						//@TRACE 644=wait for new work or for space in the inflight window 
+						log.fine(className,methodName, "644");						
  
-						queueLock.wait(getTimeUntilPing());
+						queueLock.wait();
+						
+						//@TRACE 647=new work or ping arrived 
+						log.fine(className,methodName, "647");
 					} catch (InterruptedException e) {
 					}
 				}
@@ -586,24 +619,23 @@ public class ClientState {
 				// - in the process of disconnecting / shutting down
 				// - in the process of connecting
 				if (!connected && 
-	 				(pendingFlows.isEmpty() || !((MqttWireMessage)pendingFlows.elementAt(0) instanceof MqttConnect))) {
+						(pendingFlows.isEmpty() || !((MqttWireMessage)pendingFlows.elementAt(0) instanceof MqttConnect))) {
 					//@TRACE 621=no outstanding flows and not connected
 					log.fine(className,methodName,"621");
-
+					
 					return null;
 				}
 
 				// Check if there is a need to send a ping to keep the session alive. 
 				// Note this check is done before processing messages. If not done first
 				// an app that only publishes QoS 0 messages will prevent keepalive processing
-				// from functioning.
-				checkForActivity();
+				// from functioning. 
+//				checkForActivity(); //Use pinger, don't check here
 				
 				// Now process any queued flows or messages
 				if (!pendingFlows.isEmpty()) {
 					// Process the first "flow" in the queue
-					result = (MqttWireMessage)pendingFlows.elementAt(0);
-					pendingFlows.removeElementAt(0);
+					result = (MqttWireMessage)pendingFlows.remove(0);
 					if (result instanceof MqttPubRel) {
 						inFlightPubRels++;
 
@@ -759,9 +791,11 @@ public class ClientState {
 			// Do not remove publish / delivery token at this stage
 			// do this when the persistence is removed later 
 		} else if (ack instanceof MqttPingResp) {
-			pingOutstanding = false;		
-			notifyResult(ack, token, mex);
-			tokenStore.removeToken(ack);
+			synchronized (pingOutstanding) {
+				pingOutstanding = Boolean.FALSE;		
+				notifyResult(ack, token, mex);
+				tokenStore.removeToken(ack);
+			}			
 		} else if (ack instanceof MqttConnack) {
 			int rc = ((MqttConnack) ack).getReturnCode();
 			if (rc == 0) {
@@ -929,6 +963,8 @@ public class ClientState {
 		//@TRACE 631=connected
 		log.fine(className, methodName, "631");
 		this.connected = true;
+		
+		pingSender.start(); //Start ping thread when client connected to server.
 	}
 	
 	/**
@@ -992,9 +1028,10 @@ public class ClientState {
 
 			pendingMessages.clear();
 			pendingFlows.clear();
-			// Reset pingOutstanding to allow reconnects to assume no previous ping.
-		    pingOutstanding = false;
-		    
+			synchronized (pingOutstanding) {
+				// Reset pingOutstanding to allow reconnects to assume no previous ping.
+			    pingOutstanding = Boolean.FALSE;
+			}		    
 		} catch (MqttException e) {
 			// Ignore as we have disconnected at this point
 		}
@@ -1080,7 +1117,7 @@ public class ClientState {
 			// Quiesce time up or inflight messages delivered.  Ensure pending delivery
 			// vectors are cleared ready for disconnect to be sent as the final flow.
 			synchronized (queueLock) {
-				pendingMessages.clear();
+				pendingMessages.clear();				
 				pendingFlows.clear();
 				quiescing = false;
 				actualInFlight = 0;
@@ -1090,7 +1127,7 @@ public class ClientState {
 		}
 	}
 
-	protected void notifyQueueLock() {
+	public void notifyQueueLock() {
 		final String methodName = "notifyQueueLock";
 		synchronized (queueLock) {
 			//@TRACE 638=notifying queueLock holders
@@ -1145,7 +1182,7 @@ public class ClientState {
 		props.put("actualInFlight", Integer.valueOf(actualInFlight));
 		props.put("inFlightPubRels", Integer.valueOf(inFlightPubRels));
 		props.put("quiescing", new Boolean(quiescing));
-		props.put("pingoutstanding", new Boolean(pingOutstanding));
+		props.put("pingoutstanding", pingOutstanding);
 		props.put("lastOutboundActivity", Long.valueOf(lastOutboundActivity));
 		props.put("lastInboundActivity", Long.valueOf(lastInboundActivity));
 		props.put("outboundQoS2", outboundQoS2);
