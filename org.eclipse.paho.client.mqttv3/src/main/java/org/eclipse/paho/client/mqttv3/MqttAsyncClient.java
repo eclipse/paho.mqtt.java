@@ -160,7 +160,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	}
 	
 	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
-		this(serverURI,clientId, new MqttDefaultFilePersistence(), new TimerPingSender());
+		this(serverURI,clientId, persistence, new TimerPingSender());
 	}
 
 	/**
