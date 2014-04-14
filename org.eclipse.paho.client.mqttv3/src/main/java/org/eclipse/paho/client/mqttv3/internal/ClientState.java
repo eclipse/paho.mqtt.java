@@ -531,7 +531,7 @@ public class ClientState {
 			
 			synchronized (pingOutstanding) {
 			
-				if (!pingOutstanding) {
+				if (!pingOutstanding.booleanValue()) {
 					//This follow previous Paho code logic. Should we change to the latest activity time? which is
 					//long lastActivity = lastInboundActivity > lastOutboundActivity ? lastInboundActivity: lastOutboundActivity;
 					//So we delay the ping a bit more. In most cases, lastInboundActivity and lastOutboundActivity has a TTL difference.
@@ -684,7 +684,7 @@ public class ClientState {
 		long pingin = getKeepAlive();
 		// If KA is zero which means just wait for work or 
 		// if a ping is outstanding return the KA value
-		if (connected && (getKeepAlive() > 0) && !pingOutstanding) {
+		if (connected && (getKeepAlive() > 0) && !pingOutstanding.booleanValue()) {
 		
 			long time = System.currentTimeMillis();
 			long timeSinceOut = (time-lastOutboundActivity);

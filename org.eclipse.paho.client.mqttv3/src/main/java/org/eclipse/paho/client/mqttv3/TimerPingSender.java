@@ -52,7 +52,6 @@ public class TimerPingSender implements MqttPingSender {
 		}
 	}
 
-	@Override
 	public void schedule(long delayInMilliseconds) {
 		timer.schedule(new PingTask(), delayInMilliseconds);		
 	}
