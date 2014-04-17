@@ -18,6 +18,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * An on-the-wire representation of an MQTT PINGRESP.
  */
 public class MqttPingResp extends MqttAck {
+	public static final String KEY = "Ping";
+	
 	public MqttPingResp(byte info, byte[] variableHeader) {
 		super(MqttWireMessage.MESSAGE_TYPE_PINGRESP);
 	}
@@ -35,6 +37,6 @@ public class MqttPingResp extends MqttAck {
 	}
 	
 	public String getKey() {
-		return new String("Ping");
+		return KEY;
 	}
 }

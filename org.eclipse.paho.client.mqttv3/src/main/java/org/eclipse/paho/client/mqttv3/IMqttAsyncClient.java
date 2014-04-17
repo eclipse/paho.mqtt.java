@@ -112,7 +112,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to the callback methods if a callback is set.
 	 * @see #connect(MqttConnectOptions, Object, IMqttActionListener)
 	 */
-	public IMqttToken connect() throws MqttException, MqttSecurityException;
+	IMqttToken connect() throws MqttException, MqttSecurityException;
 
 	/**
 	 * Connects to an MQTT server using the provided connect options.
@@ -127,7 +127,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to any callback that has been set.
 	 * @see #connect(MqttConnectOptions, Object, IMqttActionListener)
 	 */
-	public IMqttToken connect(MqttConnectOptions options) throws MqttException, MqttSecurityException ;
+	IMqttToken connect(MqttConnectOptions options) throws MqttException, MqttSecurityException ;
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * <p>The default options are specified in {@link MqttConnectOptions} class.
@@ -143,7 +143,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to any callback that has been set.
 	 * @see #connect(MqttConnectOptions, Object, IMqttActionListener)
 	 */
-	public IMqttToken connect(Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
+	IMqttToken connect(Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
 
 
 	/**
@@ -171,7 +171,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttSecurityException  for security related problems
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-	public IMqttToken connect(MqttConnectOptions options, Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
+	IMqttToken connect(MqttConnectOptions options, Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
 
 	/**
 	 * Disconnects from the server.
@@ -186,7 +186,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, IMqttActionListener)
 	 */
-	public IMqttToken disconnect( ) throws MqttException;
+	IMqttToken disconnect( ) throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -203,7 +203,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, IMqttActionListener)
 	 */
-	public IMqttToken disconnect(long quiesceTimeout) throws MqttException;
+	IMqttToken disconnect(long quiesceTimeout) throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -222,7 +222,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, IMqttActionListener)
 	 */
-	public IMqttToken disconnect( Object userContext, IMqttActionListener callback) throws MqttException;
+	IMqttToken disconnect( Object userContext, IMqttActionListener callback) throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -257,7 +257,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to any callback that has been set.
 	 * @throws MqttException for problems encountered while disconnecting
 	 */
-	public IMqttToken disconnect(long quiesceTimeout, Object userContext, IMqttActionListener callback) throws MqttException;
+	IMqttToken disconnect(long quiesceTimeout, Object userContext, IMqttActionListener callback) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -269,7 +269,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly() throws MqttException;
+	void disconnectForcibly() throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -281,7 +281,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long disconnectTimeout) throws MqttException;
+	void disconnectForcibly(long disconnectTimeout) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -295,14 +295,14 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
+	void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
 
 	/**
 	 * Determines if this client is currently connected to the server.
 	 *
 	 * @return <code>true</code> if connected, <code>false</code> otherwise.
 	 */
-	public boolean isConnected();
+	boolean isConnected();
 
 	/**
 	 * Returns the client ID used by this client.
@@ -312,7 +312,7 @@ public interface IMqttAsyncClient {
 	 *
 	 * @return the client ID used by this client.
 	 */
-	public String getClientId();
+	String getClientId();
 
 	/**
 	 * Returns the address of the server used by this client.
@@ -322,7 +322,7 @@ public interface IMqttAsyncClient {
 	 * @return the server's address, as a URI String.
 	 * @see MqttAsyncClient#MqttAsyncClient(String, String)
 	 */
-	public String getServerURI();
+	String getServerURI();
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -345,7 +345,7 @@ public interface IMqttAsyncClient {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
+	IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
 			boolean retained ) throws MqttException, MqttPersistenceException;
 
 	/**
@@ -373,7 +373,7 @@ public interface IMqttAsyncClient {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
+	IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
 			boolean retained, Object userContext, IMqttActionListener callback ) throws MqttException, MqttPersistenceException;
 
 	/**
@@ -391,7 +391,7 @@ public interface IMqttAsyncClient {
 	 * For instance client not connected.
 	 * @see #publish(String, MqttMessage, Object, IMqttActionListener)
 	 */
-	public IMqttDeliveryToken publish(String topic, MqttMessage message ) throws MqttException, MqttPersistenceException;
+	IMqttDeliveryToken publish(String topic, MqttMessage message ) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -462,7 +462,7 @@ public interface IMqttAsyncClient {
 	 * For instance client not connected.
 	 * @see MqttMessage
 	 */
-	public IMqttDeliveryToken publish(String topic, MqttMessage message,
+	IMqttDeliveryToken publish(String topic, MqttMessage message,
 			Object userContext, IMqttActionListener callback) throws MqttException, MqttPersistenceException;
 
 	/**
@@ -479,7 +479,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
+	IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -499,7 +499,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback)
+	IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback)
 	throws MqttException;
 
 	/**
@@ -519,7 +519,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
+	IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -626,7 +626,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
+	IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
 			throws MqttException;
 
 	/**
@@ -639,7 +639,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String topicFilter) throws MqttException;
+	IMqttToken unsubscribe(String topicFilter) throws MqttException;
 
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
@@ -652,7 +652,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String[] topicFilters) throws MqttException;
+	IMqttToken unsubscribe(String[] topicFilters) throws MqttException;
 
 	/**
 	 * Requests the server unsubscribe the client from a topics.
@@ -669,7 +669,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String topicFilter, Object userContext, IMqttActionListener callback)
+	IMqttToken unsubscribe(String topicFilter, Object userContext, IMqttActionListener callback)
 			throws MqttException;
 
 	/**
@@ -701,7 +701,7 @@ public interface IMqttAsyncClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String[] topicFilters, Object userContext, IMqttActionListener callback)
+	IMqttToken unsubscribe(String[] topicFilters, Object userContext, IMqttActionListener callback)
 			throws MqttException;
 
 
@@ -722,7 +722,7 @@ public interface IMqttAsyncClient {
 	 * @see MqttCallback
 	 * @param callback which will be invoked for certain asynchronous events
 	 */
-	public void setCallback(MqttCallback callback);
+	void setCallback(MqttCallback callback);
 
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
@@ -738,7 +738,7 @@ public interface IMqttAsyncClient {
 	 * set to false</P>
 	 * @return zero or more delivery tokens
 	 */
-	public IMqttDeliveryToken[] getPendingDeliveryTokens();
+	IMqttDeliveryToken[] getPendingDeliveryTokens();
 
 	/**
 	 * Close the client
@@ -746,9 +746,9 @@ public interface IMqttAsyncClient {
 	 * been closed it cannot be reused. For instance attempts to connect will fail.
 	 * @throws MqttException  if the client is not disconnected.
 	 */
-	public void close() throws MqttException;
+	void close() throws MqttException;
 
-	public MqttProtocolVersion getProtocolVersion();
+	MqttProtocolVersion getProtocolVersion();
 
-	public void setProtocolVersion(MqttProtocolVersion version);
+	void setProtocolVersion(MqttProtocolVersion version);
 }

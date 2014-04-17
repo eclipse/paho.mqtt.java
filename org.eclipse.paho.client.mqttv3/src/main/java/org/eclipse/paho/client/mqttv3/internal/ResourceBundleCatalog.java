@@ -18,7 +18,8 @@ public class ResourceBundleCatalog extends MessageCatalog {
 	
 	private ResourceBundle bundle;
 	
-	public ResourceBundleCatalog() throws MissingResourceException {
+	public ResourceBundleCatalog() {
+		//MAY throws MissingResourceException
 		bundle = ResourceBundle.getBundle("org.eclipse.paho.client.mqttv3.internal.nls.messages");
 	}
 

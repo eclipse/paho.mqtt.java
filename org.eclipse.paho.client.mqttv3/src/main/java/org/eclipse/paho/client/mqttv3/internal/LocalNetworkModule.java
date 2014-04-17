@@ -32,7 +32,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * ships with a number of IBM products.
  */
 public class LocalNetworkModule implements NetworkModule {
-	private Class LocalListener;
+	private Class localListener;
 	private String brokerName;
 	private Object localAdapter;
 	
@@ -41,12 +41,12 @@ public class LocalNetworkModule implements NetworkModule {
 	}
 
 	public void start() throws IOException, MqttException{
-		if (!ExceptionHelper.isClassAvailable("com.ibm.mqttdirect.modules.local.bindings.LocalListener")) {
+		if (!ExceptionHelper.isClassAvailable("com.ibm.mqttdirect.modules.local.bindings.localListener")) {
 			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR);
 		}
 		try {
-			LocalListener = Class.forName("com.ibm.mqttdirect.modules.local.bindings.LocalListener");
-			Method connect_m = LocalListener.getMethod("connect", new Class[]{ java.lang.String.class });
+			localListener = Class.forName("com.ibm.mqttdirect.modules.local.bindings.localListener");
+			Method connect_m = localListener.getMethod("connect", new Class[]{ java.lang.String.class });
 			localAdapter = connect_m.invoke(null,new Object[]{ brokerName });
 		} catch(Exception e) {
 		}
@@ -58,7 +58,7 @@ public class LocalNetworkModule implements NetworkModule {
 	public InputStream getInputStream() throws IOException {
 		InputStream stream = null;
 		try {
-			Method m = LocalListener.getMethod("getClientInputStream",new Class[]{});
+			Method m = localListener.getMethod("getClientInputStream",new Class[]{});
 			stream = (InputStream)m.invoke(this.localAdapter,new Object[]{});
 		} catch(Exception e) {
 		}
@@ -68,7 +68,7 @@ public class LocalNetworkModule implements NetworkModule {
 	public OutputStream getOutputStream() throws IOException {
 		OutputStream stream = null;
 		try {
-			Method m = LocalListener.getMethod("getClientOutputStream",new Class[]{});
+			Method m = localListener.getMethod("getClientOutputStream",new Class[]{});
 			stream = (OutputStream)m.invoke(this.localAdapter,new Object[]{});
 		} catch(Exception e) {
 		}
@@ -78,7 +78,7 @@ public class LocalNetworkModule implements NetworkModule {
 	public void stop() throws IOException {
 		if (localAdapter != null) {
 			try {
-				Method m = LocalListener.getMethod("close",new Class[]{});
+				Method m = localListener.getMethod("close",new Class[]{});
 				m.invoke(this.localAdapter,new Object[]{});
 			} catch(Exception e) {
 			}

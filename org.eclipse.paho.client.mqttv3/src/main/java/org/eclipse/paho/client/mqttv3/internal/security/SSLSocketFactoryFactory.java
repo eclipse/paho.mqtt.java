@@ -35,8 +35,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
-//import org.eclipse.paho.client.mqttv3.internal.comms.MqttDirectException;
-//import org.eclipse.paho.client.mqttv3.internal.comms.MqttSSLInitException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 
 
@@ -95,41 +93,41 @@ import org.eclipse.paho.client.mqttv3.logging.Logger;
  * </ul>
  */
 public class SSLSocketFactoryFactory {
-	private final static String CLASS_NAME = "org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory";
+	private static final String CLASS_NAME = "org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory";
 	/**
 	 * Property keys specific to the client).
 	 */
-	public final static String SSLPROTOCOL="com.ibm.ssl.protocol";
-	public final static String JSSEPROVIDER="com.ibm.ssl.contextProvider";
-	public final static String KEYSTORE="com.ibm.ssl.keyStore";
-	public final static String KEYSTOREPWD="com.ibm.ssl.keyStorePassword";
-	public final static String KEYSTORETYPE="com.ibm.ssl.keyStoreType";
-	public final static String KEYSTOREPROVIDER="com.ibm.ssl.keyStoreProvider";
-	public final static String KEYSTOREMGR="com.ibm.ssl.keyManager";
-	public final static String TRUSTSTORE="com.ibm.ssl.trustStore";
-	public final static String TRUSTSTOREPWD="com.ibm.ssl.trustStorePassword";
-	public final static String TRUSTSTORETYPE="com.ibm.ssl.trustStoreType";
-	public final static String TRUSTSTOREPROVIDER="com.ibm.ssl.trustStoreProvider";
-	public final static String TRUSTSTOREMGR="com.ibm.ssl.trustManager";
-	public final static String CIPHERSUITES="com.ibm.ssl.enabledCipherSuites";
-	public final static String CLIENTAUTH="com.ibm.ssl.clientAuthentication";
+	public static final String SSLPROTOCOL="com.ibm.ssl.protocol";
+	public static final String JSSEPROVIDER="com.ibm.ssl.contextProvider";
+	public static final String KEYSTORE="com.ibm.ssl.keyStore";
+	public static final String KEYSTOREPWD="com.ibm.ssl.keyStorePassword";
+	public static final String KEYSTORETYPE="com.ibm.ssl.keyStoreType";
+	public static final String KEYSTOREPROVIDER="com.ibm.ssl.keyStoreProvider";
+	public static final String KEYSTOREMGR="com.ibm.ssl.keyManager";
+	public static final String TRUSTSTORE="com.ibm.ssl.trustStore";
+	public static final String TRUSTSTOREPWD="com.ibm.ssl.trustStorePassword";
+	public static final String TRUSTSTORETYPE="com.ibm.ssl.trustStoreType";
+	public static final String TRUSTSTOREPROVIDER="com.ibm.ssl.trustStoreProvider";
+	public static final String TRUSTSTOREMGR="com.ibm.ssl.trustManager";
+	public static final String CIPHERSUITES="com.ibm.ssl.enabledCipherSuites";
+	public static final String CLIENTAUTH="com.ibm.ssl.clientAuthentication";
 	
 	/**
 	 * Property keys used for java system properties
 	 */
-	public final static String SYSKEYSTORE="javax.net.ssl.keyStore";
-	public final static String SYSKEYSTORETYPE="javax.net.ssl.keyStoreType";
-	public final static String SYSKEYSTOREPWD="javax.net.ssl.keyStorePassword";
-	public final static String SYSTRUSTSTORE="javax.net.ssl.trustStore";
-	public final static String SYSTRUSTSTORETYPE="javax.net.ssl.trustStoreType";
-	public final static String SYSTRUSTSTOREPWD="javax.net.ssl.trustStorePassword";
-	public final static String SYSKEYMGRALGO="ssl.KeyManagerFactory.algorithm";
-	public final static String SYSTRUSTMGRALGO="ssl.TrustManagerFactory.algorithm";
+	public static final String SYSKEYSTORE="javax.net.ssl.keyStore";
+	public static final String SYSKEYSTORETYPE="javax.net.ssl.keyStoreType";
+	public static final String SYSKEYSTOREPWD="javax.net.ssl.keyStorePassword";
+	public static final String SYSTRUSTSTORE="javax.net.ssl.trustStore";
+	public static final String SYSTRUSTSTORETYPE="javax.net.ssl.trustStoreType";
+	public static final String SYSTRUSTSTOREPWD="javax.net.ssl.trustStorePassword";
+	public static final String SYSKEYMGRALGO="ssl.KeyManagerFactory.algorithm";
+	public static final String SYSTRUSTMGRALGO="ssl.TrustManagerFactory.algorithm";
 	
 
-	public final static String DEFAULT_PROTOCOL = "TLS";  // "SSL_TLS" is not supported by DesktopEE
+	public static final String DEFAULT_PROTOCOL = "TLS";  // "SSL_TLS" is not supported by DesktopEE
 	
-	private final static String propertyKeys[] = { SSLPROTOCOL, JSSEPROVIDER,
+	private static final String propertyKeys[] = { SSLPROTOCOL, JSSEPROVIDER,
 			KEYSTORE, KEYSTOREPWD, KEYSTORETYPE, KEYSTOREPROVIDER, KEYSTOREMGR, 
 			TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER, 
 			TRUSTSTOREMGR, CIPHERSUITES, CLIENTAUTH};

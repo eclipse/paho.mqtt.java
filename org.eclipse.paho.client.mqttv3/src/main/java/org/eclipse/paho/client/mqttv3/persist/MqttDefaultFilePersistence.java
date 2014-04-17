@@ -39,13 +39,13 @@ import org.eclipse.paho.client.mqttv3.internal.MqttPersistentData;
  * with any instance of '/', '\\', ':' or ' ' removed.
  */
 public class MqttDefaultFilePersistence implements MqttClientPersistence {
+	private static final String MESSAGE_FILE_EXTENSION = ".msg";
+	private static final String MESSAGE_BACKUP_FILE_EXTENSION = ".bup";
+	private static final String LOCK_FILENAME = ".lck"; 
 
 	private File dataDir;
 	private File clientDir = null;
 	private FileLock fileLock = null;
-	private static final String MESSAGE_FILE_EXTENSION = ".msg";
-	private static final String MESSAGE_BACKUP_FILE_EXTENSION = ".bup";
-	private static final String LOCK_FILENAME = ".lck"; 
 	
 	private static final FilenameFilter FILE_FILTER = new FilenameFilter() { 
 		public boolean accept(File dir, String name) { return name.endsWith(MESSAGE_FILE_EXTENSION); }

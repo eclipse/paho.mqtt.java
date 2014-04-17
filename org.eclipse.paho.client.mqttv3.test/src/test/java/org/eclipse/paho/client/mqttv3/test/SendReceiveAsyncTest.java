@@ -640,10 +640,9 @@ public class SendReceiveAsyncTest {
 			  log.info("Close..." + mqttClient);
 			  mqttClient.disconnectForcibly(5000, 5000);
 			  mqttClient.close();
+			  Assert.assertFalse(mqttClient.isConnected());
 		  }
 	  }
-
-	  Assert.assertFalse(mqttClient.isConnected());
 
 	  log.exiting(className, methodName);
   }

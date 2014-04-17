@@ -27,9 +27,10 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * <code>MqttWireMessage</code>. 
  */
 public class MqttInputStream extends InputStream {
-	private static final String className = MqttInputStream.class.getName();
+	private static final String CLASS_NAME = MqttInputStream.class.getName();
+	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	
 	private DataInputStream in;
-	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, className);
 
 	public MqttInputStream(InputStream in) {
 		this.in = new DataInputStream(in);
@@ -70,7 +71,7 @@ public class MqttInputStream extends InputStream {
 		System.arraycopy(header,0,packet,0, header.length);
 		MqttWireMessage message = MqttWireMessage.createWireMessage(packet);
 		// @TRACE 501= received {0} 
-		log.fine(className, methodName, "501",new Object[] {message});
+		log.fine(CLASS_NAME, methodName, "501",new Object[] {message});
 		return message;
 	}
 }

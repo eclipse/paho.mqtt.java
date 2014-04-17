@@ -49,4 +49,8 @@ public class ExceptionHelper {
 		}
 		return result;
 	}
+	
+	// Utility classes should not have a public or default constructor.
+	private ExceptionHelper() {
+	}
 }

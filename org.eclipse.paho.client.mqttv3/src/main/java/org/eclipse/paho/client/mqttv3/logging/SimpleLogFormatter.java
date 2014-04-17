@@ -13,7 +13,8 @@ import java.util.logging.LogRecord;
  */
 public class SimpleLogFormatter extends Formatter {
 	
-	final String ls = System.getProperty("line.separator");
+	private static final String LS = System.getProperty("line.separator");
+	
     /**
      * Constructs a <code>SimpleFormatter</code> object.
      */
@@ -26,7 +27,7 @@ public class SimpleLogFormatter extends Formatter {
      */
     public String format(LogRecord r) {
         StringBuffer sb = new StringBuffer();
-        sb.append(r.getLevel().getName()+"\t");
+        sb.append(r.getLevel().getName()).append("\t");
         sb.append(MessageFormat.format("{0, date, yy-MM-dd} {0, time, kk:mm:ss.SSSS} ",
                 new Object[] { new Date(r.getMillis()) })+"\t");
         String cnm = r.getSourceClassName();
@@ -41,10 +42,10 @@ public class SimpleLogFormatter extends Formatter {
 	        	cn = sb1.append(sp,0, 1).toString();
 	        }        
         }
-        sb.append(cn+"\t").append(" ");
-        sb.append(left(r.getSourceMethodName(),23,' ')+"\t");
-        sb.append(r.getThreadID()+"\t"); 
-        sb.append(formatMessage(r)).append(ls);
+        sb.append(cn).append("\t").append(" ");
+        sb.append(left(r.getSourceMethodName(),23,' ')).append("\t");
+        sb.append(r.getThreadID()).append("\t");
+        sb.append(formatMessage(r)).append(LS);
         if (null != r.getThrown()) {
             sb.append("Throwable occurred: "); 
             Throwable t = r.getThrown();

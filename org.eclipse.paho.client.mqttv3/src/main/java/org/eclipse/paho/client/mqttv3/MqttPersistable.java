@@ -55,20 +55,20 @@ public interface MqttPersistable {
 	 * and continue for {@link #getHeaderLength()}.
 	 * @return the header bytes. 
 	 */
-	public byte[] getHeaderBytes() throws MqttPersistenceException;
+	byte[] getHeaderBytes() throws MqttPersistenceException;
 
 	/**
 	 * Returns the length of the header.
 	 * @return the header length
 	 */
-	public int getHeaderLength() throws MqttPersistenceException;
+	int getHeaderLength() throws MqttPersistenceException;
 
 	/**
 	 * Returns the offset of the header within the byte array returned by {@link #getHeaderBytes()}.
 	 * @return the header offset.
 	 * 
 	 */
-	public int getHeaderOffset() throws MqttPersistenceException;
+	int getHeaderOffset() throws MqttPersistenceException;
 
 	/**
 	 * Returns the payload bytes in an array.
@@ -76,18 +76,18 @@ public interface MqttPersistable {
 	 * and continue for {@link #getPayloadLength()}.
 	 * @return the payload bytes.  
 	 */
-	public byte[] getPayloadBytes() throws MqttPersistenceException;
+	byte[] getPayloadBytes() throws MqttPersistenceException;
 
 	/**
 	 * Returns the length of the payload.
 	 * @return the payload length.
 	 */
-	public int getPayloadLength() throws MqttPersistenceException;
+	int getPayloadLength() throws MqttPersistenceException;
 
 	/**
 	 * Returns the offset of the payload within the byte array returned by {@link #getPayloadBytes()}.
 	 * @return the payload offset.
 	 * 
 	 */
-	public int getPayloadOffset() throws MqttPersistenceException;
+	int getPayloadOffset() throws MqttPersistenceException;
 }

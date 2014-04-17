@@ -454,19 +454,20 @@ public class MqttConnectOptions {
 	}
 
 	public Properties getDebug() {
+		final String strNull="null";
 		Properties p = new Properties();
-		p.put("CleanSession", new Boolean(isCleanSession()));
-		p.put("ConTimeout", new Integer(getConnectionTimeout()));
-		p.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
-		p.put("UserName", (getUserName()==null)?"null":getUserName());
-		p.put("WillDestination", (getWillDestination()==null)?"null":getWillDestination());
+		p.put("CleanSession", Boolean.valueOf(isCleanSession()));
+		p.put("ConTimeout", Integer.valueOf(getConnectionTimeout()));
+		p.put("KeepAliveInterval", Integer.valueOf(getKeepAliveInterval()));
+		p.put("UserName", (getUserName() == null) ? strNull : getUserName());
+		p.put("WillDestination", (getWillDestination() == null) ? strNull : getWillDestination());
 		if (getSocketFactory()==null) {
-			p.put("SocketFactory", "null");
+			p.put("SocketFactory", strNull);
 		} else {
 			p.put("SocketFactory", getSocketFactory());
 		}
 		if (getSSLProperties()==null) {
-			p.put("SSLProperties", "null");
+			p.put("SSLProperties", strNull);
 		} else {
 			p.put("SSLProperties", getSSLProperties());
 		}

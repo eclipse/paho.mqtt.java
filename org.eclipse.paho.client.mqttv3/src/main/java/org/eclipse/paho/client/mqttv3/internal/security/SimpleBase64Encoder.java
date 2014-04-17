@@ -14,8 +14,8 @@ package org.eclipse.paho.client.mqttv3.internal.security;
 public class SimpleBase64Encoder {
 
 	// if this string is changed, then the decode method must also be adapted.
-	private final static String PWDCHARS_STRING = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	private final static char[] PWDCHARS_ARRAY = PWDCHARS_STRING.toCharArray();
+	private static final String PWDCHARS_STRING = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	private static final char[] PWDCHARS_ARRAY = PWDCHARS_STRING.toCharArray();
 
 	/**
 	 * Encodes an array of byte into a string of printable ASCII characters

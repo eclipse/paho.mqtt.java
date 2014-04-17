@@ -24,11 +24,11 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * A network module for connecting over SSL.
  */
 public class SSLNetworkModule extends TCPNetworkModule {
+	private static final String CLASS_NAME = SSLNetworkModule.class.getName();
+	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
-
-	final static String className = SSLNetworkModule.class.getName();
-	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
 
 	/**
 	 * Constructs a new SSLNetworkModule using the specified host and
@@ -63,7 +63,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 					ciphers+=enabledCiphers[i];
 				}
 				//@TRACE 260=setEnabledCiphers ciphers={0}
-				log.fine(className,methodName,"260",new Object[]{ciphers});
+				log.fine(CLASS_NAME,methodName,"260",new Object[]{ciphers});
 			}
 			((SSLSocket) socket).setEnabledCipherSuites(enabledCiphers);
 		}

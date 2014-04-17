@@ -15,8 +15,6 @@ import java.util.Properties;
 
 import javax.net.SocketFactory;
 
-import org.eclipse.paho.client.mqttv3.logging.Logger;
-import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
 
@@ -53,13 +51,11 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  * @see IMqttClient
  */
 public class MqttClient implements IMqttClient { //), DestinationProvider {
+	//private static final String CLASS_NAME = MqttClient.class.getName();
+	//private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
-	protected MqttAsyncClient aClient = null;  // Delegate implementation to MqttAsyncClient
-	protected long timeToWait = -1;				// How long each method should wait for action to complete
-
-	final static String className = MqttClient.class.getName();
-	public Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
-
+	private MqttAsyncClient aClient = null;  // Delegate implementation to MqttAsyncClient
+	private long timeToWait = -1;				// How long each method should wait for action to complete
 
 	/**
 	 * Create an MqttClient that can be used to communicate with an MQTT server.

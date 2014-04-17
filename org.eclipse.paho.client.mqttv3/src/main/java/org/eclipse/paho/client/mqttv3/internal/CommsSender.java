@@ -25,9 +25,10 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 
 public class CommsSender implements Runnable {
-	/**
-	 * Sends MQTT packets to the server on its own thread
-	 */
+	private static final String CLASS_NAME = CommsSender.class.getName();
+	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	
+	//Sends MQTT packets to the server on its own thread
 	private boolean running 		= false;
 	private Object lifecycle 		= new Object();
 	private ClientState clientState = null;
@@ -35,9 +36,6 @@ public class CommsSender implements Runnable {
 	private ClientComms clientComms = null;
 	private CommsTokenStore tokenStore = null;
 	private Thread 	sendThread		= null;
-	
-	private final static String className = CommsSender.class.getName();
-	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, className);
 	
 	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out) {
 		this.out = new MqttOutputStream(out);
@@ -52,7 +50,7 @@ public class CommsSender implements Runnable {
 	 */
 	public void start(String threadName) {
 		synchronized (lifecycle) {
-			if (running == false) {
+			if (!running) {
 				running = true;
 				sendThread = new Thread(this, threadName);
 				sendThread.start();
@@ -68,7 +66,7 @@ public class CommsSender implements Runnable {
 		
 		synchronized (lifecycle) {
 			//@TRACE 800=stopping sender
-			log.fine(className,methodName,"800");
+			log.fine(CLASS_NAME,methodName,"800");
 			if (running) {
 				running = false;
 				if (!Thread.currentThread().equals(sendThread)) {
@@ -84,7 +82,7 @@ public class CommsSender implements Runnable {
 			}
 			sendThread=null;
 			//@TRACE 801=stopped
-			log.fine(className,methodName,"801");
+			log.fine(CLASS_NAME,methodName,"801");
 		}
 	}
 	
@@ -96,7 +94,7 @@ public class CommsSender implements Runnable {
 				message = clientState.get();
 				if (message != null) {
 					//@TRACE 802=network send key={0} msg={1}
-					log.fine(className,methodName,"802", new Object[] {message.getKey(),message});
+					log.fine(CLASS_NAME,methodName,"802", new Object[] {message.getKey(),message});
 
 					if (message instanceof MqttAck) {
 						out.write(message);
@@ -114,8 +112,9 @@ public class CommsSender implements Runnable {
 								} catch (IOException ex) {
 									// The flush has been seen to fail on disconnect of a SSL socket
 									// as disconnect is in progress this should not be treated as an error
-									if (!(message instanceof MqttDisconnect))
+									if (!(message instanceof MqttDisconnect)){
 										throw ex;
+									}
 								}
 								clientState.notifySent(message);
 							}
@@ -123,7 +122,7 @@ public class CommsSender implements Runnable {
 					}
 				} else { // null message
 					//@TRACE 803=get message returned null, stopping}
-					log.fine(className,methodName,"803");
+					log.fine(CLASS_NAME,methodName,"803");
 
 					running = false;
 				}
@@ -135,14 +134,14 @@ public class CommsSender implements Runnable {
 		} // end while
 		
 		//@TRACE 805=<
-		log.fine(className, methodName,"805");
+		log.fine(CLASS_NAME, methodName,"805");
 
 	}
 
 	private void handleRunException(MqttWireMessage message, Exception ex) {
 		final String methodName = "handleRunException";
 		//@TRACE 804=exception
-		log.fine(className,methodName,"804",null, ex);
+		log.fine(CLASS_NAME,methodName,"804",null, ex);
 		MqttException mex;
 		if ( !(ex instanceof MqttException)) {
 			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);

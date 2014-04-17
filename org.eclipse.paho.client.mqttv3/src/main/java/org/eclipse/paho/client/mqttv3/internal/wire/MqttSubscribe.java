@@ -86,7 +86,7 @@ public class MqttSubscribe extends MqttWireMessage {
 			if (i > 0) {
 				sb.append(", ");
 			}
-			sb.append("\"" + names[i] + "\"");
+			sb.append("\"").append(names[i]).append("\"");
 		}
 		sb.append("] qos:[");
 		for (int i = 0; i < count; i++) {

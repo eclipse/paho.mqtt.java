@@ -2,7 +2,7 @@
  * Copyright (c) 2009, 2012 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -55,7 +55,7 @@ public interface Logger {
 	 * They should be reasonably intelligible to end users and to system
 	 * administrators.
 	 */
-	public static final int	SEVERE	= 1;
+	int	SEVERE	= 1;
 	/**
 	 * WARNING is a message level indicating a potential problem.
 	 * <p>
@@ -63,7 +63,7 @@ public interface Logger {
 	 * interest to end users or system managers, or which indicate potential
 	 * problems.
 	 */
-	public static final int	WARNING	= 2;
+	int	WARNING	= 2;
 	/**
 	 * INFO is a message level for informational messages.
 	 * <p>
@@ -71,7 +71,7 @@ public interface Logger {
 	 * So the INFO level should only be used for reasonably significant messages
 	 * that will make sense to end users and system admins.
 	 */
-	public static final int	INFO	= 3;
+	int	INFO	= 3;
 	/**
 	 * CONFIG is a message level for static configuration messages.
 	 * <p>
@@ -80,7 +80,7 @@ public interface Logger {
 	 * particular configurations. For example, CONFIG message might include the
 	 * CPU type, the graphics depth, the GUI look-and-feel, etc.
 	 */
-	public static final int	CONFIG	= 4;
+	int	CONFIG	= 4;
 	/**
 	 * FINE is a message level providing tracing information.
 	 * <p>
@@ -98,25 +98,25 @@ public interface Logger {
 	 * Issues indicating potential performance problems are also worth logging
 	 * as FINE.
 	 */
-	public static final int	FINE	= 5;
+	int	FINE	= 5;
 	/**
 	 * FINER indicates a fairly detailed tracing message. By default logging
 	 * calls for entering, returning, or throwing an exception are traced at
 	 * this level.
 	 */
-	public static final int	FINER	= 6;
+	int	FINER	= 6;
 	/**
 	 * FINEST indicates a highly detailed tracing message.
 	 */
-	public static final int	FINEST	= 7;
+	int	FINEST	= 7;
 	
-	public void initialise(ResourceBundle messageCatalog, String loggerID, String resourceName);
+	void initialise(ResourceBundle messageCatalog, String loggerID, String resourceName);
 	
 	/**
 	 * Set a name that can be used to provide context with each log record.
 	 * This overrides the value passed in on initialise
 	 */
-	public void setResourceName(String logContext);
+	void setResourceName(String logContext);
 	
 	/**
 	 * Check if a message of the given level would actually be logged by this
@@ -127,7 +127,7 @@ public interface Logger {
 	 *            a message logging level.
 	 * @return true if the given message level is currently being logged.
 	 */
-	public boolean isLoggable(int level);
+	boolean isLoggable(int level);
 
 	/**
 	 * Log a message, specifying source class and method, if the logger is
@@ -144,7 +144,7 @@ public interface Logger {
 	 *            replaced by the localized value. Otherwise the original msg
 	 *            string is used.
 	 */
-	public void severe(String sourceClass, String sourceMethod, String msg);
+	void severe(String sourceClass, String sourceMethod, String msg);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -166,7 +166,7 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message.
 	 */
-	public void severe(String sourceClass, String sourceMethod, String msg, Object[] inserts);
+	void severe(String sourceClass, String sourceMethod, String msg, Object[] inserts);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -190,7 +190,7 @@ public interface Logger {
 	 * @param thrown
 	 *            Throwable associated with log message.
 	 */
-	public void severe(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
+	void severe(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
 
 	/**
 	 * Log a message, specifying source class and method, if the logger is
@@ -207,7 +207,7 @@ public interface Logger {
 	 *            replaced by the localized value. Otherwise the original msg
 	 *            string is used.
 	 */
-	public void warning(String sourceClass, String sourceMethod, String msg);
+	void warning(String sourceClass, String sourceMethod, String msg);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -229,7 +229,7 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message.
 	 */
-	public void warning(String sourceClass, String sourceMethod, String msg, Object[] inserts);
+	void warning(String sourceClass, String sourceMethod, String msg, Object[] inserts);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -253,7 +253,7 @@ public interface Logger {
 	 * @param thrown
 	 *            Throwable associated with log message.
 	 */
-	public void warning(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
+	void warning(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
 
 	/**
 	 * Log a message, specifying source class and method, if the logger is
@@ -270,7 +270,7 @@ public interface Logger {
 	 *            replaced by the localized value. Otherwise the original msg
 	 *            string is used.
 	 */
-	public void info(String sourceClass, String sourceMethod, String msg);
+	void info(String sourceClass, String sourceMethod, String msg);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -292,7 +292,7 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message.
 	 */
-	public void info(String sourceClass, String sourceMethod, String msg, Object[] inserts);
+	void info(String sourceClass, String sourceMethod, String msg, Object[] inserts);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -316,7 +316,7 @@ public interface Logger {
 	 * @param thrown
 	 *            Throwable associated with log message.
 	 */
-	public void info(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
+	void info(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
 
 	/**
 	 * Log a message, specifying source class and method, if the logger is
@@ -333,7 +333,7 @@ public interface Logger {
 	 *            replaced by the localized value. Otherwise the original msg
 	 *            string is used.
 	 */
-	public void config(String sourceClass, String sourceMethod, String msg);
+	void config(String sourceClass, String sourceMethod, String msg);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -355,7 +355,7 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message.
 	 */
-	public void config(String sourceClass, String sourceMethod, String msg, Object[] inserts);
+	void config(String sourceClass, String sourceMethod, String msg, Object[] inserts);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -379,7 +379,7 @@ public interface Logger {
 	 * @param thrown
 	 *            Throwable associated with log message.
 	 */
-	public void config(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
+	void config(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
 
 	/**
 	 * Trace a message, specifying source class and method, if the logger is
@@ -395,7 +395,7 @@ public interface Logger {
 	 *            for the msg string, then the msg string is replaced by the
 	 *            value. Otherwise the original msg string is used.
 	 */
-	public void fine(String sourceClass, String sourceMethod, String msg);
+	void fine(String sourceClass, String sourceMethod, String msg);
 
 	/**
 	 * Trace a message, specifying source class and method, with an array of
@@ -417,9 +417,9 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message.
 	 */
-	public void fine(String sourceClass, String sourceMethod, String msg, Object[] inserts);
+	void fine(String sourceClass, String sourceMethod, String msg, Object[] inserts);
 	
-	public void fine(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
+	void fine(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
 
 	/**
 	 * Trace a message, specifying source class and method, if the logger is
@@ -435,7 +435,7 @@ public interface Logger {
 	 *            for the msg string, then the msg string is replaced by the
 	 *            value. Otherwise the original msg string is used.
 	 */
-	public void finer(String sourceClass, String sourceMethod, String msg);
+	void finer(String sourceClass, String sourceMethod, String msg);
 
 	/**
 	 * Trace a message, specifying source class and method, with an array of
@@ -457,9 +457,9 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message.
 	 */
-	public void finer(String sourceClass, String sourceMethod, String msg, Object[] inserts);
+	void finer(String sourceClass, String sourceMethod, String msg, Object[] inserts);
 	
-	public void finer(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
+	void finer(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
 
 	/**
 	 * Trace a message, specifying source class and method, if the logger is
@@ -475,7 +475,7 @@ public interface Logger {
 	 *            for the msg string, then the msg string is replaced by the
 	 *            value. Otherwise the original msg string is used.
 	 */
-	public void finest(String sourceClass, String sourceMethod, String msg);
+	void finest(String sourceClass, String sourceMethod, String msg);
 
 	/**
 	 * Trace a message, specifying source class and method, with an array of
@@ -497,9 +497,9 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message.
 	 */
-	public void finest(String sourceClass, String sourceMethod, String msg, Object[] inserts);
+	void finest(String sourceClass, String sourceMethod, String msg, Object[] inserts);
 	
-	public void finest(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
+	void finest(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
 
 	/**
 	 * Log a message, specifying source class and method, with an array of
@@ -525,7 +525,7 @@ public interface Logger {
 	 * @param thrown
 	 *            Throwable associated with log message.
 	 */
-	public void log(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
+	void log(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown);
 
 	/**
 	 * Log a trace message, specifying source class and method, with an array of
@@ -549,7 +549,7 @@ public interface Logger {
 	 * @param inserts
 	 *            Array of parameters to the message, may be null.
 	 */
-	public void trace(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
+	void trace(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
 
 	/**
 	 * Format a log message without causing it to be written to the log.
@@ -566,7 +566,7 @@ public interface Logger {
 	 *            Array of parameters to the message.
 	 * @return The formatted message for the current locale.
 	 */
-	public String formatMessage(String msg, Object[] inserts);
+	String formatMessage(String msg, Object[] inserts);
 	
-	public void dumpTrace();
+	void dumpTrace();
 }

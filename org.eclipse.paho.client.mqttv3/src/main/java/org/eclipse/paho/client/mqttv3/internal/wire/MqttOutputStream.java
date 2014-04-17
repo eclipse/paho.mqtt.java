@@ -25,10 +25,10 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * <code>MqttWireMessage</code>. 
  */
 public class MqttOutputStream extends OutputStream {
-	private static final String className = MqttOutputStream.class.getName();
+	private static final String CLASS_NAME = MqttOutputStream.class.getName();
+	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	
 	private BufferedOutputStream out;
-
-	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, className);
 	
 	public MqttOutputStream(OutputStream out) {
 		this.out = new BufferedOutputStream(out);
@@ -66,7 +66,7 @@ public class MqttOutputStream extends OutputStream {
 		out.write(bytes,0,bytes.length);
 		out.write(pl,0,pl.length);
 		// @TRACE 500= sent {0}
-    	log.fine(className, methodName, "500", new Object[]{message});
+    	log.fine(CLASS_NAME, methodName, "500", new Object[]{message});
 	}
 }
 

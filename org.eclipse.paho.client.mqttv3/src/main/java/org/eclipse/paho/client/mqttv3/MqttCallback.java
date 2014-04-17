@@ -25,7 +25,7 @@ public interface MqttCallback {
 	 *
 	 * @param cause the reason behind the loss of connection.
 	 */
-	public void connectionLost(Throwable cause);
+	void connectionLost(Throwable cause);
 
 	/**
 	 * This method is called when a message arrives from the server.
@@ -58,7 +58,7 @@ public interface MqttCallback {
 	 * @throws Exception if a terminal error has occurred, and the client should be
 	 * shut down.
 	 */
-	public void messageArrived(String topic, MqttMessage message) throws Exception;
+	void messageArrived(String topic, MqttMessage message) throws Exception;
 
 	/**
 	 * Called when delivery for a message has been completed, and all
@@ -70,6 +70,6 @@ public interface MqttCallback {
 	 *
 	 * @param token the delivery token associated with the message.
 	 */
-	public void deliveryComplete(IMqttDeliveryToken token);
+	void deliveryComplete(IMqttDeliveryToken token);
 
 }
