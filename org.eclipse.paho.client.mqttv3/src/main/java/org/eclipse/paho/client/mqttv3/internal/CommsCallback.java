@@ -130,27 +130,32 @@ public class CommsCallback implements Runnable {
 
 				if (running) {
 					// Check for deliveryComplete callbacks...
+					MqttToken token = null;
 					synchronized (completeQueue) {
 					    if (!completeQueue.isEmpty()) {
 						    // First call the delivery arrived callback if needed
-						    MqttToken token = (MqttToken) completeQueue.elementAt(0);
-						    handleActionComplete(token);
+						    token = (MqttToken) completeQueue.elementAt(0);
 						    completeQueue.removeElementAt(0);
 					    }
 					}
+					if (null != token) {
+						handleActionComplete(token);
+					}
 					
 					// Check for messageArrived callbacks...
+					MqttPublish message = null;
 					synchronized (messageQueue) {
 					    if (!messageQueue.isEmpty()) {
 						    // Note, there is a window on connect where a publish
 						    // could arrive before we've
 						    // finished the connect logic.
-						    MqttPublish message = (MqttPublish) messageQueue
-								.elementAt(0);
+							message = (MqttPublish) messageQueue.elementAt(0);
 
-						    handleMessage(message);
-						   messageQueue.removeElementAt(0);
+							messageQueue.removeElementAt(0);
 					    }
+					}
+					if (null != message) {
+						handleMessage(message);
 					}
 				}
 
