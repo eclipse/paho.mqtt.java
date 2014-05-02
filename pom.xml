@@ -4,7 +4,7 @@
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.4.1-SNAPSHOT</version>
+	<version>0.8.0</version>
 	
 	<name>Eclipse Paho</name>
 	<url>http://www.eclipse.org/paho</url>

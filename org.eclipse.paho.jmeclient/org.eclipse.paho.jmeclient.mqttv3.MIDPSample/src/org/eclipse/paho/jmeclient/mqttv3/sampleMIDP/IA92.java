@@ -1,23 +1,15 @@
-//-----------------------------------------------------------------------------
-// Source File Name: IA92.java
-//
-// Description: Sample MIDP-2.1 MIDlet
-//              The MIDlet subscribes to topic Sample/Java/request
-//              When a publication is received on this topic it is written to the device
-//              screen and published back on topic Sample/Java/response.
-//              
-// Licensed Materials - Property of IBM
-//
-// 5648-C63
-// (C) Copyright IBM Corp. 2013 All Rights Reserved.
-//
-// US Government Users Restricted Rights - Use, duplication or
-// disclosure restricted by GSA ADP Schedule Contract with
-// IBM Corp.
-//
-// Version %Z% %W% %I% %E% %U%
-//
-//-----------------------------------------------------------------------------
+/*******************************************************************************
+ * Copyright (c) 2013, 2014 IBM Corp.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ */
 
 package org.eclipse.paho.jmeclient.mqttv3.sampleMIDP;
 

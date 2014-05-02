@@ -5,11 +5,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>org.eclipse.paho.ui.core</artifactId>
-	<version>0.4.1.SNAPSHOT</version>
+	<version>0.8.0</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<parent>
-		<version>0.4.1.SNAPSHOT</version>
+		<version>0.8.0</version>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>org.eclipse.paho.ui</artifactId>
 	</parent>
@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>mqtt-client</artifactId>
-			<version>0.4.1-SNAPSHOT</version>
+			<version>0.8.0</version>
 		</dependency>
 	</dependencies>
 	 -->
