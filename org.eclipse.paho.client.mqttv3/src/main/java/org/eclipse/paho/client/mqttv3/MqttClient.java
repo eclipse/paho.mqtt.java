@@ -12,6 +12,7 @@
 package org.eclipse.paho.client.mqttv3;
 
 import java.util.Properties;
+
 import javax.net.SocketFactory;
 
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -90,7 +91,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * </p>
 	 *
 	 * <p>
-	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.
+	 * A client identifier <code>clientId</code> must be specified and be less that 65535 characters.
 	 * It must be unique across all clients connecting to the same
 	 * server. The clientId is used by the server to store data related to the client,
 	 * hence it is important that the clientId remain the same when connecting to a server
@@ -127,7 +128,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @param clientId a client identifier that is unique on the server being connected to
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://".
-	 * @throws IllegalArgumentException if the clientId is null or is greater than 23 characters in length
+	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttClient(String serverURI, String clientId) throws MqttException {
@@ -164,7 +165,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * </p>
 	 *
 	 * <p>
-	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.
+	 * A client identifier <code>clientId</code> must be specified and be less that 65535 characters.
 	 * It must be unique across all clients connecting to the same
 	 * server. The clientId is used by the server to store data related to the client,
 	 * hence it is important that the clientId remain the same when connecting to a server
@@ -215,7 +216,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
  	 * default persistence mechanism is used
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://"
-	 * @throws IllegalArgumentException if the clientId is null or is greater than 23 characters in length
+	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
@@ -240,7 +241,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see IMqttClient#disconnect()
 	 */
 	public void disconnect() throws MqttException {
-		this.disconnect(30000);
+		aClient.disconnect().waitForCompletion();
 	}
 
 	/*
@@ -248,6 +249,33 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 */
 	public void disconnect(long quiesceTimeout) throws MqttException {
 		aClient.disconnect(quiesceTimeout, null, null).waitForCompletion();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly()
+	 */
+	public void disconnectForcibly() throws MqttException {
+		aClient.disconnectForcibly();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long)
+	 */
+	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
+		aClient.disconnectForcibly(disconnectTimeout);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long)
+	 */
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
+		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
 	/*
@@ -415,5 +443,18 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 */
 	public Debug getDebug() {
 		return (aClient.getDebug());
+	}
+	
+	/**
+	 * Return Current Mqtt protocol version. Client supports version 3.1 and 3.1.1. 
+	 * This value is V3_1 by default.
+	 * @return return a "type safe enum" class to state current version.
+	 */
+	public MqttProtocolVersion getProtocolVersion() {
+		return aClient.getProtocolVersion();
+	}
+
+	public void setProtocolVersion(MqttProtocolVersion version) {
+		aClient.setProtocolVersion(version);
 	}
 }

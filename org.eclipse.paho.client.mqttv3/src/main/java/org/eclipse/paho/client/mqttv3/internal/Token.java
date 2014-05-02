@@ -91,7 +91,8 @@ public class Token {
 		if (resp == null && !completed) {
 			//@TRACE 406=key={0} timed out token={1}
 			log.fine(className,methodName, "406",new Object[]{getKey(), this});
-			throw new MqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+			exception = new MqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+			throw exception;
 		}
 		checkResult();
 	}
@@ -112,13 +113,13 @@ public class Token {
 			//@TRACE 400=>key={0} timeout={1} sent={2} completed={3} hasException={4} response={5} token={6}
 			log.fine(className, methodName, "400",new Object[]{getKey(), new Long(timeout),new Boolean(sent),new Boolean(completed),(exception==null)?"false":"true",response,this},exception);
 
-			if (!this.completed) {
+			while (!this.completed) {
 				if (this.exception == null) {
 					try {
 						//@TRACE 408=key={0} wait max={1}
 						log.fine(className,methodName,"408",new Object[] {getKey(),new Long(timeout)});
 	
-						if (timeout == -1) {
+						if (timeout <= 0) {
 							responseLock.wait();
 						} else {
 							responseLock.wait(timeout);
@@ -132,6 +133,11 @@ public class Token {
 						//@TRACE 401=failed with exception
 						log.fine(className,methodName,"401",null,exception);
 						throw exception;
+					}
+					
+					if (timeout > 0) {
+						// time up and still not completed
+						break;
 					}
 				}
 			}
@@ -224,7 +230,7 @@ public class Token {
 				}
 			}
 			
-			if (!sent) {
+			while (!sent) {
 				if (this.exception == null) {
 					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 				}

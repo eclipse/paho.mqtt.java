@@ -1,0 +1,8 @@
+MIDlet-Version: 1.0
+MIDlet-Vendor: IBM
+MIDlet-Jar-URL: GPIOSample.jar
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: GPIOSample,,org.eclipse.paho.jmeclient.mqttv3.sampleGPIO.GPIOSample
+MicroEdition-Profile: IMP-NG
+MIDlet-Jar-Size: 7251
+MIDlet-Name: GPIOSample

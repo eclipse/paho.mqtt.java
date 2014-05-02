@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009, 2012 IBM Corp.
+ * Copyright (c) 2009, 2012 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,12 +16,14 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.eclipse.paho.client.mqttv3.MqttPingSender;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
@@ -49,6 +51,7 @@ public class ClientComms {
 	ClientState	 				clientState;
 	MqttConnectOptions			conOptions;
 	private MqttClientPersistence persistence;
+	private MqttPingSender		pingSender;
 	CommsTokenStore 			tokenStore;
 	boolean 					stoppingComms = false;
 
@@ -65,18 +68,20 @@ public class ClientComms {
 	final static String className = ClientComms.class.getName();
 	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
 
-
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle
 	 * the network calls.
 	 */
-	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence) throws MqttException {
+	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client 	= client;
 		this.persistence = persistence;
+		this.pingSender = pingSender;
+		this.pingSender.init(this);
+		
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback 	= new CommsCallback(this);
-		this.clientState = new ClientState(persistence, tokenStore, this.callback, this);
+		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender);
 
 		callback.setClientState(clientState);
 		log.setResourceName(getClient().getClientId());
@@ -167,6 +172,7 @@ public class ClientComms {
 				callback = null;
 				persistence = null;
 				sender = null;
+				pingSender = null;
 				receiver = null;
 				networkModules = null;
 				conOptions = null;
@@ -197,7 +203,8 @@ public class ClientComms {
 						options.getUserName(),
 						options.getPassword(),
 						options.getWillMessage(),
-						options.getWillDestination());
+						options.getWillDestination(), 
+						((MqttAsyncClient) client).getProtocolVersion());
 
 				this.clientState.setKeepAliveSecs(options.getKeepAliveInterval());
 				this.clientState.setCleanSession(options.isCleanSession());
@@ -309,6 +316,10 @@ public class ClientComms {
 		}
 
 		if (sender != null) { sender.stop(); }
+		
+		if (pingSender != null){
+			pingSender.stop();
+		}
 
 		try {
 			if (persistence != null) {persistence.close();}
@@ -419,6 +430,29 @@ public class ClientComms {
 			conState = DISCONNECTING;
 			DisconnectBG discbg = new DisconnectBG(disconnect,quiesceTimeout,token);
 			discbg.start();
+		}
+	}
+	
+	/**
+	 * Disconnect the connection and reset all the states.
+	 */
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
+		// Allow current inbound and outbound work to complete
+		clientState.quiesce(quiesceTimeout);
+		MqttToken token = new MqttToken(client.getClientId());
+		try {
+			// Send disconnect packet
+			internalSend(new MqttDisconnect(), token);
+
+			// Wait util the disconnect packet sent with timeout
+			token.waitForCompletion(disconnectTimeout);
+		}
+		catch (Exception ex) {
+			// ignore, probably means we failed to send the disconnect packet.
+		}
+		finally {
+			token.internalTok.markComplete(null, null);
+			shutdownConnection(token, null);
 		}
 	}
 
@@ -540,8 +574,7 @@ public class ClientComms {
 				receiver.start("MQTT Rec: "+getClient().getClientId());
 				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream());
 				sender.start("MQTT Snd: "+getClient().getClientId());
-				callback.start("MQTT Call: "+getClient().getClientId());
-
+				callback.start("MQTT Call: "+getClient().getClientId());				
 				internalSend(conPacket, conToken);
 			} catch (MqttException ex) {
 				//@TRACE 212=connect failed: unexpected exception
@@ -577,6 +610,7 @@ public class ClientComms {
 			dBg = new Thread(this, "MQTT Disc: "+getClient().getClientId());
 			dBg.start();
 		}
+		
 		public void run() {
 			final String methodName = "disconnectBG:run";
 			//@TRACE 221=>
@@ -595,5 +629,36 @@ public class ClientComms {
 				shutdownConnection(token, null);
 			}
 		}
+	}
+	
+	/*
+	 * Check and send a ping if needed and check for ping timeout.
+	 * Need to send a ping if nothing has been sent or received 
+	 * in the last keepalive interval.
+	 */
+	public MqttToken checkForActivity(){
+		MqttToken token = null;
+		try{
+			token = clientState.checkForActivity();
+		}catch(MqttException e){
+			handleRunException(e);
+		}catch(Exception e){
+			handleRunException(e);
+		}
+		return token;
+	}	
+	
+	private void handleRunException(Exception ex) {
+		final String methodName = "handleRunException";
+		//@TRACE 804=exception
+		log.fine(className,methodName,"804",null, ex);
+		MqttException mex;
+		if ( !(ex instanceof MqttException)) {
+			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);
+		} else {
+			mex = (MqttException)ex;
+		}
+
+		shutdownConnection(null, mex);
 	}
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttProtocolVersion;
 
 /**
  * An on-the-wire representation of an MQTT CONNECT message.
@@ -34,6 +35,7 @@ public class MqttConnect extends MqttWireMessage {
 	private char[] password;
 	private int keepAliveInterval;
 	private String willDestination;
+	private MqttProtocolVersion protocol_version;
 	
 	/**
 	 * Constructor for an on the wire MQTT connect message
@@ -50,13 +52,14 @@ public class MqttConnect extends MqttWireMessage {
 
 		String protocol_name = decodeUTF8(dis);
 		int protocol_version = dis.readByte();
+		this.protocol_version = MqttProtocolVersion.valueOf(protocol_version);
 		byte connect_flags = dis.readByte();
 		keepAliveInterval = dis.readUnsignedShort();
 		clientId = decodeUTF8(dis);
 		dis.close();
 	}
 
-	public MqttConnect(String clientId, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
+	public MqttConnect(String clientId, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination, MqttProtocolVersion version) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.cleanSession = cleanSession;
@@ -65,6 +68,7 @@ public class MqttConnect extends MqttWireMessage {
 		this.password = password;
 		this.willMessage = willMessage;
 		this.willDestination = willDestination;
+		this.protocol_version = version;
 	}
 
 	public String toString() {
@@ -85,8 +89,15 @@ public class MqttConnect extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			encodeUTF8(dos,"MQIsdp");			
-			dos.write(3);
+			
+			//Variable headers are different in 3.1 and 3.1.1.
+			if(MqttProtocolVersion.V3_1 == protocol_version){
+				encodeUTF8(dos,"MQIsdp");			
+				dos.write(3);
+			}else{
+				encodeUTF8(dos,"MQTT");			
+				dos.write(4);
+			}
 			byte connectFlags = 0;
 			
 			if (cleanSession) {

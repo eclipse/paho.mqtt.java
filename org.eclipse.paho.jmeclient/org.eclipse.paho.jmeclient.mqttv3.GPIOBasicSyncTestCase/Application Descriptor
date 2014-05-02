@@ -1,0 +1,8 @@
+MIDlet-Version: 1.0
+MIDlet-Vendor: IBM
+MIDlet-Jar-URL: GPIOTest.jar
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: GPIOTest,,org.eclipse.paho.jmeclient.mqttv3.test.GPIOTest
+MicroEdition-Profile: IMP-NG
+MIDlet-Jar-Size: 7251
+MIDlet-Name: GPIOTest

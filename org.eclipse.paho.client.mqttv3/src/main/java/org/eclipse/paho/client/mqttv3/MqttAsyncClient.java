@@ -26,6 +26,7 @@ import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
@@ -71,11 +72,15 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  */
 public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvider {
 
+	private static final String CLIENT_ID_PREFIX = "paho-";
+	private static final long QUIESCE_TIMEOUT = 30000; // ms
+	private static final long DISCONNECT_TIMEOUT = 10000; // ms
 	private String clientId;
 	private String serverURI;
 	protected ClientComms comms;
 	private Hashtable topics;
 	private MqttClientPersistence persistence;
+	private MqttProtocolVersion protocolVersion = MqttProtocolVersion.V3_1;
 
 	final static String className = MqttAsyncClient.class.getName();
 	public Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
@@ -110,7 +115,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * </p>
 	 *
 	 * <p>
-	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.
+	 * A client identifier <code>clientId</code> must be specified and be less that 65535 characters.
 	 * It must be unique across all clients connecting to the same
 	 * server. The clientId is used by the server to store data related to the client,
 	 * hence it is important that the clientId remain the same when connecting to a server
@@ -147,11 +152,15 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @param clientId a client identifier that is unique on the server being connected to
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://".
-	 * @throws IllegalArgumentException if the clientId is null or is greater than 23 characters in length
+	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttAsyncClient(String serverURI, String clientId) throws MqttException {
 		this(serverURI,clientId, new MqttDefaultFilePersistence());
+	}
+	
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
+		this(serverURI,clientId, persistence, new TimerPingSender());
 	}
 
 	/**
@@ -184,7 +193,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * </p>
 	 *
 	 * <p>
-	 * A client identifier <code>clientId</code> must be specified and be less that 23 characters.
+	 * A client identifier <code>clientId</code> must be specified and be less that 65535 characters.
 	 * It must be unique across all clients connecting to the same
 	 * server. The clientId is used by the server to store data related to the client,
 	 * hence it is important that the clientId remain the same when connecting to a server
@@ -235,16 +244,16 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
  	 * default persistence mechanism is used
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://"
-	 * @throws IllegalArgumentException if the clientId is null or is greater than 23 characters in length
+	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
 		final String methodName = "MqttAsyncClient";
 
 		log.setResourceName(clientId);
 
-		if (clientId == null || clientId.length() == 0) {
-			throw new IllegalArgumentException("Null or zero length clientId");
+		if (clientId == null) { //Support empty client Id, 3.1.1 standard
+			throw new IllegalArgumentException("Null clientId");
 		}
 		// Count characters, surrogate pairs count as one character.
 		int clientIdLength = 0;
@@ -253,8 +262,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 				i++;
 			clientIdLength++;
 		}
-		if ( clientIdLength > 23) {
-			throw new IllegalArgumentException("ClientId longer than 23 characters");
+		if ( clientIdLength > 65535) {
+			throw new IllegalArgumentException("ClientId longer than 65535 characters");
 		}
 
 		MqttConnectOptions.validateURI(serverURI);
@@ -271,11 +280,13 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		log.fine(className,methodName,"101",new Object[]{clientId,serverURI,persistence});
 
 		this.persistence.open(clientId, serverURI);
-		this.comms = new ClientComms(this, this.persistence);
+		this.comms = new ClientComms(this, this.persistence, pingSender);
 		this.persistence.close();
 		this.topics = new Hashtable();
 
 	}
+	
+	
 
 	/**
 	 * @param ch
@@ -490,7 +501,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnect(java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
 	public IMqttToken disconnect( Object userContext, IMqttActionListener callback) throws MqttException {
-		return this.disconnect(30000, userContext, callback);
+		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback);
 	}
 
 	/* (non-Javadoc)
@@ -531,6 +542,30 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		log.fine(className,methodName,"108");
 
 		return token;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly()
+	 */
+	public void disconnectForcibly() throws MqttException {
+		disconnectForcibly(QUIESCE_TIMEOUT, DISCONNECT_TIMEOUT);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long)
+	 */
+	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
+		disconnectForcibly(QUIESCE_TIMEOUT, disconnectTimeout);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long)
+	 */
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException{
+		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
 	/* (non-Javadoc)
@@ -597,7 +632,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * wildcard character.
 	 */
 	protected MqttTopic getTopic(String topic) {
-		validateTopic(topic);
+		MqttTopic.validate(topic, false/*wildcards NOT allowed*/);
 
 		MqttTopic result = (MqttTopic)topics.get(topic);
 		if (result == null) {
@@ -606,7 +641,30 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		}
 		return result;
 	}
-
+	
+	/* (non-Javadoc)
+	 * Check and send a ping if needed.
+	 * <p>By default, client sends PingReq to server to keep the connection to 
+	 * server. For some platforms which cannot use this mechanism, such as Android,
+	 * developer needs to handle the ping request manually with this method.
+	 * </p>
+	 * 
+	 * @throws MqttException for other errors encountered while publishing the message.
+	 */
+	public IMqttToken checkPing(Object userContext, IMqttActionListener callback) throws MqttException{
+		final String methodName = "ping";
+		MqttToken token;
+		//@TRACE 117=>
+		log.fine(className,methodName,"117");
+		
+		token = comms.checkForActivity();
+		//@TRACE 118=<
+		log.fine(className,methodName,"118");
+		
+		return token;
+	}
+	
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
@@ -637,13 +695,18 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		if (topicFilters.length != qos.length) {
 			throw new IllegalArgumentException();
 		}
+		
 		String subs = "";
 		for (int i=0;i<topicFilters.length;i++) {
 			if (i>0) {
 				subs+=", ";
 			}
 			subs+=topicFilters[i]+":"+qos[i];
+			
+			//Check if the topic filter is valid before subscribing
+			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 		}
+		
 		//@TRACE 106=Subscribe topic={0} userContext={1} callback={2}
 		log.fine(className,methodName,"106",new Object[]{subs, userContext, callback});
 
@@ -693,7 +756,14 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 				subs+=", ";
 			}
 			subs+=topicFilters[i];
+			
+			// Check if the topic filter is valid before unsubscribing
+			// Although we already checked when subscribing, but invalid
+			// topic filter is meanless for unsubscribing, just prohibit it
+			// to reduce unnecessary control packet send to broker.
+			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 		}
+		
 		//@TRACE 107=Unsubscribe topic={0} userContext={1} callback={2}
 		log.fine(className, methodName,"107",new Object[]{subs, userContext, callback});
 
@@ -719,8 +789,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	}
 
 	/**
-	 * Returns a randomly generated client identifier based on the current user's login
-	 * name and the system time.
+	 * Returns a randomly generated client identifier based on the the fixed prefix (paho-)
+	 * and the system time.
 	 * <p>When cleanSession is set to false, an application must ensure it uses the
 	 * same client identifier when it reconnects to the server to resume state and maintain
 	 * assured message delivery.</p>
@@ -728,7 +798,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @see MqttConnectOptions#setCleanSession(boolean)
 	 */
 	public static String generateClientId() {
-		return (System.getProperty("user.name") + "." + System.currentTimeMillis());
+		//length of nanoTime = 15, so total length = 20  < 65535(defined in spec) 
+		return CLIENT_ID_PREFIX + System.nanoTime();
 	}
 
 	/* (non-Javadoc)
@@ -773,7 +844,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		//@TRACE 111=< topic={0} message={1}userContext={1} callback={2}
 		log.fine(className,methodName,"111", new Object[] {topic, userContext, callback});
 
-		validateTopic(topic);
+		//Checks if a topic is valid when publishing a message.
+		MqttTopic.validate(topic, false/*wildcards NOT allowed*/);
 
 		MqttDeliveryToken token = new MqttDeliveryToken(getClientId());
 		token.setActionCallback(callback);
@@ -811,16 +883,15 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	}
 
 	/**
-	 * Checks a topic is valid when publishing a message.
-	 * <p>Checks the topic does not contain a wild card character.</p>
-	 * @param topic to validate
-	 * @throws IllegalArgumentException if the topic is not valid
+	 * Return Current Mqtt protocol version. Client supports version 3.1 and 3.1.1. 
+	 * This value is V3_1 by default.
+	 * @return return a "type safe enum" class to state current version.
 	 */
-	static public void validateTopic(String topic) {
-		if ((topic.indexOf('#') == -1) && (topic.indexOf('+') == -1)) {
-			return;
-		}
-		// The topic string does not comply with topic string rules.
-		throw new IllegalArgumentException();
+	public MqttProtocolVersion getProtocolVersion() {
+		return protocolVersion;
+	}
+
+	public void setProtocolVersion(MqttProtocolVersion version) {
+		this.protocolVersion = version;
 	}
 }

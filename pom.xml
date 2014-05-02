@@ -4,8 +4,19 @@
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.4.0</version>
+	<version>0.4.1-SNAPSHOT</version>
+	
+	<name>Eclipse Paho</name>
 	<url>http://www.eclipse.org/paho</url>
+	<description>
+	  The Paho project provides scalable open-source implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine to Machine (M2M) and Internet of Things (IoT).
+	</description>
+
+	<organization>
+      <name>Eclipse Paho</name>
+      <url>http://www.eclipse.org/paho</url>
+	</organization>
+  
 	<licenses>
 		<license>
 			<name>Eclipse Public License - Version 1.0</name>
@@ -34,6 +45,7 @@
 	</distributionManagement>
 	<modules>
 		<module>org.eclipse.paho.client.mqttv3</module>
+		<module>org.eclipse.paho.client.mqttv3.test</module>
 		<module>org.eclipse.paho.sample.utility</module>
 	</modules>
 </project>

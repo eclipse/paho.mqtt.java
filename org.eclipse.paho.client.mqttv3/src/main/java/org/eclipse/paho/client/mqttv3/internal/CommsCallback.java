@@ -130,23 +130,32 @@ public class CommsCallback implements Runnable {
 
 				if (running) {
 					// Check for deliveryComplete callbacks...
-					if (!completeQueue.isEmpty()) {
-						// First call the delivery arrived callback if needed
-						MqttToken token = (MqttToken) completeQueue.elementAt(0);
+					MqttToken token = null;
+					synchronized (completeQueue) {
+					    if (!completeQueue.isEmpty()) {
+						    // First call the delivery arrived callback if needed
+						    token = (MqttToken) completeQueue.elementAt(0);
+						    completeQueue.removeElementAt(0);
+					    }
+					}
+					if (null != token) {
 						handleActionComplete(token);
-						completeQueue.removeElementAt(0);
 					}
 					
 					// Check for messageArrived callbacks...
-					if (!messageQueue.isEmpty()) {
-						// Note, there is a window on connect where a publish
-						// could arrive before we've
-						// finished the connect logic.
-						MqttPublish message = (MqttPublish) messageQueue
-								.elementAt(0);
+					MqttPublish message = null;
+					synchronized (messageQueue) {
+					    if (!messageQueue.isEmpty()) {
+						    // Note, there is a window on connect where a publish
+						    // could arrive before we've
+						    // finished the connect logic.
+							message = (MqttPublish) messageQueue.elementAt(0);
 
+							messageQueue.removeElementAt(0);
+					    }
+					}
+					if (null != message) {
 						handleMessage(message);
-						messageQueue.removeElementAt(0);
 					}
 				}
 
@@ -279,7 +288,7 @@ public class CommsCallback implements Runnable {
 			// the client protect itself from getting flooded by messages 
 			// from the server.
 			synchronized (spaceAvailable) {
-				if (!quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
+				while (!quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
 					try {
 						// @TRACE 709=wait for spaceAvailable
 						log.fine(className, methodName, "709");
