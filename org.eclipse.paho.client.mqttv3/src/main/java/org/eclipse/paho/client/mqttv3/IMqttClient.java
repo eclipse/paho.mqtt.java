@@ -497,8 +497,4 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * @throws MqttException  if the client is not disconnected.
 	 */
 	public void close() throws MqttException;
-
-	public MqttProtocolVersion getProtocolVersion();
-
-	public void setProtocolVersion(MqttProtocolVersion version);
 }

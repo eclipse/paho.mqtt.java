@@ -207,8 +207,7 @@ public class ClientComms {
 						options.getUserName(),
 						options.getPassword(),
 						options.getWillMessage(),
-						options.getWillDestination(), 
-						((MqttAsyncClient) client).getProtocolVersion());
+						options.getWillDestination());
 
 				this.clientState.setKeepAliveSecs(options.getKeepAliveInterval());
 				this.clientState.setCleanSession(options.isCleanSession());

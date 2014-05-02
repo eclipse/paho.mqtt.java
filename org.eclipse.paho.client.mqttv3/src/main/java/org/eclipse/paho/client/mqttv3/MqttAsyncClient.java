@@ -84,7 +84,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	protected ClientComms comms;
 	private Hashtable topics;
 	private MqttClientPersistence persistence;
-	private MqttProtocolVersion protocolVersion = MqttProtocolVersion.V3_1;
 
 	final static String className = MqttAsyncClient.class.getName();
 	public Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
@@ -886,16 +885,4 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		return new Debug(clientId,comms);
 	}
 
-	/**
-	 * Return Current Mqtt protocol version. Client supports version 3.1 and 3.1.1. 
-	 * This value is V3_1 by default.
-	 * @return return a "type safe enum" class to state current version.
-	 */
-	public MqttProtocolVersion getProtocolVersion() {
-		return protocolVersion;
-	}
-
-	public void setProtocolVersion(MqttProtocolVersion version) {
-		this.protocolVersion = version;
-	}
 }

@@ -449,16 +449,4 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 		return (aClient.getDebug());
 	}
 	
-	/**
-	 * Return Current Mqtt protocol version. Client supports version 3.1 and 3.1.1. 
-	 * This value is V3_1 by default.
-	 * @return return a "type safe enum" class to state current version.
-	 */
-	public MqttProtocolVersion getProtocolVersion() {
-		return aClient.getProtocolVersion();
-	}
-
-	public void setProtocolVersion(MqttProtocolVersion version) {
-		aClient.setProtocolVersion(version);
-	}
 }
