@@ -459,21 +459,33 @@ public class ClientComms {
 	}
 
 	public boolean isConnected() {
-		return conState == CONNECTED;
+		synchronized (conLock) {
+			return conState == CONNECTED;
+		}
 	}
 
 	public boolean isConnecting() {
-		return conState == CONNECTING;
+		synchronized (conLock) {
+			return conState == CONNECTING;
+		}
 	}
+
 	public boolean isDisconnected() {
-		return conState == DISCONNECTED;
+		synchronized (conLock) {
+			return conState == DISCONNECTED;
+		}
 	}
 
 	public boolean isDisconnecting() {
-		return conState == DISCONNECTING;
+		synchronized (conLock) {
+			return conState == DISCONNECTING;
+		}
 	}
+
 	public boolean isClosed() {
-		return conState == CLOSED;
+		synchronized (conLock) {
+			return conState == CLOSED;
+		}
 	}
 
 	public void setCallback(MqttCallback mqttCallback) {
