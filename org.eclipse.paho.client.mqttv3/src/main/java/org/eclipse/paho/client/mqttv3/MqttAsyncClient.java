@@ -30,7 +30,6 @@ import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
