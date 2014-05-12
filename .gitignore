@@ -1,7 +1,7 @@
 ### /.gitignore-boilerplates/Global/Eclipse.gitignore
 *.pydevproject
 .metadata
-bin/**
+bin/
 tmp/**
 tmp/**/*
 *.tmp
