@@ -17,8 +17,6 @@ package org.eclipse.paho.mqtt.ui.core.model;
 
 import java.util.Properties;
 
-import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
-
 /**
  * 
  * @author Bin Zhang
@@ -26,6 +24,12 @@ import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
  */
 public final class SSLOptions extends Bindable {
 	private static final long serialVersionUID = 1L;
+	// copied from org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory
+	// since it is internal only
+	public static final String KEY_STORE="com.ibm.ssl.keyStore";
+	public static final String KEY_STORE_PWD="com.ibm.ssl.keyStorePassword";
+	public static final String TRUST_STORE="com.ibm.ssl.trustStore";
+	public static final String TRUST_STORE_PWD="com.ibm.ssl.trustStorePassword";
 
 	private String keyStoreLocation;
 	private char[] keyStorePassword;
@@ -77,13 +81,13 @@ public final class SSLOptions extends Bindable {
 		}
 
 		Properties props = new Properties();
-		props.put(SSLSocketFactoryFactory.KEYSTORE, keyStoreLocation);
+		props.put(KEY_STORE, keyStoreLocation);
 		if (keyStorePassword != null) {
-			props.put(SSLSocketFactoryFactory.KEYSTOREPWD, new String(keyStorePassword));
+			props.put(KEY_STORE_PWD, new String(keyStorePassword));
 		}
-		props.put(SSLSocketFactoryFactory.TRUSTSTORE, trustStoreLocation);
+		props.put(TRUST_STORE, trustStoreLocation);
 		if (trustStorePassword != null) {
-			props.put(SSLSocketFactoryFactory.TRUSTSTOREPWD, new String(trustStorePassword));
+			props.put(TRUST_STORE_PWD, new String(trustStorePassword));
 		}
 
 		return props;

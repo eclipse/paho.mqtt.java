@@ -4,134 +4,98 @@
     <parent>
         <groupId>org.eclipse.paho</groupId>
         <artifactId>java-parent</artifactId>
-        <version>0.8.0</version>
+        <version>${paho.version}</version>
     </parent>
-    
-    <artifactId>mqtt-client</artifactId>
-    <packaging>bundle</packaging>
+
+	<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+    <packaging>eclipse-plugin</packaging>
     
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>templating-maven-plugin</artifactId>
-                <version>1.0-alpha-3</version>
-                <executions>
-                    <execution>
-                        <id>filter-src</id>
-                        <goals>
-                            <goal>filter-sources</goal>
-                        </goals>
-                    </execution>
-                </executions>
+		    <plugin>
+        		<groupId>org.eclipse.tycho</groupId>
+        		<artifactId>tycho-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.4.0</version>
-                <extensions>true</extensions>
-				<configuration>
-                     <instructions>
-                         <Build-Level>L${build.level}</Build-Level>
-                         <Bundle-Localization>bundle</Bundle-Localization>
-                         <Bundle-Name>%bundle.name</Bundle-Name>
-                         <Bundle-Vendor>%bundle.provider</Bundle-Vendor>
-                         <Bundle-SymbolicName>$(maven-symbolicname);singleton:=true</Bundle-SymbolicName>
-                         <Import-Package>javax.net;resolution:=optional, javax.net.ssl;resolution:=optional</Import-Package>
-                         <Export-Package>!org.eclipse.paho.client.mqttv3.internal.*, org.eclipse.paho.client.mqttv3.*</Export-Package>
-                         <Bundle-RequiredExecutionEnvironment>CDC-1.1/Foundation-1.1,J2SE-1.4</Bundle-RequiredExecutionEnvironment>
-                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-                     </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-        
-        <pluginManagement>
-			<plugins>
-        	    <!-- Workaround for the 'M2E plugin execution not covered' problem.
-            	     See: http://wiki.eclipse.org/M2E_plugin_execution_not_covered -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
+			
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>templating-maven-plugin</artifactId>
+				<version>1.0-alpha-3</version>
+				<executions>
+					<execution>
+						<id>filter-src</id>
+						<goals>
+							<goal>filter-sources</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.4.2</version>
+				<executions>
+				  <execution>
+					<id>default-copy-resources</id>
+					<phase>process-resources</phase>
+					<goals>
+					  <goal>copy-resources</goal>
+					</goals>
 					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>templating-maven-plugin</artifactId>
-										<versionRange>[1.0-alpha,)</versionRange>
-										<goals>
-											<goal>filter-sources</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore/>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.felix</groupId>
-										<artifactId>maven-bundle-plugin</artifactId>
-										<versionRange>[2.4.0,)</versionRange>
-										<goals>
-											<goal>manifest</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore/>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
+					  <overwrite>true</overwrite>
+					  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+					  <resources>
+						<resource>
+						  <!-- used in modules which relative to its parent -->
+						  <directory>../</directory>
+						  <includes>
+                                <include>about.html</include>
+                          </includes>
+						</resource>
+					  </resources>
 					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+				  </execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<source>${mqttclient.java.version}</source>
+					<target>${mqttclient.java.version}</target>
+				</configuration>
+			</plugin>  
+	
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			 </plugin>
+			 
+			 <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			 </plugin>
+        </plugins>
     </build>
-    
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>

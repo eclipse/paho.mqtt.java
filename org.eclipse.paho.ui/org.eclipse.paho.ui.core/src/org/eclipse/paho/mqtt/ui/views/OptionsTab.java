@@ -64,6 +64,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
@@ -78,6 +79,7 @@ import org.eclipse.swt.widgets.ToolTip;
  * @author Bin Zhang
  */
 public class OptionsTab extends CTabItem {
+	private static final String[] KEYSTORE_FILE_EXT = new String[] { "*.jks", "*.p12", "*.pfx", "*.*" };
 	private final Connection connection;
 
 	/**
@@ -496,11 +498,12 @@ public class OptionsTab extends CTabItem {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						DirectoryDialog directoryDialog = new DirectoryDialog(getControl().getShell());
-						directoryDialog.setMessage(Messages.OPT_TAB_GROUP_SSL_KEY_STORE_DLG);
-						String dir = directoryDialog.open();
-						if (dir != null) {
-							keystoreDirText.setText(dir);
+						FileDialog  fileDialog = new FileDialog (getControl().getShell());
+						fileDialog.setText(Messages.OPT_TAB_GROUP_SSL_KEY_STORE_DLG);
+						fileDialog.setFilterExtensions(KEYSTORE_FILE_EXT);
+						String selectedFile = fileDialog.open();
+						if (selectedFile != null) {
+							keystoreDirText.setText(selectedFile);
 						}
 					}
 				});
@@ -560,11 +563,12 @@ public class OptionsTab extends CTabItem {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						DirectoryDialog directoryDialog = new DirectoryDialog(getControl().getShell());
-						directoryDialog.setMessage(Messages.OPT_TAB_GROUP_SSL_TRUST_STORE_DLG);
-						String dir = directoryDialog.open();
-						if (dir != null) {
-							truststoreDirText.setText(dir);
+						FileDialog  fileDialog = new FileDialog (getControl().getShell());
+						fileDialog.setText(Messages.OPT_TAB_GROUP_SSL_TRUST_STORE_DLG);
+						fileDialog.setFilterExtensions(KEYSTORE_FILE_EXT);
+						String selectedFile = fileDialog.open();
+						if (selectedFile != null) {
+							truststoreDirText.setText(selectedFile);
 						}
 					}
 				});

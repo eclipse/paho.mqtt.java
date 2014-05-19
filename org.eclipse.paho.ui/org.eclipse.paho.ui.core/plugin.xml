@@ -14,7 +14,7 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            name="MQTT Perspective"
+            name="%perspective.name"
             class="org.eclipse.paho.mqtt.ui.Perspective"
             id="org.eclipse.paho.ui.perspective">
       </perspective>
@@ -22,7 +22,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            name="Connections"
+            name="%view.name"
             allowMultiple="true"
             icon="icons/connection.gif"
             class="org.eclipse.paho.mqtt.ui.views.NavigationView"
@@ -32,13 +32,13 @@
    <extension
          point="org.eclipse.ui.commands">
       <category
-            name="Connections"
+            name="%category.name"
             id="org.eclipse.paho.ui.category">
       </category>
       
       <command
-            name="New Connection"
-            description="New Connection"
+            name="%command.name"
+            description="%command.description"
             categoryId="org.eclipse.paho.ui.category"
             id="org.eclipse.paho.ui.actions.newConnection">
       </command>
@@ -50,7 +50,7 @@
       <editor
             class="org.eclipse.paho.mqtt.ui.views.ConnectionEditorPart"
             id="org.eclipse.paho.mqtt.ui.views.ConnectionEditorPart"
-            name="Connection Editor">
+            name="%editor.name">
       </editor>
    </extension>
    
@@ -68,7 +68,7 @@
       </key>
       <scheme
             id="org.eclipse.paho.ui.pahoAcceleratorConfiguration"
-            name="paho">
+            name="%scheme.name">
       </scheme>
    </extension>
    <extension
@@ -76,7 +76,7 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.paho.ui.core.application"
-            name="Paho MQTT Utility">
+            name="%product.name">
          <property
                name="aboutText"
                value="Paho MQTT Utility">
