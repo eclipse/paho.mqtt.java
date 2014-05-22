@@ -17,6 +17,7 @@
 		<tycho.version>0.20.0</tycho.version>
 		<kepler.repo.url>http://download.eclipse.org/releases/kepler</kepler.repo.url>
 		<test.exclude>**/*ConformantTest.java</test.exclude>
+		<p2repo.location>/shared/technology/paho/Java</p2repo.location>
 	</properties>
 	
 	<name>Eclipse Paho</name>
@@ -203,6 +204,8 @@
 	<modules>
 		<module>org.eclipse.paho.client.mqttv3</module>
 		<module>org.eclipse.paho.client.mqttv3.test</module>
+		<module>org.eclipse.paho.client.eclipse.feature</module>
+		<module>org.eclipse.paho.client.eclipse.view</module>
 		<module>org.eclipse.paho.client.mqttv3.repository</module>
 		<module>org.eclipse.paho.sample.utility</module>
 		<module>org.eclipse.paho.ui</module>

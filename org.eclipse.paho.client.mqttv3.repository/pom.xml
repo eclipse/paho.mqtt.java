@@ -9,6 +9,8 @@
 	<artifactId>org.eclipse.paho.client.mqttv3.repository</artifactId>
 	<packaging>eclipse-repository</packaging>
 	
+	<name>Paho P2 Repository</name>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -16,6 +18,34 @@
 				<artifactId>tycho-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete includeemptydirs="false">
+									<fileset
+										dir="${p2repo.location}">
+										<include name="**" />
+									</fileset>
+								</delete>
+								<copy includeemptydirs="false"
+									todir="${p2repo.location}">
+									<fileset dir="${project.build.directory}/repository/">
+										<include name="**" />
+									</fileset>
+								</copy>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- <plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
 				<artifactId>tycho-p2-extras-plugin</artifactId>
 				<executions>
@@ -32,8 +62,8 @@
 							<sourceLocation>${project.build.directory}/repository</sourceLocation>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
+				</executions> 
+			</plugin> -->
 		</plugins>
 	</build>
 </project>
