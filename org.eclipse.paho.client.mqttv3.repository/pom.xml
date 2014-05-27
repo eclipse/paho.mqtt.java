@@ -28,7 +28,7 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<delete includeemptydirs="false">
+								<delete includeemptydirs="false" quiet="true">
 									<fileset
 										dir="${download.location}">
 										<include name="**" />
