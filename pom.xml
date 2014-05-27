@@ -17,7 +17,8 @@
 		<tycho.version>0.20.0</tycho.version>
 		<kepler.repo.url>http://download.eclipse.org/releases/kepler</kepler.repo.url>
 		<test.exclude>**/*ConformantTest.java</test.exclude>
-		<p2repo.location>/shared/technology/paho/Java</p2repo.location>
+		<download.location>/home/data/httpd/download.eclipse.org/paho/releases/${paho.version}</download.location>
+		<p2repo.location>${download.location}/site</p2repo.location>
 	</properties>
 	
 	<name>Eclipse Paho</name>
