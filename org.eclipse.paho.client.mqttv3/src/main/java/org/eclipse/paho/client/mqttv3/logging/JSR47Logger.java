@@ -235,6 +235,8 @@ public class JSR47Logger implements Logger {
 			case FINEST:
 				julLevel = java.util.logging.Level.FINEST;
 				break;
+
+			default:
 		}
 
 		return julLevel;

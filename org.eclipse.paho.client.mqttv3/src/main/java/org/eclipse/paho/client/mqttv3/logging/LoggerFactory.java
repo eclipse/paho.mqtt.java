@@ -43,7 +43,7 @@ public class LoggerFactory {
 	 * Default message catalog.
 	 */
 	public final static String MQTT_CLIENT_MSG_CAT = "org.eclipse.paho.client.mqttv3.internal.nls.logcat";
-	private final static String className = LoggerFactory.class.getName();
+	private static final String CLASS_NAME = LoggerFactory.class.getName();
 	
 	private static String overrideloggerClassName = null;
 	/**
@@ -74,7 +74,7 @@ public class LoggerFactory {
 //		}
 
 		if (null == logger) {
-			throw new MissingResourceException("Error locating the logging class", className, loggerID);
+			throw new MissingResourceException("Error locating the logging class", CLASS_NAME, loggerID);
 		}
 
 		return logger;

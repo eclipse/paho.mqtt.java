@@ -29,7 +29,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
  */
 public class MqttConnect extends MqttWireMessage {
 
-	public static String KEY = "Con";
+	public static final String KEY = "Con";
 
 	private String clientId;
 	private boolean cleanSession;
@@ -155,6 +155,6 @@ public class MqttConnect extends MqttWireMessage {
 	}
 	
 	public String getKey() {
-		return new String(KEY);
+		return KEY;
 	}
 }

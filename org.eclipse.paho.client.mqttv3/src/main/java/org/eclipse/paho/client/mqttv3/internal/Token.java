@@ -23,7 +23,10 @@ import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 public class Token {
-	volatile private boolean completed = false;
+	private static final String CLASS_NAME = Token.class.getName();
+	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+
+	private volatile boolean completed = false;
 	private boolean pendingComplete = false;
 	private boolean sent = false;
 	
@@ -42,8 +45,8 @@ public class Token {
 	
 	private Object userContext = null;
 	
-	public int messageID = 0;
-	public boolean notified = false;
+	private int messageID = 0;
+	private boolean notified = false;
 	
 	public Token(String logContext) {
 		log.setResourceName(logContext);
@@ -56,9 +59,6 @@ public class Token {
 	public void setMessageID(int messageID) {
 		this.messageID = messageID;
 	}
-
-	final static String className = Token.class.getName();
-	Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,className);
 	
 	public boolean checkResult() throws MqttException {
 		if ( getException() != null)  {
@@ -98,12 +98,12 @@ public class Token {
 	public void waitForCompletion(long timeout) throws MqttException {
 		final String methodName = "waitForCompletion";
 		//@TRACE 407=key={0} wait max={1} token={2}
-		log.fine(className,methodName, "407",new Object[]{getKey(), new Long(timeout), this});
+		log.fine(CLASS_NAME,methodName, "407",new Object[]{getKey(), new Long(timeout), this});
 
 		MqttWireMessage resp = waitForResponse(timeout);
 		if (resp == null && !completed) {
 			//@TRACE 406=key={0} timed out token={1}
-			log.fine(className,methodName, "406",new Object[]{getKey(), this});
+			log.fine(CLASS_NAME,methodName, "406",new Object[]{getKey(), this});
 			exception = new MqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
 			throw exception;
 		}
@@ -124,13 +124,13 @@ public class Token {
 		final String methodName = "waitForResponse";
 		synchronized (responseLock) {
 			//@TRACE 400=>key={0} timeout={1} sent={2} completed={3} hasException={4} response={5} token={6}
-			log.fine(className, methodName, "400",new Object[]{getKey(), new Long(timeout),new Boolean(sent),new Boolean(completed),(exception==null)?"false":"true",response,this},exception);
+			log.fine(CLASS_NAME, methodName, "400",new Object[]{getKey(), new Long(timeout),new Boolean(sent),new Boolean(completed),(exception==null)?"false":"true",response,this},exception);
 
 			while (!this.completed) {
 				if (this.exception == null) {
 					try {
 						//@TRACE 408=key={0} wait max={1}
-						log.fine(className,methodName,"408",new Object[] {getKey(),new Long(timeout)});
+						log.fine(CLASS_NAME,methodName,"408",new Object[] {getKey(),new Long(timeout)});
 	
 						if (timeout <= 0) {
 							responseLock.wait();
@@ -144,7 +144,7 @@ public class Token {
 				if (!this.completed) {
 					if (this.exception != null) {
 						//@TRACE 401=failed with exception
-						log.fine(className,methodName,"401",null,exception);
+						log.fine(CLASS_NAME,methodName,"401",null,exception);
 						throw exception;
 					}
 					
@@ -156,7 +156,7 @@ public class Token {
 			}
 		}
 		//@TRACE 402=key={0} response={1}
-		log.fine(className,methodName, "402",new Object[]{getKey(), this.response});
+		log.fine(CLASS_NAME,methodName, "402",new Object[]{getKey(), this.response});
 		return this.response;
 	}
 	
@@ -168,7 +168,7 @@ public class Token {
 	protected void markComplete(MqttWireMessage msg, MqttException ex) {
 		final String methodName = "markComplete";
 		//@TRACE 404=>key={0} response={1} excep={2}
-		log.fine(className,methodName,"404",new Object[]{getKey(),msg,ex});
+		log.fine(CLASS_NAME,methodName,"404",new Object[]{getKey(),msg,ex});
 		
 		synchronized(responseLock) {
 			// ACK means that everything was OK, so mark the message for garbage collection.
@@ -187,7 +187,7 @@ public class Token {
 		protected void notifyComplete() {
 			final String methodName = "notifyComplete";
 			//@TRACE 411=>key={0} response={1} excep={2}
-			log.fine(className,methodName,"404",new Object[]{getKey(),this.response, this.exception});
+			log.fine(CLASS_NAME,methodName,"404",new Object[]{getKey(),this.response, this.exception});
 
 			synchronized (responseLock) {
 				// If pending complete is set then normally the token can be marked
@@ -216,7 +216,7 @@ public class Token {
 //	protected void notifyException() {
 //		final String methodName = "notifyException";
 //		//@TRACE 405=token={0} excep={1}
-//		log.fine(className,methodName, "405",new Object[]{this,this.exception});
+//		log.fine(CLASS_NAME,methodName, "405",new Object[]{this,this.exception});
 //		synchronized (responseLock) {
 //			responseLock.notifyAll();
 //		}
@@ -233,10 +233,10 @@ public class Token {
 					throw this.exception;
 				}
 			}
-			if (!sent) {
+			while (!sent) {
 				try {
 					//@TRACE 409=wait key={0}
-					log.fine(className,methodName, "409",new Object[]{getKey()});
+					log.fine(CLASS_NAME,methodName, "409",new Object[]{getKey()});
 
 					sentLock.wait();
 				} catch (InterruptedException e) {
@@ -259,7 +259,7 @@ public class Token {
 	protected void notifySent() {
 		final String methodName = "notifySent";
 		//@TRACE 403=> key={0}
-		log.fine(className, methodName, "403",new Object[]{getKey()});
+		log.fine(CLASS_NAME, methodName, "403",new Object[]{getKey()});
 		synchronized (responseLock) {
 			this.response = null;
 			this.completed = false;
@@ -285,7 +285,7 @@ public class Token {
 			throw new MqttException(MqttException.REASON_CODE_TOKEN_INUSE);
 		}
 		//@TRACE 410=> key={0}
-		log.fine(className, methodName, "410",new Object[]{getKey()});
+		log.fine(CLASS_NAME, methodName, "410",new Object[]{getKey()});
 		
 		client = null;
 		completed = false;
@@ -348,18 +348,18 @@ public class Token {
 
 	public String toString() {
 		StringBuffer tok = new StringBuffer();
-		tok.append("key="+getKey());
+		tok.append("key=").append(getKey());
 		tok.append(" ,topics=");
 		if (getTopics() != null) {
 			for (int i=0; i<getTopics().length; i++) {
-				tok.append(getTopics()[i]+", ");
+				tok.append(getTopics()[i]).append(", ");
 			} 
 		}
-		tok.append(" ,usercontext="+getUserContext());
-		tok.append(" ,isComplete="+isComplete());
-		tok.append(" ,isNotified="+isNotified());
-		tok.append(" ,exception="+getException());
-		tok.append(" ,actioncallback="+getActionCallback());
+		tok.append(" ,usercontext=").append(getUserContext());
+		tok.append(" ,isComplete=").append(isComplete());
+		tok.append(" ,isNotified=").append(isNotified());
+		tok.append(" ,exception=").append(getException());
+		tok.append(" ,actioncallback=").append(getActionCallback());
 
 		return tok.toString();
 	}
