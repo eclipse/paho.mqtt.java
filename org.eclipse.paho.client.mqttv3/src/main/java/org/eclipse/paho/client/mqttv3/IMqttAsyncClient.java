@@ -746,9 +746,5 @@ public interface IMqttAsyncClient {
 	 * been closed it cannot be reused. For instance attempts to connect will fail.
 	 * @throws MqttException  if the client is not disconnected.
 	 */
-	void close() throws MqttException;
-
-	MqttProtocolVersion getProtocolVersion();
-
-	void setProtocolVersion(MqttProtocolVersion version);
+	public void close() throws MqttException;
 }

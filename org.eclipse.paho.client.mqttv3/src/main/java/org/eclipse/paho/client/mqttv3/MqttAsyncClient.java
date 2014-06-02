@@ -1,10 +1,14 @@
-/*
- * Copyright (c) 2009, 2012 IBM Corp.
+/*******************************************************************************
+ * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -83,7 +87,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	protected ClientComms comms;
 	private Hashtable topics;
 	private MqttClientPersistence persistence;
-	private MqttProtocolVersion protocolVersion = MqttProtocolVersion.V3_1;
 
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
@@ -880,16 +883,4 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		return new Debug(clientId,comms);
 	}
 
-	/**
-	 * Return Current Mqtt protocol version. Client supports version 3.1 and 3.1.1. 
-	 * This value is V3_1 by default.
-	 * @return return a "type safe enum" class to state current version.
-	 */
-	public MqttProtocolVersion getProtocolVersion() {
-		return protocolVersion;
-	}
-
-	public void setProtocolVersion(MqttProtocolVersion version) {
-		this.protocolVersion = version;
-	}
 }
