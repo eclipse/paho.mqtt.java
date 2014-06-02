@@ -52,23 +52,23 @@ public class ClientComms {
 	private static final byte DISCONNECTING	= 2;
 	private static final byte DISCONNECTED	= 3;
 	private static final byte CLOSED	= 4;
-	
-	private IMqttAsyncClient 	  client;
-	private int 			      networkModuleIndex;
-	private NetworkModule[]		  networkModules;
-	private CommsReceiver 		  receiver;
-	private CommsSender 		  sender;
-	private CommsCallback 		  callback;
-	private ClientState	 		  clientState;
-	private MqttConnectOptions	  conOptions;
-	private MqttClientPersistence persistence;
-	private MqttPingSender		  pingSender;
-	private CommsTokenStore 	  tokenStore;
-	private boolean 			  stoppingComms = false;
 
-	private byte 	conState = DISCONNECTED;
-	private Object  conLock = new Object();  	// Used to synchronize connection state
-	private boolean closePending  = false;
+	private IMqttAsyncClient 		client;
+	private int 					networkModuleIndex;
+	private NetworkModule[]			networkModules;
+	private CommsReceiver 			receiver;
+	private CommsSender 			sender;
+	private CommsCallback 			callback;
+	private ClientState	 			clientState;
+	private MqttConnectOptions		conOptions;
+	private MqttClientPersistence	persistence;
+	private MqttPingSender			pingSender;
+	private CommsTokenStore 		tokenStore;
+	private boolean 				stoppingComms = false;
+
+	private byte	conState = DISCONNECTED;
+	private Object	conLock = new Object();  	// Used to synchronize connection state
+	private boolean	closePending = false;
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle
@@ -89,9 +89,10 @@ public class ClientComms {
 		log.setResourceName(getClient().getClientId());
 	}
 
-	CommsReceiver getReceiver(){
+	CommsReceiver getReceiver() {
 		return receiver;
 	}
+
 	/**
 	 * Sends a message to the server. Does not check if connected this validation must be done
 	 * by invoking routines.
@@ -489,6 +490,7 @@ public class ClientComms {
 			return conState == CLOSED;
 		}
 	}
+
 
 	public void setCallback(MqttCallback mqttCallback) {
 		this.callback.setCallback(mqttCallback);

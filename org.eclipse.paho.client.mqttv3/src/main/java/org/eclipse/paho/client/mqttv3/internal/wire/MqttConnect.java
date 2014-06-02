@@ -28,6 +28,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
  * An on-the-wire representation of an MQTT CONNECT message.
  */
 public class MqttConnect extends MqttWireMessage {
+
 	public static final String KEY = "Con";
 
 	private String clientId;

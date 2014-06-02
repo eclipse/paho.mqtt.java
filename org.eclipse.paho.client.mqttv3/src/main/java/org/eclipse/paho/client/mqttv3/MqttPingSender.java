@@ -25,22 +25,22 @@ public interface MqttPingSender {
 	 * Initial method. Pass interal state of current client in.
 	 * @param  The core of the client, which holds the state information for pending and in-flight messages.
 	 */
-	void init(ClientComms comms);
+	public void init(ClientComms comms);
 
 	/**
 	 * Start ping sender. It will be called after connection is success.
 	 */
-	void start();
+	public void start();
 	
 	/**
 	 * Stop ping sender. It is called if there is any errors or connection shutdowns.
 	 */
-	void stop();
+	public void stop();
 	
 	/**
 	 * Schedule next ping in certain delay.
 	 * @param  delay in milliseconds.
 	 */
-	void schedule(long delayInMilliseconds);
+	public void schedule(long delayInMilliseconds);
 	
 }

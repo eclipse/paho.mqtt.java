@@ -26,7 +26,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  */
 public class MqttConnack extends MqttAck {
 	public static final String KEY = "Con";
-	
+
 	private int returnCode;
 	
 	public MqttConnack(byte info, byte[] variableHeader) throws IOException {

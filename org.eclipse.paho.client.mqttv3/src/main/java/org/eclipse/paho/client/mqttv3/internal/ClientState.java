@@ -88,14 +88,13 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * 
  */
 public class ClientState {
-	
 	private static final String CLASS_NAME = ClientState.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME); 
+	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 	private static final String PERSISTENCE_SENT_PREFIX = "s-";
 	private static final String PERSISTENCE_CONFIRMED_PREFIX = "sc-";
 	private static final String PERSISTENCE_RECEIVED_PREFIX = "r-";
 	
-	private static final int DEFAULT_MAX_INFLIGHT = 10;		
+	private static final int DEFAULT_MAX_INFLIGHT = 10;
 	private static final int MIN_MSG_ID = 1;		// Lowest possible MQTT message ID to use
 	private static final int MAX_MSG_ID = 65535;	// Highest possible MQTT message ID to use
 	private int nextMsgId = MIN_MSG_ID - 1;			// The next available message ID to use
@@ -133,7 +132,7 @@ public class ClientState {
 	private Hashtable inboundQoS2 = null;
 	
 	private MqttPingSender pingSender = null;
-	
+
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, 
 			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender) throws MqttException {
 		
@@ -547,7 +546,7 @@ public class ClientState {
 					if (time - lastActivity >= this.keepAlive) {
 		
 						//@TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}
-						log.fine(CLASS_NAME,methodName,"620", new Object[]{Long.valueOf(this.keepAlive),Long.valueOf(lastOutboundActivity),Long.valueOf(lastInboundActivity)});
+						log.fine(CLASS_NAME,methodName,"620", new Object[]{new Long(this.keepAlive),new Long(lastOutboundActivity),new Long(lastInboundActivity)});
 						pingOutstanding = true;
 						lastPing = time;
 						token = new MqttToken(clientComms.getClient().getClientId());
@@ -757,7 +756,7 @@ public class ClientState {
 		int tokC = tokenStore.count();
 		if (quiescing && tokC == 0 && pendingFlows.size() == 0 && callback.isQuiesced()) {
 			//@TRACE 626=quiescing={0} actualInFlight={1} pendingFlows={2} inFlightPubRels={3} callbackQuiesce={4} tokens={5}
-			log.fine(CLASS_NAME,methodName,"626",new Object[]{Boolean.valueOf(quiescing), Integer.valueOf(actualInFlight), Integer.valueOf(pendingFlows.size()), Integer.valueOf(inFlightPubRels), Boolean.valueOf(callback.isQuiesced()), Integer.valueOf(tokC)});
+			log.fine(CLASS_NAME,methodName,"626",new Object[]{new Boolean(quiescing), Integer.valueOf(actualInFlight), Integer.valueOf(pendingFlows.size()), Integer.valueOf(inFlightPubRels), new Boolean(callback.isQuiesced()), Integer.valueOf(tokC)});
 			synchronized (quiesceLock) {
 				quiesceLock.notifyAll();
 			}

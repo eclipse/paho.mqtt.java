@@ -24,7 +24,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  */
 public class MqttPingReq extends MqttWireMessage {
 	public static final String KEY = "Ping";
-	
+
 	public MqttPingReq() {
 		super(MqttWireMessage.MESSAGE_TYPE_PINGREQ);
 	}

@@ -46,8 +46,8 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class CommsTokenStore {
 	private static final String CLASS_NAME = CommsTokenStore.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
-	
-	/* Maps message-specific data (usually message IDs) to tokens */
+
+	// Maps message-specific data (usually message IDs) to tokens
 	private Hashtable tokens;
 	private String logContext;
 	private MqttException closedResponse = null;
@@ -232,7 +232,7 @@ public class CommsTokenStore {
 	public void clear() {
 		final String methodName = "clear";
 		//@TRACE 305=> {0} tokens
-		log.fine(CLASS_NAME, methodName, "305", new Object[] {Integer.valueOf(tokens.size())});
+		log.fine(CLASS_NAME, methodName, "305", new Object[] {new Integer(tokens.size())});
 		synchronized(tokens) {
 			tokens.clear();
 		}

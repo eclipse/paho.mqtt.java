@@ -36,7 +36,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class CommsCallback implements Runnable {
 	private static final String CLASS_NAME = CommsCallback.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
-	
+
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
 	private ClientComms clientComms;
@@ -345,7 +345,7 @@ public class CommsCallback implements Runnable {
 
 			// @TRACE 713=call messageArrived key={0} topic={1}
 			log.fine(CLASS_NAME, methodName, "713", new Object[] { 
-					Integer.valueOf(publishMessage.getMessageId()), destName });
+					new Integer(publishMessage.getMessageId()), destName });
 			mqttCallback.messageArrived(destName, publishMessage.getMessage());
 			if (publishMessage.getMessage().getQos() == 1) {
 				this.clientComms.internalSend(new MqttPubAck(publishMessage),

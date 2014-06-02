@@ -31,7 +31,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class CommsSender implements Runnable {
 	private static final String CLASS_NAME = CommsSender.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
-	
+
 	//Sends MQTT packets to the server on its own thread
 	private boolean running 		= false;
 	private Object lifecycle 		= new Object();
@@ -116,7 +116,7 @@ public class CommsSender implements Runnable {
 								} catch (IOException ex) {
 									// The flush has been seen to fail on disconnect of a SSL socket
 									// as disconnect is in progress this should not be treated as an error
-									if (!(message instanceof MqttDisconnect)){
+									if (!(message instanceof MqttDisconnect)) {
 										throw ex;
 									}
 								}

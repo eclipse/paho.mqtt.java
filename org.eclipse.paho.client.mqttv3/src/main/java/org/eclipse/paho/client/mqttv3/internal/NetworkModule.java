@@ -23,11 +23,11 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 
 public interface NetworkModule {
-	void start() throws IOException, MqttException;
+	public void start() throws IOException, MqttException;
 	
-	InputStream getInputStream() throws IOException;
+	public InputStream getInputStream() throws IOException;
 	
-	OutputStream getOutputStream() throws IOException;
+	public OutputStream getOutputStream() throws IOException;
 	
-	void stop() throws IOException;
+	public void stop() throws IOException;
 }

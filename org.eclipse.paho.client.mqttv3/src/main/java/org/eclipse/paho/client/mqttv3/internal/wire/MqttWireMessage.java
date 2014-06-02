@@ -31,7 +31,7 @@ import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
 /**
  * An on-the-wire representation of an MQTT message.
  */
-public abstract class MqttWireMessage {
+public abstract class MqttWireMessage {	
 	public static final byte MESSAGE_TYPE_CONNECT = 1;
 	public static final byte MESSAGE_TYPE_CONNACK = 2;
 	public static final byte MESSAGE_TYPE_PUBLISH = 3;
@@ -46,17 +46,16 @@ public abstract class MqttWireMessage {
 	public static final byte MESSAGE_TYPE_PINGREQ = 12;
 	public static final byte MESSAGE_TYPE_PINGRESP = 13;
 	public static final byte MESSAGE_TYPE_DISCONNECT = 14;
-	
+
 	protected static final String STRING_ENCODING = "UTF-8";
 	
 	private static final String PACKET_NAMES[] = { "reserved", "CONNECT", "CONNACK", "PUBLISH",
 			"PUBACK", "PUBREC", "PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK",
 			"UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP", "DISCONNECT" };
 
-	/* The type of the message (e.g. CONNECT, PUBLISH, PUBACK) */
+	//The type of the message (e.g. CONNECT, PUBLISH, PUBACK)
 	private byte type;
-	
-	/* The MQTT message ID */
+	//The MQTT message ID
 	protected int msgId;
 	
 	protected boolean duplicate = false;

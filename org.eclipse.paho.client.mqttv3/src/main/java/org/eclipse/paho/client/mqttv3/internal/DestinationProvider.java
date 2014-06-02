@@ -27,5 +27,5 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
  * classes being present.
  */
 public interface DestinationProvider {
-	MqttTopic getTopic(String topic);
+	public MqttTopic getTopic(String topic);
 }

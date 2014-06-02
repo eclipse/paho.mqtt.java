@@ -33,7 +33,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class MqttInputStream extends InputStream {
 	private static final String CLASS_NAME = MqttInputStream.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
-	
+
 	private DataInputStream in;
 
 	public MqttInputStream(InputStream in) {

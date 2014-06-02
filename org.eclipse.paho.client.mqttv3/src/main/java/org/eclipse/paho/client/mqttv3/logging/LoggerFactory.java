@@ -42,14 +42,14 @@ public class LoggerFactory {
 	/**
 	 * Default message catalog.
 	 */
-	public static final String MQTT_CLIENT_MSG_CAT = "org.eclipse.paho.client.mqttv3.internal.nls.logcat";
-
+	public final static String MQTT_CLIENT_MSG_CAT = "org.eclipse.paho.client.mqttv3.internal.nls.logcat";
 	private static final String CLASS_NAME = LoggerFactory.class.getName();
-	private static String overrideloggerCLASS_NAME = null;
+	
+	private static String overrideloggerClassName = null;
 	/**
 	 * Default logger that uses java.util.logging. 
 	 */
-	private static String jsr47LoggerCLASS_NAME = "org.eclipse.paho.client.mqttv3.logging.JSR47Logger"; 
+	private static String jsr47LoggerClassName = "org.eclipse.paho.client.mqttv3.logging.JSR47Logger"; 
 	
 	/**
 	 * Find or create a logger for a named package/class. 
@@ -63,14 +63,14 @@ public class LoggerFactory {
 	 * @throws Exception
 	 */
 	public static Logger getLogger(String messageCatalogName, String loggerID) {
-		String loggerCLASS_NAME = overrideloggerCLASS_NAME;
+		String loggerClassName = overrideloggerClassName;
 		Logger logger = null;
 		
-		if (loggerCLASS_NAME == null) {
-			loggerCLASS_NAME = jsr47LoggerCLASS_NAME;
+		if (loggerClassName == null) {
+			loggerClassName = jsr47LoggerClassName;
 		}
 //			logger = getJSR47Logger(ResourceBundle.getBundle(messageCatalogName), loggerID, null) ;
-		logger = getLogger(loggerCLASS_NAME, ResourceBundle.getBundle(messageCatalogName), loggerID, null) ;
+		logger = getLogger(loggerClassName, ResourceBundle.getBundle(messageCatalogName), loggerID, null) ;
 //		}
 
 		if (null == logger) {
@@ -90,12 +90,12 @@ public class LoggerFactory {
 	 * @param resourceName a name or context to associate with this logger instance.  
 	 * @return a ready for use logger
 	 */
-	private static Logger getLogger(String loggerCLASS_NAME, ResourceBundle messageCatalog, String loggerID, String resourceName) { //, FFDC ffdc) {
+	private static Logger getLogger(String loggerClassName, ResourceBundle messageCatalog, String loggerID, String resourceName) { //, FFDC ffdc) {
 		Logger logger  = null;
 		Class logClass = null;
 		
 		try {
-			logClass = Class.forName(loggerCLASS_NAME);
+			logClass = Class.forName(loggerClassName);
 		} catch (NoClassDefFoundError ncdfe) {
 			return null;
 		} catch (ClassNotFoundException cnfe) {
@@ -148,9 +148,9 @@ public class LoggerFactory {
 	 * Set the class name of the logger that the LoggerFactory will load
 	 * If not set getLogger will attempt to create a logger 
 	 * appropriate for the platform.
-	 * @param loggerCLASS_NAME - Logger implementation class name to use.
+	 * @param loggerClassName - Logger implementation class name to use.
 	 */
-	public static void setLogger(String loggerCLASS_NAME) {
-		LoggerFactory.overrideloggerCLASS_NAME = loggerCLASS_NAME;
+	public static void setLogger(String loggerClassName) {
+		LoggerFactory.overrideloggerClassName = loggerClassName;
 	}
 }

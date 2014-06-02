@@ -30,7 +30,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class SSLNetworkModule extends TCPNetworkModule {
 	private static final String CLASS_NAME = SSLNetworkModule.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
-	
+
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
 

@@ -58,8 +58,8 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	//private static final String CLASS_NAME = MqttClient.class.getName();
 	//private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
-	private MqttAsyncClient aClient = null;  // Delegate implementation to MqttAsyncClient
-	private long timeToWait = -1;				// How long each method should wait for action to complete
+	protected MqttAsyncClient aClient = null;  // Delegate implementation to MqttAsyncClient
+	protected long timeToWait = -1;				// How long each method should wait for action to complete
 
 	/**
 	 * Create an MqttClient that can be used to communicate with an MQTT server.

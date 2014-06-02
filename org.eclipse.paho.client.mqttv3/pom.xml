@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.eclipse.paho</groupId>
-        <artifactId>java-parent</artifactId>
-        <version>${paho.version}</version>
-    </parent>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.eclipse.paho</groupId>
+		<artifactId>java-parent</artifactId>
+		<version>${paho.version}</version>
+	</parent>
 
 	<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-    <packaging>eclipse-plugin</packaging>
-    
-    <build>
-        <plugins>
-		    <plugin>
-        		<groupId>org.eclipse.tycho</groupId>
-        		<artifactId>tycho-maven-plugin</artifactId>
-            </plugin>
-			
+	<packaging>eclipse-plugin</packaging>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>templating-maven-plugin</artifactId>
@@ -30,60 +29,48 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>2.4.2</version>
 				<executions>
-				  <execution>
-					<id>default-copy-resources</id>
-					<phase>process-resources</phase>
-					<goals>
-					  <goal>copy-resources</goal>
-					</goals>
-					<configuration>
-					  <overwrite>true</overwrite>
-					  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-					  <resources>
-						<resource>
-						  <!-- used in modules which relative to its parent -->
-						  <directory>../</directory>
-						  <includes>
-                                <include>about.html</include>
-                          </includes>
-						</resource>
-					  </resources>
-					</configuration>
-				  </execution>
+					<execution>
+						<id>default-copy-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+							<resources>
+								<resource>
+									<!-- used in modules which relative to its parent -->
+									<directory>../</directory>
+									<includes>
+										<include>about.html</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3</version>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>0.20.0</version>
 				<configuration>
 					<source>${mqttclient.java.version}</source>
 					<target>${mqttclient.java.version}</target>
 				</configuration>
 			</plugin>  
-	
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			 </plugin>
-			 
-			 <plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-source-plugin</artifactId>
+				<version>0.20.0</version>
+			</plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
@@ -95,7 +82,7 @@
 						</goals>
 					</execution>
 				</executions>
-			 </plugin>
-        </plugins>
-    </build>
+			</plugin> -->
+		</plugins>
+	</build>
 </project>

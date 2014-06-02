@@ -76,7 +76,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
 public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvider {
 	private static final String CLASS_NAME = MqttAsyncClient.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
-	
+
 	private static final String CLIENT_ID_PREFIX = "paho-";
 	private static final long QUIESCE_TIMEOUT = 30000; // ms
 	private static final long DISCONNECT_TIMEOUT = 10000; // ms
@@ -386,7 +386,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 //					throw ExceptionHelper.createMqttException(ex.getCause());
 //				}
 			}
-			else if (!(factory instanceof SSLSocketFactory)) {
+			else if ((factory instanceof SSLSocketFactory) == false) {
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
 
@@ -525,7 +525,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	public IMqttToken disconnect(long quiesceTimeout, Object userContext, IMqttActionListener callback) throws MqttException {
 		final String methodName = "disconnect";
 		// @TRACE 104=> quiesceTimeout={0} userContext={1} callback={2}
-		log.fine(CLASS_NAME,methodName, "104",new Object[]{ Long.valueOf(quiesceTimeout), userContext, callback});
+		log.fine(CLASS_NAME,methodName, "104",new Object[]{ new Long(quiesceTimeout), userContext, callback});
 
 		MqttToken token = new MqttToken(getClientId());
 		token.setActionCallback(callback);

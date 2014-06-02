@@ -25,7 +25,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class Token {
 	private static final String CLASS_NAME = Token.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
-	
+
 	private volatile boolean completed = false;
 	private boolean pendingComplete = false;
 	private boolean sent = false;
@@ -59,7 +59,7 @@ public class Token {
 	public void setMessageID(int messageID) {
 		this.messageID = messageID;
 	}
-
+	
 	public boolean checkResult() throws MqttException {
 		if ( getException() != null)  {
 			throw getException();
