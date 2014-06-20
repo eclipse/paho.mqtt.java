@@ -101,14 +101,14 @@ public class ConnectActionListener implements IMqttActionListener {
     int numberOfURIs = comms.getNetworkModules().length;
     int index = comms.getNetworkModuleIndex();
 
-    if ((index + 1) < numberOfURIs || (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT &&  options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_3_1_1)) {
+    if ((index + 1) < numberOfURIs || (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT && options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_3_1_1)) {
 
       if (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
         if (options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_3_1_1) {
           options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
         }
         else {
-          options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
+          options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
           comms.setNetworkModuleIndex(index + 1);
         }
       }
@@ -158,7 +158,7 @@ public class ConnectActionListener implements IMqttActionListener {
       persistence.clear();
     }
     
-    if (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
+    if (options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
       options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
     }
 
