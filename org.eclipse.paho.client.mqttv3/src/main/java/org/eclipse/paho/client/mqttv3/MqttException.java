@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -43,6 +44,9 @@ public class MqttException extends Exception {
 
 	/** An unexpected error has occurred. */
 	public static final short REASON_CODE_UNEXPECTED_ERROR				= 0x06;
+	
+	/** Error from subscribe - returned from the server. */
+	public static final short REASON_CODE_SUBSCRIBE_FAILED				= 0x80;
 	
 	/** 
 	 * Client timed out while waiting for a response from the server.

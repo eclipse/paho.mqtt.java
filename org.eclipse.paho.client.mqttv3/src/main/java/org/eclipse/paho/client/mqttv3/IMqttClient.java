@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Copyright (c) 2009, 2014 IBM Corp.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * Contributors:
+ *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
+ */
+
 package org.eclipse.paho.client.mqttv3;
 
 /**
@@ -69,6 +86,23 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
   public void connect(MqttConnectOptions options) throws MqttSecurityException, MqttException;
+  
+	/**
+	 * Connects to an MQTT server using the specified options.
+	 * <p>The server to connect to is specified on the constructor.
+	 * It is recommended to call {@link #setCallback(MqttCallback)} prior to
+	 * connecting in order that messages destined for the client can be accepted
+	 * as soon as the client is connected.
+	 * </p>
+	 * <p>This is a blocking method that returns once connect completes</p>
+	 *
+	 * @param options a set of connection parameters that override the defaults.
+	 * @return the MqttToken used for the call.  Can be used to obtain the session present flag
+	 * @throws MqttSecurityException when the server rejects the connect for security
+	 * reasons
+	 * @throws MqttException  for non security related problems including communication errors
+	 */
+public IMqttToken connectWithResult(MqttConnectOptions options) throws MqttSecurityException, MqttException;
 
 	/**
 	 * Disconnects from the server.

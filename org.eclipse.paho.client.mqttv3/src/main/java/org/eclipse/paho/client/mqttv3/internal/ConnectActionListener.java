@@ -9,6 +9,9 @@
  *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   
+ * Contributors:
+ *   Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -39,6 +42,7 @@ public class ConnectActionListener implements IMqttActionListener {
   private MqttToken userToken;
   private Object userContext;
   private IMqttActionListener userCallback;
+  private int originalMqttVersion;
 
   /**
    * @param persistence
@@ -64,6 +68,7 @@ public class ConnectActionListener implements IMqttActionListener {
     this.userToken = userToken;
     this.userContext = userContext;
     this.userCallback = userCallback;
+    this.originalMqttVersion = options.getMqttVersion();
   }
 
   /**
@@ -72,8 +77,10 @@ public class ConnectActionListener implements IMqttActionListener {
    * @param token 
    */
   public void onSuccess(IMqttToken token) {
-
-    userToken.internalTok.markComplete(null, null);
+	if (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
+      options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_DEFAULT);
+	}
+    userToken.internalTok.markComplete(token.getResponse(), null);
     userToken.internalTok.notifyComplete();
 
     if (userCallback != null) {
@@ -92,10 +99,22 @@ public class ConnectActionListener implements IMqttActionListener {
   public void onFailure(IMqttToken token, Throwable exception) {
 
     int numberOfURIs = comms.getNetworkModules().length;
-    int index = 1 + comms.getNetworkModuleIndex();
+    int index = comms.getNetworkModuleIndex();
 
-    if (index < numberOfURIs) {
-      comms.setNetworkModuleIndex(index);
+    if ((index + 1) < numberOfURIs || (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT &&  options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_3_1_1)) {
+
+      if (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
+        if (options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_3_1_1) {
+          options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
+        }
+        else {
+          options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
+          comms.setNetworkModuleIndex(index + 1);
+        }
+      }
+      else {
+        comms.setNetworkModuleIndex(index + 1);
+      }
       try {
         connect();
       }
@@ -104,6 +123,9 @@ public class ConnectActionListener implements IMqttActionListener {
       }
     }
     else {
+      if (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
+    	 options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_DEFAULT);
+      }
       MqttException ex;
       if (exception instanceof MqttException) {
         ex = (MqttException) exception;
@@ -122,8 +144,7 @@ public class ConnectActionListener implements IMqttActionListener {
   }
 
   /**
-   * The connect failed, so try the next URI on the list.
-   * If there are no more URIs, then fail the overall connect. 
+   * Start the connect processing
    * @throws MqttPersistenceException 
    */
   public void connect() throws MqttPersistenceException {
@@ -135,6 +156,10 @@ public class ConnectActionListener implements IMqttActionListener {
 
     if (options.isCleanSession()) {
       persistence.clear();
+    }
+    
+    if (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
+      options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
     }
 
     try {

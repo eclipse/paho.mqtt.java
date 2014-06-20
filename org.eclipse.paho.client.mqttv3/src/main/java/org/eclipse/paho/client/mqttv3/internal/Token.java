@@ -9,6 +9,9 @@
  *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   
+ * Contributors:
+ *   Ian Craggs - MQTT 3.1.1 support
  */
 
 package org.eclipse.paho.client.mqttv3.internal;
@@ -18,6 +21,8 @@ import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -169,7 +174,7 @@ public class Token {
 		final String methodName = "markComplete";
 		//@TRACE 404=>key={0} response={1} excep={2}
 		log.fine(CLASS_NAME,methodName,"404",new Object[]{getKey(),msg,ex});
-		
+				
 		synchronized(responseLock) {
 			// ACK means that everything was OK, so mark the message for garbage collection.
 			if (msg instanceof MqttAck) {
@@ -362,6 +367,26 @@ public class Token {
 		tok.append(" ,actioncallback=").append(getActionCallback());
 
 		return tok.toString();
+	}
+	
+	public int[] getGrantedQos() {
+		int[] val = new int[0];
+		if (response instanceof MqttSuback) {
+			val = ((MqttSuback)response).getGrantedQos();
+		}
+		return val;
+	}
+	
+	public boolean getSessionPresent() {
+		boolean val = false;
+		if (response instanceof MqttConnack) {
+			val = ((MqttConnack)response).getSessionPresent();
+		}
+		return val;
+	}
+	
+	public MqttWireMessage getResponse() {
+		return response;
 	}
 
 }

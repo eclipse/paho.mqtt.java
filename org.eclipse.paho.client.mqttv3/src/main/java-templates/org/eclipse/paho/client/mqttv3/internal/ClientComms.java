@@ -204,6 +204,7 @@ public class ClientComms {
 				this.conOptions = options;
 
 				MqttConnect connect = new MqttConnect(client.getClientId(),
+						options.getMqttVersion(),
 						options.isCleanSession(),
 						options.getKeepAliveInterval(),
 						options.getUserName(),

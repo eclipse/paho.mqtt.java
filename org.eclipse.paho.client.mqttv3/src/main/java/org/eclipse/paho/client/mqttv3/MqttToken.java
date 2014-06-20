@@ -9,11 +9,15 @@
  *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
  *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   
+ * Contributions:
+ *   Ian Craggs - MQTT 3.1.1 support
  */
 
 package org.eclipse.paho.client.mqttv3;
 
 import org.eclipse.paho.client.mqttv3.internal.Token;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 /**
  *  Provides a mechanism for tracking the completion of an asynchronous action.
@@ -76,9 +80,22 @@ public class MqttToken implements IMqttToken {
 	}
 
 	public void setUserContext(Object userContext) {
-		internalTok.setUserContext(userContext);	}
+		internalTok.setUserContext(userContext);	
+	}
 
 	public int getMessageId() {
 		return internalTok.getMessageID();
+	}
+	
+	public int[] getGrantedQos() {
+		return internalTok.getGrantedQos();
+	}
+	
+	public boolean getSessionPresent() {
+		return internalTok.getSessionPresent();
+	}
+	
+	public MqttWireMessage getResponse() {
+		return internalTok.getResponse();
 	}
 }

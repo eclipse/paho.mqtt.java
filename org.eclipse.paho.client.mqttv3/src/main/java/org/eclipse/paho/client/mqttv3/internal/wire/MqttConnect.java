@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
@@ -38,6 +39,7 @@ public class MqttConnect extends MqttWireMessage {
 	private char[] password;
 	private int keepAliveInterval;
 	private String willDestination;
+	private int MqttVersion;
 	
 	/**
 	 * Constructor for an on the wire MQTT connect message
@@ -60,7 +62,7 @@ public class MqttConnect extends MqttWireMessage {
 		dis.close();
 	}
 
-	public MqttConnect(String clientId, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
+	public MqttConnect(String clientId, int MqttVersion, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.cleanSession = cleanSession;
@@ -69,6 +71,7 @@ public class MqttConnect extends MqttWireMessage {
 		this.password = password;
 		this.willMessage = willMessage;
 		this.willDestination = willDestination;
+		this.MqttVersion = MqttVersion;
 	}
 
 	public String toString() {
@@ -90,8 +93,13 @@ public class MqttConnect extends MqttWireMessage {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			
-			encodeUTF8(dos,"MQIsdp");			
-			dos.write(3);
+			if (MqttVersion == 3) {
+				encodeUTF8(dos,"MQIsdp");			
+			}
+			else if (MqttVersion == 4) {
+				encodeUTF8(dos,"MQTT");			
+			}
+			dos.write(MqttVersion);
 
 			byte connectFlags = 0;
 			

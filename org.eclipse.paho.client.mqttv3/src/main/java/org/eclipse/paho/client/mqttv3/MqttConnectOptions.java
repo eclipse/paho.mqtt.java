@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -40,6 +41,12 @@ public class MqttConnectOptions {
 	 * The default clean session setting if one is not specified
 	 */
 	public static final boolean CLEAN_SESSION_DEFAULT = true;
+	/**
+	 * The default MqttVersion is 3.1.1 first, dropping back to 3.1 if that fails
+	 */
+	public static final int MQTT_VERSION_DEFAULT = 0;
+	public static final int MQTT_VERSION_3_1 = 3;
+	public static final int MQTT_VERSION_3_1_1 = 4;
 
 	protected static final int URI_TYPE_TCP = 0;
 	protected static final int URI_TYPE_SSL = 1;
@@ -55,6 +62,7 @@ public class MqttConnectOptions {
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	private String[] serverURIs = null;
+	private int MqttVersion = MQTT_VERSION_DEFAULT;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
@@ -173,6 +181,15 @@ public class MqttConnectOptions {
 	 */
 	public int getKeepAliveInterval() {
 		return keepAliveInterval;
+	}
+	
+	/**
+	 * Returns the MQTT version.
+	 * @see #setMqttVersion(int)
+	 * @return the MQTT version.
+	 */
+	public int getMqttVersion() {
+		return MqttVersion;
 	}
 
 	/**
@@ -456,10 +473,29 @@ public class MqttConnectOptions {
 			throw new IllegalArgumentException(srvURI);
 		}
 	}
+	
+	/**
+	 * Sets the MQTT version.
+	 * The default action is to connect with version 3.1.1, 
+	 * and to fall back to 3.1 if that fails.
+	 * Version 3.1.1 or 3.1 can be selected specifically, with no fall back,
+	 * by using the MQTT_VERSION_3_1_1 or MQTT_VERSION_3_1 options respectively.
+	 *
+	 * @param MqttVersion the version of the MQTT protocol.
+	 */
+	public void setMqttVersion(int MqttVersion)throws IllegalArgumentException {
+		if (MqttVersion != MQTT_VERSION_DEFAULT && 
+			MqttVersion != MQTT_VERSION_3_1 && 
+			MqttVersion != MQTT_VERSION_3_1_1) {
+			throw new IllegalArgumentException();
+		}
+		this.MqttVersion = MqttVersion;
+	}
 
 	public Properties getDebug() {
 		final String strNull="null";
 		Properties p = new Properties();
+		p.put("MqttVersion", Integer.valueOf(getMqttVersion()));
 		p.put("CleanSession", Boolean.valueOf(isCleanSession()));
 		p.put("ConTimeout", Integer.valueOf(getConnectionTimeout()));
 		p.put("KeepAliveInterval", Integer.valueOf(getKeepAliveInterval()));
