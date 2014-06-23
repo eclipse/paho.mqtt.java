@@ -116,7 +116,6 @@ public class ConnectActionListener implements IMqttActionListener {
         comms.setNetworkModuleIndex(index + 1);
       }
       try {
-    	try { Thread.sleep(250); } catch (Exception e) {}
         connect();
       }
       catch (MqttPersistenceException e) {
@@ -162,7 +161,7 @@ public class ConnectActionListener implements IMqttActionListener {
     if (options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
       options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
     }
-    System.out.println("Connecting "+options.getMqttVersion()+" "+comms.getNetworkModuleIndex());
+
     try {
       comms.connect(options, token);
     }
