@@ -116,6 +116,7 @@ public class ConnectActionListener implements IMqttActionListener {
         comms.setNetworkModuleIndex(index + 1);
       }
       try {
+    	try { Thread.sleep(250); } catch (Exception e) {}
         connect();
       }
       catch (MqttPersistenceException e) {
