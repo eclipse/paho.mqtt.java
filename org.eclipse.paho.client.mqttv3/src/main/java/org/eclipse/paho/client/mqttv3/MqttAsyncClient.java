@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3;
 

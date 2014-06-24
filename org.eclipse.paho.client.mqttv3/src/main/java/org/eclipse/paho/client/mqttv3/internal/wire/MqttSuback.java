@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
@@ -26,7 +27,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * An on-the-wire representation of an MQTT SUBACK.
  */
 public class MqttSuback extends MqttAck {
-	private int[] grantedQos;		// Not currently made available to anyone. 
+	private int[] grantedQos;	
 	
 	public MqttSuback(byte info, byte[] data) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBACK);
@@ -56,6 +57,10 @@ public class MqttSuback extends MqttAck {
 			sb.append(" ").append(grantedQos[i]);
 		}
 		return sb.toString();
+	}
+	
+	public int[] getGrantedQos() {
+		return grantedQos;
 	}
 	
 }

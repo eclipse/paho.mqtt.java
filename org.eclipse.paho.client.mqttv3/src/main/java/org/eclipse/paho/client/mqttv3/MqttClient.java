@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -236,6 +237,15 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public void connect(MqttConnectOptions options) throws MqttSecurityException, MqttException {
 		aClient.connect(options, null, null).waitForCompletion(getTimeToWait());
 	}
+	
+	/*
+	 * @see IMqttClient#connect(MqttConnectOptions)
+	 */
+	public IMqttToken connectWithResult(MqttConnectOptions options) throws MqttSecurityException, MqttException {
+		IMqttToken tok = aClient.connect(options, null, null);
+		tok.waitForCompletion(getTimeToWait());
+		return tok;
+	}
 
 	/*
 	 * @see IMqttClient#disconnect()
@@ -307,7 +317,15 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see IMqttClient#subscribe(String[], int[])
 	 */
 	public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
-		aClient.subscribe(topicFilters, qos, null,null).waitForCompletion(getTimeToWait());
+		IMqttToken tok = aClient.subscribe(topicFilters, qos, null, null);
+		tok.waitForCompletion(getTimeToWait());
+		int[] grantedQos = tok.getGrantedQos();
+		for (int i = 0; i < grantedQos.length; ++i) {
+			qos[i] = grantedQos[i];
+		}
+		if (grantedQos.length == 1 && qos[0] == 0x80) {
+			throw new MqttException(MqttException.REASON_CODE_SUBSCRIBE_FAILED);
+		}
 	}
 
 	/*

@@ -8,9 +8,11 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3;
 
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 
 /**
  * Provides a mechanism for tracking the completion of an asynchronous task.
@@ -136,5 +138,20 @@ public interface IMqttToken {
 	 * the MQTT message id flowed over the network.
 	 */
 	public int getMessageId();
+	
+	/**
+	 * Returns the granted QoS list from a suback 
+	 */
+	public int[] getGrantedQos();
+	
+	/**
+	 * Returns the session present flag from a connack 
+	 */
+	public boolean getSessionPresent();
+	
+	/**
+	 * Returns the response wire message
+	 */
+	public MqttWireMessage getResponse();
 
 }

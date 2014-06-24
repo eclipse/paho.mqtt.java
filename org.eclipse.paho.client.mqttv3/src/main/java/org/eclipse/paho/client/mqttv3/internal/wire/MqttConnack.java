@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - MQTT 3.1.1 support
  */
 package org.eclipse.paho.client.mqttv3.internal.wire;
 
@@ -28,12 +29,13 @@ public class MqttConnack extends MqttAck {
 	public static final String KEY = "Con";
 
 	private int returnCode;
+	private boolean sessionPresent;
 	
 	public MqttConnack(byte info, byte[] variableHeader) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
 		ByteArrayInputStream bais = new ByteArrayInputStream(variableHeader);
 		DataInputStream dis = new DataInputStream(bais);
-		dis.readByte();
+		sessionPresent = (dis.readUnsignedByte() & 0x01) == 0x01;
 		returnCode = dis.readUnsignedByte();
 		dis.close();
 	}
@@ -59,6 +61,10 @@ public class MqttConnack extends MqttAck {
 	}
 	
 	public String toString() {
-		return super.toString() + " return code: " + returnCode;
+		return super.toString() + " session present:" + sessionPresent + " return code: " + returnCode;
+	}
+	
+	public boolean getSessionPresent() {
+		return sessionPresent;
 	}
 }
