@@ -7,7 +7,7 @@
 	<version>${paho.version}</version>
 	
 	<properties>
-		<paho.version>1.0.0</paho.version>
+		<paho.version>1.0.1-SNAPSHOT</paho.version>
 		<!-- source & target java version for MQTT Client -->
 		<mqttclient.java.version>1.4</mqttclient.java.version>
 		<!-- source & target java version for others modules -->
