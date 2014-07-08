@@ -103,7 +103,7 @@ public class CommsReceiver implements Runnable {
 			try {
 				//@TRACE 852=network read message
 				log.fine(CLASS_NAME,methodName,"852");
-				receiving = true;
+				receiving = in.available() > 0;
 				MqttWireMessage message = in.readMqttWireMessage();
 				receiving = false;
 				
