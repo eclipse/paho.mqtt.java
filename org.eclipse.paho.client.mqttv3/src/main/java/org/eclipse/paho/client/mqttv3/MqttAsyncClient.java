@@ -419,7 +419,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			port = defaultPort;
 		}
 		else {
-			port = Integer.valueOf(uri.substring(portIndex + 1)).intValue();
+		    port = Integer.parseInt(uri.substring(portIndex + 1));
 		}
 		return port;
 	}
@@ -478,8 +478,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		log.fine(CLASS_NAME,methodName, "103",
 				new Object[]{
 				Boolean.valueOf(options.isCleanSession()),
-				Integer.valueOf(options.getConnectionTimeout()),
-				Integer.valueOf(options.getKeepAliveInterval()),
+				new Integer(options.getConnectionTimeout()),
+				new Integer(options.getKeepAliveInterval()),
 				options.getUserName(),
 				((null == options.getPassword())?"[null]":"[notnull]"),
 				((null == options.getWillMessage())?"[null]":"[notnull]"),

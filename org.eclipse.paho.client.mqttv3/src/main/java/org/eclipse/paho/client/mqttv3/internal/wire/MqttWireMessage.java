@@ -110,7 +110,7 @@ public abstract class MqttWireMessage {
 	 * @return key a key associated with the message
 	 */
 	public String getKey() {
-		return Integer.valueOf(getMessageId()).toString();
+		return new Integer(getMessageId()).toString();
 	}
 	
 	public byte[] getHeader() throws MqttException {

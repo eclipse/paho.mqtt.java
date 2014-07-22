@@ -114,7 +114,7 @@ public class CommsTokenStore {
 		final String methodName = "restoreToken";
 		MqttDeliveryToken token;
 		synchronized(tokens) {
-			String key = Integer.valueOf(message.getMessageId()).toString();
+			String key = new Integer(message.getMessageId()).toString();
 			if (this.tokens.containsKey(key)) {
 				token = (MqttDeliveryToken)this.tokens.get(key);
 				//@TRACE 302=existing key={0} message={1} token={2}

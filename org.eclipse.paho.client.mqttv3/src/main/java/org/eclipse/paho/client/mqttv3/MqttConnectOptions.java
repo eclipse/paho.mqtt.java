@@ -495,10 +495,10 @@ public class MqttConnectOptions {
 	public Properties getDebug() {
 		final String strNull="null";
 		Properties p = new Properties();
-		p.put("MqttVersion", Integer.valueOf(getMqttVersion()));
+		p.put("MqttVersion", new Integer(getMqttVersion()));
 		p.put("CleanSession", Boolean.valueOf(isCleanSession()));
-		p.put("ConTimeout", Integer.valueOf(getConnectionTimeout()));
-		p.put("KeepAliveInterval", Integer.valueOf(getKeepAliveInterval()));
+		p.put("ConTimeout", new Integer(getConnectionTimeout()));
+		p.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
 		p.put("UserName", (getUserName() == null) ? strNull : getUserName());
 		p.put("WillDestination", (getWillDestination() == null) ? strNull : getWillDestination());
 		if (getSocketFactory()==null) {
