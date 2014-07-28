@@ -24,11 +24,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -49,7 +53,6 @@ import org.eclipse.paho.mqtt.ui.core.model.Pair;
 import org.eclipse.paho.mqtt.ui.nls.Messages;
 import org.eclipse.paho.mqtt.ui.support.tree.TreeViewerBuilder;
 import org.eclipse.paho.mqtt.ui.util.Images;
-import org.eclipse.paho.mqtt.ui.util.Widgets;
 import org.eclipse.paho.mqtt.ui.views.provider.NavTreeContentProvider;
 import org.eclipse.paho.mqtt.ui.views.provider.NavTreeLabelProvider;
 import org.eclipse.swt.SWT;
@@ -60,6 +63,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IEditorPart;
@@ -158,9 +162,28 @@ public class NavigationView extends ViewPart {
 			}
 		});
 
-		// build context menu
-		Widgets.buildContextMenu(viewer.getControl(), new Action() {
+		// Add action
+		final Action addAction = new Action() {
+			@Override
+			public String getText() {
+				return Messages.LABEL_NEW_CONNECTION;
+			}
 
+			@Override
+			public ImageDescriptor getImageDescriptor() {
+				return Images.getDescriptor(ImageKeys.IMG_ADD);
+			}
+
+			@Override
+			public void run() {
+				// send new connection event to request connection creation on
+				// nav tree
+				Paho.getEventService().sendEvent(Events.of(Selector.ofNewConnection()));
+			}
+		};
+
+		// Delete action
+		final Action deleteAction = new Action() {
 			@Override
 			public String getText() {
 				return Messages.LABEL_DELETE;
@@ -174,7 +197,7 @@ public class NavigationView extends ViewPart {
 			@Override
 			public void run() {
 				// confirm deletion
-				if (!MessageDialog.openConfirm(getViewSite().getShell(), Messages.NAV_TREE_DELETE_CONFIRM_TITLE,
+				if (!MessageDialog.openConfirm(getViewSite().getShell(),Messages.NAV_TREE_DELETE_CONFIRM_TITLE,
 						Messages.NAV_TREE_DELETE_CONFIRM_MESSAGE)) {
 					return;
 				}
@@ -187,7 +210,8 @@ public class NavigationView extends ViewPart {
 				// make selection after deletion
 				if (!connections.isEmpty()) {
 					// should be previous or next of the removed?
-					viewer.setSelection(new TreeSelection(new TreePath(new Object[] { connections.getLast() })), true);
+					viewer.setSelection(new TreeSelection(new TreePath(
+							new Object[] { connections.getLast() })), true);
 				}
 
 				// refresh view
@@ -213,7 +237,29 @@ public class NavigationView extends ViewPart {
 				// perform persistence deletion
 				Paho.deleteConnection(connection);
 			}
+		};
+
+		MenuManager menuMgr = new MenuManager();
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				manager.add(addAction);
+
+				ISelection selection = viewer.getSelection();
+				if (!selection.isEmpty()) {
+					if (selection instanceof IStructuredSelection) {
+						Connection connection = (Connection) ((IStructuredSelection) selection)
+								.getFirstElement();
+						if (connection != null) {
+							manager.add(deleteAction);
+						}
+					}
+				}
+			}
 		});
+		menuMgr.setRemoveAllWhenShown(true);
+		viewer.getControl().setMenu(menu);
 
 		// register event handlers
 		eventService = Paho.getEventService();

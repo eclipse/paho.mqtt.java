@@ -13,6 +13,7 @@
 	<modules>
 		<module>org.eclipse.paho.ui.core</module>
 		<module>org.eclipse.paho.ui.app</module>
+		<module>org.eclipse.paho.ui.plugin</module>
 	</modules>
 
 	<build>

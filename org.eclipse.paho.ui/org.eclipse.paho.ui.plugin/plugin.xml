@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Eclipse Paho MQTT View"
+            id="org.eclipse.paho.mqtt.ui">
+      </category>
+      <view
+            name="%view.name"
+            icon="icons/mqtt.gif"
+            category="org.eclipse.paho.mqtt.ui"
+            class="org.eclipse.paho.mqtt.ui.views.NavigationView"
+            id="org.eclipse.paho.ui.navigationView">
+      </view>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="org.eclipse.paho.ui.navigationView"
+               ratio="0.5"
+               relationship="stack"
+               relative="org.eclipse.ui.views.ProblemView"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.eclipse.paho.mqtt.ui.views.ConnectionEditorPart"
+            id="org.eclipse.paho.mqtt.ui.views.ConnectionEditorPart"
+            name="%editor.name">
+      </editor>
+   </extension>
+
+</plugin>
