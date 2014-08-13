@@ -524,6 +524,14 @@ public class ClientState {
 	 */
 	public MqttToken checkForActivity() throws MqttException {
 		final String methodName = "checkForActivity";
+		
+        synchronized (quiesceLock) {
+            // ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=440698
+            // No ping while quiescing
+            if (quiescing) {
+                return null;
+            }
+        }
 
 		MqttToken token = null;
 		long nextPingTime = getKeepAlive();
