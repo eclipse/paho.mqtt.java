@@ -90,18 +90,11 @@ public class CommsTokenStore {
 		final String methodName = "removeToken";
 		//@TRACE 306=key={0}
 		log.fine(CLASS_NAME,methodName,"306",new Object[]{key});
-
-		if (key != null) {
-			synchronized(tokens) {
-				MqttToken tok = (MqttToken)tokens.get(key);
-				if (tok != null) {
-					synchronized(tok) {
-	
-						return (MqttToken) tokens.remove(key);
-					}
-				}
-			}
+		
+		if ( null != key ){
+		    return (MqttToken) tokens.remove(key);
 		}
+		
 		return null;
 	}
 		
