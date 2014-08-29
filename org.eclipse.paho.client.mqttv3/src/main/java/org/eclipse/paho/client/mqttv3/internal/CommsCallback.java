@@ -209,9 +209,12 @@ public class CommsCallback implements Runnable {
 			}
 			
 			// Set notified so we don't tell the user again about this action.
-			if ( token instanceof MqttDeliveryToken && token.isComplete()) {
-				token.internalTok.setNotified(true);
-			}
+ 			if ( token.isComplete() ){
+ 			   if ( token instanceof MqttDeliveryToken || token.getActionCallback() instanceof ConnectActionListener ) {
+ 	                token.internalTok.setNotified(true);
+ 	            }
+ 			}
+			
 
 			if (token.isComplete()) {
 				// Finish by doing any post processing such as delete 
