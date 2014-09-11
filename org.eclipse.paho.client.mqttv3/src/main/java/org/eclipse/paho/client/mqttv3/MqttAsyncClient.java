@@ -78,7 +78,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	private static final String CLASS_NAME = MqttAsyncClient.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
-	private static final String CLIENT_ID_PREFIX = "paho-";
+	private static final String CLIENT_ID_PREFIX = "paho";
 	private static final long QUIESCE_TIMEOUT = 30000; // ms
 	private static final long DISCONNECT_TIMEOUT = 10000; // ms
 	private static final char MIN_HIGH_SURROGATE = '\uD800';
@@ -791,7 +791,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	}
 
 	/**
-	 * Returns a randomly generated client identifier based on the the fixed prefix (paho-)
+	 * Returns a randomly generated client identifier based on the the fixed prefix (paho)
 	 * and the system time.
 	 * <p>When cleanSession is set to false, an application must ensure it uses the
 	 * same client identifier when it reconnects to the server to resume state and maintain
@@ -800,7 +800,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @see MqttConnectOptions#setCleanSession(boolean)
 	 */
 	public static String generateClientId() {
-		//length of nanoTime = 15, so total length = 20  < 65535(defined in spec) 
+		//length of nanoTime = 15, so total length = 19  < 65535(defined in spec) 
 		return CLIENT_ID_PREFIX + System.nanoTime();
 	}
 
