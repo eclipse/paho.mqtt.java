@@ -603,7 +603,7 @@ public class SendReceiveAsyncTest {
 
 	  IMqttAsyncClient mqttClient = null;
 	  // Change the URI to a none MQTT server
-	  URI uri = new URI("tcp://ibmbjclub.org:22");
+	  URI uri = new URI("tcp://iot.eclipse.org:22");
 	  IMqttToken connectToken = null;
 	  try {
 		  mqttClient = clientFactory.createMqttAsyncClient(uri, methodName);
