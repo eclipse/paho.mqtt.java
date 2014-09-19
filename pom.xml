@@ -208,5 +208,6 @@
 		<module>org.eclipse.paho.client.mqttv3.repository</module>
 		<module>org.eclipse.paho.sample.utility</module>
 		<module>org.eclipse.paho.ui</module>
+		<module>org.eclipse.paho.android.service</module>
 	</modules>
 </project>
