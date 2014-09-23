@@ -200,7 +200,7 @@ public class MqttTopic {
 		// *******************************************************************************
 		if (Strings.containsAny(topicString, TOPIC_WILDCARDS)) {
 			throw new IllegalArgumentException(
-					"The topic name MUST NOT contain any wildard characters (#+)");
+					"The topic name MUST NOT contain any wildcard characters (#+)");
 		}
 	}
 	
