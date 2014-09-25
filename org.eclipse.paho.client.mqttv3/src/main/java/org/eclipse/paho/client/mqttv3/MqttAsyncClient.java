@@ -703,13 +703,12 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			if (i>0) {
 				subs+=", ";
 			}
-			subs+=topicFilters[i]+":"+qos[i];
+			subs+= "topic="+ topicFilters[i]+" qos="+qos[i];
 			
 			//Check if the topic filter is valid before subscribing
 			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 		}
-		
-		//@TRACE 106=Subscribe topic={0} userContext={1} callback={2}
+		//@TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
 		log.fine(CLASS_NAME,methodName,"106",new Object[]{subs, userContext, callback});
 
 		MqttToken token = new MqttToken(getClientId());
