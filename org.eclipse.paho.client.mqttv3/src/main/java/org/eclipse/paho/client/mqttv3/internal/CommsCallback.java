@@ -122,7 +122,7 @@ public class CommsCallback implements Runnable {
 				// If no work is currently available, then wait until there is some...
 				try {
 					synchronized (workAvailable) {
-						if (running & messageQueue.isEmpty()
+						if (running && messageQueue.isEmpty()
 								&& completeQueue.isEmpty()) {
 							// @TRACE 704=wait for workAvailable
 							log.fine(CLASS_NAME, methodName, "704");
@@ -166,15 +166,7 @@ public class CommsCallback implements Runnable {
 				if (quiescing) {
 					clientState.checkQuiesceLock();
 				}
-
-				synchronized (spaceAvailable) {
-					// Notify the spaceAvailable lock, to say that there's now
-					// some space on the queue...
-
-					// @TRACE 706=notify spaceAvailable
-					log.fine(CLASS_NAME, methodName, "706");
-					spaceAvailable.notifyAll();
-				}
+				
 			} catch (Throwable ex) {
 				// Users code could throw an Error or Exception e.g. in the case
 				// of class NoClassDefFoundError
@@ -182,6 +174,16 @@ public class CommsCallback implements Runnable {
 				log.fine(CLASS_NAME, methodName, "714", null, ex);
 				running = false;
 				clientComms.shutdownConnection(null, new MqttException(ex));
+				
+			} finally {
+			    synchronized (spaceAvailable) {
+                    // Notify the spaceAvailable lock, to say that there's now
+                    // some space on the queue...
+
+                    // @TRACE 706=notify spaceAvailable
+                    log.fine(CLASS_NAME, methodName, "706");
+                    spaceAvailable.notifyAll();
+                }
 			}
 		}
 	}
@@ -295,11 +297,11 @@ public class CommsCallback implements Runnable {
 			// the client protect itself from getting flooded by messages 
 			// from the server.
 			synchronized (spaceAvailable) {
-				while (!quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
+				while (running && !quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
 					try {
 						// @TRACE 709=wait for spaceAvailable
 						log.fine(CLASS_NAME, methodName, "709");
-						spaceAvailable.wait();
+						spaceAvailable.wait(200);
 					} catch (InterruptedException ex) {
 					}
 				}
