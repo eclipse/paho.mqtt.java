@@ -42,7 +42,7 @@ public class CommsSender implements Runnable {
 	private Thread 	sendThread		= null;
 	
 	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out) {
-		this.out = new MqttOutputStream(out);
+		this.out = new MqttOutputStream(clientState, out);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;

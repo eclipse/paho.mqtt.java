@@ -136,10 +136,10 @@ public class MqttV3Receiver implements MqttCallback {
    * @throws InterruptedException
    */
   public boolean validateReceipt(String sendTopic, int expectedQos, byte[] sentBytes) throws MqttException, InterruptedException {
-     final String methodName = "validateReceipt";
-    log.entering(className, methodName, new Object[]{sendTopic, expectedQos, sentBytes});
+    final String methodName = "validateReceipt";
+    log.entering(className, methodName, new Object[]{sendTopic, expectedQos});
 
-    long waitMilliseconds = 10000;
+    long waitMilliseconds = 40*30000;
     ReceivedMessage receivedMessage = receiveNext(waitMilliseconds);
     if (receivedMessage == null) {
       report(" No message received in waitMilliseconds=" + waitMilliseconds);

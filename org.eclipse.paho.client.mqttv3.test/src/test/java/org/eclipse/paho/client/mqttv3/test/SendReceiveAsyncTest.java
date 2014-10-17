@@ -550,7 +550,7 @@ public class SendReceiveAsyncTest {
   
   		String topic = "testLargeMsg/Topic";
   		//10MB
-  		int largeSize = 60 * (1 << 20);
+  		int largeSize = 20 * (1 << 20);
   		byte[] message = new byte[largeSize];
   
   		java.util.Arrays.fill(message, (byte) 's');
@@ -562,6 +562,7 @@ public class SendReceiveAsyncTest {
   		IMqttToken pubToken = mqttClient.publish(topic, message, 0, false, null, null);
   		log.info("Publishing to..." + topic);
   		pubToken.waitForCompletion();
+  		log.info("Published");
   
   		boolean ok = mqttV3Receiver.validateReceipt(topic, 0, message);
   		if (!ok) {

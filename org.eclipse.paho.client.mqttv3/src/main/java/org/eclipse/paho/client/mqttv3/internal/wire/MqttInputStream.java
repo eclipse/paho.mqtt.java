@@ -17,10 +17,12 @@ package org.eclipse.paho.client.mqttv3.internal.wire;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.internal.ClientState;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -34,9 +36,11 @@ public class MqttInputStream extends InputStream {
 	private static final String CLASS_NAME = MqttInputStream.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
+	private ClientState clientState = null;
 	private DataInputStream in;
 
-	public MqttInputStream(InputStream in) {
+	public MqttInputStream(ClientState clientState, InputStream in) {
+		this.clientState = clientState;
 		this.in = new DataInputStream(in);
 	}
 	
@@ -59,6 +63,8 @@ public class MqttInputStream extends InputStream {
 		final String methodName ="readMqttWireMessage";
 		ByteArrayOutputStream bais = new ByteArrayOutputStream();
 		byte first = in.readByte();
+		clientState.notifyReceivedBytes(1);
+		
 		byte type = (byte) ((first >>> 4) & 0x0F);
 		if ((type < MqttWireMessage.MESSAGE_TYPE_CONNECT) ||
 			(type > MqttWireMessage.MESSAGE_TYPE_DISCONNECT)) {
@@ -70,7 +76,8 @@ public class MqttInputStream extends InputStream {
 		// bit silly, we decode it then encode it
 		bais.write(MqttWireMessage.encodeMBI(remLen));
 		byte[] packet = new byte[(int)(bais.size()+remLen)];
-		in.readFully(packet,bais.size(),packet.length - bais.size());
+		readFully(packet,bais.size(),packet.length - bais.size());
+		
 		byte[] header = bais.toByteArray();
 		System.arraycopy(header,0,packet,0, header.length);
 		MqttWireMessage message = MqttWireMessage.createWireMessage(packet);
@@ -78,4 +85,20 @@ public class MqttInputStream extends InputStream {
 		log.fine(CLASS_NAME, methodName, "501",new Object[] {message});
 		return message;
 	}
+
+
+    private void readFully(byte b[], int off, int len) throws IOException {
+    	if (len < 0)
+    		throw new IndexOutOfBoundsException();
+    	int n = 0;
+    	while (n < len) {
+    		int count = in.read(b, off + n, len - n);
+    		clientState.notifyReceivedBytes(count);
+
+    		if (count < 0)
+    			throw new EOFException();
+    		n += count;
+    	}
+    }
 }
+

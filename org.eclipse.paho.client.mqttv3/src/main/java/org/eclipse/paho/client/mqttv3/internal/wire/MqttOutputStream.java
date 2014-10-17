@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.internal.ClientState;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
@@ -32,9 +33,11 @@ public class MqttOutputStream extends OutputStream {
 	private static final String CLASS_NAME = MqttOutputStream.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
+	private ClientState clientState = null;
 	private BufferedOutputStream out;
 	
-	public MqttOutputStream(OutputStream out) {
+	public MqttOutputStream(ClientState clientState, OutputStream out) {
+		this.clientState = clientState;
 		this.out = new BufferedOutputStream(out);
 	}
 	
@@ -48,10 +51,12 @@ public class MqttOutputStream extends OutputStream {
 	
 	public void write(byte[] b) throws IOException {
 		out.write(b);
+		clientState.notifySentBytes(b.length);
 	}
 	
 	public void write(byte[] b, int off, int len) throws IOException {
 		out.write(b, off, len);
+		clientState.notifySentBytes(len);
 	}
 	
 	public void write(int b) throws IOException {
@@ -68,7 +73,17 @@ public class MqttOutputStream extends OutputStream {
 //		out.write(message.getHeader());
 //		out.write(message.getPayload());
 		out.write(bytes,0,bytes.length);
-		out.write(pl,0,pl.length);
+		clientState.notifySentBytes(bytes.length);
+		
+        int offset = 0;
+        int chunckSize = 1024;
+        while (offset < pl.length) {
+        	int length = Math.min(chunckSize, pl.length - offset);
+        	out.write(pl, offset, length);
+        	offset += chunckSize;
+        	clientState.notifySentBytes(length);
+        }		
+		
 		// @TRACE 500= sent {0}
     	log.fine(CLASS_NAME, methodName, "500", new Object[]{message});
 	}

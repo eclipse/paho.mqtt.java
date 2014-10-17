@@ -43,7 +43,7 @@ public class CommsReceiver implements Runnable {
 	private volatile boolean receiving;
 	
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
-		this.in = new MqttInputStream(in);
+		this.in = new MqttInputStream(clientState, in);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
