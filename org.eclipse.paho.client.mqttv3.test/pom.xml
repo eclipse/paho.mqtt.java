@@ -53,6 +53,7 @@
 					<excludes>
 						<exclude>${test.exclude}</exclude>
 					</excludes>
+					<excludedGroups>org.eclipse.paho.client.mqttv3.test.ManualTest</excludedGroups>
 				</configuration>
 			</plugin>
 		</plugins>

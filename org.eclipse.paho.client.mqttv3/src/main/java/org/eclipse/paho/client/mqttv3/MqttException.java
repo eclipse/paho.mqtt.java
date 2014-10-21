@@ -54,21 +54,21 @@ public class MqttException extends Exception {
 	 */
 	public static final short REASON_CODE_CLIENT_TIMEOUT                = 32000;
 
-	/** 
-	 * Client timed out while waiting to write messages to the server.
-	 */
-	public static final short REASON_CODE_WRITE_TIMEOUT                 = 32002;
-
 	/**
 	 * Internal error, caused by no new message IDs being available.
 	 */
 	public static final short REASON_CODE_NO_MESSAGE_IDS_AVAILABLE      = 32001;
 
+	/** 
+	 * Client timed out while waiting to write messages to the server.
+	 */
+	public static final short REASON_CODE_WRITE_TIMEOUT                 = 32002;
 	
 	/**
 	 * The client is already connected.
 	 */
-	public static final short REASON_CODE_CLIENT_CONNECTED      = 32100;
+	public static final short REASON_CODE_CLIENT_CONNECTED              = 32100;
+
 	/**
 	 * The client is already disconnected.
 	 */

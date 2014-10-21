@@ -1,3 +1,17 @@
+/*******************************************************************************
+ * Copyright (c) 2009, 2014 IBM Corp.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ *******************************************************************************/
+
 package org.eclipse.paho.client.mqttv3.test.connectionLoss;
 
 import java.util.Date;
@@ -13,12 +27,25 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
+import org.eclipse.paho.client.mqttv3.test.ManualTest;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-public class ConnectionLossTest implements MqttCallback
+/**
+ * These tests verify whether paho can successfully detect a loss of connection with a broker.
+ * 
+ * >> The tests MUST BE run manually and they WILL FAIL in an automated test environment. <<
+ * The pom.xml of the test project, all tests categorized as ManualTests are excluded from the execution.  
+ * 
+ * The tests will print a messages in the console notifying the operator when to "unplug" the internet connection of the test machine.   
+ * 
+ * @author mcarrer
+ */
+@Category(ManualTest.class)
+public class ConnectionLossManualTest implements MqttCallback
 {
-	static final Class<?> cclass = ConnectionLossTest.class;
+	static final Class<?> cclass = ConnectionLossManualTest.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 
@@ -28,7 +55,11 @@ public class ConnectionLossTest implements MqttCallback
 	private char[]  password = "password".toCharArray();
 	private String  clientId = "device-client-id";
 	private String  message  = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
-	
+
+	/**
+	 * Tests whether paho can detect a connection loss with the server even if it has outbound activity by publishing messages with QoS 0.
+	 * @throws Exception
+	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos0()
 		throws Exception
@@ -79,6 +110,10 @@ public class ConnectionLossTest implements MqttCallback
 	}
 
 	
+	/**
+	 * Tests whether paho can detect a connection loss with the server even if it has outbound activity by publishing messages with QoS 1.
+	 * @throws Exception
+	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos1()
 		throws Exception
@@ -130,6 +165,10 @@ public class ConnectionLossTest implements MqttCallback
 	}
 
 
+	/**
+	 * Tests whether paho can detect a connection loss with the server even if it has outbound activity by publishing messages with QoS 2.
+	 * @throws Exception
+	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos2()
 		throws Exception
@@ -180,6 +219,10 @@ public class ConnectionLossTest implements MqttCallback
 	}
 	
 
+	/**
+	 * Tests whether async paho can detect a connection loss with the server even if it has outbound activity by publishing messages with QoS 1.
+	 * @throws Exception
+	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos1Async()
 		throws Exception
@@ -239,6 +282,10 @@ public class ConnectionLossTest implements MqttCallback
 	}
 	
 	
+	/**
+	 * Tests whether paho keeps the connection alive for 10 keep alive intervals while publishing messages with QoS 0.
+	 * @throws Exception
+	 */
 	@Test
 	public void testKeepConnectionOpenWhilePublishingQos0()
 		throws Exception
@@ -279,6 +326,10 @@ public class ConnectionLossTest implements MqttCallback
 	}
 
 	
+	/**
+	 * Tests whether paho keeps the connection alive for 10 keep alive in idle state.
+	 * @throws Exception
+	 */
 	@Test
 	public void testKeepConnectionOpenIdle()
 		throws Exception

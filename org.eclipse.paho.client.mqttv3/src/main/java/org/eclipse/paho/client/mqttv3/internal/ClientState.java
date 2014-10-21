@@ -742,7 +742,7 @@ public class ClientState {
         }
         // @TRACE 631=sent bytes count={0}                                                                                                                                                                                            
         log.fine(CLASS_NAME, methodName, "631", new Object[] {
-        		 Integer.valueOf(sentBytesCount) });
+        		 new Integer(sentBytesCount) });
     }
 
 	
@@ -767,7 +767,7 @@ public class ClientState {
                 	pingOutstanding++;
                 }
                 //@TRACE 635=ping sent. pingOutstanding: {0}                                                                                                                                                                  
-                log.fine(CLASS_NAME,methodName,"635",new Object[]{Integer.valueOf(pingOutstanding)});
+                log.fine(CLASS_NAME,methodName,"635",new Object[]{ new Integer(pingOutstanding)});
             }
         }
         else if (message instanceof MqttPublish) {
@@ -819,7 +819,7 @@ public class ClientState {
         }
         // @TRACE 630=received bytes count={0}                                                                                                                                                                                        
         log.fine(CLASS_NAME, methodName, "630", new Object[] {
-                 Integer.valueOf(receivedBytesCount) });
+                 new Integer(receivedBytesCount) });
     }
 
     /**
@@ -861,7 +861,7 @@ public class ClientState {
                 }
             }
             //@TRACE 636=ping response received. pingOutstanding: {0}                                                                                                                                                     
-            log.fine(CLASS_NAME,methodName,"636",new Object[]{Integer.valueOf(pingOutstanding)});
+            log.fine(CLASS_NAME,methodName,"636",new Object[]{ new Integer(pingOutstanding)});
 		} else if (ack instanceof MqttConnack) {
 			int rc = ((MqttConnack) ack).getReturnCode();
 			if (rc == 0) {
@@ -1252,7 +1252,7 @@ public class ClientState {
 		props.put("actualInFlight", new Integer(actualInFlight));
 		props.put("inFlightPubRels", new Integer(inFlightPubRels));
 		props.put("quiescing", Boolean.valueOf(quiescing));
-		props.put("pingoutstanding", Integer.valueOf(pingOutstanding));
+		props.put("pingoutstanding", new Integer(pingOutstanding));
 		props.put("lastOutboundActivity", new Long(lastOutboundActivity));
 		props.put("lastInboundActivity", new Long(lastInboundActivity));
 		props.put("outboundQoS2", outboundQoS2);
