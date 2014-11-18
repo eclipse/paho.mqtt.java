@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>java-parent</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1</version>
 	</parent>
 	
 	<artifactId>org.eclipse.paho.client.mqttv3.repository</artifactId>
@@ -29,13 +29,11 @@
 						<configuration>
 							<tasks>
 								<delete includeemptydirs="false" quiet="true">
-									<fileset
-										dir="${download.location}">
+									<fileset dir="${download.location}">
 										<include name="**" />
 									</fileset>
 								</delete>
-								<copy includeemptydirs="false"
-									todir="${download.location}">
+								<copy includeemptydirs="false" todir="${download.location}">
 									<fileset dir="${project.build.directory}/repository/">
 										<include name="**" />
 									</fileset>
