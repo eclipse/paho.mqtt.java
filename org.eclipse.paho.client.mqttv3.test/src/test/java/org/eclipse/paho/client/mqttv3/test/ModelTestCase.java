@@ -633,7 +633,8 @@ public class ModelTestCase implements MqttCallback {
   public void waitForMessage(String topic, MqttMessage message, boolean expectRetained)
       throws Exception {
     synchronized (lock) {
-      if (messages.size() == 0) {
+      int count = 0;
+      while (messages.size() == 0 && ++count < 10) {
         lock.wait(1000);
       }
       if (messages.size() == 0) {
