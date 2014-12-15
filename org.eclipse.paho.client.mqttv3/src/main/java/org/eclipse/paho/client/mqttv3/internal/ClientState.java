@@ -315,9 +315,11 @@ public class ClientState {
 					if (persistence.containsKey(getSendConfirmPersistenceKey(sendMessage))) {
 						MqttPersistable persistedConfirm = persistence.get(getSendConfirmPersistenceKey(sendMessage));
 						// QoS 2, and CONFIRM has already been sent...
+						// NO DUP flag is allowed for 3.1.1 spec while it's not clear for 3.1 spec
+						// So we just remove DUP
 						MqttPubRel confirmMessage = (MqttPubRel) restoreMessage(key, persistedConfirm);
 						if (confirmMessage != null) {
-							confirmMessage.setDuplicate(true);
+							// confirmMessage.setDuplicate(true); // REMOVED
 							//@TRACE 605=outbound QoS 2 pubrel key={0} message={1}
 							log.fine(CLASS_NAME,methodName, "605", new Object[]{key,message});
 
@@ -375,11 +377,12 @@ public class ClientState {
 		Enumeration keys = outboundQoS2.keys();
 		while (keys.hasMoreElements()) {
 			Object key = keys.nextElement();
-			Object msg = outboundQoS2.get(key);
+			MqttWireMessage msg = (MqttWireMessage) outboundQoS2.get(key);
 			if (msg instanceof MqttPublish) {
 				//@TRACE 610=QoS 2 publish key={0}
 				log.fine(CLASS_NAME,methodName, "610", new Object[]{key});
-
+                // set DUP flag only for PUBLISH, but NOT for PUBREL (spec 3.1.1)
+				msg.setDuplicate(true);  
 				insertInOrder(pendingMessages, (MqttPublish)msg);
 			} else if (msg instanceof MqttPubRel) {
 				//@TRACE 611=QoS 2 pubrel key={0}
@@ -392,6 +395,7 @@ public class ClientState {
 		while (keys.hasMoreElements()) {
 			Object key = keys.nextElement();
 			MqttPublish msg = (MqttPublish)outboundQoS1.get(key);
+			msg.setDuplicate(true);
 			//@TRACE 612=QoS 1 publish key={0}
 			log.fine(CLASS_NAME,methodName, "612", new Object[]{key});
 

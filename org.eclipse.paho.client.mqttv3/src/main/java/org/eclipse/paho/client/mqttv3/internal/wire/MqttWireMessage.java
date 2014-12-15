@@ -60,7 +60,6 @@ public abstract class MqttWireMessage {
 	
 	protected boolean duplicate = false;
 	
-	private byte[] encodedHeader = null;
 	
 	public MqttWireMessage(byte type) {
 		this.type = type;
@@ -114,24 +113,21 @@ public abstract class MqttWireMessage {
 	}
 	
 	public byte[] getHeader() throws MqttException {
-		if (encodedHeader == null) {
-			try {
-				int first = ((getType() & 0x0f) << 4) ^ (getMessageInfo() & 0x0f);
-				byte[] varHeader = getVariableHeader();
-				int remLen = varHeader.length + getPayload().length;
+	    try {
+	        int first = ((getType() & 0x0f) << 4) ^ (getMessageInfo() & 0x0f);
+	        byte[] varHeader = getVariableHeader();
+	        int remLen = varHeader.length + getPayload().length;
 
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				DataOutputStream dos = new DataOutputStream(baos);
-				dos.writeByte(first);
-				dos.write(encodeMBI(remLen));
-				dos.write(varHeader);
-				dos.flush();
-				encodedHeader = baos.toByteArray();
-			} catch(IOException ioe) {
-				throw new MqttException(ioe);
-			}
-		}
-		return encodedHeader;
+	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        DataOutputStream dos = new DataOutputStream(baos);
+	        dos.writeByte(first);
+	        dos.write(encodeMBI(remLen));
+	        dos.write(varHeader);
+	        dos.flush();
+	        return baos.toByteArray();
+	    } catch(IOException ioe) {
+	        throw new MqttException(ioe);
+	    }
 	}
 	
 	protected abstract byte[] getVariableHeader() throws MqttException;
