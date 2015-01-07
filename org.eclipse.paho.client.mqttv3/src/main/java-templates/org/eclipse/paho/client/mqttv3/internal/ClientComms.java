@@ -201,19 +201,20 @@ public class ClientComms {
 
 				conState = CONNECTING;
 
-				this.conOptions = options;
+				conOptions = options;
 
-				MqttConnect connect = new MqttConnect(client.getClientId(),
-						options.getMqttVersion(),
-						options.isCleanSession(),
-						options.getKeepAliveInterval(),
-						options.getUserName(),
-						options.getPassword(),
-						options.getWillMessage(),
-						options.getWillDestination());
+                MqttConnect connect = new MqttConnect(client.getClientId(),
+                        conOptions.getMqttVersion(),
+                        conOptions.isCleanSession(),
+                        conOptions.getKeepAliveInterval(),
+                        conOptions.getUserName(),
+                        conOptions.getPassword(),
+                        conOptions.getWillMessage(),
+                        conOptions.getWillDestination());
 
-				this.clientState.setKeepAliveSecs(options.getKeepAliveInterval());
-				this.clientState.setCleanSession(options.isCleanSession());
+                this.clientState.setKeepAliveSecs(conOptions.getKeepAliveInterval());
+                this.clientState.setCleanSession(conOptions.isCleanSession());
+                this.clientState.setMaxInflight(conOptions.getMaxInflight());
 
 				tokenStore.open();
 				ConnectBG conbg = new ConnectBG(this, token, connect);

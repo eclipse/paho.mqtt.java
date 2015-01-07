@@ -38,6 +38,10 @@ public class MqttConnectOptions {
 	 */
 	public static final int CONNECTION_TIMEOUT_DEFAULT = 30;
 	/**
+     * The default max inflight if one is not specified
+     */
+    public static final int MAX_INFLIGHT_DEFAULT = 10;
+	/**
 	 * The default clean session setting if one is not specified
 	 */
 	public static final boolean CLEAN_SESSION_DEFAULT = true;
@@ -53,6 +57,7 @@ public class MqttConnectOptions {
 	protected static final int URI_TYPE_LOCAL = 2;
 
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
+	private int maxInflight = MAX_INFLIGHT_DEFAULT;
 	private String willDestination = null;
 	private MqttMessage willMessage = null;
 	private String userName;
@@ -213,6 +218,29 @@ public class MqttConnectOptions {
 		}
 		this.keepAliveInterval = keepAliveInterval;
 	}
+	
+	/**
+     * Returns the "max inflight".
+     * The max inflight limits to how many messages we can send without receiving acknowledgments. 
+     * @see #setMaxInflight(int)
+     * @return the max inflight
+     */
+    public int getMaxInflight() {
+        return maxInflight;
+    }
+
+    /**
+     * Sets the "max inflight". 
+     * please increase this value in a high traffic environment.
+     * <p>The default value is 10</p>
+     * @param maxInflight
+     */
+    public void setMaxInflight(int maxInflight) {
+        if (maxInflight < 0) {
+            throw new IllegalArgumentException();
+        }
+        this.maxInflight = maxInflight;
+    }
 
 	/**
 	 * Returns the connection timeout value.
