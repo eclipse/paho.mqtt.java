@@ -3,7 +3,7 @@
 	id="org.eclipse.paho.client.eclipse.feature"
 	label="%featureName"
 	provider-name="%providerName"
-	version="1.0.1">
+	version="1.0.2">
 
 	<description url="http://www.eclipse.org/paho/">
 		%description
