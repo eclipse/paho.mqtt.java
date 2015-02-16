@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>org.eclipse.paho.ui</artifactId>
-		<version>1.0.2-SNAPSHOT</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.paho.ui.plugin</artifactId>
@@ -89,7 +89,7 @@
 	    <dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.ui.core</artifactId>
-			<version>1.0.2-SNAPSHOT</version>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
