@@ -142,7 +142,6 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
-				<version>${tycho-version}</version>
 		        <executions>
 					<execution>
 					<id>plugin-source</id>
