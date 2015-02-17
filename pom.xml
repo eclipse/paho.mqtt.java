@@ -151,6 +151,18 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-document-bundle-plugin</artifactId>
+		        <executions>
+					<execution>
+					<id>javadoc</id>
+					<goals>
+						<goal>javadoc</goal>
+					</goals>
+					</execution>
+				</executions>     
+			</plugin>
 		</plugins>
 	</build>
 
