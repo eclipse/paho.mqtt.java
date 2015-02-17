@@ -87,6 +87,9 @@
 					<goals>
 						<goal>javadoc</goal>
 					</goals>
+					<configuration>
+						<javadocOptions>-sourcepath src/main/java:src/main/java-templates org.eclipse.paho.client.mqttv3</javadocOptions>
+					</configuration>
 					</execution>
 				</executions>     
 			</plugin>
