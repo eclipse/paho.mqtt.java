@@ -65,7 +65,7 @@
 					<target>${mqttclient.java.version}</target>
 				</configuration>
 			</plugin>  
-			<!-- <plugin>
+			<!-- <plugin> conflicts with the signing plugin
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
@@ -77,25 +77,22 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin> -->
+			</plugin> 
 			<plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
 				<artifactId>tycho-document-bundle-plugin</artifactId>
 		        <executions>
 					<execution>
-					<id>javadoc</id>
-					<goals>
-						<goal>javadoc</goal>
-					</goals>
-					<configuration>
-						<javadocOptions>
-							<javadocOption>-sourcepath src/main/java:src/main/java-templates</javadocOption>
-							<javadocOption>org.eclipse.paho.client.mqttv3</javadocOption>
-						</javadocOptions>
-					</configuration>
+						<id>javadoc</id>
+						<goals>
+							<goal>javadoc</goal>
+						</goals>
+						<configuration>
+						<javadocOptions>-sourcepath src/main/java:src/main/java-templates org.eclipse.paho.client.mqttv3	</javadocOptions>
+						</configuration>
 					</execution>
 				</executions>     
-			</plugin>
+			</plugin> -->
 		</plugins>
 		<pluginManagement>
 			<plugins> 
