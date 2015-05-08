@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - fix duplicate message id (Bug 466853)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -746,8 +747,8 @@ public class ClientState {
         if (sentBytesCount > 0) {
         	this.lastOutboundActivity = System.currentTimeMillis();
         }
-        // @TRACE 631=sent bytes count={0}                                                                                                                                                                                            
-        log.fine(CLASS_NAME, methodName, "631", new Object[] {
+        // @TRACE 643=sent bytes count={0}                                                                                                                                                                                            
+        log.fine(CLASS_NAME, methodName, "643", new Object[] {
         		 new Integer(sentBytesCount) });
     }
 
