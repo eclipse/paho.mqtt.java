@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - per subscription message handlers
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -20,6 +21,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -496,6 +498,14 @@ public class ClientComms {
 
 	public void setCallback(MqttCallback mqttCallback) {
 		this.callback.setCallback(mqttCallback);
+	}
+	
+	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
+		this.callback.setMessageListener(topicFilter, messageListener);
+	}
+	
+	public void removeMessageListener(String topicFilter) {
+		this.callback.removeMessageListener(topicFilter);
 	}
 
 	protected MqttTopic getTopic(String topic) {

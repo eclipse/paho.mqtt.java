@@ -665,8 +665,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		
 		return token;
 	}
-	
-	
+		
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
@@ -687,7 +686,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	public IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException {
 		return this.subscribe(topicFilters, qos, null, null);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String[], int[], java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
@@ -723,6 +722,37 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		log.fine(CLASS_NAME,methodName,"109");
 
 		return token;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
+	 */
+	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException {
+		return this.subscribe(new String[] {topicFilter}, new int[] {qos}, userContext, callback, messageListener);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String, int)
+	 */
+	public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
+		return this.subscribe(new String[] {topicFilter}, new int[] {qos}, null, null, messageListener);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String[], int[])
+	 */
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener messageListener) throws MqttException {
+		return this.subscribe(topicFilters, qos, null, null, messageListener);
+	}
+	
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException {
+		
+		// add message handlers to the list for this client
+		for (int i = 0; i < topicFilters.length; ++i) {
+			this.comms.setMessageListener(topicFilters[i], messageListener);
+		}
+		
+		return this.subscribe(topicFilters, qos, userContext, callback);
 	}
 
 	/* (non-Javadoc)

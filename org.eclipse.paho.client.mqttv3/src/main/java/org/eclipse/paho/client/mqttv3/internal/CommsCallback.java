@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,12 +15,16 @@
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubAck;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
@@ -39,6 +43,7 @@ public class CommsCallback implements Runnable {
 
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
+	private Hashtable callbacks; // topicFilter -> messageHandler
 	private ClientComms clientComms;
 	private Vector messageQueue;
 	private Vector completeQueue;
@@ -54,6 +59,7 @@ public class CommsCallback implements Runnable {
 		this.clientComms = clientComms;
 		this.messageQueue = new Vector(INBOUND_QUEUE_SIZE);
 		this.completeQueue = new Vector(INBOUND_QUEUE_SIZE);
+		this.callbacks = new Hashtable();
 		log.setResourceName(clientComms.getClient().getClientId());
 	}
 
@@ -67,7 +73,7 @@ public class CommsCallback implements Runnable {
 	public void start(String threadName) {
 		synchronized (lifecycle) {
 			if (!running) {
-				// Praparatory work before starting the background thread.
+				// Preparatory work before starting the background thread.
 				// For safety ensure any old events are cleared.
 				messageQueue.clear();
 				completeQueue.clear();
@@ -291,7 +297,7 @@ public class CommsCallback implements Runnable {
 	 */
 	public void messageArrived(MqttPublish sendMessage) {
 		final String methodName = "messageArrived";
-		if (mqttCallback != null) {
+		if (mqttCallback != null || callbacks.size() > 0) {
 			// If we already have enough messages queued up in memory, wait
 			// until some more queue space becomes available. This helps 
 			// the client protect itself from getting flooded by messages 
@@ -345,21 +351,21 @@ public class CommsCallback implements Runnable {
 			throws MqttException, Exception {
 		final String methodName = "handleMessage";
 		// If quisecing process any pending messages. 
-		if (mqttCallback != null) {
-			String destName = publishMessage.getTopicName();
 
-			// @TRACE 713=call messageArrived key={0} topic={1}
-			log.fine(CLASS_NAME, methodName, "713", new Object[] { 
-					new Integer(publishMessage.getMessageId()), destName });
-			mqttCallback.messageArrived(destName, publishMessage.getMessage());
-			if (publishMessage.getMessage().getQos() == 1) {
-				this.clientComms.internalSend(new MqttPubAck(publishMessage),
-						new MqttToken(clientComms.getClient().getClientId()));
-			} else if (publishMessage.getMessage().getQos() == 2) {
-				this.clientComms.deliveryComplete(publishMessage);
-				MqttPubComp pubComp = new MqttPubComp(publishMessage);
-				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
-			}
+		String destName = publishMessage.getTopicName();
+
+		// @TRACE 713=call messageArrived key={0} topic={1}
+		log.fine(CLASS_NAME, methodName, "713", new Object[] { 
+				new Integer(publishMessage.getMessageId()), destName });
+		deliverMessage(destName, publishMessage.getMessage());
+		
+		if (publishMessage.getMessage().getQos() == 1) {
+			this.clientComms.internalSend(new MqttPubAck(publishMessage),
+					new MqttToken(clientComms.getClient().getClientId()));
+		} else if (publishMessage.getMessage().getQos() == 2) {
+			this.clientComms.deliveryComplete(publishMessage);
+			MqttPubComp pubComp = new MqttPubComp(publishMessage);
+			this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 		}
 	}
 
@@ -397,4 +403,68 @@ public class CommsCallback implements Runnable {
 	protected Thread getThread() {
 		return callbackThread;
 	}
+
+
+	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
+		this.callbacks.put(topicFilter, messageListener);
+	}
+	
+	
+	public void removeMessageListener(String topicFilter) {
+		this.callbacks.remove(topicFilter); // no exception thrown if the filter was not present
+	}
+	
+	
+	private boolean isTopicMatched(String topicFilter, String topicName)
+	{   
+	    int curn = 0,
+	        curf = 0;
+	    int curn_end = topicName.length();
+	    int curf_end = topicFilter.length();
+
+	    while (curf < curf_end && curn < curn_end)
+	    {
+	        if (topicName.charAt(curn) == '/' && topicFilter.charAt(curf) != '/')
+	            break;
+	        if (topicFilter.charAt(curf) != '+' && topicFilter.charAt(curf) != '#' && 
+	        		topicFilter.charAt(curf) != topicName.charAt(curn))
+	            break;
+	        if (topicFilter.charAt(curf) == '+')
+	        {   // skip until we meet the next separator, or end of string
+	            int nextpos = curn + 1;
+	            while (nextpos < curn_end && topicName.charAt(nextpos) != '/')
+	                nextpos = ++curn + 1;
+	        }
+	        else if (topicFilter.charAt(curf) == '#')
+	            curn = curn_end - 1;    // skip until end of string
+	        curf++;
+	        curn++;
+	    };
+
+	    return (curn == curn_end) && (curf == curf_end);
+	}
+	
+	
+	protected boolean deliverMessage(String topicName, MqttMessage aMessage) throws Exception
+	{		
+		boolean delivered = false;
+		
+		Enumeration keys = callbacks.keys();
+		while (keys.hasMoreElements()) {
+			String topicFilter = (String)keys.nextElement();
+			if (isTopicMatched(topicFilter, topicName)) {
+				((IMqttMessageListener)(callbacks.get(topicFilter))).messageArrived(topicName, aMessage);
+				delivered = true;
+			}
+		}
+		
+		/* if the message hasn't been delivered to a per subscription handler, give it to the default handler */
+		if (mqttCallback != null && !delivered) {
+			mqttCallback.messageArrived(topicName, aMessage);
+			delivered = true;
+		}
+		
+		return delivered;
+	}
+
 }
