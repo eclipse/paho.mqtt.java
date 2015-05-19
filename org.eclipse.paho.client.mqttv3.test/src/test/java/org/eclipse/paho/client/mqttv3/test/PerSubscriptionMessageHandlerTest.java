@@ -10,9 +10,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
@@ -21,7 +21,7 @@ import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
 
 public class PerSubscriptionMessageHandlerTest {
 	
-	  static final Class<?> cclass = SendReceiveAsyncTest.class;
+	  static final Class<?> cclass = PerSubscriptionMessageHandlerTest.class;
 	  static final String className = cclass.getName();
 	  static final Logger log = Logger.getLogger(className);
 
@@ -74,7 +74,74 @@ public class PerSubscriptionMessageHandlerTest {
 	   * @throws Exception
 	   */
 	  @Test
-	  public void testSubs1() throws Exception {
+	  public void testSyncSubs1() throws Exception {
+	    final String methodName = Utility.getMethodName();
+	    LoggingUtilities.banner(log, cclass, methodName);
+	    log.entering(className, methodName);
+	        
+	    class listener implements IMqttMessageListener {
+
+	        ArrayList<MqttMessage> messages;
+
+	        public listener() {
+	          messages = new ArrayList<MqttMessage>();
+	        }
+
+	        public MqttMessage getNextMessage() {
+	          synchronized (messages) {
+	            if (messages.size() == 0) {
+	              try {
+	                messages.wait(1000);
+	              }
+	              catch (InterruptedException e) {
+	                // empty
+	              }
+	            }
+
+	            if (messages.size() == 0) {
+	              return null;
+	            }
+	            return messages.remove(0);
+	          }
+	        }
+	        
+	        public void messageArrived(String topic, MqttMessage message) throws Exception {
+	            log.info("message arrived: " + new String(message.getPayload()) + "'");
+
+	            synchronized (messages) {
+	              messages.add(message);
+	              messages.notifyAll();
+	            }
+	          }
+	    }
+	    
+	   
+	    listener mylistener = new listener();
+	    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+	    String mytopic = "PerSubscriptionTest/topic";
+	    
+	    mqttClient.connect();
+	    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+	    
+	    mqttClient.subscribe(mytopic, 2, mylistener);
+	    
+	    MqttMessage message = new MqttMessage();
+	    message.setPayload("foo".getBytes());
+	    mqttClient.publish(mytopic, message);
+	    
+	    // Wait for an amount of time for the message to arrive
+	    
+	    log.info("Checking msg");
+	    MqttMessage msg = mylistener.getNextMessage();
+	    Assert.assertNotNull(msg);
+	    Assert.assertEquals("foo", msg.toString());
+	    
+	    mqttClient.disconnect();
+	    
+	  }
+	  
+	  @Test
+	  public void testAsyncSubs1() throws Exception {
 	    final String methodName = Utility.getMethodName();
 	    LoggingUtilities.banner(log, cclass, methodName);
 	    log.entering(className, methodName);
@@ -138,6 +205,8 @@ public class PerSubscriptionMessageHandlerTest {
 	    MqttMessage msg = mylistener.getNextMessage();
 	    Assert.assertNotNull(msg);
 	    Assert.assertEquals("foo", msg.toString());
+	    
+	    mqttClient.disconnect();
 	    
 	  }
 

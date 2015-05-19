@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    Ian Craggs - per subscription message handlers (bug 466579)
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -327,6 +328,41 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 			throw new MqttException(MqttException.REASON_CODE_SUBSCRIBE_FAILED);
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
+	 */
+	public void subscribe(String topicFilter, IMqttMessageListener messageListener) throws MqttException {
+		this.subscribe(new String[] {topicFilter}, new int[] {1}, new IMqttMessageListener[] {messageListener});
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
+	 */
+	public void subscribe(String[] topicFilters, IMqttMessageListener[] messageListeners) throws MqttException {
+		int[] qos = new int[topicFilters.length];
+		for (int i=0; i<qos.length; i++) {
+			qos[i] = 1;
+		}
+		this.subscribe(topicFilters, qos, messageListeners);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int)
+	 */
+	public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
+		this.subscribe(new String[] {topicFilter}, new int[] {qos}, new IMqttMessageListener[] {messageListener});
+	}
+
+	
+	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {		
+		// add message handlers to the list for this client
+		for (int i = 0; i < topicFilters.length; ++i) {
+			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+		}
+		
+		this.subscribe(topicFilters, qos);
+	}
 
 	/*
 	 * @see IMqttClient#unsubscribe(String)
@@ -340,6 +376,11 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 */
 	public void unsubscribe(String[] topicFilters) throws MqttException {
 		aClient.unsubscribe(topicFilters, null,null).waitForCompletion(getTimeToWait());
+		
+		// remove message handlers from the list for this client
+		for (int i = 0; i < topicFilters.length; ++i) {
+			aClient.comms.removeMessageListener(topicFilters[i]);
+		}
 	}
 
 	/*

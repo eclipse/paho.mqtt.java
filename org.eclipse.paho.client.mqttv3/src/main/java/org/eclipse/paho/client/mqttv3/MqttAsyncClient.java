@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    Ian Craggs - per subscription message handlers (bug 466579)
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -728,28 +729,33 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
 	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException {
-		return this.subscribe(new String[] {topicFilter}, new int[] {qos}, userContext, callback, messageListener);
+		
+		return this.subscribe(new String[] {topicFilter}, new int[] {qos}, userContext, callback, new IMqttMessageListener[] {messageListener});
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String, int)
 	 */
 	public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
-		return this.subscribe(new String[] {topicFilter}, new int[] {qos}, null, null, messageListener);
+		return this.subscribe(new String[] {topicFilter}, new int[] {qos}, null, null,  new IMqttMessageListener[] {messageListener});
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#subscribe(java.lang.String[], int[])
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener messageListener) throws MqttException {
-		return this.subscribe(topicFilters, qos, null, null, messageListener);
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {
+		return this.subscribe(topicFilters, qos, null, null, messageListeners);
 	}
 	
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException {
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener[] messageListeners) throws MqttException {
+		
+		if ((messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
+			throw new IllegalArgumentException();
+		}
 		
 		// add message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
-			this.comms.setMessageListener(topicFilters[i], messageListener);
+			this.comms.setMessageListener(topicFilters[i], messageListeners[i]);
 		}
 		
 		return this.subscribe(topicFilters, qos, userContext, callback);
@@ -797,6 +803,12 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		
 		//@TRACE 107=Unsubscribe topic={0} userContext={1} callback={2}
 		log.fine(CLASS_NAME, methodName,"107",new Object[]{subs, userContext, callback});
+		
+		// remove message handlers from the list for this client
+		// TODO: this really should be done if the unsubscribe is successful
+		for (int i = 0; i < topicFilters.length; ++i) {
+			this.comms.removeMessageListener(topicFilters[i]);
+		}
 
 		MqttToken token = new MqttToken(getClientId());
 		token.setActionCallback(callback);

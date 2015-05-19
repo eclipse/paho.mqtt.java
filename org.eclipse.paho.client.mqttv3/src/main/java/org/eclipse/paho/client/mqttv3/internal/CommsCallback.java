@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - per subscription message handlers (bug 466579)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -422,6 +423,10 @@ public class CommsCallback implements Runnable {
 	    int curn_end = topicName.length();
 	    int curf_end = topicFilter.length();
 
+	    if (topicFilter.equals(topicName)) {
+	    	return true;
+	    }
+	    
 	    while (curf < curf_end && curn < curn_end)
 	    {
 	        if (topicName.charAt(curn) == '/' && topicFilter.charAt(curf) != '/')

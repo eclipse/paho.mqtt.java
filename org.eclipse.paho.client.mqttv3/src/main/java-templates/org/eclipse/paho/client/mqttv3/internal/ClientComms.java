@@ -12,7 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
- *    Ian Craggs - per subscription message handlers
+ *    Ian Craggs - per subscription message handlers (bug 466579)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 

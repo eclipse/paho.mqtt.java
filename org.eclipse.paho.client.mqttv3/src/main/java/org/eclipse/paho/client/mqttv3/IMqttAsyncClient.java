@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corp.
+ * Copyright (c) 2013, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    Ian Craggs - per subscription message handlers (bug 466579)
  */
 
 package org.eclipse.paho.client.mqttv3;
@@ -660,7 +661,7 @@ public interface IMqttAsyncClient {
 	 * null if not required.
 	 * @param callback optional listener that will be notified when subscribe
 	 * has completed
-	 * @param messageListener 
+	 * @param messageListener a callback to handle incoming messages
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
@@ -678,7 +679,7 @@ public interface IMqttAsyncClient {
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
-	 * @param messageListener
+	 * @param messageListener a callback to handle incoming messages
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
@@ -699,12 +700,12 @@ public interface IMqttAsyncClient {
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
-	 * @param messageListener
+	 * @param messageListeners one or more callbacks to handle incoming messages
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener messageListener) throws MqttException;
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
 
 
 	/**
@@ -724,12 +725,12 @@ public interface IMqttAsyncClient {
 	 * null if not required.
 	 * @param callback optional listener that will be notified when subscribe
 	 * has completed
-	 * @param messageListener
+	 * @param messageListeners one or more callbacks to handle incoming messages
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException;
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener[] messageListeners) throws MqttException;
 
 
 	/**
