@@ -223,9 +223,9 @@ public class PerSubscriptionMessageHandlerTest {
 		    mqttClient.connect(opts);
 		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
 		    
-		    message = new MqttMessage();
-		    message.setPayload("foo1".getBytes());
-		    mqttClient.publish(mytopic, message);
+		    MqttMessage message2 = new MqttMessage();
+		    message2.setPayload("foo1".getBytes());
+		    mqttClient.publish(mytopic, message2);
 		    
 		    log.info("Checking msg");
 		    msg = mylistener.getNextMessage();
@@ -275,9 +275,9 @@ public class PerSubscriptionMessageHandlerTest {
 		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
 		    token.waitForCompletion();
 		    
-		    message = new MqttMessage();
-		    message.setPayload("foo1".getBytes());
-		    token = mqttClient.publish(mytopic, message);
+		    MqttMessage message2 = new MqttMessage();
+		    message2.setPayload("foo1".getBytes());
+		    token = mqttClient.publish(mytopic, message2);
 		    token.waitForCompletion();
 		    
 		    log.info("Checking msg");
