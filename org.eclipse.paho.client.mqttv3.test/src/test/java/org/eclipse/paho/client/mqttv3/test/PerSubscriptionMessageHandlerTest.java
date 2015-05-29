@@ -180,7 +180,8 @@ public class PerSubscriptionMessageHandlerTest {
 	    Assert.assertNotNull(msg);
 	    Assert.assertEquals("foo", msg.toString());
 	    
-	    mqttClient.disconnect();
+	    token = mqttClient.disconnect();
+	    token.waitForCompletion();
 	    
 	  }
 	  
@@ -265,7 +266,8 @@ public class PerSubscriptionMessageHandlerTest {
 		    Assert.assertNotNull(msg);
 		    Assert.assertEquals("foo", msg.toString());
 		    
-		    mqttClient.disconnect();
+		    token = mqttClient.disconnect();
+		    token.waitForCompletion();
 		    
 		    /* subscription handler should still exist on reconnect */
 		    
@@ -283,7 +285,8 @@ public class PerSubscriptionMessageHandlerTest {
 		    Assert.assertNotNull(msg);
 		    Assert.assertEquals("foo1", msg.toString());
 		    
-		    mqttClient.disconnect();
+		    token = mqttClient.disconnect();
+		    token.waitForCompletion();
 	  }
 	  
 	  /* check unsubscribe removes handlers */
