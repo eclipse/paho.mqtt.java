@@ -805,7 +805,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		log.fine(CLASS_NAME, methodName,"107",new Object[]{subs, userContext, callback});
 		
 		// remove message handlers from the list for this client
-		// TODO: this really should be done if the unsubscribe is successful
 		for (int i = 0; i < topicFilters.length; ++i) {
 			this.comms.removeMessageListener(topicFilters[i]);
 		}

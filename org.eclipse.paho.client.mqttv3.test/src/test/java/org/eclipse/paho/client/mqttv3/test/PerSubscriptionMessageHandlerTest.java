@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2015 IBM Corp.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * Contributors:
+ *    Ian Craggs - initial API and implementation and/or initial documentation
+ *******************************************************************************/
+
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
@@ -13,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
@@ -67,9 +84,44 @@ public class PerSubscriptionMessageHandlerTest {
 	    }
 	  }
 	  
+	  class listener implements IMqttMessageListener {
+
+		  ArrayList<MqttMessage> messages;
+
+		  public listener() {
+			  messages = new ArrayList<MqttMessage>();
+		  }
+
+		  public MqttMessage getNextMessage() {
+			  synchronized (messages) {
+				  if (messages.size() == 0) {
+					  try {
+						  messages.wait(1000);
+					  }
+					  catch (InterruptedException e) {
+						  // empty
+					  }
+				  }
+
+				  if (messages.size() == 0) {
+					  return null;
+				  }
+				  return messages.remove(0);
+			  }
+		  }
+
+		  public void messageArrived(String topic, MqttMessage message) throws Exception {
+			  log.info("message arrived: " + new String(message.getPayload()) + "'");
+
+			  synchronized (messages) {
+				  messages.add(message);
+				  messages.notifyAll();
+			  }
+		  }
+	  }
+	  
 	  /**
-	   * Tests that a client can be constructed and that it can connect to and
-	   * disconnect from the service
+	   * Basic test with 1 subscription for the synchronous client
 	   * 
 	   * @throws Exception
 	   */
@@ -77,45 +129,8 @@ public class PerSubscriptionMessageHandlerTest {
 	  public void testSyncSubs1() throws Exception {
 	    final String methodName = Utility.getMethodName();
 	    LoggingUtilities.banner(log, cclass, methodName);
-	    log.entering(className, methodName);
-	        
-	    class listener implements IMqttMessageListener {
-
-	        ArrayList<MqttMessage> messages;
-
-	        public listener() {
-	          messages = new ArrayList<MqttMessage>();
-	        }
-
-	        public MqttMessage getNextMessage() {
-	          synchronized (messages) {
-	            if (messages.size() == 0) {
-	              try {
-	                messages.wait(1000);
-	              }
-	              catch (InterruptedException e) {
-	                // empty
-	              }
-	            }
-
-	            if (messages.size() == 0) {
-	              return null;
-	            }
-	            return messages.remove(0);
-	          }
-	        }
-	        
-	        public void messageArrived(String topic, MqttMessage message) throws Exception {
-	            log.info("message arrived: " + new String(message.getPayload()) + "'");
-
-	            synchronized (messages) {
-	              messages.add(message);
-	              messages.notifyAll();
-	            }
-	          }
-	    }
-	    
-	   
+	    log.entering(className, methodName);        
+    
 	    listener mylistener = new listener();
 	    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
 	    String mytopic = "PerSubscriptionTest/topic";
@@ -128,8 +143,6 @@ public class PerSubscriptionMessageHandlerTest {
 	    MqttMessage message = new MqttMessage();
 	    message.setPayload("foo".getBytes());
 	    mqttClient.publish(mytopic, message);
-	    
-	    // Wait for an amount of time for the message to arrive
 	    
 	    log.info("Checking msg");
 	    MqttMessage msg = mylistener.getNextMessage();
@@ -145,43 +158,6 @@ public class PerSubscriptionMessageHandlerTest {
 	    final String methodName = Utility.getMethodName();
 	    LoggingUtilities.banner(log, cclass, methodName);
 	    log.entering(className, methodName);
-	        
-	    class listener implements IMqttMessageListener {
-
-	        ArrayList<MqttMessage> messages;
-
-	        public listener() {
-	          messages = new ArrayList<MqttMessage>();
-	        }
-
-	        public MqttMessage getNextMessage() {
-	          synchronized (messages) {
-	            if (messages.size() == 0) {
-	              try {
-	                messages.wait(1000);
-	              }
-	              catch (InterruptedException e) {
-	                // empty
-	              }
-	            }
-
-	            if (messages.size() == 0) {
-	              return null;
-	            }
-	            return messages.remove(0);
-	          }
-	        }
-	        
-	        public void messageArrived(String topic, MqttMessage message) throws Exception {
-	            log.info("message arrived: " + new String(message.getPayload()) + "'");
-
-	            synchronized (messages) {
-	              messages.add(message);
-	              messages.notifyAll();
-	            }
-	          }
-	    }
-	    
 	   
 	    listener mylistener = new listener();
 	    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
@@ -199,8 +175,6 @@ public class PerSubscriptionMessageHandlerTest {
 	    token = mqttClient.publish(mytopic, message);
 	    token.waitForCompletion();
 	    
-	    // Wait for an amount of time for the message to arrive
-	    
 	    log.info("Checking msg");
 	    MqttMessage msg = mylistener.getNextMessage();
 	    Assert.assertNotNull(msg);
@@ -209,5 +183,110 @@ public class PerSubscriptionMessageHandlerTest {
 	    mqttClient.disconnect();
 	    
 	  }
+	  
+	  /*
+	   *  Check handlers still exist after reconnection non-cleansession
+	   */
+	  
+	  @Test
+	  public void testSyncCleanSesionFalse() throws Exception {
+		    final String methodName = Utility.getMethodName();
+		    LoggingUtilities.banner(log, cclass, methodName);
+		    log.entering(className, methodName);        
+	    
+		    listener mylistener = new listener();
+		    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+		    String mytopic = "PerSubscriptionTest/topic";
+		    
+		    MqttConnectOptions opts = new MqttConnectOptions();
+		    opts.setCleanSession(false);
+		    
+		    mqttClient.connect(opts);
+		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+		    
+		    mqttClient.subscribe(mytopic, 2, mylistener);
+		    
+		    MqttMessage message = new MqttMessage();
+		    message.setPayload("foo".getBytes());
+		    mqttClient.publish(mytopic, message);
+		    
+		    log.info("Checking msg");
+		    MqttMessage msg = mylistener.getNextMessage();
+		    Assert.assertNotNull(msg);
+		    Assert.assertEquals("foo", msg.toString());
+		    
+		    mqttClient.disconnect();
+		    
+		    /* subscription handler should still exist on reconnect */
+		    
+		    mqttClient.connect(opts);
+		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+		    
+		    message = new MqttMessage();
+		    message.setPayload("foo1".getBytes());
+		    mqttClient.publish(mytopic, message);
+		    
+		    log.info("Checking msg");
+		    msg = mylistener.getNextMessage();
+		    Assert.assertNotNull(msg);
+		    Assert.assertEquals("foo1", msg.toString());
+		    
+		    mqttClient.disconnect();
+
+	  }
+	  
+	  @Test
+	  public void testAsyncCleanSesionFalse() throws Exception {
+		    final String methodName = Utility.getMethodName();
+		    LoggingUtilities.banner(log, cclass, methodName);
+		    log.entering(className, methodName);
+		   
+		    listener mylistener = new listener();
+		    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+		    String mytopic = "PerSubscriptionTest/topic";
+		    
+		    MqttConnectOptions opts = new MqttConnectOptions();
+		    opts.setCleanSession(false);
+		    	    
+		    IMqttToken token = mqttClient.connect(opts, null, null);
+		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+		    token.waitForCompletion();
+		    
+		    token = mqttClient.subscribe(mytopic, 2, mylistener);
+		    token.waitForCompletion();
+		    
+		    MqttMessage message = new MqttMessage();
+		    message.setPayload("foo".getBytes());
+		    token = mqttClient.publish(mytopic, message);
+		    token.waitForCompletion();
+		    
+		    log.info("Checking msg");
+		    MqttMessage msg = mylistener.getNextMessage();
+		    Assert.assertNotNull(msg);
+		    Assert.assertEquals("foo", msg.toString());
+		    
+		    mqttClient.disconnect();
+		    
+		    /* subscription handler should still exist on reconnect */
+		    
+		    token = mqttClient.connect(opts, null, null);
+		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+		    token.waitForCompletion();
+		    
+		    message = new MqttMessage();
+		    message.setPayload("foo1".getBytes());
+		    token = mqttClient.publish(mytopic, message);
+		    token.waitForCompletion();
+		    
+		    log.info("Checking msg");
+		    msg = mylistener.getNextMessage();
+		    Assert.assertNotNull(msg);
+		    Assert.assertEquals("foo1", msg.toString());
+		    
+		    mqttClient.disconnect();
+	  }
+	  
+	  /* check unsubscribe removes handlers */
+	  /* check can resubscribe after client object recreation */
 
 }

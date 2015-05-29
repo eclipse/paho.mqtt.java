@@ -27,6 +27,7 @@ import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttToken;
+import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubAck;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
@@ -416,40 +417,6 @@ public class CommsCallback implements Runnable {
 	}
 	
 	
-	private boolean isTopicMatched(String topicFilter, String topicName)
-	{   
-	    int curn = 0,
-	        curf = 0;
-	    int curn_end = topicName.length();
-	    int curf_end = topicFilter.length();
-
-	    if (topicFilter.equals(topicName)) {
-	    	return true;
-	    }
-	    
-	    while (curf < curf_end && curn < curn_end)
-	    {
-	        if (topicName.charAt(curn) == '/' && topicFilter.charAt(curf) != '/')
-	            break;
-	        if (topicFilter.charAt(curf) != '+' && topicFilter.charAt(curf) != '#' && 
-	        		topicFilter.charAt(curf) != topicName.charAt(curn))
-	            break;
-	        if (topicFilter.charAt(curf) == '+')
-	        {   // skip until we meet the next separator, or end of string
-	            int nextpos = curn + 1;
-	            while (nextpos < curn_end && topicName.charAt(nextpos) != '/')
-	                nextpos = ++curn + 1;
-	        }
-	        else if (topicFilter.charAt(curf) == '#')
-	            curn = curn_end - 1;    // skip until end of string
-	        curf++;
-	        curn++;
-	    };
-
-	    return (curn == curn_end) && (curf == curf_end);
-	}
-	
-	
 	protected boolean deliverMessage(String topicName, MqttMessage aMessage) throws Exception
 	{		
 		boolean delivered = false;
@@ -457,7 +424,7 @@ public class CommsCallback implements Runnable {
 		Enumeration keys = callbacks.keys();
 		while (keys.hasMoreElements()) {
 			String topicFilter = (String)keys.nextElement();
-			if (isTopicMatched(topicFilter, topicName)) {
+			if (MqttTopic.isMatched(topicFilter, topicName)) {
 				((IMqttMessageListener)(callbacks.get(topicFilter))).messageArrived(topicName, aMessage);
 				delivered = true;
 			}
