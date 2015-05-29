@@ -111,7 +111,7 @@ public class PerSubscriptionMessageHandlerTest {
 		  }
 
 		  public void messageArrived(String topic, MqttMessage message) throws Exception {
-			  log.info("message arrived: " + new String(message.getPayload()) + "'");
+			  log.info("message arrived: '" + new String(message.getPayload()) + "'");
 
 			  synchronized (messages) {
 				  messages.add(message);
@@ -151,6 +151,8 @@ public class PerSubscriptionMessageHandlerTest {
 	    
 	    mqttClient.disconnect();
 	    
+	    mqttClient.close();
+	    
 	  }
 	  
 	  @Test
@@ -183,6 +185,8 @@ public class PerSubscriptionMessageHandlerTest {
 	    token = mqttClient.disconnect();
 	    token.waitForCompletion();
 	    
+	    mqttClient.close();
+	    
 	  }
 	  
 	  /*
@@ -190,7 +194,7 @@ public class PerSubscriptionMessageHandlerTest {
 	   */
 	  
 	  @Test
-	  public void testSyncCleanSesionFalse() throws Exception {
+	  public void testSyncCleanSessionFalse() throws Exception {
 		    final String methodName = Utility.getMethodName();
 		    LoggingUtilities.banner(log, cclass, methodName);
 		    log.entering(className, methodName);        
@@ -223,9 +227,9 @@ public class PerSubscriptionMessageHandlerTest {
 		    mqttClient.connect(opts);
 		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
 		    
-		    MqttMessage message2 = new MqttMessage();
-		    message2.setPayload("foo1".getBytes());
-		    mqttClient.publish(mytopic, message2);
+		    message = new MqttMessage();
+		    message.setPayload("foo1".getBytes());
+		    mqttClient.publish(mytopic, message);
 		    
 		    log.info("Checking msg");
 		    msg = mylistener.getNextMessage();
@@ -233,11 +237,13 @@ public class PerSubscriptionMessageHandlerTest {
 		    Assert.assertEquals("foo1", msg.toString());
 		    
 		    mqttClient.disconnect();
+		    
+		    mqttClient.close();
 
 	  }
 	  
 	  @Test
-	  public void testAsyncCleanSesionFalse() throws Exception {
+	  public void testAsyncCleanSessionFalse() throws Exception {
 		    final String methodName = Utility.getMethodName();
 		    LoggingUtilities.banner(log, cclass, methodName);
 		    log.entering(className, methodName);
@@ -275,18 +281,21 @@ public class PerSubscriptionMessageHandlerTest {
 		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
 		    token.waitForCompletion();
 		    
-		    MqttMessage message2 = new MqttMessage();
-		    message2.setPayload("foo1".getBytes());
-		    token = mqttClient.publish(mytopic, message2);
+		    message = new MqttMessage();
+		    message.setPayload("foo1".getBytes());
+		    token = mqttClient.publish(mytopic, message);
 		    token.waitForCompletion();
 		    
 		    log.info("Checking msg");
 		    msg = mylistener.getNextMessage();
 		    Assert.assertNotNull(msg);
 		    Assert.assertEquals("foo1", msg.toString());
+		    log.info("Number of messages " + mylistener.messages.size());
 		    
 		    token = mqttClient.disconnect();
 		    token.waitForCompletion();
+		    
+		    mqttClient.close();
 	  }
 	  
 	  /* check unsubscribe removes handlers */
