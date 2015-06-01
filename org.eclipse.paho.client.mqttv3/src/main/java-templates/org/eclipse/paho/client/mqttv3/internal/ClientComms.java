@@ -320,7 +320,8 @@ public class ClientComms {
 		try {
 			// Clean session handling and tidy up
 			clientState.disconnected(reason);
-			callback.removeMessageListeners();
+			if (clientState.getCleanSession())
+				callback.removeMessageListeners();
 		}catch(Exception ex) {
 			// Ignore as we are shutting down
 		}
