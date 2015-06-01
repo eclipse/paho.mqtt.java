@@ -144,13 +144,13 @@ public class PerSubscriptionMessageHandlerTest {
 	    mqttClient.subscribe(mytopic, 2, mylistener);
 	    
 	    MqttMessage message = new MqttMessage();
-	    message.setPayload("foo".getBytes());
+	    message.setPayload("testSyncSubs1".getBytes());
 	    mqttClient.publish(mytopic, message);
 	    
 	    log.info("Checking msg");
 	    MqttMessage msg = mylistener.getNextMessage();
 	    Assert.assertNotNull(msg);
-	    Assert.assertEquals("foo", msg.toString());
+	    Assert.assertEquals("testSyncSubs1", msg.toString());
 	    
 	    mqttClient.disconnect();
 	    
@@ -177,14 +177,14 @@ public class PerSubscriptionMessageHandlerTest {
 	    token.waitForCompletion();
 	    
 	    MqttMessage message = new MqttMessage();
-	    message.setPayload("foo".getBytes());
+	    message.setPayload("testAsyncSubs1".getBytes());
 	    token = mqttClient.publish(mytopic, message);
 	    token.waitForCompletion();
 	    
 	    log.info("Checking msg");
 	    MqttMessage msg = mylistener.getNextMessage();
 	    Assert.assertNotNull(msg);
-	    Assert.assertEquals("foo", msg.toString());
+	    Assert.assertEquals("testAsyncSubs1", msg.toString());
 	    
 	    token = mqttClient.disconnect();
 	    token.waitForCompletion();
@@ -217,13 +217,13 @@ public class PerSubscriptionMessageHandlerTest {
 		    mqttClient.subscribe(mytopic, 2, mylistener);
 		    
 		    MqttMessage message = new MqttMessage();
-		    message.setPayload("foo".getBytes());
+		    message.setPayload("testSyncCleanSessionFalse".getBytes());
 		    mqttClient.publish(mytopic, message);
 		    
 		    log.info("Checking msg");
 		    MqttMessage msg = mylistener.getNextMessage();
 		    Assert.assertNotNull(msg);
-		    Assert.assertEquals("foo", msg.toString());
+		    Assert.assertEquals("testSyncCleanSessionFalse", msg.toString());
 		    
 		    mqttClient.disconnect();
 		    
@@ -233,13 +233,13 @@ public class PerSubscriptionMessageHandlerTest {
 		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
 		    
 		    message = new MqttMessage();
-		    message.setPayload("foo1".getBytes());
+		    message.setPayload("testSyncCleanSessionFalse1".getBytes());
 		    mqttClient.publish(mytopic, message);
 		    
 		    log.info("Checking msg");
 		    msg = mylistener.getNextMessage();
 		    Assert.assertNotNull(msg);
-		    Assert.assertEquals("foo1", msg.toString());
+		    Assert.assertEquals("testSyncCleanSessionFalse1", msg.toString());
 		    
 		    mqttClient.disconnect();	
 		    
@@ -272,14 +272,14 @@ public class PerSubscriptionMessageHandlerTest {
 		    token.waitForCompletion();
 		    
 		    MqttMessage message = new MqttMessage();
-		    message.setPayload("foo".getBytes());
+		    message.setPayload("testAsyncCleanSessionFalse".getBytes());
 		    token = mqttClient.publish(mytopic, message);
 		    token.waitForCompletion();
 		    
 		    log.info("Checking msg");
 		    MqttMessage msg = mylistener.getNextMessage();
 		    Assert.assertNotNull(msg);
-		    Assert.assertEquals("foo", msg.toString());
+		    Assert.assertEquals("testAsyncCleanSessionFalse", msg.toString());
 		    
 		    token = mqttClient.disconnect();
 		    token.waitForCompletion();
@@ -291,14 +291,14 @@ public class PerSubscriptionMessageHandlerTest {
 		    token.waitForCompletion();
 		    
 		    message = new MqttMessage();
-		    message.setPayload("foo1".getBytes());
+		    message.setPayload("testAsyncCleanSessionFalse1".getBytes());
 		    token = mqttClient.publish(mytopic, message);
 		    token.waitForCompletion();
 		    
 		    log.info("Checking msg");
 		    msg = mylistener.getNextMessage();
 		    Assert.assertNotNull(msg);
-		    Assert.assertEquals("foo1", msg.toString());
+		    Assert.assertEquals("testAsyncCleanSessionFalse1", msg.toString());
 		    log.info("Number of messages " + mylistener.messages.size());
 		    
 		    token = mqttClient.disconnect();
