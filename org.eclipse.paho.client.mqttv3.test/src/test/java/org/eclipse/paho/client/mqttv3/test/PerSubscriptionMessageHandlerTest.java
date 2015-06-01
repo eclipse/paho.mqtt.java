@@ -113,7 +113,9 @@ public class PerSubscriptionMessageHandlerTest {
 		  }
 
 		  public void messageArrived(String topic, MqttMessage message) throws Exception {
-			  log.info("message arrived: '" + new String(message.getPayload()) + "' "+this.hashCode());
+				  
+			  log.info("message arrived: '" + new String(message.getPayload()) + "' "+this.hashCode()+
+					  " " + (message.isDuplicate() ? "duplicate" : ""));
 
 			  synchronized (messages) {
 				  messages.add(message);

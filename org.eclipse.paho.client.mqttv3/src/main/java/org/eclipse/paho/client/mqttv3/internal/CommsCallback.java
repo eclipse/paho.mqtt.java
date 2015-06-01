@@ -426,6 +426,7 @@ public class CommsCallback implements Runnable {
 		boolean delivered = false;
 		
 		Enumeration keys = callbacks.keys();
+		System.out.println("CommsCallback: number of callbacks: "+callbacks.size());
 		while (keys.hasMoreElements()) {
 			String topicFilter = (String)keys.nextElement();
 			if (MqttTopic.isMatched(topicFilter, topicName)) {
