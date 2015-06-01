@@ -698,6 +698,11 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			throw new IllegalArgumentException();
 		}
 		
+		// remove any message handlers for individual topics 
+		for (int i = 0; i < topicFilters.length; ++i) {
+			this.comms.removeMessageListener(topicFilters[i]);
+		}
+		
 		String subs = "";
 		for (int i=0;i<topicFilters.length;i++) {
 			if (i>0) {
@@ -753,12 +758,14 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			throw new IllegalArgumentException();
 		}
 		
+		IMqttToken token = this.subscribe(topicFilters, qos, userContext, callback);
+		
 		// add message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
 			this.comms.setMessageListener(topicFilters[i], messageListeners[i]);
 		}
 		
-		return this.subscribe(topicFilters, qos, userContext, callback);
+		return token;
 	}
 
 	/* (non-Javadoc)

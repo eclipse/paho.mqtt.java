@@ -29,6 +29,8 @@ import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
@@ -111,7 +113,8 @@ public class PerSubscriptionMessageHandlerTest {
 		  }
 
 		  public void messageArrived(String topic, MqttMessage message) throws Exception {
-			  log.info("message arrived: '" + new String(message.getPayload()) + "'");
+			  log.info("message arrived: '" + new String(message.getPayload()) + "' retained "+
+					  	message.isRetained());
 
 			  synchronized (messages) {
 				  messages.add(message);
@@ -132,7 +135,8 @@ public class PerSubscriptionMessageHandlerTest {
 	    log.entering(className, methodName);        
     
 	    listener mylistener = new listener();
-	    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+	    //IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+	    IMqttClient mqttClient = new MqttClient(serverURI.toString(), methodName);
 	    String mytopic = "PerSubscriptionTest/topic";
 	    
 	    mqttClient.connect();
@@ -162,7 +166,8 @@ public class PerSubscriptionMessageHandlerTest {
 	    log.entering(className, methodName);
 	   
 	    listener mylistener = new listener();
-	    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+	    //IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+	    IMqttAsyncClient mqttClient = new MqttAsyncClient(serverURI.toString(), methodName);
 	    String mytopic = "PerSubscriptionTest/topic";
 	    
 	    IMqttToken token = mqttClient.connect(null, null);
@@ -200,7 +205,8 @@ public class PerSubscriptionMessageHandlerTest {
 		    log.entering(className, methodName);        
 	    
 		    listener mylistener = new listener();
-		    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+		    //IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+		    IMqttClient mqttClient = new MqttClient(serverURI.toString(), methodName);
 		    String mytopic = "PerSubscriptionTest/topic";
 		    
 		    MqttConnectOptions opts = new MqttConnectOptions();
@@ -236,10 +242,8 @@ public class PerSubscriptionMessageHandlerTest {
 		    Assert.assertNotNull(msg);
 		    Assert.assertEquals("foo1", msg.toString());
 		    
-		    mqttClient.disconnect();
-		    
+		    mqttClient.disconnect();	    
 		    mqttClient.close();
-
 	  }
 	  
 	  @Test
@@ -249,7 +253,8 @@ public class PerSubscriptionMessageHandlerTest {
 		    log.entering(className, methodName);
 		   
 		    listener mylistener = new listener();
-		    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+		    //IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+		    IMqttAsyncClient mqttClient = new MqttAsyncClient(serverURI.toString(), methodName);
 		    String mytopic = "PerSubscriptionTest/topic";
 		    
 		    MqttConnectOptions opts = new MqttConnectOptions();
@@ -299,6 +304,52 @@ public class PerSubscriptionMessageHandlerTest {
 	  }
 	  
 	  /* check unsubscribe removes handlers */
+	  /*
+	  @Test
+	  public void testSyncUnsubscribeRemove() throws Exception {
+		    final String methodName = Utility.getMethodName();
+		    LoggingUtilities.banner(log, cclass, methodName);
+		    log.entering(className, methodName);        
+	    
+		    listener mylistener = new listener();
+		    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
+		    String mytopic = "PerSubscriptionTest/topic";
+		    
+		    MqttConnectOptions opts = new MqttConnectOptions();
+		    opts.setCleanSession(false);
+		    
+		    mqttClient.connect(opts);
+		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+		    
+		    mqttClient.subscribe(mytopic, 2, mylistener);
+		    
+		    MqttMessage message = new MqttMessage();
+		    message.setPayload("foo".getBytes());
+		    mqttClient.publish(mytopic, message);
+		    
+		    log.info("Checking msg");
+		    MqttMessage msg = mylistener.getNextMessage();
+		    Assert.assertNotNull(msg);
+		    Assert.assertEquals("foo", msg.toString());
+		    
+		    mqttClient.unsubscribe(mytopic); // unsubscribe will remove the message handler
+		    mqttClient.subscribe(mytopic, 2); // but so will this
+		    
+		    message = new MqttMessage();
+		    message.setPayload("foo1".getBytes());
+		    mqttClient.publish(mytopic, message);
+		    
+		    log.info("Checking msg");
+		    msg = mylistener.getNextMessage();
+		    Assert.assertNotNull(msg);
+		    Assert.assertEquals("foo1", msg.toString());
+		    
+		    mqttClient.disconnect();
+		    
+		    mqttClient.close();
+
+	  }*/
+	  
 	  /* check can resubscribe after client object recreation */
 
 }

@@ -355,13 +355,13 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	}
 
 	
-	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {		
+	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {			
+		this.subscribe(topicFilters, qos);
+		
 		// add message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
 			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
 		}
-		
-		this.subscribe(topicFilters, qos);
 	}
 
 	/*
@@ -375,12 +375,8 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see IMqttClient#unsubscribe(String[])
 	 */
 	public void unsubscribe(String[] topicFilters) throws MqttException {
+		// message handlers removed in the async client unsubscribe below
 		aClient.unsubscribe(topicFilters, null,null).waitForCompletion(getTimeToWait());
-		
-		// remove message handlers from the list for this client
-		for (int i = 0; i < topicFilters.length; ++i) {
-			aClient.comms.removeMessageListener(topicFilters[i]);
-		}
 	}
 
 	/*
