@@ -170,6 +170,9 @@ public class ClientState {
 	protected void setCleanSession(boolean cleanSession) {
 		this.cleanSession = cleanSession;
 	}
+	protected boolean getCleanSession() {
+		return this.cleanSession;
+	}
 	
 	private String getSendPersistenceKey(MqttWireMessage message) {
 		return PERSISTENCE_SENT_PREFIX + message.getMessageId();

@@ -416,6 +416,10 @@ public class CommsCallback implements Runnable {
 		this.callbacks.remove(topicFilter); // no exception thrown if the filter was not present
 	}
 	
+	public void removeMessageListeners() {
+		this.callbacks.clear(); 
+	}
+	
 	
 	protected boolean deliverMessage(String topicName, MqttMessage aMessage) throws Exception
 	{		

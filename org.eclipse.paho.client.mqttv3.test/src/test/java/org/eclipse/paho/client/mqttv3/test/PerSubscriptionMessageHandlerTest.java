@@ -241,7 +241,12 @@ public class PerSubscriptionMessageHandlerTest {
 		    Assert.assertNotNull(msg);
 		    Assert.assertEquals("foo1", msg.toString());
 		    
-		    mqttClient.disconnect();	    
+		    mqttClient.disconnect();	
+		    
+		    /* clean up by connecting cleansession */
+		    mqttClient.connect();
+		    mqttClient.disconnect();
+		    
 		    mqttClient.close();
 	  }
 	  
@@ -296,6 +301,12 @@ public class PerSubscriptionMessageHandlerTest {
 		    Assert.assertEquals("foo1", msg.toString());
 		    log.info("Number of messages " + mylistener.messages.size());
 		    
+		    token = mqttClient.disconnect();
+		    token.waitForCompletion();
+		    
+		    /* clean up by connecting cleansession */
+		    token = mqttClient.connect();
+		    token.waitForCompletion();
 		    token = mqttClient.disconnect();
 		    token.waitForCompletion();
 		    
