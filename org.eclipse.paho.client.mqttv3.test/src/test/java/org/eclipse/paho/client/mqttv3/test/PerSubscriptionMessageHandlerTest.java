@@ -116,10 +116,12 @@ public class PerSubscriptionMessageHandlerTest {
 				  
 			  log.info("message arrived: '" + new String(message.getPayload()) + "' "+this.hashCode()+
 					  " " + (message.isDuplicate() ? "duplicate" : ""));
-
-			  synchronized (messages) {
-				  messages.add(message);
-				  messages.notifyAll();
+			  
+			  if (!message.isDuplicate()) {
+				  synchronized (messages) {
+					  messages.add(message);
+					  messages.notifyAll();
+				  }
 			  }
 		  }
 	  }
