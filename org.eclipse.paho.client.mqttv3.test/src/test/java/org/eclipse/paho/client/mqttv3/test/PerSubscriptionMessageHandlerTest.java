@@ -113,8 +113,7 @@ public class PerSubscriptionMessageHandlerTest {
 		  }
 
 		  public void messageArrived(String topic, MqttMessage message) throws Exception {
-			  log.info("message arrived: '" + new String(message.getPayload()) + "' retained "+
-					  	message.isRetained());
+			  log.info("message arrived: '" + new String(message.getPayload()) + "' "+this.hashCode());
 
 			  synchronized (messages) {
 				  messages.add(message);
