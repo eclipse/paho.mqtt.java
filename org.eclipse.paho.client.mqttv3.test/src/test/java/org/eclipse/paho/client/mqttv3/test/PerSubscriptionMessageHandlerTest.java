@@ -138,8 +138,7 @@ public class PerSubscriptionMessageHandlerTest {
 	    log.entering(className, methodName);        
     
 	    listener mylistener = new listener();
-	    //IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
-	    IMqttClient mqttClient = new MqttClient(serverURI.toString(), methodName);
+	    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
 	    String mytopic = "PerSubscriptionTest/topic";
 	    
 	    mqttClient.connect();
@@ -169,8 +168,7 @@ public class PerSubscriptionMessageHandlerTest {
 	    log.entering(className, methodName);
 	   
 	    listener mylistener = new listener();
-	    //IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
-	    IMqttAsyncClient mqttClient = new MqttAsyncClient(serverURI.toString(), methodName);
+	    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
 	    String mytopic = "PerSubscriptionTest/topic";
 	    
 	    IMqttToken token = mqttClient.connect(null, null);
@@ -208,8 +206,7 @@ public class PerSubscriptionMessageHandlerTest {
 		    log.entering(className, methodName);        
 	    
 		    listener mylistener = new listener();
-		    //IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
-		    IMqttClient mqttClient = new MqttClient(serverURI.toString(), methodName);
+		    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
 		    String mytopic = "PerSubscriptionTest/topic";
 		    
 		    MqttConnectOptions opts = new MqttConnectOptions();
@@ -261,8 +258,7 @@ public class PerSubscriptionMessageHandlerTest {
 		    log.entering(className, methodName);
 		   
 		    listener mylistener = new listener();
-		    //IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
-		    IMqttAsyncClient mqttClient = new MqttAsyncClient(serverURI.toString(), methodName);
+		    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
 		    String mytopic = "PerSubscriptionTest/topic";
 		    
 		    MqttConnectOptions opts = new MqttConnectOptions();
@@ -303,7 +299,6 @@ public class PerSubscriptionMessageHandlerTest {
 		    msg = mylistener.getNextMessage();
 		    Assert.assertNotNull(msg);
 		    Assert.assertEquals("testAsyncCleanSessionFalse1", msg.toString());
-		    log.info("Number of messages " + mylistener.messages.size());
 		    
 		    token = mqttClient.disconnect();
 		    token.waitForCompletion();
