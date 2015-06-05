@@ -172,7 +172,7 @@ public class SendReceiveAsyncCallbackTest {
     		
     	    mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
 
-    		mqttClient.connect(null, null, new onConnect(1));
+    		mqttClient.connect(null, new onConnect(1));
     		log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
     		
     		int count = 0;
