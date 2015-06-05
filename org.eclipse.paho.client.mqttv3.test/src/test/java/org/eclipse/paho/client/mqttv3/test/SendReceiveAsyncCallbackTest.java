@@ -35,176 +35,172 @@ import org.junit.Test;
  */
 public class SendReceiveAsyncCallbackTest {
 
-  static final Class<?> cclass = SendReceiveAsyncTest.class;
-  static final String className = cclass.getName();
-  static final Logger log = Logger.getLogger(className);
+	static final Class<?> cclass = SendReceiveAsyncTest.class;
+	static final String className = cclass.getName();
+	static final Logger log = Logger.getLogger(className);
 
-  private static URI serverURI;
-  private static MqttClientFactoryPaho clientFactory;
-  private boolean testFinished = false;
+	private static URI serverURI;
+	private static MqttClientFactoryPaho clientFactory;
+	private boolean testFinished = false;
 
-  /**
-   * @throws Exception
-   */
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
+	/**
+	 * @throws Exception
+	 */
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
 
-    try {
-      String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
-
-      serverURI = TestProperties.getServerURI();
-      clientFactory = new MqttClientFactoryPaho();
-      clientFactory.open();
-    }
-    catch (Exception exception) {
-      log.log(Level.SEVERE, "caught exception:", exception);
-      throw exception;
-    }
-  }
-
-  /**
-   * @throws Exception
-   */
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-    String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-
-    try {
-      if (clientFactory != null) {
-        clientFactory.close();
-        clientFactory.disconnect();
-      }
-    }
-    catch (Exception exception) {
-      log.log(Level.SEVERE, "caught exception:", exception);
-    }
-  }
-  
-  
-  class onDisconnect implements IMqttActionListener {
-	  
-	  final String methodName = Utility.getMethodName();
-	  private int testno;
-	  
-	  onDisconnect(int testno) {
-		  this.testno = testno;
-	  }
-
-	  @Override
-	  public void onSuccess(IMqttToken token) {
-		log.info("testDisconnect: disconnect Success");
-		
-		if (testno == 1) {
-			testFinished = true;
-		}
-		else {
-		    Assert.fail("Wrong test numnber:" + methodName);
-			testFinished = true;
-		}
-		
-	  }
-
-	  @Override
-	  public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-		log.info("Disconnect failure, test no "+testno);
-		testFinished = true;
-	  }
-	  
-  }
-  
-  
-  class onConnect implements IMqttActionListener {
-	  
-	  private int testno;
-	  final String methodName = Utility.getMethodName();
-	  
-	  onConnect(int testno) {
-		  this.testno = testno;
-	  }
-
-	  @Override
-	  public void onSuccess(IMqttToken token) {
-		log.info("testConnect: connect Success");
-		
 		try {
-			if (testno == 1) {
-				token.getClient().disconnect(null, new onDisconnect(1));
+			String methodName = Utility.getMethodName();
+			LoggingUtilities.banner(log, cclass, methodName);
+
+			serverURI = TestProperties.getServerURI();
+			clientFactory = new MqttClientFactoryPaho();
+			clientFactory.open();
+		} catch (Exception exception) {
+			log.log(Level.SEVERE, "caught exception:", exception);
+			throw exception;
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+
+		try {
+			if (clientFactory != null) {
+				clientFactory.close();
+				clientFactory.disconnect();
 			}
-			else {
-			    Assert.fail("Wrong test numnber:" + methodName);
+		} catch (Exception exception) {
+			log.log(Level.SEVERE, "caught exception:", exception);
+		}
+	}
+
+	class onDisconnect implements IMqttActionListener {
+
+		private int testno;
+
+		onDisconnect(int testno) {
+			this.testno = testno;
+		}
+
+		@Override
+		public void onSuccess(IMqttToken token) {
+			final String methodName = Utility.getMethodName();
+			log.info("testDisconnect: disconnect Success");
+
+			if (testno == 1) {
+				testFinished = true;
+			} else {
+				Assert.fail("Wrong test numnber:" + methodName);
 				testFinished = true;
 			}
+
 		}
-		catch (Exception exception) {
-			log.log(Level.SEVERE, "caught exception:", exception);
-		    Assert.fail("Failed:" + methodName + " exception=" + exception);
+
+		@Override
+		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+			final String methodName = Utility.getMethodName();
+			log.info("Disconnect failure, test no " + testno +" "+methodName);
 			testFinished = true;
 		}
-		
-	  }
 
-	@Override
-	public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-		log.log(Level.SEVERE, "connect failure:", exception);
-	    Assert.fail("Failed:" + methodName + " exception=" + exception);
-		testFinished = true;
 	}
-	  
-  }
 
-  /**
-   * Tests that a client can be constructed and that it can connect to and
-   * disconnect from the service
-   * 
-   * @throws Exception
-   */
-  @Test
-  public void testConnect() throws Exception {
-    final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+	class onConnect implements IMqttActionListener {
 
-    IMqttAsyncClient mqttClient = null;
-    try {
-    		testFinished = false;
-    		
-    	    mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+		private int testno;
 
-    		mqttClient.connect(null, new onConnect(1));
-    		log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-    		
-    		int count = 0;
-    		while (!testFinished && ++count < 20) {
-    			Thread.sleep(500);
-    		}
-    		Assert.assertTrue("Callbacks not called", testFinished);
-  		
-        
-    		testFinished = false;
+		onConnect(int testno) {
+			this.testno = testno;
+		}
 
-    		mqttClient.connect(null, null, new onConnect(1));
-    		log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-    		
-    		count = 0;
-    		while (!testFinished && ++count < 20) {
-    			Thread.sleep(500);
-    		}
-    		Assert.assertTrue("Callbacks not called", testFinished);
-    }
-    catch (Exception exception) {
-      log.log(Level.SEVERE, "caught exception:", exception);
-      Assert.fail("Failed:" + methodName + " exception=" + exception);
-    }
-    finally {
-      if (mqttClient != null) {
-        log.info("Close...");
-        mqttClient.close();
-      }
-    }
+		@Override
+		public void onSuccess(IMqttToken token) {
+			final String methodName = Utility.getMethodName();
+			log.info("testConnect: connect Success");
 
-    log.exiting(className, methodName);
-  }
+			try {
+				if (testno == 1) {
+					token.getClient().disconnect(null, new onDisconnect(1));
+				} else {
+					Assert.fail("Wrong test numnber:" + methodName);
+					testFinished = true;
+				}
+			} catch (Exception exception) {
+				log.log(Level.SEVERE, "caught exception:", exception);
+				Assert.fail("Failed:" + methodName + " exception=" + exception);
+				testFinished = true;
+			}
+
+		}
+
+		@Override
+		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+			final String methodName = Utility.getMethodName();
+			log.log(Level.SEVERE, "connect failure:", exception);
+			Assert.fail("Failed:" + methodName + " exception=" + exception);
+			testFinished = true;
+		}
+
+	}
+
+	/**
+	 * Tests that a client can be constructed and that it can connect to and
+	 * disconnect from the service
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testConnect() throws Exception {
+		final String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		log.entering(className, methodName);
+
+		IMqttAsyncClient mqttClient = null;
+		try {
+			testFinished = false;
+
+			mqttClient = clientFactory.createMqttAsyncClient(serverURI,
+					methodName);
+
+			mqttClient.connect(null, new onConnect(1));
+			log.info("Connecting...(serverURI:" + serverURI + ", ClientId:"
+					+ methodName);
+
+			int count = 0;
+			while (!testFinished && ++count < 20) {
+				Thread.sleep(500);
+			}
+			Assert.assertTrue("Callbacks not called", testFinished);
+
+			testFinished = false;
+
+			mqttClient.connect(null, null, new onConnect(1));
+			log.info("Connecting...(serverURI:" + serverURI + ", ClientId:"
+					+ methodName);
+
+			count = 0;
+			while (!testFinished && ++count < 20) {
+				Thread.sleep(500);
+			}
+			Assert.assertTrue("Callbacks not called", testFinished);
+			
+		} catch (Exception exception) {
+			log.log(Level.SEVERE, "caught exception:", exception);
+			Assert.fail("Failed:" + methodName + " exception=" + exception);
+		} finally {
+			if (mqttClient != null) {
+				log.info("Close...");
+				mqttClient.close();
+			}
+		}
+
+		log.exiting(className, methodName);
+	}
 
 }
