@@ -48,6 +48,7 @@ public class SendReceiveAsyncCallbackTest {
 	private boolean testFinished = false;
 	private String topicFilter = "SendReceiveAsyncCallback/topic";
 	private listener myListener = new listener();
+	private onPublish myOnPublish = new onPublish(1);
 
 	/**
 	 * @throws Exception
@@ -158,6 +159,7 @@ public class SendReceiveAsyncCallbackTest {
 		}
 	}
 	
+	 
 	
 	class onPublish implements IMqttActionListener {
 
@@ -177,7 +179,7 @@ public class SendReceiveAsyncCallbackTest {
 			if (testno == 1) {
 				try {
 					if (++count < messageCount) {
-						token.getClient().publish(topicFilter, "".getBytes(), 2, false, null, new onPublish(1));
+						token.getClient().publish(topicFilter, "my data".getBytes(), 2, false, null, myOnPublish);
 					}
 					else
 						testFinished = true;
@@ -218,7 +220,7 @@ public class SendReceiveAsyncCallbackTest {
 
 			if (testno == 1) {
 				try {
-					token.getClient().publish(topicFilter, "".getBytes(), 2, false, myListener, new onPublish(1));
+					token.getClient().publish(topicFilter, "my data".getBytes(), 2, false, myListener, myOnPublish);
 				}
 				catch (Exception exception) {
 					log.log(Level.SEVERE, "caught exception:", exception);
@@ -255,7 +257,7 @@ public class SendReceiveAsyncCallbackTest {
 
 			try {
 				if (testno == 1) {
-					token.getClient().subscribe(topicFilter, 2, new listener(), new onSubscribe(1));
+					token.getClient().subscribe(topicFilter, 2, myListener, new onSubscribe(1));
 				} else {
 					Assert.fail("Wrong test numnber:" + methodName);
 					testFinished = true;
