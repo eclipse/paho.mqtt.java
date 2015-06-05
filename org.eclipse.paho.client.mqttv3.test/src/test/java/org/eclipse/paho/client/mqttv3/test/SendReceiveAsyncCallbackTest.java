@@ -97,7 +97,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onSuccess(IMqttToken token) {
 			final String methodName = Utility.getMethodName();
-			log.info(methodName + ": onSuccess");
+			log.info(methodName + ": onDisconnect");
 
 			if (testno == 1) {
 				testFinished = true;
@@ -111,7 +111,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 			final String methodName = Utility.getMethodName();
-			log.info("Disconnect failure, test no " + testno + " " + methodName);
+			log.info("onDisconnect: test no " + testno + " " + methodName);
 			testFinished = true;
 		}
 
@@ -172,7 +172,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onSuccess(IMqttToken token) {
 			final String methodName = Utility.getMethodName();
-			log.info(methodName + ": onSuccess");
+			log.info(methodName + ": onPublish");
 
 			if (testno == 1) {
 				try {
@@ -196,7 +196,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 			final String methodName = Utility.getMethodName();
-			log.info("Disconnect failure, test no " + testno + " " + methodName);
+			log.info("onPublish failure, test no " + testno + " " + methodName);
 			testFinished = true;
 		}
 
@@ -214,7 +214,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onSuccess(IMqttToken token) {
 			final String methodName = Utility.getMethodName();
-			log.info(methodName + ": onSuccess");
+			log.info(methodName + ": onSubscribe");
 
 			if (testno == 1) {
 				try {
@@ -234,7 +234,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 			final String methodName = Utility.getMethodName();
-			log.info("Disconnect failure, test no " + testno + " " + methodName);
+			log.info("Subscribe failure, test no " + testno + " " + methodName);
 			testFinished = true;
 		}
 
@@ -251,7 +251,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onSuccess(IMqttToken token) {
 			final String methodName = Utility.getMethodName();
-			log.info(methodName + ": onSuccess");
+			log.info(methodName + ": onConnect");
 
 			try {
 				if (testno == 1) {
@@ -272,7 +272,7 @@ public class SendReceiveAsyncCallbackTest {
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 			final String methodName = Utility.getMethodName();
 			log.log(Level.SEVERE, "connect failure:", exception);
-			Assert.fail("Failed:" + methodName + " exception=" + exception);
+			Assert.fail("onConnect:" + methodName + " exception=" + exception);
 			testFinished = true;
 		}
 
@@ -301,7 +301,7 @@ public class SendReceiveAsyncCallbackTest {
 					+ methodName);
 
 			int count = 0;
-			while (!testFinished && ++count < 20) {
+			while (!testFinished && ++count < 80) {
 				Thread.sleep(500);
 			}
 			Assert.assertTrue("Callbacks not called", testFinished);
@@ -313,7 +313,7 @@ public class SendReceiveAsyncCallbackTest {
 			mqttClient.disconnect(null, new onDisconnect(1));
 			
 			count = 0;
-			while (!testFinished && ++count < 5) {
+			while (!testFinished && ++count < 80) {
 				Thread.sleep(500);
 			}
 			Assert.assertTrue("Callbacks not called", testFinished);
