@@ -126,6 +126,8 @@ public class SendReceiveAsyncCallbackTest {
 
 			try {
 				if (testno == 1) {
+					if (token.getClient() == null)
+						log.info("client object is null "+methodName);
 					token.getClient().disconnect(null, new onDisconnect(1));
 				} else {
 					Assert.fail("Wrong test numnber:" + methodName);
