@@ -15,12 +15,15 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
@@ -38,10 +41,13 @@ public class SendReceiveAsyncCallbackTest {
 	static final Class<?> cclass = SendReceiveAsyncTest.class;
 	static final String className = cclass.getName();
 	static final Logger log = Logger.getLogger(className);
-
+	
+	private final int messageCount = 5;
 	private static URI serverURI;
 	private static MqttClientFactoryPaho clientFactory;
 	private boolean testFinished = false;
+	private String topicFilter = "SendReceiveAsyncCallback/topic";
+	private listener myListener = new listener();
 
 	/**
 	 * @throws Exception
@@ -91,7 +97,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onSuccess(IMqttToken token) {
 			final String methodName = Utility.getMethodName();
-			log.info("testDisconnect: disconnect Success");
+			log.info(methodName + ": onSuccess");
 
 			if (testno == 1) {
 				testFinished = true;
@@ -105,7 +111,130 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 			final String methodName = Utility.getMethodName();
-			log.info("Disconnect failure, test no " + testno +" "+methodName);
+			log.info("Disconnect failure, test no " + testno + " " + methodName);
+			testFinished = true;
+		}
+
+	}
+
+	class listener implements IMqttMessageListener {
+
+		ArrayList<MqttMessage> messages;
+
+		public listener() {
+			messages = new ArrayList<MqttMessage>();
+		}
+
+		public MqttMessage getNextMessage() {
+			synchronized (messages) {
+				if (messages.size() == 0) {
+					try {
+						messages.wait(1000);
+					} catch (InterruptedException e) {
+						// empty
+					}
+				}
+
+				if (messages.size() == 0) {
+					return null;
+				}
+				return messages.remove(0);
+			}
+		}
+
+		public void messageArrived(String topic, MqttMessage message)
+				throws Exception {
+
+			log.info("message arrived: '" + new String(message.getPayload())
+					+ "' " + this.hashCode() + " "
+					+ (message.isDuplicate() ? "duplicate" : ""));
+
+			if (!message.isDuplicate()) {
+				synchronized (messages) {
+					messages.add(message);
+					messages.notifyAll();
+				}
+			}
+		}
+	}
+	
+	
+	class onPublish implements IMqttActionListener {
+
+		private int testno;
+		private int count;
+
+		onPublish(int testno) {
+			this.testno = testno;
+			count = 0;
+		}
+
+		@Override
+		public void onSuccess(IMqttToken token) {
+			final String methodName = Utility.getMethodName();
+			log.info(methodName + ": onSuccess");
+
+			if (testno == 1) {
+				try {
+					if (++count < messageCount) {
+						token.getClient().publish(topicFilter, "".getBytes(), 2, false, null, new onPublish(1));
+					}
+					else
+						testFinished = true;
+				}
+				catch (Exception exception) {
+					log.log(Level.SEVERE, "caught exception:", exception);
+					Assert.fail("Failed:" + methodName + " exception=" + exception);
+				}
+			} else {
+				Assert.fail("Wrong test numnber:" + methodName);
+				testFinished = true;
+			}
+
+		}
+
+		@Override
+		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+			final String methodName = Utility.getMethodName();
+			log.info("Disconnect failure, test no " + testno + " " + methodName);
+			testFinished = true;
+		}
+
+	}
+
+
+	class onSubscribe implements IMqttActionListener {
+
+		private int testno;
+
+		onSubscribe(int testno) {
+			this.testno = testno;
+		}
+
+		@Override
+		public void onSuccess(IMqttToken token) {
+			final String methodName = Utility.getMethodName();
+			log.info(methodName + ": onSuccess");
+
+			if (testno == 1) {
+				try {
+					token.getClient().publish(topicFilter, "".getBytes(), 2, false, myListener, new onPublish(1));
+				}
+				catch (Exception exception) {
+					log.log(Level.SEVERE, "caught exception:", exception);
+					Assert.fail("Failed:" + methodName + " exception=" + exception);
+				}
+			} else {
+				Assert.fail("Wrong test numnber:" + methodName);
+				testFinished = true;
+			}
+
+		}
+
+		@Override
+		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+			final String methodName = Utility.getMethodName();
+			log.info("Disconnect failure, test no " + testno + " " + methodName);
 			testFinished = true;
 		}
 
@@ -122,13 +251,11 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onSuccess(IMqttToken token) {
 			final String methodName = Utility.getMethodName();
-			log.info("testConnect: connect Success");
+			log.info(methodName + ": onSuccess");
 
 			try {
 				if (testno == 1) {
-					if (token.getClient() == null)
-						log.info("client object is null "+methodName);
-					token.getClient().disconnect(null, new onDisconnect(1));
+					token.getClient().subscribe(topicFilter, 2, new listener(), new onSubscribe(1));
 				} else {
 					Assert.fail("Wrong test numnber:" + methodName);
 					testFinished = true;
@@ -152,13 +279,12 @@ public class SendReceiveAsyncCallbackTest {
 	}
 
 	/**
-	 * Tests that a client can be constructed and that it can connect to and
-	 * disconnect from the service
+	 * Connect, subscribe and publish
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testConnect() throws Exception {
+	public void test1() throws Exception {
 		final String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
 		log.entering(className, methodName);
@@ -179,19 +305,21 @@ public class SendReceiveAsyncCallbackTest {
 				Thread.sleep(500);
 			}
 			Assert.assertTrue("Callbacks not called", testFinished);
+			
+			Assert.assertTrue("All messages received", myListener.messages.size() == messageCount);
 
 			testFinished = false;
-
-			mqttClient.connect(null, null, new onConnect(1));
-			log.info("Connecting...(serverURI:" + serverURI + ", ClientId:"
-					+ methodName);
-
+			
+			mqttClient.disconnect(null, new onDisconnect(1));
+			
 			count = 0;
-			while (!testFinished && ++count < 20) {
+			while (!testFinished && ++count < 5) {
 				Thread.sleep(500);
 			}
 			Assert.assertTrue("Callbacks not called", testFinished);
-			
+
+			testFinished = false;
+
 		} catch (Exception exception) {
 			log.log(Level.SEVERE, "caught exception:", exception);
 			Assert.fail("Failed:" + methodName + " exception=" + exception);
