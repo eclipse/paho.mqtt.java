@@ -98,7 +98,7 @@ public class SendReceiveAsyncCallbackTest {
 		@Override
 		public void onSuccess(IMqttToken token) {
 			final String methodName = Utility.getMethodName();
-			log.info(methodName + ": onDisconnect");
+			log.info("onDisconnect: test no " + testno + " " + methodName);
 
 			if (testno == 1) {
 				testFinished = true;
@@ -312,15 +312,15 @@ public class SendReceiveAsyncCallbackTest {
 
 			testFinished = false;
 			
-			mqttClient.disconnect(null, new onDisconnect(1));
+			log.info("Disconnecting...(serverURI:" + serverURI + ", ClientId:"
+					+ methodName);
+			mqttClient.disconnect(30000, null, new onDisconnect(1));
 			
 			count = 0;
 			while (!testFinished && ++count < 80) {
 				Thread.sleep(500);
 			}
 			Assert.assertTrue("Callbacks not called", testFinished);
-
-			testFinished = false;
 
 		} catch (Exception exception) {
 			log.log(Level.SEVERE, "caught exception:", exception);
