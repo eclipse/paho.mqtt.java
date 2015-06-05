@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
  *   
  * Contributors:
  *   Ian Craggs - MQTT 3.1.1 support
+ *   Ian Craggs - fix bug 469527
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -82,6 +83,7 @@ public class ConnectActionListener implements IMqttActionListener {
 	}
     userToken.internalTok.markComplete(token.getResponse(), null);
     userToken.internalTok.notifyComplete();
+    userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
 
     if (userCallback != null) {
       userToken.setUserContext(userContext);
@@ -135,6 +137,7 @@ public class ConnectActionListener implements IMqttActionListener {
       }
       userToken.internalTok.markComplete(null, ex);
       userToken.internalTok.notifyComplete();
+      userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
 
       if (userCallback != null) {
         userToken.setUserContext(userContext);
