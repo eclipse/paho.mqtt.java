@@ -308,6 +308,11 @@ public class SendReceiveAsyncCallbackTest {
 			}
 			Assert.assertTrue("Callbacks not called", testFinished);
 			
+			count = 0;
+			while (myListener.messages.size() < messageCount && ++count < 10) {
+				Thread.sleep(500);
+			}
+			
 			Assert.assertTrue("All messages received", myListener.messages.size() == messageCount);
 
 			testFinished = false;
