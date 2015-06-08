@@ -301,8 +301,7 @@ public class SendReceiveAsyncCallbackTest {
 					methodName);
 
 			mqttClient.connect(null, new onConnect(1));
-			log.info("Connecting...(serverURI:" + serverURI + ", ClientId:"
-					+ methodName);
+			log.info("Connecting...(serverURI:" + serverURI + ", ClientId:"+mqttClient.getClientId()+")");
 
 			int count = 0;
 			while (!testFinished && ++count < 80) {
@@ -315,13 +314,12 @@ public class SendReceiveAsyncCallbackTest {
 			while (myListener.messages.size() < messageCount && ++count < 10) {
 				Thread.sleep(500);
 			}
-			
+			log.info(methodName + ": all messages received "+ (myListener.messages.size() == messageCount));
 			Assert.assertTrue("All messages received", myListener.messages.size() == messageCount);
 
 			testFinished = false;
 			
-			log.info("Disconnecting...(serverURI:" + serverURI + ", ClientId:"
-					+ methodName);
+			log.info("Disconnecting...(serverURI:" + serverURI + ", ClientId:"+mqttClient.getClientId()+")");
 			mqttClient.disconnect(30000, null, new onDisconnect(1));
 			
 			count = 0;
@@ -331,6 +329,7 @@ public class SendReceiveAsyncCallbackTest {
 			Assert.assertTrue("Callbacks not called", testFinished);
 
 		} catch (Exception exception) {
+			log.info("Exception thrown"+exception);
 			log.log(Level.SEVERE, "caught exception:", exception);
 			Assert.fail("Failed:" + methodName + " exception=" + exception);
 		} finally {
