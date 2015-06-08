@@ -181,8 +181,10 @@ public class SendReceiveAsyncCallbackTest {
 					if (++count < messageCount) {
 						token.getClient().publish(topicFilter, "my data".getBytes(), 2, false, null, myOnPublish);
 					}
-					else
+					else {
+						log.info(methodName + ": all messages published");
 						testFinished = true;
+					}
 				}
 				catch (Exception exception) {
 					log.log(Level.SEVERE, "caught exception:", exception);
@@ -306,6 +308,7 @@ public class SendReceiveAsyncCallbackTest {
 			while (!testFinished && ++count < 80) {
 				Thread.sleep(500);
 			}
+			log.info(methodName + ": all Messages published "+testFinished);
 			Assert.assertTrue("Callbacks not called", testFinished);
 			
 			count = 0;
