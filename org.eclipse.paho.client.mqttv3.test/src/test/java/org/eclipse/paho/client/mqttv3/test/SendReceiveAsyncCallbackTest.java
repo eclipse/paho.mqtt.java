@@ -21,8 +21,10 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
@@ -117,6 +119,7 @@ public class SendReceiveAsyncCallbackTest {
 		}
 
 	}
+
 
 	class listener implements IMqttMessageListener {
 
@@ -259,7 +262,7 @@ public class SendReceiveAsyncCallbackTest {
 
 			try {
 				if (testno == 1) {
-					token.getClient().subscribe(topicFilter, 2, myListener, new onSubscribe(1));
+					token.getClient().subscribe(topicFilter, 2, null, new onSubscribe(1), myListener);
 				} else {
 					Assert.fail("Wrong test numnber:" + methodName);
 					testFinished = true;
