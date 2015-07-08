@@ -224,7 +224,7 @@ public class MqttMessage {
 	 * received from the server.  Has no effect when publishing messages.
 	 * @param messageId
 	 */
-	public void setMessageId(int messageId) {
+	public void setId(int messageId) {
 		this.messageId = messageId;
 	}
 
@@ -233,7 +233,7 @@ public class MqttMessage {
 	 * received from the server.
 	 * @return the MQTT id of the message
 	 */
-	public int getMessageId() {
+	public int getId() {
 		return this.messageId;
 	}
 	

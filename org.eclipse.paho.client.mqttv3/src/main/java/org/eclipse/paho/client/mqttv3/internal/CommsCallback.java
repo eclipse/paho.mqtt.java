@@ -452,7 +452,7 @@ public class CommsCallback implements Runnable {
 		while (keys.hasMoreElements()) {
 			String topicFilter = (String)keys.nextElement();
 			if (MqttTopic.isMatched(topicFilter, topicName)) {
-				aMessage.setMessageId(messageId);
+				aMessage.setId(messageId);
 				((IMqttMessageListener)(callbacks.get(topicFilter))).messageArrived(topicName, aMessage);
 				delivered = true;
 			}
@@ -460,7 +460,7 @@ public class CommsCallback implements Runnable {
 		
 		/* if the message hasn't been delivered to a per subscription handler, give it to the default handler */
 		if (mqttCallback != null && !delivered) {
-			aMessage.setMessageId(messageId);
+			aMessage.setId(messageId);
 			mqttCallback.messageArrived(topicName, aMessage);
 			delivered = true;
 		}
