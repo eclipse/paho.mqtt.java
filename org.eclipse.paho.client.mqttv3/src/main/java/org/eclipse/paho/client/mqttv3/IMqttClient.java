@@ -14,6 +14,7 @@
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
  *    Ian Craggs - per subscription message handlers (bug 466579)
+ *    Ian Craggs - ack control (bug 472172)
  */
 
 package org.eclipse.paho.client.mqttv3;
@@ -656,6 +657,26 @@ public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] m
 	 * @return zero or more delivery tokens
 	 */
 	public IMqttDeliveryToken[] getPendingDeliveryTokens();
+	
+	/**
+	 * If manualAcks is set to true, then on completion of the messageArrived callback
+	 * the MQTT acknowledgements are not sent.  You must call messageArrivedComplete
+	 * to send those acknowledgements.  This allows finer control over when the acks are
+	 * sent.  The default behaviour, when manualAcks is false, is to send the MQTT
+	 * acknowledgements automatically at the successful completion of the messageArrived
+	 * callback method.
+	 * @param manualAcks
+	 */
+	public void setManualAcks(boolean manualAcks);
+	
+	/**
+	 * Indicate that the application has completed processing the message with id messageId.
+	 * This will cause the MQTT acknowledgement to be sent to the server.
+	 * @param messageId the MQTT message id to be acknowledged
+	 * @param qos the MQTT QoS of the message to be acknowledged
+	 * @throws MqttException
+	 */
+	public void messageArrivedComplete(int messageId, int qos) throws MqttException;
 
 	/**
 	 * Close the client

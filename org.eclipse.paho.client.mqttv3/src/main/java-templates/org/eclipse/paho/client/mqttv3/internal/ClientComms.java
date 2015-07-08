@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - per subscription message handlers (bug 466579)
+ *    Ian Craggs - ack control (bug 472172)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -502,6 +503,14 @@ public class ClientComms {
 		this.callback.setCallback(mqttCallback);
 	}
 	
+	public void setManualAcks(boolean manualAcks) {
+		this.callback.setManualAcks(manualAcks);
+	}
+	
+	public void messageArrivedComplete(int messageId, int qos) throws MqttException {
+		this.callback.messageArrivedComplete(messageId, qos);
+	}
+	
 	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
 		this.callback.setMessageListener(topicFilter, messageListener);
 	}
@@ -528,8 +537,13 @@ public class ClientComms {
 	public MqttDeliveryToken[] getPendingDeliveryTokens() {
 		return tokenStore.getOutstandingDelTokens();
 	}
+	
 	protected void deliveryComplete(MqttPublish msg) throws MqttPersistenceException {
 		this.clientState.deliveryComplete(msg);
+	}
+	
+	protected void deliveryComplete(int messageId) throws MqttPersistenceException {
+		this.clientState.deliveryComplete(messageId);
 	}
 
 	public IMqttAsyncClient getClient() {

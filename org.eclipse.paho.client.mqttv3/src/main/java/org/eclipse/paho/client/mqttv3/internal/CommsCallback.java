@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - per subscription message handlers (bug 466579)
+ *    Ian Craggs - ack control (bug 472172)    
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -56,6 +57,7 @@ public class CommsCallback implements Runnable {
 	private Object workAvailable = new Object();
 	private Object spaceAvailable = new Object();
 	private ClientState clientState;
+	private boolean manualAcks = false;
 
 	CommsCallback(ClientComms clientComms) {
 		this.clientComms = clientComms;
@@ -121,6 +123,10 @@ public class CommsCallback implements Runnable {
 
 	public void setCallback(MqttCallback mqttCallback) {
 		this.mqttCallback = mqttCallback;
+	}
+	
+	public void setManualAcks(boolean manualAcks) {
+		this.manualAcks = manualAcks;
 	}
 
 	public void run() {
@@ -352,22 +358,39 @@ public class CommsCallback implements Runnable {
 	private void handleMessage(MqttPublish publishMessage)
 			throws MqttException, Exception {
 		final String methodName = "handleMessage";
-		// If quisecing process any pending messages. 
+		// If quisecing process any pending messages.
 
 		String destName = publishMessage.getTopicName();
 
 		// @TRACE 713=call messageArrived key={0} topic={1}
-		log.fine(CLASS_NAME, methodName, "713", new Object[] { 
+		log.fine(CLASS_NAME, methodName, "713", new Object[] {
 				new Integer(publishMessage.getMessageId()), destName });
-		deliverMessage(destName, publishMessage.getMessage());
-		
-		if (publishMessage.getMessage().getQos() == 1) {
-			this.clientComms.internalSend(new MqttPubAck(publishMessage),
+		deliverMessage(destName, publishMessage.getMessageId(),
+				publishMessage.getMessage());
+
+		if (!this.manualAcks) {
+			if (publishMessage.getMessage().getQos() == 1) {
+				this.clientComms.internalSend(new MqttPubAck(publishMessage),
+						new MqttToken(clientComms.getClient().getClientId()));
+			} else if (publishMessage.getMessage().getQos() == 2) {
+				this.clientComms.deliveryComplete(publishMessage);
+				MqttPubComp pubComp = new MqttPubComp(publishMessage);
+				this.clientComms.internalSend(pubComp, new MqttToken(
+						clientComms.getClient().getClientId()));
+			}
+		}
+	}
+	
+	public void messageArrivedComplete(int messageId, int qos) 
+		throws MqttException {
+		if (qos == 1) {
+			this.clientComms.internalSend(new MqttPubAck(messageId),
 					new MqttToken(clientComms.getClient().getClientId()));
-		} else if (publishMessage.getMessage().getQos() == 2) {
-			this.clientComms.deliveryComplete(publishMessage);
-			MqttPubComp pubComp = new MqttPubComp(publishMessage);
-			this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
+		} else if (qos == 2) {
+			this.clientComms.deliveryComplete(messageId);
+			MqttPubComp pubComp = new MqttPubComp(messageId);
+			this.clientComms.internalSend(pubComp, new MqttToken(
+					clientComms.getClient().getClientId()));
 		}
 	}
 
@@ -421,7 +444,7 @@ public class CommsCallback implements Runnable {
 	}
 	
 	
-	protected boolean deliverMessage(String topicName, MqttMessage aMessage) throws Exception
+	protected boolean deliverMessage(String topicName, int messageId, MqttMessage aMessage) throws Exception
 	{		
 		boolean delivered = false;
 		
@@ -429,6 +452,7 @@ public class CommsCallback implements Runnable {
 		while (keys.hasMoreElements()) {
 			String topicFilter = (String)keys.nextElement();
 			if (MqttTopic.isMatched(topicFilter, topicName)) {
+				aMessage.setMessageId(messageId);
 				((IMqttMessageListener)(callbacks.get(topicFilter))).messageArrived(topicName, aMessage);
 				delivered = true;
 			}
@@ -436,6 +460,7 @@ public class CommsCallback implements Runnable {
 		
 		/* if the message hasn't been delivered to a per subscription handler, give it to the default handler */
 		if (mqttCallback != null && !delivered) {
+			aMessage.setMessageId(messageId);
 			mqttCallback.messageArrived(topicName, aMessage);
 			delivered = true;
 		}

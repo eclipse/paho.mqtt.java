@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - fix duplicate message id (Bug 466853)
+ *    Ian Craggs - ack control (bug 472172)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -184,6 +185,10 @@ public class ClientState {
 	
 	private String getReceivedPersistenceKey(MqttWireMessage message) {
 		return PERSISTENCE_RECEIVED_PREFIX + message.getMessageId();
+	}
+	
+	private String getReceivedPersistenceKey(int messageId) {
+		return PERSISTENCE_RECEIVED_PREFIX + messageId;
 	}
 	
 	protected void clearState() throws MqttException {
@@ -1224,6 +1229,16 @@ public class ClientState {
 		
 		persistence.remove(getReceivedPersistenceKey(message));
 		inboundQoS2.remove(new Integer(message.getMessageId()));
+	}
+	
+	protected void deliveryComplete(int messageId) throws MqttPersistenceException {
+		final String methodName = "deliveryComplete";
+
+		//@TRACE 641=remove publish from persistence. key={0}
+		log.fine(CLASS_NAME,methodName,"641", new Object[]{new Integer(messageId)});
+		
+		persistence.remove(getReceivedPersistenceKey(messageId));
+		inboundQoS2.remove(new Integer(messageId));
 	}
 	
 	/**

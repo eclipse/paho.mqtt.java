@@ -14,6 +14,7 @@
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
  *    Ian Craggs - per subscription message handlers (bug 466579)
+ *    Ian Craggs - ack control (bug 472172)
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -835,6 +836,17 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 */
 	public void setCallback(MqttCallback callback) {
 		comms.setCallback(callback);
+	}
+	
+	/* (non-Javadoc)
+	 * @see IMqttAsyncClient#setManualAcks(manualAcks)
+	 */
+	public void setManualAcks(boolean manualAcks) {
+		comms.setManualAcks(manualAcks);
+	}
+	
+	public void messageArrivedComplete(int messageId, int qos) throws MqttException {
+		comms.messageArrivedComplete(messageId, qos);
 	}
 
 	/**
