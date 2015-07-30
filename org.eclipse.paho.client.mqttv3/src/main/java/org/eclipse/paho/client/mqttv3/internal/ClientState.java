@@ -14,6 +14,7 @@
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - fix duplicate message id (Bug 466853)
  *    Ian Craggs - ack control (bug 472172)
+ *    James Sutton - Ping Callback (bug 473928)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -23,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -537,7 +539,7 @@ public class ClientState {
 	 * 
 	 * @return token of ping command, null if no ping command has been sent.
 	 */
-	public MqttToken checkForActivity() throws MqttException {
+	public MqttToken checkForActivity(IMqttActionListener pingCallback) throws MqttException {
 		final String methodName = "checkForActivity";
 		//@TRACE 616=checkForActivity entered
 		log.fine(CLASS_NAME,methodName,"616", new Object[]{});
@@ -604,6 +606,9 @@ public class ClientState {
                     // pingOutstanding++;  // it will be set after the ping has been written on the wire                                                                                                             
                     // lastPing = time;    // it will be set after the ping has been written on the wire                                                                                                             
                     token = new MqttToken(clientComms.getClient().getClientId());
+                    if(pingCallback != null){
+                    	token.setActionCallback(pingCallback);
+                    }
                     tokenStore.saveToken(token, pingCommand);
                     pendingFlows.insertElementAt(pingCommand, 0);
 

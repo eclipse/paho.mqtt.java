@@ -14,6 +14,7 @@
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - per subscription message handlers (bug 466579)
  *    Ian Craggs - ack control (bug 472172)
+ *    James Sutton - checkForActivity Token (bug 473928)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -21,6 +22,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -682,9 +684,21 @@ public class ClientComms {
 	 * in the last keepalive interval.
 	 */
 	public MqttToken checkForActivity(){
+		return this.checkForActivity(null);
+	}
+	
+	/*
+	 * Check and send a ping if needed and check for ping timeout.
+	 * Need to send a ping if nothing has been sent or received 
+	 * in the last keepalive interval.
+	 * Passes an IMqttActionListener to ClientState.checkForActivity
+	 * so that the callbacks are attached as soon as the token is created
+	 * (Bug 473928) 
+	 */
+	public MqttToken checkForActivity(IMqttActionListener pingCallback){
 		MqttToken token = null;
 		try{
-			token = clientState.checkForActivity();
+			token = clientState.checkForActivity(pingCallback);
 		}catch(MqttException e){
 			handleRunException(e);
 		}catch(Exception e){
