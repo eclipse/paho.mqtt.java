@@ -15,6 +15,7 @@
  *    Ian Craggs - fix duplicate message id (Bug 466853)
  *    Ian Craggs - ack control (bug 472172)
  *    James Sutton - Ping Callback (bug 473928)
+ *    Ian Craggs - fix for NPE bug 470718
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -859,7 +860,11 @@ public class ClientState {
 		MqttToken token = tokenStore.getToken(ack);
 		MqttException mex = null;
 
-		if (ack instanceof MqttPubRec) {
+		if (token == null) {
+			// @TRACE 662=no message found for ack id={0}
+			log.fine(CLASS_NAME, methodName, "662", new Object[] {
+					new Integer(ack.getMessageId())});
+		} else if (ack instanceof MqttPubRec) {
 			// Complete the QoS 2 flow. Unlike all other
 			// flows, QoS is a 2 phase flow. The second phase sends a
 			// PUBREL - the operation is not complete until a PUBCOMP
