@@ -1034,7 +1034,8 @@ public class ClientState {
 		final String methodName = "notifyResult";
 		// unblock any threads waiting on the token  
 		token.internalTok.markComplete(ack, ex);
-						
+		token.internalTok.notifyComplete();
+		
 		// Let the user know an async operation has completed and then remove the token
 		if (ack != null && ack instanceof MqttAck && !(ack instanceof MqttPubRec)) {
 			//@TRACE 648=key{0}, msg={1}, excep={2}
