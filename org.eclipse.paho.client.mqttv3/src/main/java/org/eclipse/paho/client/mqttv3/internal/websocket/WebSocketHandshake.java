@@ -1,0 +1,165 @@
+/*******************************************************************************
+ * Copyright (c) 2009, 2014 IBM Corp.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * Contributors:
+ *    James Sutton - Bug 459142 - WebSocket support for the Java client.
+ */
+package org.eclipse.paho.client.mqttv3.internal.websocket;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+/**
+ * Helper class to execute a WebSocket Handshake.
+ */
+public class WebSocketHandshake {
+	
+	// Do not change: https://tools.ietf.org/html/rfc6455#section-1.3
+	private static final String ACCEPT_SALT = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+	private static final String SHA1_PROTOCOL = "SHA1";
+	private static final String HTTP_HEADER_SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
+	private static final String HTTP_HEADER_UPGRADE = "Upgrade";
+	private static final String HTTP_HEADER_UPGRADE_WEBSOCKET = "websocket";
+	private static final String EMPTY = "";
+	
+	InputStream input;
+	OutputStream output;
+	String host;
+	int port;
+	
+	
+	public WebSocketHandshake(InputStream input, OutputStream output, String host, int port){
+		this.input = input;
+		this.output = output;
+		this.host = host;
+		this.port = port;
+	}
+
+	
+	/**
+	 * Executes a Websocket Handshake.
+	 * Will throw an IOException if the handshake fails
+	 * @throws IOException
+	 */
+	public void execute() throws IOException {
+		String key = "mqtt-" + (System.currentTimeMillis()/1000);
+		String b64Key = Base64.encode(key);
+		sendHandshakeRequest(b64Key);
+		receiveHandshakeResponse(b64Key);
+	}
+	
+	/**
+	 * Builds and sends the HTTP Header GET Request
+	 * for the socket.
+	 * @param Base64 encoded key
+	 * @throws IOException
+	 */
+	private void sendHandshakeRequest(String key) throws IOException{
+		PrintWriter pw = new PrintWriter(output);
+		pw.println("GET /mqtt HTTP/1.1");
+		pw.println("Host: " + host + ":" + port);
+		pw.println("Upgrade: websocket");
+		pw.println("Connection: Upgrade");
+		pw.println("Sec-WebSocket-Key: " + key);
+		pw.println("Sec-WebSocket-Protocol: mqtt");
+		pw.println("Sec-WebSocket-Version: 13");
+		pw.println("");
+		pw.flush();
+	}
+	
+	/**
+	 * Receives the Handshake response and verifies that it is valid.
+	 * @param Base64 encoded key
+	 * @throws IOException
+	 */
+	private void receiveHandshakeResponse(String key) throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(input));
+		ArrayList responseLines = new ArrayList();
+		String line = in.readLine();
+		while(!line.equals(EMPTY) ) {
+			responseLines.add(line);
+			line = in.readLine();
+		}
+		Map headerMap = getHeaders(responseLines);
+		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
+		if(!upgradeHeader.contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
+			throw new IOException("WebSocket Response header: Incorrect upgrade.");
+		}
+		
+		if(!headerMap.containsKey(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT)){
+			throw new IOException("WebSocket Response header: Missing Sec-WebSocket-Accept");
+		}
+		
+		try {
+			verifyWebSocketKey(key, (String)headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT));
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e.getMessage());
+		} catch (HandshakeFailedException e) {
+			throw new IOException("WebSocket Response header: Incorrect Sec-WebSocket-Key");
+		}
+
+	}
+	
+	/**
+	 * Returns a Hashmap of HTTP headers
+	 * @param ArrayList<String> of headers
+	 * @return A Hashmap<String, String> of the headers
+	 */
+	private Map getHeaders(ArrayList headers){
+		Map headerMap = new HashMap();
+		for(int i = 1; i < headers.size(); i++){
+			String headerPre = (String) headers.get(i);
+			String[] header =  headerPre.split(":");
+			headerMap.put(header[0], header[1]);
+		}
+		return headerMap;
+	}
+	
+	/**
+	 * Verifies that the Accept key provided is correctly built from the
+	 * original key sent.
+	 * @param key
+	 * @param accept
+	 * @throws NoSuchAlgorithmException
+	 * @throws HandshakeFailedException
+	 */
+	private void verifyWebSocketKey(String key, String accept) throws NoSuchAlgorithmException, HandshakeFailedException{
+		// We build up the accept in the same way the server should
+		// then we check that the response is the same.
+		byte[] sha1Bytes = sha1(key + ACCEPT_SALT);
+		String encodedSha1Bytes = Base64.encodeBytes(sha1Bytes).trim();
+		if(!encodedSha1Bytes.equals(encodedSha1Bytes)){
+			throw new HandshakeFailedException();
+		}	
+	}
+	
+	/**
+	 * Returns the sha1 byte array of the provided string.
+	 * @param input
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 */
+	private byte[] sha1(String input) throws NoSuchAlgorithmException {
+		MessageDigest mDigest = MessageDigest.getInstance(SHA1_PROTOCOL);
+		byte[] result = mDigest.digest(input.getBytes());
+		return result;
+	}
+
+}

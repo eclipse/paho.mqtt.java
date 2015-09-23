@@ -15,7 +15,9 @@
  *    Ian Craggs - MQTT 3.1.1 support
  *    Ian Craggs - per subscription message handlers (bug 466579)
  *    Ian Craggs - ack control (bug 472172)
+ *    James Sutton - Bug 459142 - WebSocket support for the Java client.
  */
+
 package org.eclipse.paho.client.mqttv3;
 
 import java.util.Hashtable;
@@ -32,6 +34,8 @@ import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
+import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
+import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
@@ -399,6 +403,47 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			// Ciphers suites need to be set, if they are available
 			if (factoryFactory != null) {
 				String[] enabledCiphers = factoryFactory.getEnabledCipherSuites(null);
+				if (enabledCiphers != null) {
+					((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
+				}
+			}
+			break;
+		case MqttConnectOptions.URI_TYPE_WS:
+			shortAddress = address.substring(5);
+			host = getHostName(shortAddress);
+			port = getPort(shortAddress, 1883);
+			if (factory == null) {
+				factory = SocketFactory.getDefault();
+			}
+			else if (factory instanceof SSLSocketFactory) {
+				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
+			}
+			netModule = new WebSocketNetworkModule(factory, host, port, clientId);
+			((WebSocketNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
+			break;
+		case MqttConnectOptions.URI_TYPE_WSS:
+			shortAddress = address.substring(6);
+			host = getHostName(shortAddress);
+			port = getPort(shortAddress, 8883);
+			SSLSocketFactoryFactory wSSFactoryFactory = null;
+			if (factory == null) {
+				wSSFactoryFactory = new SSLSocketFactoryFactory();
+					Properties sslClientProps = options.getSSLProperties();
+					if (null != sslClientProps)
+						wSSFactoryFactory.initialize(sslClientProps, null);
+					factory = wSSFactoryFactory.createSocketFactory(null);
+
+			}
+			else if ((factory instanceof SSLSocketFactory) == false) {
+				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
+			}
+
+			// Create the network module...	
+			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, host, port, clientId);
+			((WebSocketSecureNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
+			// Ciphers suites need to be set, if they are available
+			if (wSSFactoryFactory != null) {
+				String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);
 				if (enabledCiphers != null) {
 					((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
 				}

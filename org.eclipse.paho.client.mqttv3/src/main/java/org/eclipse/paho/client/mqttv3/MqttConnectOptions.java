@@ -55,6 +55,8 @@ public class MqttConnectOptions {
 	protected static final int URI_TYPE_TCP = 0;
 	protected static final int URI_TYPE_SSL = 1;
 	protected static final int URI_TYPE_LOCAL = 2;
+	protected static final int URI_TYPE_WS = 3;
+	protected static final int URI_TYPE_WSS = 4;
 
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
 	private int maxInflight = MAX_INFLIGHT_DEFAULT;
@@ -493,6 +495,12 @@ public class MqttConnectOptions {
 			}
 			else if (vURI.getScheme().equals("local")) {
 				return URI_TYPE_LOCAL;
+			}
+			else if (vURI.getScheme().equals("ws")){
+				return URI_TYPE_WS;
+			}
+			else if (vURI.getScheme().equals("wss")) {
+				return URI_TYPE_WSS;
 			}
 			else {
 				throw new IllegalArgumentException(srvURI);
