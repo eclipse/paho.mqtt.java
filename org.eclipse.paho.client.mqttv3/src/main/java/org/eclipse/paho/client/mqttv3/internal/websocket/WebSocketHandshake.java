@@ -38,6 +38,7 @@ public class WebSocketHandshake {
 	private static final String HTTP_HEADER_UPGRADE = "Upgrade";
 	private static final String HTTP_HEADER_UPGRADE_WEBSOCKET = "websocket";
 	private static final String EMPTY = "";
+	private static final String LINE_SEPARATOR = "\r\n";
 	
 	InputStream input;
 	OutputStream output;
@@ -73,14 +74,14 @@ public class WebSocketHandshake {
 	 */
 	private void sendHandshakeRequest(String key) throws IOException{
 		PrintWriter pw = new PrintWriter(output);
-		pw.println("GET /mqtt HTTP/1.1");
-		pw.println("Host: " + host + ":" + port);
-		pw.println("Upgrade: websocket");
-		pw.println("Connection: Upgrade");
-		pw.println("Sec-WebSocket-Key: " + key);
-		pw.println("Sec-WebSocket-Protocol: mqtt");
-		pw.println("Sec-WebSocket-Version: 13");
-		pw.println("");
+		pw.print("GET /mqtt HTTP/1.1" + LINE_SEPARATOR);
+		pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
+		pw.print("Upgrade: websocket" + LINE_SEPARATOR);
+		pw.print("Connection: Upgrade" + LINE_SEPARATOR);
+		pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
+		pw.print("Sec-WebSocket-Protocol: mqtt" + LINE_SEPARATOR);
+		pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
+		pw.print(LINE_SEPARATOR);
 		pw.flush();
 	}
 	
@@ -99,7 +100,7 @@ public class WebSocketHandshake {
 		}
 		Map headerMap = getHeaders(responseLines);
 		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
-		if(!upgradeHeader.contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
+		if(!upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET.toLowerCase())){
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
 		
