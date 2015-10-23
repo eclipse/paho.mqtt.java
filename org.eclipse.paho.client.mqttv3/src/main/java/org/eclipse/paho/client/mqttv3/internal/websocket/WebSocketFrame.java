@@ -204,7 +204,6 @@ public class WebSocketFrame {
 	 */
 	public static void appendLengthAndMask(ByteBuffer buffer, int length, byte mask[]){
 		if(mask != null){
-			assert (mask.length ==4);
 			appendLength(buffer, length, true);
 			buffer.put(mask);
 		} else {

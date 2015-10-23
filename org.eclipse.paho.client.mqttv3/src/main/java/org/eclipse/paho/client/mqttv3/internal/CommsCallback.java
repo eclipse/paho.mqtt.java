@@ -208,6 +208,12 @@ public class CommsCallback implements Runnable {
 		synchronized (token) {
 			// @TRACE 705=callback and notify for key={0}
 			log.fine(CLASS_NAME, methodName, "705",	new Object[] { token.internalTok.getKey() });
+			if (token.isComplete()) {
+				// Finish by doing any post processing such as delete 
+				// from persistent store but only do so if the action
+				// is complete
+				clientState.notifyComplete(token);
+			}
 			
 			// Unblock any waiters and if pending complete now set completed
 			token.internalTok.notifyComplete();
@@ -232,12 +238,7 @@ public class CommsCallback implements Runnable {
  			}
 			
 
-			if (token.isComplete()) {
-				// Finish by doing any post processing such as delete 
-				// from persistent store but only do so if the action
-				// is complete
-				clientState.notifyComplete(token);
-			}
+			
 		}
 	}
 
