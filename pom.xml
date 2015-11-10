@@ -5,7 +5,7 @@
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0.3-SNAPSHOT</version>
-	
+
 	<properties>
 		<!-- source & target java version for MQTT Client -->
 		<mqttclient.java.version>1.4</mqttclient.java.version>
@@ -18,7 +18,7 @@
 		<test.exclude>**/*ConformantTest.java</test.exclude>
 		<download.location>/home/data/httpd/download.eclipse.org/paho/releases/${project.version}/Java</download.location>
 	</properties>
-	
+
 	<name>Eclipse Paho</name>
 	<url>http://www.eclipse.org/paho</url>
 	<description>
@@ -36,12 +36,12 @@
 			<url>http://www.eclipse.org/org/documents/epl-v10.php</url>
 		</license>
 	</licenses>
-	
+
 	<scm>
 		<url>http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.java.git</url>
 		<connection>scm:git://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.java.git</connection>
 	</scm>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>repo.eclipse.org</id>
@@ -54,7 +54,7 @@
 			<url>https://repo.eclipse.org/content/repositories/paho-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
-	
+
 	<repositories>
 		<repository>
 			<id>eclipse-kepler</id>
@@ -69,7 +69,7 @@
 			<url>https://repo.eclipse.org/content/repositories/cbi-releases/</url>
 		</pluginRepository>
 	</pluginRepositories>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -80,7 +80,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
+
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -159,6 +159,30 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<!--
+					Use the Nexus Staging plugin as a full replacement for the standard
+					Maven Deploy plugin.
+					See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
+					why this makes sense :-)
+					We can control whether we want to deploy to the Eclipse repo or Maven Central
+					by a combination of the version being a SNAPHOT or release version and property
+					skipStaging=true/false.
+					In any case we can take advantage of the plugin's "deferred deploy" feature which
+					makes sure that all artifacts of a multi-module project are deployed as a whole
+					at the end of the build process instead of deploying each module's artifacts
+					individually as part of building the module.
+				 -->
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.5</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>false</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -228,6 +252,34 @@
 						<configuration>
 							<defaultP2Metadata>false</defaultP2Metadata>
 						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!-- this profile generates GPG signatures -->
+			<id>create_gpg_signature</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>createGPGSignature</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
