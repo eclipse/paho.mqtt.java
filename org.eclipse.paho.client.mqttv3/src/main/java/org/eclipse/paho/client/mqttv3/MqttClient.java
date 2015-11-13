@@ -459,6 +459,21 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public String getServerURI() {
 		return aClient.getServerURI();
 	}
+	
+	/**
+	 * Returns the currently connected Server URI
+	 * Implemented due to: https://bugs.eclipse.org/bugs/show_bug.cgi?id=481097
+	 * 
+	 * Where getServerURI only returns the URI that was provided in
+	 * MqttAsyncClient's constructor, getCurrentServerURI returns the URI of the
+	 * Server that the client is currently connected to. This would be different in scenarios
+	 * where multiple server URIs have been provided to the MqttConnectOptions.
+	 * 
+	 * @return the currently connected server URI
+	 */
+	public String getCurrentServerURI(){
+		return aClient.getCurrentServerURI();
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getTopic(java.lang.String)

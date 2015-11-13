@@ -88,4 +88,8 @@ public class LocalNetworkModule implements NetworkModule {
 			}
 		}
 	}
+	
+	public String getServerURI() {
+		return "local://" + brokerName;
+	}
 }

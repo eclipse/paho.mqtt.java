@@ -104,4 +104,8 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 		super.stop();
 	}
 	
+	public String getServerURI() {
+		return "ws://" + host + ":" + port;
+	}
+	
 }
