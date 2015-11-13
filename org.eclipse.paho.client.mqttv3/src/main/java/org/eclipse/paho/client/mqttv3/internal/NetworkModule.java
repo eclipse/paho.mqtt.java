@@ -30,4 +30,6 @@ public interface NetworkModule {
 	public OutputStream getOutputStream() throws IOException;
 	
 	public void stop() throws IOException;
+
+	public String getServerURI();
 }

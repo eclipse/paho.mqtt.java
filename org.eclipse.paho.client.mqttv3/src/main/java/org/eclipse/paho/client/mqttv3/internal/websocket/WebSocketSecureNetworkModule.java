@@ -101,6 +101,9 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 		super.stop();
 	}
 
+	public String getServerURI() {
+		return "wss://" + host + ":" + port;
+	}
 
 
 }
