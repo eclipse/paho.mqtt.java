@@ -104,12 +104,12 @@ public class WebSocketHandshake {
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
 		
-		if(!headerMap.containsKey(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT)){
+		if(!headerMap.containsKey(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT.toLowerCase())){
 			throw new IOException("WebSocket Response header: Missing Sec-WebSocket-Accept");
 		}
 		
 		try {
-			verifyWebSocketKey(key, (String)headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT));
+			verifyWebSocketKey(key, (String)headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT.toLowerCase()));
 		} catch (NoSuchAlgorithmException e) {
 			throw new IOException(e.getMessage());
 		} catch (HandshakeFailedException e) {
@@ -128,7 +128,7 @@ public class WebSocketHandshake {
 		for(int i = 1; i < headers.size(); i++){
 			String headerPre = (String) headers.get(i);
 			String[] header =  headerPre.split(":");
-			headerMap.put(header[0], header[1]);
+			headerMap.put(header[0].toLowerCase(), header[1]);
 		}
 		return headerMap;
 	}
