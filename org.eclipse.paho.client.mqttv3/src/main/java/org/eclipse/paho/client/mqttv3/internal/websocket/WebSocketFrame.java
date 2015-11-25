@@ -144,7 +144,10 @@ public class WebSocketFrame {
 		}
 		
 		// Decode the payload length
-		while (--byteCount > 0){
+		if(byteCount > 0){
+			payloadLength = 0;
+		}
+		while (--byteCount >= 0){
 			maskLengthByte = (byte) input.read();
 			payloadLength |= (maskLengthByte & 0xFF) << (8 * byteCount);
 		}
@@ -157,7 +160,15 @@ public class WebSocketFrame {
 		}
 
 		this.payload = new byte[payloadLength];
-		input.read(this.payload,0,payloadLength);
+		int offsetIndex = 0;
+		int tempLength = payloadLength;
+		int bytesRead = 0;
+		while (offsetIndex != payloadLength){
+				bytesRead = input.read(this.payload,offsetIndex,tempLength);
+				offsetIndex += bytesRead;
+				tempLength -= bytesRead;
+		}
+		
 		
 		// Demask if needed
 		if(masked)

@@ -13,8 +13,11 @@
 
 package org.eclipse.paho.client.mqttv3.test;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -183,6 +186,62 @@ public class WebSocketTest {
       }
     }
   }
+  
+  /**
+   * Tests Websocker support for packets over 16KB
+   * Prompted by Bug: 482432
+   * https://bugs.eclipse.org/bugs/show_bug.cgi?id=482432
+   * This test connects to a broker via WebSockets, subscribes
+   * to a topic, publishes a large payload to it and checks
+   * that it recieves the same payload.
+ * @throws Exception 
+   */
+  @Test
+  public void largePayloadTest() throws Exception{
+	  // Generate large byte array;
+	  byte[] largeByteArray = new byte[32000];
+	  new Random().nextBytes(largeByteArray);
+	  String methodName = Utility.getMethodName();
+	  LoggingUtilities.banner(log, cclass, methodName);
+
+	    IMqttClient client = null;
+	    try {
+	      String topicStr = "topic_largeFile_01";
+	      String clientId = methodName;
+	      client = clientFactory.createMqttClient(serverURI, clientId);
+
+	      log.info("Assigning callback...");
+	      MessageListener listener = new MessageListener();
+	      client.setCallback(listener);
+
+	      log.info("Connecting... serverURI:" + serverURI + ", ClientId:" + clientId);
+	      client.connect();
+
+	      log.info("Subscribing to..." + topicStr);
+	      client.subscribe(topicStr);
+
+	      log.info("Publishing to..." + topicStr);
+	      MqttTopic topic = client.getTopic(topicStr);
+	      MqttMessage message = new MqttMessage(largeByteArray);
+	      topic.publish(message);
+
+	      log.info("Checking msg");
+	      MqttMessage msg = listener.getNextMessage();
+	      Assert.assertNotNull(msg);
+	      Assert.assertTrue(Arrays.equals(largeByteArray, msg.getPayload()));
+	      log.info("Disconnecting...");
+	      client.disconnect();
+	      log.info("Disconnected...");
+	    } catch (Exception e){
+	    	e.printStackTrace();
+	    } finally {
+	      if (client != null) {
+	        log.info("Close...");
+	        client.close();
+	      }
+	    }
+	  
+  }
 
 
 
@@ -211,7 +270,8 @@ public class WebSocketTest {
       synchronized (messages) {
         if (messages.size() == 0) {
           try {
-            messages.wait(1000);
+        	// Wait a bit longer than usual because of the largePayloadTest
+            messages.wait(10000);
           }
           catch (InterruptedException e) {
             // empty
