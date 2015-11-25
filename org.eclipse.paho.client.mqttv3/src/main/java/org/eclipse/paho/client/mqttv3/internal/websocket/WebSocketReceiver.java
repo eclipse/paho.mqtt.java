@@ -69,6 +69,7 @@ public class WebSocketReceiver implements Runnable{
 			if(running) {
 				running = false;
 				receiving = false;
+				closeOutputStream();
 				if( !Thread.currentThread().equals(receiverThread)) {
 					try {
 						// Wait for the thread to finish
@@ -100,10 +101,18 @@ public class WebSocketReceiver implements Runnable{
 				receiving = false;
 				
 			} catch (IOException ex) {
-				
+				// Exception occurred whilst reading the stream. 
+				closeOutputStream();
 			}
 		}
 		
+	}
+	
+	private void closeOutputStream(){
+		try {
+			pipedOutputStream.close();
+		} catch (IOException e) {
+		}
 	}
 	
 
