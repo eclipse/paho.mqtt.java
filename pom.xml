@@ -30,6 +30,18 @@
 		<url>http://www.eclipse.org/paho</url>
 	</organization>
 
+	<developers>
+		<developer>
+			<id>jsutton</id>
+			<name>James Sutton</name>
+			<email>james.sutton@uk.ibm.com</email>
+			<organization>IBM</organization>
+			<organizationUrl>http://www.ibm.com</organizationUrl>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</developer>
+	</developers>
 	<licenses>
 		<license>
 			<name>Eclipse Public License - Version 1.0</name>
