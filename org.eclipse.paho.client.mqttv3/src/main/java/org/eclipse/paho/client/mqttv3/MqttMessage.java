@@ -112,7 +112,8 @@ public class MqttMessage {
 
 	/**
 	 * Whether or not the publish message should be retained by the messaging engine.
-	 * Sending a message with the retained set to <code>false</code> will clear the
+	 * Sending a message with retained set to <code>true</code> and with an empty
+         * byte array as the payload e.g. <code>new byte[0]</code> will clear the
 	 * retained message from the server.  The default value is <code>false</code>
 	 *
 	 * @param retained whether or not the messaging engine should retain the message.
