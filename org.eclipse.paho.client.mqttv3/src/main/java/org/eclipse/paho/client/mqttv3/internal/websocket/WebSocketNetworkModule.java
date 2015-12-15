@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import javax.net.SocketFactory;
@@ -98,6 +99,12 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	 * Stops the module, by closing the TCP socket.
 	 */
 	public void stop() throws IOException {
+		// Creating Close Frame
+		WebSocketFrame frame = new WebSocketFrame((byte)0x08, true, "1000".getBytes());
+		byte[] rawFrame = frame.encodeFrame();
+		getSocketOutputStream().write(rawFrame);
+		getSocketOutputStream().flush();
+		
 		if(webSocketReceiver != null){
 			webSocketReceiver.stop();
 		}
