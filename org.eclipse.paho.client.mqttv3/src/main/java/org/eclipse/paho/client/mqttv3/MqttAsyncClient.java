@@ -411,7 +411,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		case MqttConnectOptions.URI_TYPE_WS:
 			shortAddress = address.substring(5);
 			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 1883);
+			port = getPort(shortAddress, 80);
 			if (factory == null) {
 				factory = SocketFactory.getDefault();
 			}
@@ -424,7 +424,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		case MqttConnectOptions.URI_TYPE_WSS:
 			shortAddress = address.substring(6);
 			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 8883);
+			port = getPort(shortAddress, 443);
 			SSLSocketFactoryFactory wSSFactoryFactory = null;
 			if (factory == null) {
 				wSSFactoryFactory = new SSLSocketFactoryFactory();

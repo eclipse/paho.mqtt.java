@@ -94,6 +94,9 @@ public class WebSocketHandshake {
 		BufferedReader in = new BufferedReader(new InputStreamReader(input));
 		ArrayList responseLines = new ArrayList();
 		String line = in.readLine();
+		if(line == null){
+			throw new IOException("WebSocket Response header: Invalid response from Server, It may not support WebSockets.");
+		}
 		while(!line.equals(EMPTY) ) {
 			responseLines.add(line);
 			line = in.readLine();
