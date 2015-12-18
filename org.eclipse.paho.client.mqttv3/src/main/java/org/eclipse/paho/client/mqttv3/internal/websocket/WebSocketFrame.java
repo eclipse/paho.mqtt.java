@@ -27,6 +27,7 @@ public class WebSocketFrame {
 	private byte opcode;
 	private boolean fin;
 	private byte payload[];
+	private boolean closeFlag = false;
 	
 	public byte getOpcode() {
 		return opcode;
@@ -38,6 +39,10 @@ public class WebSocketFrame {
 
 	public byte[] getPayload() {
 		return payload;
+	}
+	
+	public boolean isCloseFlag() {
+		return closeFlag;
 	}
 
 
@@ -127,57 +132,62 @@ public class WebSocketFrame {
 	public WebSocketFrame(InputStream input) throws IOException {
 		byte firstByte = (byte) input.read();
 		setFinAndOpCode(firstByte);
-		if(this.opcode != 2){
-			throw new IOException("Invalid Frame");
-		}
-		
-		byte maskLengthByte = (byte) input.read();
-		boolean masked = ((maskLengthByte & 0x80) != 0);
-		int payloadLength = (byte)(0x7F & maskLengthByte);
-		int byteCount = 0;
-		if(payloadLength == 0X7F){
-			// 8 Byte Extended payload length
-			byteCount = 8;
-		} else if (payloadLength == 0X7E){
-			// 2 bytes extended payload length
-			byteCount = 2;
-		}
-		
-		// Decode the payload length
-		if(byteCount > 0){
-			payloadLength = 0;
-		}
-		while (--byteCount >= 0){
-			maskLengthByte = (byte) input.read();
-			payloadLength |= (maskLengthByte & 0xFF) << (8 * byteCount);
-		}
-		
-		// Get the masking key
-		byte maskingKey[] = null;
-		if(masked) {
-			maskingKey = new byte[4];
-			input.read(maskingKey,0,4);
-		}
-
-		this.payload = new byte[payloadLength];
-		int offsetIndex = 0;
-		int tempLength = payloadLength;
-		int bytesRead = 0;
-		while (offsetIndex != payloadLength){
-				bytesRead = input.read(this.payload,offsetIndex,tempLength);
-				offsetIndex += bytesRead;
-				tempLength -= bytesRead;
-		}
-		
-		
-		// Demask if needed
-		if(masked)
-		{
-			for(int i = 0; i < this.payload.length; i++){
-				this.payload[i] ^= maskingKey[i % 4];
+		if(this.opcode == 2){
+			byte maskLengthByte = (byte) input.read();
+			boolean masked = ((maskLengthByte & 0x80) != 0);
+			int payloadLength = (byte)(0x7F & maskLengthByte);
+			int byteCount = 0;
+			if(payloadLength == 0X7F){
+				// 8 Byte Extended payload length
+				byteCount = 8;
+			} else if (payloadLength == 0X7E){
+				// 2 bytes extended payload length
+				byteCount = 2;
 			}
+			
+			// Decode the payload length
+			if(byteCount > 0){
+				payloadLength = 0;
+			}
+			while (--byteCount >= 0){
+				maskLengthByte = (byte) input.read();
+				payloadLength |= (maskLengthByte & 0xFF) << (8 * byteCount);
+			}
+			
+			// Get the masking key
+			byte maskingKey[] = null;
+			if(masked) {
+				maskingKey = new byte[4];
+				input.read(maskingKey,0,4);
+			}
+
+			this.payload = new byte[payloadLength];
+			int offsetIndex = 0;
+			int tempLength = payloadLength;
+			int bytesRead = 0;
+			while (offsetIndex != payloadLength){
+					bytesRead = input.read(this.payload,offsetIndex,tempLength);
+					offsetIndex += bytesRead;
+					tempLength -= bytesRead;
+			}
+			
+			
+			// Demask if needed
+			if(masked)
+			{
+				for(int i = 0; i < this.payload.length; i++){
+					this.payload[i] ^= maskingKey[i % 4];
+				}
+			}
+			return;
+		} else if(this.opcode == 8){
+			// Closing connection with server
+			closeFlag = true;
+		} else {
+			throw new IOException("Invalid Frame: Opcode: " +this.opcode);
 		}
-		return;
+		
+		
 	}
 
 
@@ -288,6 +298,9 @@ public class WebSocketFrame {
 		int d = randomGenerator.nextInt(255);
 		return new byte[] {(byte) a,(byte) b,(byte) c,(byte) d};
 	}
+
+
+
 	
 
 }

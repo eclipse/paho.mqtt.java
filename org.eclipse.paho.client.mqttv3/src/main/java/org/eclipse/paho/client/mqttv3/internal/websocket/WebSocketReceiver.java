@@ -29,6 +29,7 @@ public class WebSocketReceiver implements Runnable{
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	
 	private boolean running = false;
+	private boolean stopping = false;
 	private Object lifecycle = new Object();
 	private InputStream input;
 	private Thread receiverThread = null;
@@ -63,6 +64,7 @@ public class WebSocketReceiver implements Runnable{
 	 */
 	public void stop() {
 		final String methodName = "stop";
+		stopping = true;
 		synchronized (lifecycle) {
 			//@TRACE 850=stopping
 			log.fine(CLASS_NAME,methodName, "850");
@@ -94,18 +96,27 @@ public class WebSocketReceiver implements Runnable{
 				log.fine(CLASS_NAME, methodName, "852");
 				receiving = input.available() > 0;
 				WebSocketFrame incomingFrame = new WebSocketFrame(input);
+				if(!incomingFrame.isCloseFlag()){
 				for(int i = 0; i < incomingFrame.getPayload().length; i++){
 					pipedOutputStream.write(incomingFrame.getPayload()[i]);
 				}
+				
 				pipedOutputStream.flush();
+				} else {
+					if(!stopping){
+						throw new IOException("Server sent a WebSocket Frame with the Stop OpCode");
+					}
+				}
+				
 				receiving = false;
 				
 			} catch (IOException ex) {
 				// Exception occurred whilst reading the stream. 
+				System.out.println("WebSocketReceiver.java : run(): Exception Occured.");
+				ex.printStackTrace();
 				closeOutputStream();
 			}
 		}
-		
 	}
 	
 	private void closeOutputStream(){
