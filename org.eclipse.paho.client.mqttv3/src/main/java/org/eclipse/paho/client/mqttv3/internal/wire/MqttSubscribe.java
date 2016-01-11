@@ -128,6 +128,7 @@ public class MqttSubscribe extends MqttWireMessage {
 				encodeUTF8(dos,names[i]);
 				dos.writeByte(qos[i]);
 			}
+			dos.flush();
 			return baos.toByteArray();
 		} catch (IOException ex) {
 			throw new MqttException(ex);

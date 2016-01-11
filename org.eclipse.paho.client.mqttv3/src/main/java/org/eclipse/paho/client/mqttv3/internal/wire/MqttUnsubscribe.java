@@ -104,6 +104,7 @@ public class MqttUnsubscribe extends MqttWireMessage {
 		for (int i=0; i<names.length; i++) {
 			encodeUTF8(dos, names[i]);
 		}
+		dos.flush();
 		return baos.toByteArray();
 	}
 
