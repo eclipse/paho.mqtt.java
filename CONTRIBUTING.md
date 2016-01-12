@@ -20,16 +20,18 @@ Please read the [Eclipse Foundation policy on accepting contributions via Git](h
 
 ## Contributing a change
 
-1. Fork the repository on GitHub
-2. Clone the forked repository onto your computer: ``` git clone https://github.com/eclipse/paho.mqtt.java.git ```
-3. Checkout the remote ```develop``` branch: ``` git checkout -b develop remotes/origin/develop ```
+## Contributing a change
+
+1. [Fork the repository on GitHub](https://github.com/eclipse/paho.mqtt.java/fork)
+2. Clone the forked repository onto your computer: ``` git clone https://github.com/<your username>/paho.mqtt.java.git ```
+3. Create a new branch from the latest ```develop``` branch with ```git checkout -b YOUR_BRANCH_NAME origin/develop```
 4. Make your changes
 5. If developing a new feature, make sure to include JUnit tests.
-6. Ensure that all tests pass.
+6. Ensure that all new and existing tests pass.
 7. Commit the changes into the branch: ``` git commit -s ``` Make sure that your commit message is meaningful and describes your changes correctly.
-8. If you have a lot of commits for the change, squash them into a single commit.
-9. Push the changes to the develop branch in your forked repository.
-10. Finally, submit a pull request using the normal GitHub Web Interface.
+8. If you have a lot of commits for the change, squash them into a single / few commits.
+9. Push the changes in your branch to your forked repository.
+10. Finally, go to [https://github.com/eclipse/paho.mqtt.java](https://github.com/eclipse/paho.mqtt.java) and create a pull request from your "YOUR_BRANCH_NAME" branch to the ```develop``` one to request review and merge of the commits in your pushed branch.
 
 
 What happens next depends on the content of the patch. If it is 100% authored
