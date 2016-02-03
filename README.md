@@ -54,7 +54,7 @@ The latest release version is ```1.0.2``` and the current snapshot version is ``
 
 If you find that there is functionality missing or bugs in the release version, you may want to try using the snapshot version to see if this helps before raising a feature request or an issue.
 
-### Builing from source
+### Building from source
 
 There are two active branches on the Paho Java git repository, ```master``` which is used to produce stable releases, and ```develop``` where active development is carried out. By default cloning the git repository will download the ```master``` branch, to build from ```develop``` make sure you switch to the remote branch: ``` git checkout -b develop remotes/origin/develop ```
 
