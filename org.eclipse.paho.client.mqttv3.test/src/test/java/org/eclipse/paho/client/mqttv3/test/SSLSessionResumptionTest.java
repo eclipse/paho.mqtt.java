@@ -1,31 +1,41 @@
-/* Copyright (c) 2009, 2014 IBM Corp.
+/**
+ * Copyright (c) 2011, 2014 Eurotech and/or its affiliates
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
  *
- * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
- *
- *******************************************************************************/
+ * Contributors:
+ *   Cristiano De Alti - Eurotech (Initial contribution)
+ *   James Sutton - IBM (Fixing Copyright header and adding getSocketFactory)
+ */
 
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSessionContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
+import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
+import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 
@@ -39,13 +49,32 @@ public class SSLSessionResumptionTest {
   private static final String className = cclass.getName();
   private static final Logger log = Logger.getLogger(className);
   
-  //private static final String HOST = "iot.eclipse.org";
-  private static final String HOST = "broker-sandbox.everyware-cloud.com";
-  private static final int PORT = 8883;
-  private static final String HOST_URI = "ssl://"+HOST+":"+PORT;
-  private static final String USERNAME = "";
-  private static final char[] PASSWORD = "".toCharArray();
-  private static final String PROTOCOL = "TLSv1";
+  
+  private static String serverURI;
+  private static String serverHost;
+  private static int serverPort;
+  private static final String certificateName = "iot.eclipse.org.crt";
+
+  
+  /**
+   * @throws Exception 
+   */
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+
+    try {
+      String methodName = Utility.getMethodName();
+      LoggingUtilities.banner(log, cclass, methodName);
+      serverURI = "ssl://" + TestProperties.getServerURI().getHost();
+      serverHost = TestProperties.getServerURI().getHost();
+      serverPort = TestProperties.getServerSSLPort();
+
+    }
+    catch (Exception exception) {
+      log.log(Level.SEVERE, "caught exception:", exception);
+      throw exception;
+    }
+  }
 
   /**
    * This test involves inspecting the SSL debug log
@@ -59,22 +88,19 @@ public class SSLSessionResumptionTest {
    */
   @Test
   public void testSSLSessionInvalidated() throws Exception {
-	  System.setProperty("javax.net.debug", "all");
+	  //System.setProperty("javax.net.debug", "all");
 
-	  SSLSocketFactory factory =
-	  (SSLSocketFactory)SSLSocketFactory.getDefault();
-//	  SSLSocketFactory factory = getSSLSocketFactory(PROTOCOL);
+	  SSLSocketFactory factory = getSocketFactory(certificateName);
 	  
 	  MqttConnectOptions options = new MqttConnectOptions();
-	  options.setServerURIs(new String[] {HOST_URI});
-	  options.setUserName(USERNAME);
-	  options.setPassword(PASSWORD);
+	  options.setServerURIs(new String[] {serverURI});
 	  options.setKeepAliveInterval(60);
 	  options.setSocketFactory(factory);
 	  
-	  MqttClient mqttClient = new MqttClient(HOST_URI, MqttClient.generateClientId());
+	  MqttClient mqttClient = new MqttClient(serverURI, MqttClient.generateClientId());
 	  
-	  log.info("Connecting to: " + HOST_URI);
+	  
+	  log.info("Connecting to: " + serverURI);
 	  mqttClient.connect(options);
 	  
 	  Thread.sleep(2000);
@@ -92,22 +118,6 @@ public class SSLSessionResumptionTest {
 	  log.info("Disconnetting...");
 	  mqttClient.disconnect();
 	  
-//	  log.info("Connecting again (3)...");
-//	  mqttClient.connect(options);
-//	  log.info("Connected (3)!");
-//	  while (mqttClient.isConnected()) {
-//		  Thread.sleep(1000);
-//	  }
-//	  
-//	  log.info("Connection lost! Restore link in 30s");
-//	  
-//	  Thread.sleep(30000);
-//	  
-//	  log.info("Connection lost! Reconnecting (4)");
-//	  mqttClient.connect(options);
-//	  
-//	  log.info("Disconnetting (4)...");
-//	  mqttClient.disconnect();
   }
 
   /**
@@ -122,18 +132,16 @@ public class SSLSessionResumptionTest {
    */
   @Test
   public void testSSLSessionCached() throws Exception {
-	  System.setProperty("javax.net.debug", "all");
+	 // System.setProperty("javax.net.debug", "all");
 	  
-	  SSLSocketFactory factory =
-			  (SSLSocketFactory)SSLSocketFactory.getDefault();
-//	  SSLSocketFactory factory = getSSLSocketFactory(PROTOCOL);
+	  SSLSocketFactory factory = getSocketFactory(certificateName);
 
 	  
 	  log.info("Do handshake...");
-	  doHandshake(factory, HOST, PORT);
+	  doHandshake(factory, serverHost, serverPort);
 
 	  log.info("Done! Redo handshake... An abbreviated SSL handshake will be performed");
-	  doHandshake(factory, HOST, PORT);
+	  doHandshake(factory, serverHost, serverPort);
 	  
 	  log.info("Done!");
   }
@@ -169,16 +177,17 @@ public class SSLSessionResumptionTest {
 	  }
   }
   
-  private SSLSocketFactory getSSLSocketFactory(String protocol) throws Exception {
-	  SSLContext sslCtx = null;
-	  if (protocol == null) {
-		  sslCtx = SSLContext.getDefault();
-	  }
-	  else {
-		  sslCtx = SSLContext.getInstance(protocol);
-		  sslCtx.init(null, null, null);
-	  }
-	  
-	  return sslCtx.getSocketFactory();
-  }
+  private static SSLSocketFactory getSocketFactory(String certificateName) throws Exception {
+  		InputStream certStream = SSLSessionResumptionTest.class.getClassLoader().getResourceAsStream(certificateName);
+  		CertificateFactory certFactory = CertificateFactory.getInstance("X509");
+      Certificate certificate =  certFactory.generateCertificate(certStream);
+      SSLContext sslContext = SSLContext.getInstance("TLS");
+      TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+  		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+  		keyStore.load(null);
+  		keyStore.setCertificateEntry("alias", certificate);
+  		trustManagerFactory.init(keyStore);
+  		sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
+  		return sslContext.getSocketFactory();
+    }
 }
