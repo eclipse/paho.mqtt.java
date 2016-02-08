@@ -80,7 +80,12 @@ public class CommsReceiver implements Runnable {
 				if (!Thread.currentThread().equals(recThread)) {
 					try {
 						// Wait for the thread to finish.
-						recThread.join();
+						// It is always a good idea to set a timeout.
+						// WARNING: the timeout must be correlated with the
+						// socket read timeout.
+						// Unfortunately we cannot access the socket here to
+						// get its read timeout.
+						recThread.join(1500);
 					}
 					catch (InterruptedException ex) {
 					}
@@ -107,6 +112,7 @@ public class CommsReceiver implements Runnable {
 				MqttWireMessage message = in.readMqttWireMessage();
 				receiving = false;
 				
+				// instanceof checks if message is null
 				if (message instanceof MqttAck) {
 					token = tokenStore.getToken(message);
 					if (token!=null) {
@@ -123,8 +129,10 @@ public class CommsReceiver implements Runnable {
 						throw new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 					}
 				} else {
-					// A new message has arrived
-					clientState.notifyReceivedMsg(message);
+					if (message != null) {
+						// A new message has arrived
+						clientState.notifyReceivedMsg(message);
+					}
 				}
 			}
 			catch (MqttException ex) {
