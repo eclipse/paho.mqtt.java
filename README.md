@@ -18,7 +18,7 @@ Paho reflects the inherent physical and cost constraints of device connectivity.
 - Paho Java Client Page: [https://eclipse.org/paho/clients/java/](https://eclipse.org/paho/clients/java)
 - GitHub: [https://github.com/eclipse/paho.mqtt.java](https://github.com/eclipse/paho.mqtt.java)
 - Twitter: [@eclipsepaho](https://twitter.com/eclipsepaho)
-- Issues: Currently [https://bugs.eclipse.org/bugs/buglist.cgi?component=MQTT-Java](https://bugs.eclipse.org/bugs/buglist.cgi?component=MQTT-Java), though will soon be GitHub Issues.
+- Issues: [https://github.com/eclipse/paho.mqtt.java/issues](https://github.com/eclipse/paho.mqtt.java/issues)
 - Mailing-list: [https://dev.eclipse.org/mailman/listinfo/paho-dev](https://dev.eclipse.org/mailman/listinfo/paho-dev)
 
 ## Using the Paho Java Client
