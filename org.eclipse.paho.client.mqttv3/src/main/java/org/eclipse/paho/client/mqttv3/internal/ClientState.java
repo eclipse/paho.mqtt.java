@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corp.
+ * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@
  *    Ian Craggs - ack control (bug 472172)
  *    James Sutton - Ping Callback (bug 473928)
  *    Ian Craggs - fix for NPE bug 470718
+ *    James Sutton - Automatic Reconnect & Offline Buffering
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -96,6 +97,7 @@ public class ClientState {
 	private static final String CLASS_NAME = ClientState.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 	private static final String PERSISTENCE_SENT_PREFIX = "s-";
+	private static final String PERSISTENCE_SENT_BUFFERED_PREFIX = "sb-";
 	private static final String PERSISTENCE_CONFIRMED_PREFIX = "sc-";
 	private static final String PERSISTENCE_RECEIVED_PREFIX = "r-";
 	
@@ -133,6 +135,7 @@ public class ClientState {
 	
 	private Hashtable outboundQoS2 = null;
 	private Hashtable outboundQoS1 = null;
+	private Hashtable outboundQoS0 = null;
 	private Hashtable inboundQoS2 = null;
 	
 	private MqttPingSender pingSender = null;
@@ -147,6 +150,7 @@ public class ClientState {
 		pendingFlows = new Vector();
 		outboundQoS2 = new Hashtable();
 		outboundQoS1 = new Hashtable();
+		outboundQoS0 = new Hashtable();
 		inboundQoS2 = new Hashtable();
 		pingCommand = new MqttPingReq();
 		inFlightPubRels = 0;
@@ -194,6 +198,10 @@ public class ClientState {
 		return PERSISTENCE_RECEIVED_PREFIX + messageId;
 	}
 	
+	private String getSendBufferedPersistenceKey(MqttWireMessage message){
+		return PERSISTENCE_SENT_BUFFERED_PREFIX + message.getMessageId();
+	}
+	
 	protected void clearState() throws MqttException {
 		final String methodName = "clearState";
 		//@TRACE 603=clearState
@@ -205,6 +213,7 @@ public class ClientState {
 		pendingFlows.clear();
 		outboundQoS2.clear();
 		outboundQoS1.clear();
+		outboundQoS0.clear();
 		inboundQoS2.clear();
 		tokenStore.clear();
 	}
@@ -361,8 +370,28 @@ public class ClientState {
 					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put(new Integer(sendMessage.getMessageId()),new Integer(sendMessage.getMessageId()));
-				}
-				else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {
+				} else if(key.startsWith(PERSISTENCE_SENT_BUFFERED_PREFIX)){
+					// Buffered outgoing messages that have not yet been sent at all
+					MqttPublish sendMessage = (MqttPublish) message;
+					highestMsgId = Math.max(sendMessage.getMessageId(), highestMsgId);
+					if(sendMessage.getMessage().getQos() == 2){
+						//@TRACE 607=outbound QoS 2 publish key={0} message={1}
+						log.fine(CLASS_NAME,methodName, "607", new Object[]{key,message});
+						outboundQoS2.put(new Integer(sendMessage.getMessageId()),sendMessage);
+					} else if(sendMessage.getMessage().getQos() == 1){
+						//@TRACE 608=outbound QoS 1 publish key={0} message={1}
+						log.fine(CLASS_NAME,methodName, "608", new Object[]{key,message});
+
+						outboundQoS1.put(new Integer(sendMessage.getMessageId()),sendMessage);
+						
+					} else {
+						//@TRACE 511=outbound QoS 0 publish key={0} message={1}
+						log.fine(CLASS_NAME,methodName, "511", new Object[]{key,message});
+						outboundQoS0.put(new Integer(sendMessage.getMessageId()), sendMessage);
+					}
+					
+					
+				} else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {
 					MqttPubRel pubRelMessage = (MqttPubRel) message;
 					if (!persistence.containsKey(getSendPersistenceKey(pubRelMessage))) {
 						orphanedPubRels.addElement(key);
@@ -414,6 +443,15 @@ public class ClientState {
 			log.fine(CLASS_NAME,methodName, "612", new Object[]{key});
 
 			insertInOrder(pendingMessages, msg);
+		}
+		keys = outboundQoS0.keys();
+		while(keys.hasMoreElements()){
+			Object key = keys.nextElement();
+			MqttPublish msg = (MqttPublish)outboundQoS0.get(key);
+			//@TRACE 512=QoS 0 publish key={0}
+			log.fine(CLASS_NAME,methodName, "512", new Object[]{key});
+			insertInOrder(pendingMessages, msg);
+			
 		}
 		
 		this.pendingFlows = reOrder(pendingFlows);
@@ -501,6 +539,43 @@ public class ClientState {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Persists a buffered message to the persistence layer
+	 * 
+	 * @param message
+	 * @throws MqttPersistenceException
+	 */
+	public void persistBufferedMessage(MqttWireMessage message) {
+		final String methodName = "persistBufferedMessage";
+		String key = getSendBufferedPersistenceKey(message);
+		
+		// Because the client will have disconnected, we will want to re-open persistence
+		try {
+			message.setMessageId(getNextMessageId());
+			try {
+				persistence.put(key, (MqttPublish) message);
+			} catch (MqttPersistenceException mpe){
+				//@TRACE 515=Could not Persist, attempting to Re-Open Persistence Store
+				log.fine(CLASS_NAME,methodName, "515");
+				// TODO - Relies on https://github.com/eclipse/paho.mqtt.java/issues/178
+				persistence.open(this.clientComms.getClient().getClientId(), this.clientComms.getClient().getClientId());
+				persistence.put(key, (MqttPublish) message);
+			}
+			//@TRACE 513=Persisted Buffered Message key={0}
+			log.fine(CLASS_NAME,methodName, "513", new Object[]{key});
+		} catch (MqttException ex){
+			//@TRACE 514=Failed to persist buffered message key={0}
+			log.warning(CLASS_NAME,methodName, "513", new Object[]{key});
+		} 
+	}
+	
+	public void unPersistBufferedMessage(MqttWireMessage message) throws MqttPersistenceException {
+		final String methodName = "unPersistBufferedMessage";
+		//@TRACE 515=Un-Persisting Buffered message key={0}
+		log.fine(CLASS_NAME,methodName, "513", new Object[]{message.getKey()});
+		persistence.remove(getSendBufferedPersistenceKey(message));
 	}
 	
 	/**
@@ -1263,6 +1338,7 @@ public class ClientState {
 		pendingFlows.clear();
 		outboundQoS2.clear();
 		outboundQoS1.clear();
+		outboundQoS0.clear();
 		inboundQoS2.clear();
 		tokenStore.clear();
 		inUseMsgIds = null;
@@ -1270,6 +1346,7 @@ public class ClientState {
 		pendingFlows = null;
 		outboundQoS2 = null;
 		outboundQoS1 = null;
+		outboundQoS0 = null;
 		inboundQoS2 = null;
 		tokenStore = null;
 		callback = null;
@@ -1293,6 +1370,7 @@ public class ClientState {
 		props.put("lastInboundActivity", new Long(lastInboundActivity));
 		props.put("outboundQoS2", outboundQoS2);
 		props.put("outboundQoS1", outboundQoS1);
+		props.put("outboundQoS0", outboundQoS0);
 		props.put("inboundQoS2", inboundQoS2);
 		props.put("tokens", tokenStore);
 		return props;

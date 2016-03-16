@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corp.
+ * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,8 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - per subscription message handlers (bug 466579)
- *    Ian Craggs - ack control (bug 472172)    
+ *    Ian Craggs - ack control (bug 472172)
+ *    James Sutton - Automatic Reconnect & Offline Buffering    
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -24,6 +25,7 @@ import java.util.Vector;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -46,6 +48,7 @@ public class CommsCallback implements Runnable {
 
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
+	private MqttCallbackExtended reconnectInternalCallback;
 	private Hashtable callbacks; // topicFilter -> messageHandler
 	private ClientComms clientComms;
 	private Vector messageQueue;
@@ -123,6 +126,10 @@ public class CommsCallback implements Runnable {
 
 	public void setCallback(MqttCallback mqttCallback) {
 		this.mqttCallback = mqttCallback;
+	}
+	
+	public void setReconnectCallback(MqttCallbackExtended callback){
+		this.reconnectInternalCallback = callback;
 	}
 	
 	public void setManualAcks(boolean manualAcks) {
@@ -260,6 +267,9 @@ public class CommsCallback implements Runnable {
 				// @TRACE 708=call connectionLost
 				log.fine(CLASS_NAME, methodName, "708", new Object[] { cause });
 				mqttCallback.connectionLost(cause);
+			}
+			if(reconnectInternalCallback != null && cause != null){
+				reconnectInternalCallback.connectionLost(cause);
 			}
 		} catch (java.lang.Throwable t) {
 			// Just log the fact that a throwable has caught connection lost 

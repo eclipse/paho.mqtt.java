@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    James Sutton - Automatic Reconnect & Offline Buffering
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -70,6 +71,7 @@ public class MqttConnectOptions {
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	private String[] serverURIs = null;
 	private int MqttVersion = MQTT_VERSION_DEFAULT;
+	private boolean automaticReconnect = false;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
@@ -527,6 +529,33 @@ public class MqttConnectOptions {
 		}
 		this.MqttVersion = MqttVersion;
 	}
+	
+	/**
+	 * Returns whether the client will automatically attempt to reconnect to the
+	 * server if the connection is lost
+	 * @return the automatic reconnection flag.
+	 */
+	public boolean isAutomaticReconnect() {
+		return automaticReconnect;
+	}
+
+	/**
+	 * Sets whether the client will automatically attempt to reconnect to the
+	 * server if the connection is lost.
+	 * <ul>
+	 * <li>If set to false, the client will not attempt to automatically
+	 *  reconnect to the server in the event that the connection is lost.</li>
+	 *  <li>If set to true, in the event that the connection is lost, the client
+	 *  will attempt to reconnect to the server. It will initially wait 1 second before
+	 *  it attempts to reconnect, for every failed reconnect attempt, the delay will double
+	 *  until it is at 2 minutes at which point the delay will stay at 2 minutes.</li>
+	 * </ul>
+	 * @param automaticReconnect
+	 */
+	public void setAutomaticReconnect(boolean automaticReconnect) {
+		this.automaticReconnect = automaticReconnect;
+	}
+	
 
 	public Properties getDebug() {
 		final String strNull="null";
