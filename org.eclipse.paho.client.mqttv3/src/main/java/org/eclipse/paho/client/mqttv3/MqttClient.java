@@ -519,6 +519,10 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public static String generateClientId() {
 		return MqttAsyncClient.generateClientId();
 	}
+	
+	public void reconnect() throws MqttException {
+		aClient.reconnect();
+	}
 
 	/**
 	 * Return a debug object that can be used to help solve problems.

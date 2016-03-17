@@ -1047,6 +1047,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		if (comms.isClosed()) {
 			throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
 		}
+		// We don't want to spam the server
+		stopReconnectCycle();
+
 		attemptReconnect();
 	}
 	
@@ -1071,7 +1074,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 				public void onSuccess(IMqttToken asyncActionToken) {
 					//@Trace 501=Automatic Reconnect Successful: {0}
 					log.fine(CLASS_NAME, methodName, "501", new Object[]{asyncActionToken.getClient().getClientId()});
-					comms.setRestingState(true);
+					comms.setRestingState(false);
 					stopReconnectCycle();
 				}
 				
@@ -1109,6 +1112,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		//@Trace 504=Stop reconnect timer for client: {0}
 		log.fine(CLASS_NAME, methodName, "504", new Object[]{this.clientId});
 		reconnectTimer.cancel();
+		reconnectDelay = 1000; // Reset Delay Timer
+		
 	}
 	
 	private void rescheduleReconnectCycle(int delay){
