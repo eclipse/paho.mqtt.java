@@ -21,6 +21,8 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	private boolean enableProxy = true;
 	private boolean running = true;
 	Socket client = null, server = null;
+	ServerSocket serverSocket = null;
+	
 
 	public ConnectionManipulationProxyServer(String host, int remotePort, int localPort) {
 		this.localPort = localPort;
@@ -52,10 +54,13 @@ public class ConnectionManipulationProxyServer implements Runnable {
 		synchronized (enableLock) {
 			enableProxy = false;
 		}
+		killOpenSockets();
+		// Give it a second to close down
 		try {
-			client.close();
-			server.close();
-		} catch (IOException e) {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -64,18 +69,29 @@ public class ConnectionManipulationProxyServer implements Runnable {
 			enableProxy = false;
 		}
 		running = false;
+		killOpenSockets();
+	}
+	
+	private void killOpenSockets(){
 		try {
-			client.close();
-			server.close();
-		} catch (IOException e) {
-		}	
+			if(serverSocket != null){
+				serverSocket.close();
+			}
+			if(client != null){
+				client.close();
+			}
+			if(server != null){	
+				server.close();
+			}
+		} catch (IOException ex){
+			// Do nothing as we want to close;
+		}
 	}
 
 	@Override
 	public void run() {
 		try {
-			//Create the Listening Server
-			ServerSocket serverSocket = new ServerSocket(localPort);
+			
 			final byte[] request = new byte[1024];
 			byte[] reply = new byte[4096];
 			boolean canIrun = true;
@@ -83,12 +99,26 @@ public class ConnectionManipulationProxyServer implements Runnable {
 				synchronized (enableLock) {
 					canIrun = enableProxy;
 				}
+				
 				while(canIrun){
-					log.fine("Waiting for incoming connection");
+					synchronized (enableLock) {
+						canIrun = enableProxy;
+						if(!enableProxy){
+							break;
+						}
+					}
+					if(serverSocket == null|| serverSocket.isClosed()){
+						serverSocket = new ServerSocket(localPort);
+					}
+					
+					
+
+					//log.fine("Proxy: Waiting for incoming connection");
 					
 					try {
 						// Wait for a connection on the local Port
 						client = serverSocket.accept();
+						
 						log.fine("Proxy: Client Opened Connection to Proxy...");
 						
 						final InputStream streamFromClient = client.getInputStream();
@@ -150,6 +180,8 @@ public class ConnectionManipulationProxyServer implements Runnable {
 					
 					}  catch (IOException ex) {
 						//log.warning("Proxy: 3 Connection lost: " + ex.getMessage());
+						//ex.printStackTrace();
+						break;
 					} finally {
 						try {
 							if(server != null){

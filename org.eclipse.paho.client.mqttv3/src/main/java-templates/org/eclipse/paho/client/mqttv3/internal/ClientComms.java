@@ -793,6 +793,11 @@ public class ClientComms {
 				
 				public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
 					if (isConnected()) {
+						while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-1)){
+							// We need to Yield to the other threads to allow the in flight messages to clear
+							Thread.yield();
+							
+						}
 						//@TRACE 510=Publising Buffered message message={0}
 						log.fine(CLASS_NAME, methodName, "510", new Object[] {bufferedMessage.getMessage().getKey()});
 						internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());

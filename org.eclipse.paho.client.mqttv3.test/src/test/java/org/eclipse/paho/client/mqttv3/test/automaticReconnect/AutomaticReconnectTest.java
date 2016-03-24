@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
@@ -51,6 +52,7 @@ public class AutomaticReconnectTest{
 		proxy.stopProxy();
 		
 	}
+	
 
 	/**
 	 * Tests that if a connection is opened and then is lost that the client automatically reconnects
@@ -73,9 +75,6 @@ public class AutomaticReconnectTest{
     	Assert.assertTrue(isConnected);
     	
     	proxy.disableProxy();
-    	
-    	// Give it a second to close everything down
-    	Thread.sleep(100);
     	isConnected = client.isConnected();
     	log.info("Proxy Disconnect isConnected: " + isConnected);
     	Assert.assertFalse(isConnected);
@@ -83,7 +82,7 @@ public class AutomaticReconnectTest{
     	proxy.enableProxy();
     	// give it some time to reconnect
     	long currentTime = System.currentTimeMillis();
-    	int timeout = 16000;
+    	int timeout = 4000;
     	while(client.isConnected() ==  false){
     		long now = System.currentTimeMillis();
     		if((currentTime + timeout) < now){
@@ -121,9 +120,6 @@ public class AutomaticReconnectTest{
     	Assert.assertTrue(isConnected);
     	
     	proxy.disableProxy();
-    	
-    	// Give it a second to close everything down
-    	Thread.sleep(100);
     	isConnected = client.isConnected();
     	log.info("Proxy Disconnect isConnected: " + isConnected);
     	Assert.assertFalse(isConnected);
@@ -131,7 +127,7 @@ public class AutomaticReconnectTest{
     	proxy.enableProxy();
     	client.reconnect();
     	// give it some time to reconnect
-    	Thread.sleep(5000);
+    	Thread.sleep(4000);
     	isConnected = client.isConnected();
     	log.info("Proxy Re-Enabled isConnected: " + isConnected);
     	Assert.assertTrue(isConnected);
@@ -140,4 +136,48 @@ public class AutomaticReconnectTest{
 	}
 
 
+	/**
+	 * Tests that if the initial connection attempt fails, that the automatic reconnect code does NOT
+	 * engage.
+	 */
+	@Test
+	public void testNoAutomaticReconnectWithNoInitialConnect() throws Exception {
+		 String methodName = Utility.getMethodName();
+		    LoggingUtilities.banner(log, cclass, methodName);
+	    	MqttConnectOptions options = new MqttConnectOptions();
+	    	options.setCleanSession(true);
+	    	options.setAutomaticReconnect(true);
+	    	options.setConnectionTimeout(15);
+	    	final MqttClient client = new MqttClient("tcp://localhost:4242", clientId, DATA_STORE);
+	    	
+	    	// Make sure the proxy is disabled and give it a second to close everything down
+	    	proxy.disableProxy();
+	    	try {
+	    	client.connect(options);
+	    	} catch (MqttException ex) {
+	    		// Exceptions are good in this case!
+	    	}
+	    	boolean isConnected = client.isConnected();
+	    	log.info("First Connection isConnected: " + isConnected);
+	    	Assert.assertFalse(isConnected);
+	    	
+	    	// Enable The Proxy
+	    	proxy.enableProxy();
+	    	
+	    	// Give it some time to make sure we are still not connected
+	    	long currentTime = System.currentTimeMillis();
+	    	int timeout = 4000;
+	    	while(client.isConnected() ==  false){
+	    		long now = System.currentTimeMillis();
+	    		if((currentTime + timeout) < now){
+	    			Assert.assertFalse(isConnected);
+	    			break;
+	    		}
+	    		Thread.sleep(500);
+	    	}
+	    	isConnected = client.isConnected();
+	    	log.info("Proxy Re-Enabled isConnected: " + isConnected);
+	    	Assert.assertFalse(isConnected);
+
+	}
 }

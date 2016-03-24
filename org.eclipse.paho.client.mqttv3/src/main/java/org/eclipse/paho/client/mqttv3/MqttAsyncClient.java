@@ -1150,7 +1150,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	}
 	
 	public void deleteBufferedMessage(int bufferIndex){
-		this.comms.deleteBufferedMessage(bufferIndex);;
+		this.comms.deleteBufferedMessage(bufferIndex);
 	}
 	
 

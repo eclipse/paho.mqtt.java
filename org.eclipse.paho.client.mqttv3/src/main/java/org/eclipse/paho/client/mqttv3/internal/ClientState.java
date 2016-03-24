@@ -371,6 +371,7 @@ public class ClientState {
 					tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put(new Integer(sendMessage.getMessageId()),new Integer(sendMessage.getMessageId()));
 				} else if(key.startsWith(PERSISTENCE_SENT_BUFFERED_PREFIX)){
+					
 					// Buffered outgoing messages that have not yet been sent at all
 					MqttPublish sendMessage = (MqttPublish) message;
 					highestMsgId = Math.max(sendMessage.getMessageId(), highestMsgId);
@@ -388,7 +389,14 @@ public class ClientState {
 						//@TRACE 511=outbound QoS 0 publish key={0} message={1}
 						log.fine(CLASS_NAME,methodName, "511", new Object[]{key,message});
 						outboundQoS0.put(new Integer(sendMessage.getMessageId()), sendMessage);
+						// Because there is no Puback, we have to trust that this is enough to send the message
+						persistence.remove(key);
+						
 					}
+					
+					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
+					tok.internalTok.setClient(clientComms.getClient());
+					inUseMsgIds.put(new Integer(sendMessage.getMessageId()),new Integer(sendMessage.getMessageId()));
 					
 					
 				} else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {
@@ -770,6 +778,7 @@ public class ClientState {
 		
 					checkQuiesceLock();
 				} else if (!pendingMessages.isEmpty()) {
+					
 					// If the inflight window is full then messages are not 
 					// processed until the inflight window has space. 
 					if (actualInFlight < this.maxInflight) {
@@ -1063,11 +1072,13 @@ public class ClientState {
 	 * @throws MqttException
 	 */
 	protected void notifyComplete(MqttToken token) throws MqttException {
+		
 		final String methodName = "notifyComplete";
 
 		MqttWireMessage message = token.internalTok.getWireMessage();
 
 		if (message != null && message instanceof MqttAck) {
+			
 			// @TRACE 629=received key={0} token={1} message={2}
 			log.fine(CLASS_NAME, methodName, "629", new Object[] {
 					 new Integer(message.getMessageId()), token, message });
@@ -1075,6 +1086,7 @@ public class ClientState {
 			MqttAck ack = (MqttAck) message;
 
 			if (ack instanceof MqttPubAck) {
+				
 				// QoS 1 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
 				outboundQoS1.remove(new Integer(ack.getMessageId()));
@@ -1325,6 +1337,14 @@ public class ClientState {
 		
 		persistence.remove(getReceivedPersistenceKey(messageId));
 		inboundQoS2.remove(new Integer(messageId));
+	}
+	
+	public int getActualInFlight(){
+		return actualInFlight;
+	}
+	
+	public int getMaxInFlight(){
+		return maxInflight;
 	}
 	
 	/**
