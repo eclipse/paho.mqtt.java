@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corp.
+ * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@
  *    Ian Craggs - per subscription message handlers (bug 466579)
  *    Ian Craggs - ack control (bug 472172)
  *    James Sutton - checkForActivity Token (bug 473928)
+ *    James Sutton - Automatic Reconnect & Offline Buffering.
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -22,14 +23,17 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.eclipse.paho.client.mqttv3.BufferedMessage;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttPingSender;
 import org.eclipse.paho.client.mqttv3.MqttToken;
@@ -74,7 +78,9 @@ public class ClientComms {
 	private byte	conState = DISCONNECTED;
 	private Object	conLock = new Object();  	// Used to synchronize connection state
 	private boolean	closePending = false;
-
+	private boolean resting = false;
+	private DisconnectedMessageBuffer disconnectedMessageBuffer;
+	
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle
 	 * the network calls.
@@ -141,7 +147,19 @@ public class ClientComms {
 		if (isConnected() ||
 				(!isConnected() && message instanceof MqttConnect) ||
 				(isDisconnecting() && message instanceof MqttDisconnect)) {
-			this.internalSend(message, token);
+			if(disconnectedMessageBuffer != null && disconnectedMessageBuffer.getMessageCount() != 0){
+				//@TRACE 507=Client Connected, Offline Buffer available, but not empty. Adding message to buffer. message={0}
+				log.fine(CLASS_NAME, methodName, "507", new Object[] {message.getKey()});
+				this.clientState.persistBufferedMessage(message);
+				disconnectedMessageBuffer.putMessage(message, token);
+			} else {
+				this.internalSend(message, token);
+			}
+		} else if(disconnectedMessageBuffer != null && isResting()){
+			//@TRACE 508=Client Resting, Offline Buffer available. Adding message to buffer. message={0}
+			log.fine(CLASS_NAME, methodName, "508", new Object[] {message.getKey()});
+			this.clientState.persistBufferedMessage(message);
+			disconnectedMessageBuffer.putMessage(message, token);
 		} else {
 			//@TRACE 208=failed: not connected
 			log.fine(CLASS_NAME, methodName, "208");
@@ -336,7 +354,10 @@ public class ClientComms {
 		}
 
 		try {
-			if (persistence != null) {persistence.close();}
+			if(disconnectedMessageBuffer == null && persistence != null){
+				persistence.close();
+			}
+			
 		}catch(Exception ex) {
 			// Ignore as we are shutting down
 		}
@@ -499,10 +520,20 @@ public class ClientComms {
 			return conState == CLOSED;
 		}
 	}
+	
+	public boolean isResting() {
+		synchronized (conLock) {
+			return resting;
+		}
+	}
 
 
 	public void setCallback(MqttCallback mqttCallback) {
 		this.callback.setCallback(mqttCallback);
+	}
+	
+	public void setReconnectCallback(MqttCallbackExtended callback){
+		this.callback.setReconnectCallback(callback);
 	}
 	
 	public void setManualAcks(boolean manualAcks) {
@@ -720,4 +751,67 @@ public class ClientComms {
 
 		shutdownConnection(null, mex);
 	}
+
+	/**
+	 * When Automatic reconnect is enabled, we want ClientComs to enter the
+	 * 'resting' state if disconnected. This will allow us to publish messages
+	 * @param resting
+	 */
+	public void setRestingState(boolean resting) {
+		this.resting = resting;
+	}
+
+	public void setDisconnectedMessageBuffer(DisconnectedMessageBuffer disconnectedMessageBuffer) {
+		this.disconnectedMessageBuffer = disconnectedMessageBuffer;
+	}
+	
+	public int getBufferedMessageCount(){
+		return this.disconnectedMessageBuffer.getMessageCount();
+	}
+	
+	public MqttMessage getBufferedMessage(int bufferIndex){
+		MqttPublish send = (MqttPublish) this.disconnectedMessageBuffer.getMessage(bufferIndex).getMessage();
+		return send.getMessage();
+	}
+	
+	public void deleteBufferedMessage(int bufferIndex){
+		this.disconnectedMessageBuffer.deleteMessage(bufferIndex);
+	}
+	
+
+	/**
+	 * When the client automatically reconnects, we want to send all messages from the
+	 * buffer first before allowing the user to send any messages
+	 * @throws MqttException 
+	 */
+	public void notifyReconnect() {
+		final String methodName = "notifyReconnect";
+		if(disconnectedMessageBuffer != null){
+			//@TRACE 509=Client Reconnected, Offline Buffer Available. Sending Buffered Messages.
+			log.fine(CLASS_NAME, methodName, "509");
+			disconnectedMessageBuffer.setPublishCallback(new IDisconnectedBufferCallback() {
+				
+				public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
+					if (isConnected()) {
+						while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-1)){
+							// We need to Yield to the other threads to allow the in flight messages to clear
+							Thread.yield();
+							
+						}
+						//@TRACE 510=Publising Buffered message message={0}
+						log.fine(CLASS_NAME, methodName, "510", new Object[] {bufferedMessage.getMessage().getKey()});
+						internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());
+						// Delete from persistence if in there
+						clientState.unPersistBufferedMessage(bufferedMessage.getMessage());
+					} else {
+						//@TRACE 208=failed: not connected
+						log.fine(CLASS_NAME, methodName, "208");
+						throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
+					}	
+				}
+			});
+			new Thread(disconnectedMessageBuffer).start();
+		}
+	}
+
 }

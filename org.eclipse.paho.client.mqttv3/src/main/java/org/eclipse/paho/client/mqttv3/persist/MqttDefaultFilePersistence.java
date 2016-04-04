@@ -109,7 +109,9 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 			try {
 				fileLock = new FileLock(clientDir, LOCK_FILENAME);
 	 		} catch (Exception e) {
-				throw new MqttPersistenceException(MqttPersistenceException.REASON_CODE_PERSISTENCE_IN_USE);
+	 			// TODO - This shouldn't be here according to the interface
+	 			// See https://github.com/eclipse/paho.mqtt.java/issues/178
+				//throw new MqttPersistenceException(MqttPersistenceException.REASON_CODE_PERSISTENCE_IN_USE);
 			}
 
 			// Scan the directory for .backup files. These will
