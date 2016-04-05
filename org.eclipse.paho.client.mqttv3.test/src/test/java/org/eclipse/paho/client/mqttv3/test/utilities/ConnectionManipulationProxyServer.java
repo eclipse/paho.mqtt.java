@@ -14,6 +14,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 	private int localPort;
+	private boolean portSet = false;
 	private String host;
 	private int remotePort;
 	private Thread proxyThread;
@@ -109,6 +110,8 @@ public class ConnectionManipulationProxyServer implements Runnable {
 					}
 					if(serverSocket == null|| serverSocket.isClosed()){
 						serverSocket = new ServerSocket(localPort);
+						localPort = serverSocket.getLocalPort();
+						portSet = true;
 					}
 					
 					
@@ -207,5 +210,13 @@ public class ConnectionManipulationProxyServer implements Runnable {
 		}
 		
 		
+	}
+
+	public int getLocalPort() {
+		return localPort;
+	}
+
+	public boolean isPortSet() {
+		return portSet;
 	}
 }
