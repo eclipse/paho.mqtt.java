@@ -37,8 +37,13 @@ public class AutomaticReconnectTest{
 			String methodName = Utility.getMethodName();
 			LoggingUtilities.banner(log, cclass, methodName);
 			serverURI = TestProperties.getServerURI();
-			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 4242);
+			// Use 0 for the first time.
+			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 0);
 			proxy.startProxy();
+			while(!proxy.isPortSet()){
+				Thread.sleep(0);
+			}
+			log.log(Level.INFO, "Proxy Started, port set to: " + proxy.getLocalPort());
 		} catch (Exception exception) {
 		      log.log(Level.SEVERE, "caught exception:", exception);
 		      throw exception;
@@ -65,7 +70,7 @@ public class AutomaticReconnectTest{
     	MqttConnectOptions options = new MqttConnectOptions();
     	options.setCleanSession(true);
     	options.setAutomaticReconnect(true);
-    	final MqttClient client = new MqttClient("tcp://localhost:4242", clientId, DATA_STORE);
+    	final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
     	
     	proxy.enableProxy();
     	client.connect(options);
@@ -110,7 +115,7 @@ public class AutomaticReconnectTest{
     	options.setCleanSession(true);
     	options.setAutomaticReconnect(true);
     	
-    	final MqttClient client = new MqttClient("tcp://localhost:4242", clientId, DATA_STORE);
+    	final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
     	
     	proxy.enableProxy();
     	client.connect(options);
@@ -148,7 +153,7 @@ public class AutomaticReconnectTest{
 	    	options.setCleanSession(true);
 	    	options.setAutomaticReconnect(true);
 	    	options.setConnectionTimeout(15);
-	    	final MqttClient client = new MqttClient("tcp://localhost:4242", clientId, DATA_STORE);
+	    	final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
 	    	
 	    	// Make sure the proxy is disabled and give it a second to close everything down
 	    	proxy.disableProxy();
