@@ -430,7 +430,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			else if (factory instanceof SSLSocketFactory) {
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
-			netModule = new WebSocketNetworkModule(factory, host, port, clientId);
+			netModule = new WebSocketNetworkModule(factory, address, host, port, clientId);
 			((WebSocketNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
 			break;
 		case MqttConnectOptions.URI_TYPE_WSS:
@@ -451,7 +451,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			}
 
 			// Create the network module...	
-			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, host, port, clientId);
+			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, clientId);
 			((WebSocketSecureNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
 			// Ciphers suites need to be set, if they are available
 			if (wSSFactoryFactory != null) {
@@ -478,18 +478,24 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			port = defaultPort;
 		}
 		else {
-		    port = Integer.parseInt(uri.substring(portIndex + 1));
+			int slashIndex = uri.indexOf('/');
+			if (slashIndex == -1) {
+				slashIndex = uri.length();
+			}
+		    port = Integer.parseInt(uri.substring(portIndex + 1, slashIndex));
 		}
 		return port;
 	}
 
 	private String getHostName(String uri) {
-		int schemeIndex = uri.lastIndexOf('/');
-		int portIndex = uri.lastIndexOf(':');
+		int portIndex = uri.indexOf(':');
+		if (portIndex == -1) {
+			portIndex = uri.indexOf('/');
+		}
 		if (portIndex == -1) {
 			portIndex = uri.length();
 		}
-		return uri.substring(schemeIndex + 1, portIndex);
+		return uri.substring(0, portIndex);
 	}
 
 	/* (non-Javadoc)
@@ -532,7 +538,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		if (comms.isClosed()) {
 			throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
 		}
-		
+
 		this.connOpts = options;
 		this.userContext = userContext;
 		final boolean automaticReconnect = options.isAutomaticReconnect();
@@ -576,7 +582,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		ConnectActionListener connectActionListener = new ConnectActionListener(this, persistence, comms, options, userToken, userContext, callback, reconnecting);
 		userToken.setActionCallback(connectActionListener);
 		userToken.setUserContext(this);
-		
+
 		// If we are using the MqttCallbackExtended, set it on the connectActionListener
 		if(this.mqttCallback instanceof MqttCallbackExtended){
 			connectActionListener.setMqttCallbackExtended((MqttCallbackExtended)this.mqttCallback);
@@ -1025,7 +1031,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 
 		return token;
 	}
-	
+
 	/**
 	 * User triggered attempt to reconnect
 	 * @throws MqttException
