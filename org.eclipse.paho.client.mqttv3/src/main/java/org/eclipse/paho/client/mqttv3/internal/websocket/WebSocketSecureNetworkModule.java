@@ -36,6 +36,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	
 	private PipedInputStream pipedInputStream;
 	private WebSocketReceiver webSocketReceiver;
+	private String uri;
 	private String host;
 	private int port;
 	ByteBuffer recievedPayload;
@@ -61,8 +62,9 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 		}
 	};
 
-	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String host, int port, String clientId) {
+	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId) {
 		super(factory, host, port, clientId);
+		this.uri = uri;
 		this.host = host;
 		this.port = port;
 		this.pipedInputStream = new PipedInputStream();
@@ -71,7 +73,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 
 	public void start() throws IOException, MqttException {
 		super.start();
-		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), host, port);
+		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port);
 		handshake.execute();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("WssSocketReceiver");
@@ -95,6 +97,12 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	}
 
 	public void stop() throws IOException {
+		// Creating Close Frame
+		WebSocketFrame frame = new WebSocketFrame((byte)0x08, true, "1000".getBytes());
+		byte[] rawFrame = frame.encodeFrame();
+		getSocketOutputStream().write(rawFrame);
+		getSocketOutputStream().flush();
+
 		if(webSocketReceiver != null){
 			webSocketReceiver.stop();
 		}

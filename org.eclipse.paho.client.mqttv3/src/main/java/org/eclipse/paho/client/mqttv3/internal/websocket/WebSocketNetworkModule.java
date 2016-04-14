@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import javax.net.SocketFactory;
@@ -35,6 +34,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	private static final String CLASS_NAME = WebSocketNetworkModule.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 		
+	private String uri;
 	private String host;
 	private int port;
 	private PipedInputStream pipedInputStream;
@@ -62,8 +62,9 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 		}
 	};
 	
-	public WebSocketNetworkModule(SocketFactory factory, String host, int port, String resourceContext){
+	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext){
 		super(factory, host, port, resourceContext);
+		this.uri = uri;
 		this.host = host;
 		this.port = port;
 		this.pipedInputStream = new PipedInputStream();
@@ -73,7 +74,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	
 	public void start() throws IOException, MqttException {
 		super.start();
-		WebSocketHandshake handshake = new WebSocketHandshake(getSocketInputStream(), getSocketOutputStream(), host, port);
+		WebSocketHandshake handshake = new WebSocketHandshake(getSocketInputStream(), getSocketOutputStream(), uri, host, port);
 		handshake.execute();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("webSocketReceiver");
@@ -104,7 +105,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 		byte[] rawFrame = frame.encodeFrame();
 		getSocketOutputStream().write(rawFrame);
 		getSocketOutputStream().flush();
-		
+
 		if(webSocketReceiver != null){
 			webSocketReceiver.stop();
 		}

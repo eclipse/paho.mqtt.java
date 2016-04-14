@@ -486,6 +486,13 @@ public class MqttConnectOptions {
 	protected static int validateURI(String srvURI) {
 		try {
 			URI vURI = new URI(srvURI);
+			if (vURI.getScheme().equals("ws")){
+				return URI_TYPE_WS;
+			}
+			else if (vURI.getScheme().equals("wss")) {
+				return URI_TYPE_WSS;
+			}
+
 			if (!vURI.getPath().equals("")) {
 				throw new IllegalArgumentException(srvURI);
 			}
@@ -497,12 +504,6 @@ public class MqttConnectOptions {
 			}
 			else if (vURI.getScheme().equals("local")) {
 				return URI_TYPE_LOCAL;
-			}
-			else if (vURI.getScheme().equals("ws")){
-				return URI_TYPE_WS;
-			}
-			else if (vURI.getScheme().equals("wss")) {
-				return URI_TYPE_WSS;
 			}
 			else {
 				throw new IllegalArgumentException(srvURI);
@@ -529,7 +530,7 @@ public class MqttConnectOptions {
 		}
 		this.MqttVersion = MqttVersion;
 	}
-	
+
 	/**
 	 * Returns whether the client will automatically attempt to reconnect to the
 	 * server if the connection is lost

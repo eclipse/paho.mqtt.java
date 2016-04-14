@@ -24,10 +24,10 @@ import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 public class WebSocketReceiver implements Runnable{
-	
+
 	private static final String CLASS_NAME = WebSocketReceiver.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
-	
+
 	private boolean running = false;
 	private boolean stopping = false;
 	private Object lifecycle = new Object();
@@ -35,13 +35,13 @@ public class WebSocketReceiver implements Runnable{
 	private Thread receiverThread = null;
 	private volatile boolean receiving;
 	private PipedOutputStream pipedOutputStream;
-	
+
 	public WebSocketReceiver(InputStream input, PipedInputStream pipedInputStream) throws IOException{
 		this.input = input;
 		this.pipedOutputStream = new PipedOutputStream();
 		pipedInputStream.connect(pipedOutputStream);
 	}
-	
+
 	/**
 	 * Starts up the WebSocketReceiver's thread
 	 */
@@ -57,7 +57,7 @@ public class WebSocketReceiver implements Runnable{
 			}
 		}
 	}
-	
+
 	/**
 	 * Stops this WebSocketReceiver's thread.
 	 * This call will block.
@@ -89,7 +89,7 @@ public class WebSocketReceiver implements Runnable{
 
 	public void run() {
 		final String methodName = "run";
-		
+
 		while (running && (input != null)) {
 			try {
 				//@TRACE 852=network read message
@@ -97,43 +97,41 @@ public class WebSocketReceiver implements Runnable{
 				receiving = input.available() > 0;
 				WebSocketFrame incomingFrame = new WebSocketFrame(input);
 				if(!incomingFrame.isCloseFlag()){
-				for(int i = 0; i < incomingFrame.getPayload().length; i++){
-					pipedOutputStream.write(incomingFrame.getPayload()[i]);
-				}
-				
-				pipedOutputStream.flush();
+					for(int i = 0; i < incomingFrame.getPayload().length; i++){
+						pipedOutputStream.write(incomingFrame.getPayload()[i]);
+					}
+
+					pipedOutputStream.flush();
 				} else {
 					if(!stopping){
 						throw new IOException("Server sent a WebSocket Frame with the Stop OpCode");
 					}
 				}
-				
+
 				receiving = false;
-				
+
 			} catch (IOException ex) {
-				// Exception occurred whilst reading the stream. 
-				System.out.println("WebSocketReceiver.java : run(): Exception Occured.");
-				ex.printStackTrace();
-				closeOutputStream();
+				// Exception occurred whilst reading the stream.
+				this.stop();
 			}
 		}
 	}
-	
+
 	private void closeOutputStream(){
 		try {
 			pipedOutputStream.close();
 		} catch (IOException e) {
 		}
 	}
-	
+
 
 	public boolean isRunning() {
 		return running;
 	}
-	
+
 	/**
 	 * Returns the receiving state.
-	 * 
+	 *
 	 * @return true if the receiver is receiving data, false otherwise.
 	 */
 	public boolean isReceiving(){

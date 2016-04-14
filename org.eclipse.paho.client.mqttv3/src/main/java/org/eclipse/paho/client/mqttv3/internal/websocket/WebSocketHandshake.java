@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -39,16 +41,22 @@ public class WebSocketHandshake {
 	private static final String HTTP_HEADER_UPGRADE_WEBSOCKET = "websocket";
 	private static final String EMPTY = "";
 	private static final String LINE_SEPARATOR = "\r\n";
-	
+
+	private static final String HTTP_HEADER_CONNECTION = "connection";
+	private static final String HTTP_HEADER_CONNECTION_VALUE = "upgrade";
+	private static final String HTTP_HEADER_SEC_WEBSOCKET_PROTOCOL = "sec-websocket-protocol";
+
 	InputStream input;
 	OutputStream output;
+	String uri;
 	String host;
 	int port;
 	
 	
-	public WebSocketHandshake(InputStream input, OutputStream output, String host, int port){
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port){
 		this.input = input;
 		this.output = output;
+		this.uri = uri;
 		this.host = host;
 		this.port = port;
 	}
@@ -73,16 +81,29 @@ public class WebSocketHandshake {
 	 * @throws IOException
 	 */
 	private void sendHandshakeRequest(String key) throws IOException{
-		PrintWriter pw = new PrintWriter(output);
-		pw.print("GET /mqtt HTTP/1.1" + LINE_SEPARATOR);
-		pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
-		pw.print("Upgrade: websocket" + LINE_SEPARATOR);
-		pw.print("Connection: Upgrade" + LINE_SEPARATOR);
-		pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
-		pw.print("Sec-WebSocket-Protocol: mqtt" + LINE_SEPARATOR);
-		pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
-		pw.print(LINE_SEPARATOR);
-		pw.flush();
+		try {
+			String path = "/mqtt";
+			URI srvUri = new URI(uri);
+			if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) {
+				path = srvUri.getRawPath();
+				if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) {
+					path += "?" + srvUri.getRawQuery();
+				}
+			}
+
+			PrintWriter pw = new PrintWriter(output);
+			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
+			pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
+			pw.print("Upgrade: websocket" + LINE_SEPARATOR);
+			pw.print("Connection: Upgrade" + LINE_SEPARATOR);
+			pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
+			pw.print("Sec-WebSocket-Protocol: mqttv3.1" + LINE_SEPARATOR);
+			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
+			pw.print(LINE_SEPARATOR);
+			pw.flush();
+		} catch (URISyntaxException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	/**
@@ -102,11 +123,22 @@ public class WebSocketHandshake {
 			line = in.readLine();
 		}
 		Map headerMap = getHeaders(responseLines);
+
+		String connectionHeader = (String) headerMap.get(HTTP_HEADER_CONNECTION);
+		if (connectionHeader == null || connectionHeader.equalsIgnoreCase(HTTP_HEADER_CONNECTION_VALUE)) {
+			throw new IOException("WebSocket Response header: Incorrect connection header");
+		}
+
 		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
 		if(!upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
-		
+
+		String secWebsocketProtocolHeader = (String) headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_PROTOCOL);
+		if (secWebsocketProtocolHeader == null) {
+			throw new IOException("WebSocket Response header: empty sec-websocket-protocol");
+		}
+
 		if(!headerMap.containsKey(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT)){
 			throw new IOException("WebSocket Response header: Missing Sec-WebSocket-Accept");
 		}
