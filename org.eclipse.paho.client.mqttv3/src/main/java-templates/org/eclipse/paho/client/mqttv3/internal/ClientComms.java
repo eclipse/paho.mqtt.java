@@ -293,7 +293,7 @@ public class ClientComms {
 		// This method could concurrently be invoked from many places only allow it
 		// to run once.
 		synchronized(conLock) {
-			if (stoppingComms || closePending) {
+			if (stoppingComms || closePending || isClosed()) {
 				return;
 			}
 			stoppingComms = true;
@@ -303,90 +303,87 @@ public class ClientComms {
 
 			wasConnected = (isConnected() || isDisconnecting());
 			conState = DISCONNECTING;
-		}
 
-		// Update the token with the reason for shutdown if it
-		// is not already complete.
-		if (token != null && !token.isComplete()) {
-			token.internalTok.setException(reason);
-		}
+			// Update the token with the reason for shutdown if it
+			// is not already complete.
+			if (token != null && !token.isComplete()) {
+				token.internalTok.setException(reason);
+			}
 
-		// Stop the thread that is used to call the user back
-		// when actions complete
-		if (callback!= null) {callback.stop(); }
+			// Stop the thread that is used to call the user back
+			// when actions complete
+			if (callback!= null) {callback.stop(); }
 
-		// Stop the network module, send and receive now not possible
-		try {
-			if (networkModules != null) {
-				NetworkModule networkModule = networkModules[networkModuleIndex];
-				if (networkModule != null) {
-					networkModule.stop();
+			// Stop the network module, send and receive now not possible
+			try {
+				if (networkModules != null) {
+					NetworkModule networkModule = networkModules[networkModuleIndex];
+					if (networkModule != null) {
+						networkModule.stop();
+					}
 				}
+			} catch (Exception ioe) {
+				// Ignore as we are shutting down
 			}
-		} catch (Exception ioe) {
-			// Ignore as we are shutting down
-		}
 
-		// Stop the thread that handles inbound work from the network
-		if (receiver != null) {receiver.stop();}
+			// Stop the thread that handles inbound work from the network
+			if (receiver != null) {receiver.stop();}
 
-		// Stop any new tokens being saved by app and throwing an exception if they do
-		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
+			// Stop any new tokens being saved by app and throwing an exception if they do
+			tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
 
-		// Notify any outstanding tokens with the exception of
-		// con or discon which may be returned and will be notified at
-		// the end
-		endToken = handleOldTokens(token, reason);
+			// Notify any outstanding tokens with the exception of
+			// con or discon which may be returned and will be notified at
+			// the end
+			endToken = handleOldTokens(token, reason);
 
-		try {
-			// Clean session handling and tidy up
-			clientState.disconnected(reason);
-			if (clientState.getCleanSession())
-				callback.removeMessageListeners();
-		}catch(Exception ex) {
-			// Ignore as we are shutting down
-		}
-
-		if (sender != null) { sender.stop(); }
-		
-		if (pingSender != null){
-			pingSender.stop();
-		}
-
-		try {
-			if(disconnectedMessageBuffer == null && persistence != null){
-				persistence.close();
+			try {
+				// Clean session handling and tidy up
+				clientState.disconnected(reason);
+				if (clientState.getCleanSession())
+					callback.removeMessageListeners();
+			}catch(Exception ex) {
+				// Ignore as we are shutting down
 			}
-			
-		}catch(Exception ex) {
-			// Ignore as we are shutting down
-		}
-		// All disconnect logic has been completed allowing the
-		// client to be marked as disconnected.
-		synchronized(conLock) {
+
+			if (sender != null) { sender.stop(); }
+
+			if (pingSender != null){
+				pingSender.stop();
+			}
+
+			try {
+				if(disconnectedMessageBuffer == null && persistence != null){
+					persistence.close();
+				}
+
+			}catch(Exception ex) {
+				// Ignore as we are shutting down
+			}
+
+			// All disconnect logic has been completed allowing the
+			// client to be marked as disconnected.
 			//@TRACE 217=state=DISCONNECTED
 			log.fine(CLASS_NAME,methodName,"217");
 
 			conState = DISCONNECTED;
 			stoppingComms = false;
-		}
 
-		// Internal disconnect processing has completed.  If there
-		// is a disconnect token or a connect in error notify
-		// it now. This is done at the end to allow a new connect
-		// to be processed and now throw a currently disconnecting error.
-		// any outstanding tokens and unblock any waiters
-		if (endToken != null & callback != null) {
-			callback.asyncOperationComplete(endToken);
-		}
+			// Internal disconnect processing has completed.  If there
+			// is a disconnect token or a connect in error notify
+			// it now. This is done at the end to allow a new connect
+			// to be processed and now throw a currently disconnecting error.
+			// any outstanding tokens and unblock any waiters
+			if (endToken != null & callback != null) {
+				callback.asyncOperationComplete(endToken);
+			}
 
-		if (wasConnected && callback != null) {
-			// Let the user know client has disconnected either normally or abnormally
-			callback.connectionLost(reason);
-		}
+			if (wasConnected && callback != null) {
+				// Let the user know client has disconnected either normally or abnormally
+				callback.connectionLost(reason);
+			}
 
-		// While disconnecting, close may have been requested - try it now
-		synchronized(conLock) {
+			// While disconnecting, close may have been requested - try it now
 			if (closePending) {
 				try {
 					close();
