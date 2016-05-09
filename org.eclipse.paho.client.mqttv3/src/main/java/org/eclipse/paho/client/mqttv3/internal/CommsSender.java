@@ -75,10 +75,12 @@ public class CommsSender implements Runnable {
 				running = false;
 				if (!Thread.currentThread().equals(sendThread)) {
 					try {
-						// first notify get routine to finish
-						clientState.notifyQueueLock();
-						// Wait for the thread to finish.
-						sendThread.join();
+						while(sendThread.isAlive()) {
+							// first notify get routine to finish
+							clientState.notifyQueueLock();
+							// Wait for the thread to finish.
+							sendThread.join(100);
+						}
 					}
 					catch (InterruptedException ex) {
 					}
