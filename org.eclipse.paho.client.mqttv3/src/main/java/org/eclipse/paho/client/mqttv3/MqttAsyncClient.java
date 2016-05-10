@@ -27,6 +27,12 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
@@ -109,6 +115,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 
 
 
+	private ExecutorService executorService;
+
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
 	 * <p>
@@ -180,11 +188,15 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttAsyncClient(String serverURI, String clientId) throws MqttException {
-		this(serverURI,clientId, new MqttDefaultFilePersistence());
+		this(serverURI, clientId, new MqttDefaultFilePersistence());
 	}
 	
 	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
-		this(serverURI,clientId, persistence, new TimerPingSender());
+		this(serverURI, clientId, persistence, new TimerPingSender());
+	}
+
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
+		this(serverURI, clientId, persistence, pingSender, null);
 	}
 
 	/**
@@ -264,14 +276,15 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @param serverURI the address of the server to connect to, specified as a URI. Can be overridden using
 	 * {@link MqttConnectOptions#setServerURIs(String[])}
 	 * @param clientId a client identifier that is unique on the server being connected to
- 	 * @param persistence the persistence class to use to store in-flight message. If null then the
- 	 * default persistence mechanism is used
+	 * @param persistence the persistence class to use to store in-flight message. If null then the
+	 * default persistence mechanism is used
+	 * @param executorService used for managing threads. If null then a newFixedThreadPool is used.
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://"
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
 		final String methodName = "MqttAsyncClient";
 
 		log.setResourceName(clientId);
@@ -300,11 +313,16 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			this.persistence = new MemoryPersistence();
 		}
 
+		this.executorService = executorService;
+		if (this.executorService == null) {
+			this.executorService = Executors.newFixedThreadPool(10);
+		}
+
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 		log.fine(CLASS_NAME,methodName,"101",new Object[]{clientId,serverURI,persistence});
 
 		this.persistence.open(clientId, serverURI);
-		this.comms = new ClientComms(this, this.persistence, pingSender);
+		this.comms = new ClientComms(this, this.persistence, pingSender, this.executorService);
 		this.persistence.close();
 		this.topics = new Hashtable();
 

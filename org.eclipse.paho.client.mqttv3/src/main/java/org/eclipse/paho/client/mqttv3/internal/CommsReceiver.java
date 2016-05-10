@@ -17,6 +17,8 @@ package org.eclipse.paho.client.mqttv3.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Semaphore;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
@@ -42,6 +44,9 @@ public class CommsReceiver implements Runnable {
 	private Thread recThread = null;
 	private volatile boolean receiving;
 	
+	private final Semaphore runningSemaphore = new Semaphore(1);
+	private String threadName;
+
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
 		this.in = new MqttInputStream(clientState, in);
 		this.clientComms = clientComms;
@@ -52,16 +57,18 @@ public class CommsReceiver implements Runnable {
 	
 	/**
 	 * Starts up the Receiver's thread.
+	 * @param threadName
+	 * @param executorService used to execute the thread
 	 */
-	public void start(String threadName) {
+	public void start(String threadName, ExecutorService executorService) {
+		this.threadName = threadName;
 		final String methodName = "start";
 		//@TRACE 855=starting
 		log.fine(CLASS_NAME,methodName, "855");
 		synchronized (lifecycle) {
 			if (!running) {
 				running = true;
-				recThread = new Thread(this, threadName);
-				recThread.start();
+				executorService.execute(this);
 			}
 		}
 	}
@@ -80,9 +87,11 @@ public class CommsReceiver implements Runnable {
 				if (!Thread.currentThread().equals(recThread)) {
 					try {
 						// Wait for the thread to finish.
-						recThread.join();
+						runningSemaphore.acquire();
 					}
 					catch (InterruptedException ex) {
+					} finally {
+						runningSemaphore.release();
 					}
 				}
 			}
@@ -96,9 +105,18 @@ public class CommsReceiver implements Runnable {
 	 * Run loop to receive messages from the server.
 	 */
 	public void run() {
+		recThread = Thread.currentThread();
+		recThread.setName(threadName);
 		final String methodName = "run";
 		MqttToken token = null;
-		
+
+		try {
+			runningSemaphore.acquire();
+		} catch (InterruptedException e) {
+			running = false;
+			return;
+		}
+
 		while (running && (in != null)) {
 			try {
 				//@TRACE 852=network read message
@@ -148,6 +166,7 @@ public class CommsReceiver implements Runnable {
 			}
 			finally {
 				receiving = false;
+				runningSemaphore.release();
 			}
 		}
 		

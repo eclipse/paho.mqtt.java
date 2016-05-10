@@ -22,6 +22,8 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.BufferedMessage;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -80,18 +82,21 @@ public class ClientComms {
 	private boolean	closePending = false;
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
-	
+
+	private ExecutorService executorService;
+
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle
 	 * the network calls.
 	 */
-	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
+	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client 	= client;
 		this.persistence = persistence;
 		this.pingSender = pingSender;
 		this.pingSender.init(this);
-		
+		this.executorService = executorService;
+
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback 	= new CommsCallback(this);
 		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender);
@@ -102,6 +107,22 @@ public class ClientComms {
 
 	CommsReceiver getReceiver() {
 		return receiver;
+	}
+
+	private void shutdownExecutorService() {
+		String methodName = "shutdownExecutorService";
+		executorService.shutdown();
+		try {
+			if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+				executorService.shutdownNow();
+				if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+					log.fine(CLASS_NAME, methodName, "executorService did not terminate");
+				}
+			}
+		} catch (InterruptedException ie) {
+			executorService.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	/**
@@ -198,7 +219,7 @@ public class ClientComms {
 				}
 
 				conState = CLOSED;
-
+				shutdownExecutorService();
 				// ShutdownConnection has already cleaned most things
 				clientState.close();
 				clientState = null;
@@ -244,7 +265,7 @@ public class ClientComms {
                 this.clientState.setMaxInflight(conOptions.getMaxInflight());
 
 				tokenStore.open();
-				ConnectBG conbg = new ConnectBG(this, token, connect);
+				ConnectBG conbg = new ConnectBG(this, token, connect, executorService);
 				conbg.start();
 			}
 			else {
@@ -467,7 +488,7 @@ public class ClientComms {
 			//@TRACE 218=state=DISCONNECTING
 			log.fine(CLASS_NAME,methodName,"218");
 			conState = DISCONNECTING;
-			DisconnectBG discbg = new DisconnectBG(disconnect,quiesceTimeout,token);
+			DisconnectBG discbg = new DisconnectBG(disconnect,quiesceTimeout,token, executorService);
 			discbg.start();
 		}
 	}
@@ -614,22 +635,23 @@ public class ClientComms {
 	// the socket could take time to create.
 	private class ConnectBG implements Runnable {
 		ClientComms 	clientComms = null;
-		Thread 			cBg = null;
 		MqttToken 		conToken;
 		MqttConnect 	conPacket;
+		private String threadName;
 
-		ConnectBG(ClientComms cc, MqttToken cToken, MqttConnect cPacket) {
+		ConnectBG(ClientComms cc, MqttToken cToken, MqttConnect cPacket, ExecutorService executorService) {
 			clientComms = cc;
 			conToken 	= cToken;
 			conPacket 	= cPacket;
-			cBg = new Thread(this, "MQTT Con: "+getClient().getClientId());
+			threadName = "MQTT Con: "+getClient().getClientId();
 		}
 
 		void start() {
-			cBg.start();
+			executorService.execute(this);
 		}
 
 		public void run() {
+			Thread.currentThread().setName(threadName);
 			final String methodName = "connectBG:run";
 			MqttException mqttEx = null;
 			//@TRACE 220=>
@@ -653,10 +675,10 @@ public class ClientComms {
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
 				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream());
-				receiver.start("MQTT Rec: "+getClient().getClientId());
+				receiver.start("MQTT Rec: "+getClient().getClientId(), executorService);
 				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream());
-				sender.start("MQTT Snd: "+getClient().getClientId());
-				callback.start("MQTT Call: "+getClient().getClientId());				
+				sender.start("MQTT Snd: "+getClient().getClientId(), executorService);
+				callback.start("MQTT Call: "+getClient().getClientId(), executorService);
 				internalSend(conPacket, conToken);
 			} catch (MqttException ex) {
 				//@TRACE 212=connect failed: unexpected exception
@@ -677,23 +699,24 @@ public class ClientComms {
 	// Kick off the disconnect processing in the background so that it does not block. For instance
 	// the quiesce
 	private class DisconnectBG implements Runnable {
-		Thread dBg = null;
 		MqttDisconnect disconnect;
 		long quiesceTimeout;
 		MqttToken token;
+		private String threadName;
 
-		DisconnectBG(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token ) {
+		DisconnectBG(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token, ExecutorService executorService) {
 			this.disconnect = disconnect;
 			this.quiesceTimeout = quiesceTimeout;
 			this.token = token;
 		}
 
 		void start() {
-			dBg = new Thread(this, "MQTT Disc: "+getClient().getClientId());
-			dBg.start();
+			threadName = "MQTT Disc: "+getClient().getClientId();
+			executorService.execute(this);
 		}
-		
+
 		public void run() {
+			Thread.currentThread().setName(threadName);
 			final String methodName = "disconnectBG:run";
 			//@TRACE 221=>
 			log.fine(CLASS_NAME, methodName, "221");
@@ -814,7 +837,7 @@ public class ClientComms {
 					}	
 				}
 			});
-			new Thread(disconnectedMessageBuffer).start();
+			executorService.execute(disconnectedMessageBuffer);
 		}
 	}
 

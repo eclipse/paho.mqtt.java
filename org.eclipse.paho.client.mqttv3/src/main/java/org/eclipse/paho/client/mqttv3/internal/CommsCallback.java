@@ -21,6 +21,8 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Semaphore;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
@@ -61,6 +63,8 @@ public class CommsCallback implements Runnable {
 	private Object spaceAvailable = new Object();
 	private ClientState clientState;
 	private boolean manualAcks = false;
+	private String threadName;
+	private final Semaphore runningSemaphore = new Semaphore(1);
 
 	CommsCallback(ClientComms clientComms) {
 		this.clientComms = clientComms;
@@ -77,7 +81,8 @@ public class CommsCallback implements Runnable {
 	/**
 	 * Starts up the Callback thread.
 	 */
-	public void start(String threadName) {
+	public void start(String threadName, ExecutorService executorService) {
+		this.threadName = threadName;
 		synchronized (lifecycle) {
 			if (!running) {
 				// Preparatory work before starting the background thread.
@@ -87,8 +92,7 @@ public class CommsCallback implements Runnable {
 
 				running = true;
 				quiescing = false;
-				callbackThread = new Thread(this, threadName);
-				callbackThread.start();
+				executorService.execute(this);
 			}
 		}
 	}
@@ -113,8 +117,10 @@ public class CommsCallback implements Runnable {
 							workAvailable.notifyAll();
 						}
 						// Wait for the thread to finish.
-						callbackThread.join();
+						runningSemaphore.acquire();
 					} catch (InterruptedException ex) {
+					} finally {
+						runningSemaphore.release();
 					}
 				}
 			}
@@ -138,6 +144,16 @@ public class CommsCallback implements Runnable {
 
 	public void run() {
 		final String methodName = "run";
+		callbackThread = Thread.currentThread();
+		callbackThread.setName(threadName);
+
+		try {
+			runningSemaphore.acquire();
+		} catch (InterruptedException e) {
+			running = false;
+			return;
+		}
+
 		while (running) {
 			try {
 				// If no work is currently available, then wait until there is some...
@@ -195,8 +211,8 @@ public class CommsCallback implements Runnable {
 				log.fine(CLASS_NAME, methodName, "714", null, ex);
 				running = false;
 				clientComms.shutdownConnection(null, new MqttException(ex));
-				
 			} finally {
+				runningSemaphore.release();
 			    synchronized (spaceAvailable) {
                     // Notify the spaceAvailable lock, to say that there's now
                     // some space on the queue...
