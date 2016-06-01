@@ -19,14 +19,12 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class MqttReceivedMessage extends MqttMessage {
 	
-	private int messageId;
-	
 	public void setMessageId(int msgId) {
-		this.messageId = msgId;
+        	super.setId(msgId);
 	}
-
+	
 	public int getMessageId() {
-		return messageId;
+		return super.getId();
 	}
 	
 	// This method exists here to get around the protected visibility of the
