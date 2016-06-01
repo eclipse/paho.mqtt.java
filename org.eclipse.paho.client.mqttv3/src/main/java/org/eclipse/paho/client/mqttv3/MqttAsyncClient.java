@@ -1064,7 +1064,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * Attempts to reconnect the client to the server.
 	 * If successful it will make sure that there are no further
 	 * reconnects scheduled. However if the connect fails, the delay will double
-	 * up to 2 minutes and will re-schedule the reconnect for after the delay.
+	 * up to 128 seconds and will re-schedule the reconnect for after the delay.
 	 * 
 	 * Any thrown exceptions are logged but not acted upon as it is assumed that 
 	 * they are being thrown due to the server being offline and so reconnect
@@ -1087,7 +1087,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 					//@Trace 502=Automatic Reconnect failed, rescheduling: {0}
 					log.fine(CLASS_NAME, methodName, "502", new Object[]{asyncActionToken.getClient().getClientId()});
-					if(reconnectDelay != 120000){
+					if(reconnectDelay < 128000){
 						reconnectDelay = reconnectDelay * 2;
 					}
 					rescheduleReconnectCycle(reconnectDelay);
