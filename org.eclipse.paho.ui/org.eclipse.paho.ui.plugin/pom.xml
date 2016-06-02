@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>org.eclipse.paho.ui</artifactId>
-		<version>1.0.3-SNAPSHOT</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.paho.ui.plugin</artifactId>
@@ -13,7 +12,7 @@
 
 	<build>
 		<plugins>
-		  
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -34,8 +33,8 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-			
+
+
 		    <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -49,8 +48,7 @@
 						</goals>
 						<configuration>
 							<target>
-							    <unzip src="${project.build.directory}/plugin/org.eclipse.paho.ui.core-${project.version}.jar" 
-							           dest="${project.build.directory}/plugin/tmp" />
+							    <unzip src="${project.build.directory}/plugin/org.eclipse.paho.ui.core-${project.version}.jar" dest="${project.build.directory}/plugin/tmp" />
 							</target>
 						</configuration>
 					</execution>
@@ -75,8 +73,8 @@
 							<descriptors>
 								<descriptor>assembly.xml</descriptor>
 							</descriptors>
-							<archive> 
-							   <manifestFile>${project.build.directory}/plugin/tmp/META-INF/MANIFEST.MF</manifestFile> 
+							<archive>
+							   <manifestFile>${project.build.directory}/plugin/tmp/META-INF/MANIFEST.MF</manifestFile>
 							 </archive>
 						</configuration>
 					</execution>
@@ -89,8 +87,8 @@
 	    <dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.ui.core</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
+			<version>1.1.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
-</project> 
+</project>
