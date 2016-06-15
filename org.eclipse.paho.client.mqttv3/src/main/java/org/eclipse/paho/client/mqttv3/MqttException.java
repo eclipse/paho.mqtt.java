@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    James Sutton - Automatic Reconnect & Offline Buffering
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -152,6 +153,15 @@ public class MqttException extends Exception {
 	 * then new messages can be sent.   
 	 */
 	public static final short REASON_CODE_MAX_INFLIGHT    			= 32202;
+	
+	/**
+	 * The Client has attempted to publish a message whilst in the 'resting' / offline
+	 * state with Disconnected Publishing enabled, however the buffer is full and
+	 * deleteOldestMessages is disabled, therefore no more messages can be published
+	 * until the client reconnects, or the application deletes buffered message
+	 * manually. 
+	 */
+	public static final short REASON_CODE_DISCONNECTED_BUFFER_FULL	= 32203;
 
 	private int reasonCode;
 	private Throwable cause;

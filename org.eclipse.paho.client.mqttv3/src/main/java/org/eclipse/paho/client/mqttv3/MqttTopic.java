@@ -140,7 +140,8 @@ public class MqttTopic {
 	 * @param wildcardAllowed true if validate topic filter, false otherwise
 	 * @throws IllegalArgumentException if the topic is invalid
 	 */
-	public static void validate(String topicString, boolean wildcardAllowed) {
+	public static void validate(String topicString, boolean wildcardAllowed) 
+			throws IllegalStateException, IllegalArgumentException{
 		int topicLen = 0;
 		try {
 			topicLen = topicString.getBytes("UTF-8").length;
@@ -225,5 +226,48 @@ public class MqttTopic {
             }
         }
     }
+    
+	/**
+	 * Check the supplied topic name and filter match
+	 * 
+	 * @param topicFilter topic filter: wildcards allowed
+	 * @param topicName topic name: wildcards not allowed
+	 * @throws IllegalArgumentException if the topic name or filter is invalid
+	 */
+	public static boolean isMatched(String topicFilter, String topicName) 
+	                    throws IllegalStateException, IllegalArgumentException {
+	    int curn = 0,
+	        curf = 0;
+	    int curn_end = topicName.length();
+	    int curf_end = topicFilter.length();
+	    
+	    MqttTopic.validate(topicFilter, true);
+	    MqttTopic.validate(topicName, false);
+
+	    if (topicFilter.equals(topicName)) {
+	    	return true;
+	    }
+	    
+	    while (curf < curf_end && curn < curn_end)
+	    {
+	        if (topicName.charAt(curn) == '/' && topicFilter.charAt(curf) != '/')
+	            break;
+	        if (topicFilter.charAt(curf) != '+' && topicFilter.charAt(curf) != '#' && 
+	        		topicFilter.charAt(curf) != topicName.charAt(curn))
+	            break;
+	        if (topicFilter.charAt(curf) == '+')
+	        {   // skip until we meet the next separator, or end of string
+	            int nextpos = curn + 1;
+	            while (nextpos < curn_end && topicName.charAt(nextpos) != '/')
+	                nextpos = ++curn + 1;
+	        }
+	        else if (topicFilter.charAt(curf) == '#')
+	            curn = curn_end - 1;    // skip until end of string
+	        curf++;
+	        curn++;
+	    };
+
+	    return (curn == curn_end) && (curf == curf_end);
+	}
 	
 }

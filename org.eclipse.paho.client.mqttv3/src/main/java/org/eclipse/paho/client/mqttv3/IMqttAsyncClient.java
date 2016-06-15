@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corp.
+ * Copyright (c) 2013, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,8 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    Ian Craggs - per subscription message handlers (bug 466579)
+ *    Ian Craggs - ack control (bug 472172)
  */
 
 package org.eclipse.paho.client.mqttv3;
@@ -645,6 +647,92 @@ public interface IMqttAsyncClient {
 	 */
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
 			throws MqttException;
+	
+	/**
+	 * Subscribe to a topic, which may include wildcards.
+	 *
+	 * @see #subscribe(String[], int[], Object, IMqttActionListener)
+	 *
+	 * @param topicFilter the topic to subscribe to, which can include wildcards.
+	 * @param qos the maximum quality of service at which to subscribe. Messages
+	 * published at a lower quality of service will be received at the published
+	 * QoS.  Messages published at a higher quality of service will be received using
+	 * the QoS specified on the subscribe.
+	 * @param userContext optional object used to pass context to the callback. Use
+	 * null if not required.
+	 * @param callback optional listener that will be notified when subscribe
+	 * has completed
+	 * @param messageListener a callback to handle incoming messages
+	 * @return token used to track and wait for the subscribe to complete. The token
+	 * will be passed to callback methods if set.
+	 * @throws MqttException if there was an error registering the subscription.
+	 */
+	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException;
+
+
+	/**
+	 * Subscribe to a topic, which may include wildcards.
+	 *
+	 * @see #subscribe(String[], int[], Object, IMqttActionListener)
+	 *
+	 * @param topicFilter the topic to subscribe to, which can include wildcards.
+	 * @param qos the maximum quality of service at which to subscribe. Messages
+	 * published at a lower quality of service will be received at the published
+	 * QoS.  Messages published at a higher quality of service will be received using
+	 * the QoS specified on the subscribe.
+	 * @param messageListener a callback to handle incoming messages
+	 * @return token used to track and wait for the subscribe to complete. The token
+	 * will be passed to callback methods if set.
+	 * @throws MqttException if there was an error registering the subscription.
+	 */
+	public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
+
+	
+	/**
+	 * Subscribe to multiple topics, each of which may include wildcards.
+	 *
+	 * <p>Provides an optimized way to subscribe to multiple topics compared to
+	 * subscribing to each one individually.</p>
+	 *
+	 * @see #subscribe(String[], int[], Object, IMqttActionListener)
+	 *
+	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
+	 * @param qos the maximum quality of service at which to subscribe. Messages
+	 * published at a lower quality of service will be received at the published
+	 * QoS.  Messages published at a higher quality of service will be received using
+	 * the QoS specified on the subscribe.
+	 * @param messageListeners one or more callbacks to handle incoming messages
+	 * @return token used to track and wait for the subscribe to complete. The token
+	 * will be passed to callback methods if set.
+	 * @throws MqttException if there was an error registering the subscription.
+	 */
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
+
+
+	/**
+	 * Subscribe to multiple topics, each of which may include wildcards.
+	 *
+	 * <p>Provides an optimized way to subscribe to multiple topics compared to
+	 * subscribing to each one individually.</p>
+	 *
+	 * @see #subscribe(String[], int[], Object, IMqttActionListener)
+	 *
+	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
+	 * @param qos the maximum quality of service at which to subscribe. Messages
+	 * published at a lower quality of service will be received at the published
+	 * QoS.  Messages published at a higher quality of service will be received using
+	 * the QoS specified on the subscribe.
+	 * @param userContext optional object used to pass context to the callback. Use
+	 * null if not required.
+	 * @param callback optional listener that will be notified when subscribe
+	 * has completed
+	 * @param messageListeners one or more callbacks to handle incoming messages
+	 * @return token used to track and wait for the subscribe to complete. The token
+	 * will be passed to callback methods if set.
+	 * @throws MqttException if there was an error registering the subscription.
+	 */
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener[] messageListeners) throws MqttException;
+
 
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -756,6 +844,26 @@ public interface IMqttAsyncClient {
 	 * @return zero or more delivery tokens
 	 */
 	public IMqttDeliveryToken[] getPendingDeliveryTokens();
+	
+	/**
+	 * If manualAcks is set to true, then on completion of the messageArrived callback
+	 * the MQTT acknowledgements are not sent.  You must call messageArrivedComplete
+	 * to send those acknowledgements.  This allows finer control over when the acks are
+	 * sent.  The default behaviour, when manualAcks is false, is to send the MQTT
+	 * acknowledgements automatically at the successful completion of the messageArrived
+	 * callback method.
+	 * @param manualAcks
+	 */
+	public void setManualAcks(boolean manualAcks);
+	
+	/**
+	 * Indicate that the application has completed processing the message with id messageId.
+	 * This will cause the MQTT acknowledgement to be sent to the server.
+	 * @param messageId the MQTT message id to be acknowledged
+	 * @param qos the MQTT QoS of the message to be acknowledged
+	 * @throws MqttException
+	 */
+	public void messageArrivedComplete(int messageId, int qos) throws MqttException;
 
 	/**
 	 * Close the client

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    James Sutton - Automatic Reconnect & Offline Buffering
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -38,6 +39,10 @@ public class MqttConnectOptions {
 	 */
 	public static final int CONNECTION_TIMEOUT_DEFAULT = 30;
 	/**
+     * The default max inflight if one is not specified
+     */
+    public static final int MAX_INFLIGHT_DEFAULT = 10;
+	/**
 	 * The default clean session setting if one is not specified
 	 */
 	public static final boolean CLEAN_SESSION_DEFAULT = true;
@@ -51,8 +56,11 @@ public class MqttConnectOptions {
 	protected static final int URI_TYPE_TCP = 0;
 	protected static final int URI_TYPE_SSL = 1;
 	protected static final int URI_TYPE_LOCAL = 2;
+	protected static final int URI_TYPE_WS = 3;
+	protected static final int URI_TYPE_WSS = 4;
 
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
+	private int maxInflight = MAX_INFLIGHT_DEFAULT;
 	private String willDestination = null;
 	private MqttMessage willMessage = null;
 	private String userName;
@@ -63,6 +71,7 @@ public class MqttConnectOptions {
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	private String[] serverURIs = null;
 	private int MqttVersion = MQTT_VERSION_DEFAULT;
+	private boolean automaticReconnect = false;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
@@ -213,6 +222,29 @@ public class MqttConnectOptions {
 		}
 		this.keepAliveInterval = keepAliveInterval;
 	}
+	
+	/**
+     * Returns the "max inflight".
+     * The max inflight limits to how many messages we can send without receiving acknowledgments. 
+     * @see #setMaxInflight(int)
+     * @return the max inflight
+     */
+    public int getMaxInflight() {
+        return maxInflight;
+    }
+
+    /**
+     * Sets the "max inflight". 
+     * please increase this value in a high traffic environment.
+     * <p>The default value is 10</p>
+     * @param maxInflight
+     */
+    public void setMaxInflight(int maxInflight) {
+        if (maxInflight < 0) {
+            throw new IllegalArgumentException();
+        }
+        this.maxInflight = maxInflight;
+    }
 
 	/**
 	 * Returns the connection timeout value.
@@ -454,6 +486,13 @@ public class MqttConnectOptions {
 	protected static int validateURI(String srvURI) {
 		try {
 			URI vURI = new URI(srvURI);
+			if (vURI.getScheme().equals("ws")){
+				return URI_TYPE_WS;
+			}
+			else if (vURI.getScheme().equals("wss")) {
+				return URI_TYPE_WSS;
+			}
+
 			if (!vURI.getPath().equals("")) {
 				throw new IllegalArgumentException(srvURI);
 			}
@@ -491,6 +530,33 @@ public class MqttConnectOptions {
 		}
 		this.MqttVersion = MqttVersion;
 	}
+
+	/**
+	 * Returns whether the client will automatically attempt to reconnect to the
+	 * server if the connection is lost
+	 * @return the automatic reconnection flag.
+	 */
+	public boolean isAutomaticReconnect() {
+		return automaticReconnect;
+	}
+
+	/**
+	 * Sets whether the client will automatically attempt to reconnect to the
+	 * server if the connection is lost.
+	 * <ul>
+	 * <li>If set to false, the client will not attempt to automatically
+	 *  reconnect to the server in the event that the connection is lost.</li>
+	 *  <li>If set to true, in the event that the connection is lost, the client
+	 *  will attempt to reconnect to the server. It will initially wait 1 second before
+	 *  it attempts to reconnect, for every failed reconnect attempt, the delay will double
+	 *  until it is at 2 minutes at which point the delay will stay at 2 minutes.</li>
+	 * </ul>
+	 * @param automaticReconnect
+	 */
+	public void setAutomaticReconnect(boolean automaticReconnect) {
+		this.automaticReconnect = automaticReconnect;
+	}
+	
 
 	public Properties getDebug() {
 		final String strNull="null";
