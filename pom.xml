@@ -4,7 +4,7 @@
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.2</version>
+	<version>1.1.0</version>
 
 	<properties>
 		<!-- source & target java version for MQTT Client -->
@@ -305,6 +305,5 @@
 		<module>org.eclipse.paho.client.mqttv3.repository</module>
 		<module>org.eclipse.paho.sample.utility</module>
 		<module>org.eclipse.paho.ui</module>
-		<module>org.eclipse.paho.android.service</module>
 	</modules>
 </project>

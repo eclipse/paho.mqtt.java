@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,12 +12,15 @@
  *   
  * Contributors:
  *   Ian Craggs - MQTT 3.1.1 support
+ *   Ian Craggs - fix bug 469527
+ *   James Sutton - Automatic Reconnect & Offline Buffering
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -43,8 +46,10 @@ public class ConnectActionListener implements IMqttActionListener {
   private Object userContext;
   private IMqttActionListener userCallback;
   private int originalMqttVersion;
+  private MqttCallbackExtended mqttCallbackExtended;
+  private boolean reconnect;
 
-  /**
+/**
    * @param persistence
    * @param client 
    * @param comms
@@ -60,7 +65,8 @@ public class ConnectActionListener implements IMqttActionListener {
       MqttConnectOptions options,
       MqttToken userToken,
       Object userContext,
-      IMqttActionListener userCallback) {
+      IMqttActionListener userCallback,
+      boolean reconnect) {
     this.persistence = persistence;
     this.client = client;
     this.comms = comms;
@@ -69,6 +75,7 @@ public class ConnectActionListener implements IMqttActionListener {
     this.userContext = userContext;
     this.userCallback = userCallback;
     this.originalMqttVersion = options.getMqttVersion();
+    this.reconnect = reconnect;
   }
 
   /**
@@ -82,11 +89,23 @@ public class ConnectActionListener implements IMqttActionListener {
 	}
     userToken.internalTok.markComplete(token.getResponse(), null);
     userToken.internalTok.notifyComplete();
+    userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
+
+    if(reconnect){
+		comms.notifyReconnect();
+    }
 
     if (userCallback != null) {
       userToken.setUserContext(userContext);
       userCallback.onSuccess(userToken);
     }
+    
+    if(mqttCallbackExtended != null){
+    	String serverURI = comms.getNetworkModules()[comms.getNetworkModuleIndex()].getServerURI();
+    	mqttCallbackExtended.connectComplete(reconnect, serverURI);
+    }
+    
+    
   }
 
   /**
@@ -135,6 +154,7 @@ public class ConnectActionListener implements IMqttActionListener {
       }
       userToken.internalTok.markComplete(null, ex);
       userToken.internalTok.notifyComplete();
+      userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
 
       if (userCallback != null) {
         userToken.setUserContext(userContext);
@@ -168,6 +188,14 @@ public class ConnectActionListener implements IMqttActionListener {
     catch (MqttException e) {
       onFailure(token, e);
     }
+  }
+  
+  /**
+   * Set the MqttCallbackExtened callback to receive connectComplete callbacks
+   * @param mqttCallbackExtended
+   */
+  public void setMqttCallbackExtended(MqttCallbackExtended mqttCallbackExtended) {
+		this.mqttCallbackExtended = mqttCallbackExtended;
   }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,8 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - MQTT 3.1.1 support
+ *    Ian Craggs - per subscription message handlers (bug 466579)
+ *    Ian Craggs - ack control (bug 472172)
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -327,6 +329,41 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 			throw new MqttException(MqttException.REASON_CODE_SUBSCRIBE_FAILED);
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
+	 */
+	public void subscribe(String topicFilter, IMqttMessageListener messageListener) throws MqttException {
+		this.subscribe(new String[] {topicFilter}, new int[] {1}, new IMqttMessageListener[] {messageListener});
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
+	 */
+	public void subscribe(String[] topicFilters, IMqttMessageListener[] messageListeners) throws MqttException {
+		int[] qos = new int[topicFilters.length];
+		for (int i=0; i<qos.length; i++) {
+			qos[i] = 1;
+		}
+		this.subscribe(topicFilters, qos, messageListeners);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int)
+	 */
+	public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
+		this.subscribe(new String[] {topicFilter}, new int[] {qos}, new IMqttMessageListener[] {messageListener});
+	}
+
+	
+	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {			
+		this.subscribe(topicFilters, qos);
+		
+		// add message handlers to the list for this client
+		for (int i = 0; i < topicFilters.length; ++i) {
+			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+		}
+	}
 
 	/*
 	 * @see IMqttClient#unsubscribe(String)
@@ -339,6 +376,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see IMqttClient#unsubscribe(String[])
 	 */
 	public void unsubscribe(String[] topicFilters) throws MqttException {
+		// message handlers removed in the async client unsubscribe below
 		aClient.unsubscribe(topicFilters, null,null).waitForCompletion(getTimeToWait());
 	}
 
@@ -421,6 +459,21 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public String getServerURI() {
 		return aClient.getServerURI();
 	}
+	
+	/**
+	 * Returns the currently connected Server URI
+	 * Implemented due to: https://bugs.eclipse.org/bugs/show_bug.cgi?id=481097
+	 * 
+	 * Where getServerURI only returns the URI that was provided in
+	 * MqttAsyncClient's constructor, getCurrentServerURI returns the URI of the
+	 * Server that the client is currently connected to. This would be different in scenarios
+	 * where multiple server URIs have been provided to the MqttConnectOptions.
+	 * 
+	 * @return the currently connected server URI
+	 */
+	public String getCurrentServerURI(){
+		return aClient.getCurrentServerURI();
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getTopic(java.lang.String)
@@ -442,6 +495,17 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public void setCallback(MqttCallback callback) {
 		aClient.setCallback(callback);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#setCallback(org.eclipse.paho.client.mqttv3.MqttCallback)
+	 */
+	public void setManualAcks(boolean manualAcks) {
+		aClient.setManualAcks(manualAcks);
+	}
+	
+	public void messageArrivedComplete(int messageId, int qos) throws MqttException {
+		aClient.messageArrivedComplete(messageId, qos);
+	}
 
 	/**
 	 * Returns a randomly generated client identifier based on the current user's login
@@ -454,6 +518,10 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 */
 	public static String generateClientId() {
 		return MqttAsyncClient.generateClientId();
+	}
+	
+	public void reconnect() throws MqttException {
+		aClient.reconnect();
 	}
 
 	/**

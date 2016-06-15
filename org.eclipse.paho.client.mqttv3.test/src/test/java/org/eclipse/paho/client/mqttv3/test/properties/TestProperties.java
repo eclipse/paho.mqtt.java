@@ -108,6 +108,8 @@ public class TestProperties {
   static public final String KEY_CLIENT_TRUST_STORE = "CLIENT_TRUST_STORE";
 
   static public final String KEY_SERVER_SSL_PORT = "SERVER_SSL_PORT";
+  
+  static public final String KEY_SERVER_WEBSOCKET_URI = "SERVER_WEBSOCKET_URI";
 
   static private Map<String, String> defaults = new HashMap<String, String>();
 
@@ -377,6 +379,22 @@ public class TestProperties {
 
     log.exiting(className, methodName, string);
     return uri;
+  }
+  
+  
+  /**
+   * @return The WebSocket Server URI which may be set in the constructor of an MqttClient
+   * @throws URISyntaxException
+   */
+  public static URI getWebSocketServerURI() throws URISyntaxException {
+	  String methodName = Utility.getMethodName();
+	  log.entering(className, methodName);
+	  
+	  String string = getInstance().getProperty(KEY_SERVER_WEBSOCKET_URI);
+	  URI uri = new URI(string);
+	  
+	  log.exiting(className, methodName, string);
+	  return uri;
   }
 
   /**

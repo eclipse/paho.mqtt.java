@@ -104,4 +104,8 @@ public class TCPNetworkModule implements NetworkModule {
 	public void setConnectTimeout(int timeout) {
 		this.conTimeout = timeout;
 	}
+
+	public String getServerURI() {
+		return "tcp://" + host + ":" + port;
+	}
 }

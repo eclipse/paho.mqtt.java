@@ -12,6 +12,7 @@
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
+ *    Ian Craggs - ack control (bug 472172)
  */
 package org.eclipse.paho.client.mqttv3;
 
@@ -28,6 +29,7 @@ public class MqttMessage {
 	private int qos = 1;
 	private boolean retained = false;
 	private boolean dup = false;
+	private int messageId;
 
 	/**
 	 * Utility method to validate the supplied QoS value.
@@ -110,7 +112,8 @@ public class MqttMessage {
 
 	/**
 	 * Whether or not the publish message should be retained by the messaging engine.
-	 * Sending a message with the retained set to <code>false</code> will clear the
+	 * Sending a message with retained set to <code>true</code> and with an empty
+         * byte array as the payload e.g. <code>new byte[0]</code> will clear the
 	 * retained message from the server.  The default value is <code>false</code>
 	 *
 	 * @param retained whether or not the messaging engine should retain the message.
@@ -216,4 +219,25 @@ public class MqttMessage {
 	public boolean isDuplicate() {
 		return this.dup;
 	}
+	
+	/**
+	 * This is only to be used internally to provide the MQTT id of a message
+	 * received from the server.  Has no effect when publishing messages.
+	 * @param messageId
+	 */
+	public void setId(int messageId) {
+		this.messageId = messageId;
+	}
+
+	/**
+	 * Returns the MQTT id of the message.  This is only applicable to messages
+	 * received from the server.
+	 * @return the MQTT id of the message
+	 */
+	public int getId() {
+		return this.messageId;
+	}
+	
+	
+	
 }

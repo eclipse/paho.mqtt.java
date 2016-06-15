@@ -33,7 +33,9 @@ public class SSLNetworkModule extends TCPNetworkModule {
 
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
-
+	
+	private String host;
+	private int port;
 	/**
 	 * Constructs a new SSLNetworkModule using the specified host and
 	 * port.  The supplied SSLSocketFactory is used to supply the network
@@ -41,6 +43,8 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	 */
 	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext) {
 		super(factory, host, port, resourceContext);
+		this.host = host;
+		this.port = port;
 		log.setResourceName(resourceContext);
 	}
 
@@ -89,5 +93,9 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		((SSLSocket)socket).startHandshake();
 		// reset timeout to default value
 		socket.setSoTimeout(soTimeout);   
+	}
+	
+	public String getServerURI() {
+		return "ssl://" + host + ":" + port;
 	}
 }
