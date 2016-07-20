@@ -21,6 +21,8 @@
 
 package org.eclipse.paho.client.mqttv3;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Timer;
@@ -358,7 +360,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * supplied address URI.
 	 *
 	 * @param address the URI for the server.
-	 * @param Connect options
+	 * @param options Connect options
 	 * @return a network module appropriate to the specified address.
 	 */
 	private NetworkModule createNetworkModule(String address, MqttConnectOptions options) throws MqttException, MqttSecurityException {
@@ -367,18 +369,25 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		log.fine(CLASS_NAME,methodName, "115", new Object[] {address});
 
 		NetworkModule netModule;
-		String shortAddress;
-		String host;
-		int port;
 		SocketFactory factory = options.getSocketFactory();
 
 		int serverURIType = MqttConnectOptions.validateURI(address);
 
+		URI uri;
+		try {
+			uri = new URI(address);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Malformed URI: " + address, e);
+		}
+
+		String host = uri.getHost();
+		int port = uri.getPort(); // -1 if not defined
+
 		switch (serverURIType) {
 		case MqttConnectOptions.URI_TYPE_TCP :
-			shortAddress = address.substring(6);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 1883);
+			if (port == -1) {
+				port = 1883;
+			}
 			if (factory == null) {
 				factory = SocketFactory.getDefault();
 			}
@@ -389,9 +398,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			((TCPNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
 			break;
 		case MqttConnectOptions.URI_TYPE_SSL:
-			shortAddress = address.substring(6);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 8883);
+			if (port == -1) {
+				port = 8883;
+			}
 			SSLSocketFactoryFactory factoryFactory = null;
 			if (factory == null) {
 //				try {
@@ -421,9 +430,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			}
 			break;
 		case MqttConnectOptions.URI_TYPE_WS:
-			shortAddress = address.substring(5);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 80);
+			if (port == -1) {
+				port = 80;
+			}
 			if (factory == null) {
 				factory = SocketFactory.getDefault();
 			}
@@ -434,9 +443,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			((WebSocketNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
 			break;
 		case MqttConnectOptions.URI_TYPE_WSS:
-			shortAddress = address.substring(6);
-			host = getHostName(shortAddress);
-			port = getPort(shortAddress, 443);
+			if (port == -1) {
+				port = 443;
+			}
 			SSLSocketFactoryFactory wSSFactoryFactory = null;
 			if (factory == null) {
 				wSSFactoryFactory = new SSLSocketFactoryFactory();
@@ -469,33 +478,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			netModule = null;
 		}
 		return netModule;
-	}
-
-	private int getPort(String uri, int defaultPort) {
-		int port;
-		int portIndex = uri.lastIndexOf(':');
-		if (portIndex == -1) {
-			port = defaultPort;
-		}
-		else {
-			int slashIndex = uri.indexOf('/');
-			if (slashIndex == -1) {
-				slashIndex = uri.length();
-			}
-		    port = Integer.parseInt(uri.substring(portIndex + 1, slashIndex));
-		}
-		return port;
-	}
-
-	private String getHostName(String uri) {
-		int portIndex = uri.indexOf(':');
-		if (portIndex == -1) {
-			portIndex = uri.indexOf('/');
-		}
-		if (portIndex == -1) {
-			portIndex = uri.length();
-		}
-		return uri.substring(0, portIndex);
 	}
 
 	/* (non-Javadoc)
