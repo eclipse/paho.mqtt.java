@@ -15,6 +15,7 @@ package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,6 +48,8 @@ public class BasicTest {
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
+  private static String topicPrefix;
+
 
   /**
    * @throws Exception 
@@ -61,6 +64,8 @@ public class BasicTest {
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
+      topicPrefix = "BasicTest-" + UUID.randomUUID().toString() + "-";
+
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -193,7 +198,7 @@ public class BasicTest {
 
     IMqttClient client = null;
     try {
-      String topicStr = "topic" + "_02";
+      String topicStr = topicPrefix + "topic" + "_02";
       String clientId = methodName;
       client = clientFactory.createMqttClient(serverURI, clientId);
 

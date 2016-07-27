@@ -13,18 +13,17 @@
 
 package org.eclipse.paho.client.mqttv3.test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
@@ -50,6 +49,7 @@ public class WebSocketTest {
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
+  private static String topicPrefix;
 
   /**
    * @throws Exception 
@@ -64,6 +64,7 @@ public class WebSocketTest {
       serverURI = TestProperties.getWebSocketServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
+      topicPrefix = "WebSocketTest-" + UUID.randomUUID().toString() + "-";
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -147,7 +148,7 @@ public class WebSocketTest {
 
     IMqttClient client = null;
     try {
-      String topicStr = "topic" + "_02";
+      String topicStr = topicPrefix + "topic" + "_02";
       String clientId = methodName;
       client = clientFactory.createMqttClient(serverURI, clientId);
 
@@ -181,6 +182,9 @@ public class WebSocketTest {
     }
     finally {
       if (client != null) {
+    	  if(client.isConnected()){
+    		  client.disconnectForcibly();
+    	  }
         log.info("Close...");
         client.close();
       }
@@ -206,7 +210,7 @@ public class WebSocketTest {
 
 	    IMqttClient client = null;
 	    try {
-	      String topicStr = "topic_largeFile_01";
+	      String topicStr = topicPrefix + "topic_largeFile_01";
 	      String clientId = methodName;
 	      client = clientFactory.createMqttClient(serverURI, clientId);
 
