@@ -150,7 +150,9 @@ public class ClientComms {
 			if(disconnectedMessageBuffer != null && disconnectedMessageBuffer.getMessageCount() != 0){
 				//@TRACE 507=Client Connected, Offline Buffer available, but not empty. Adding message to buffer. message={0}
 				log.fine(CLASS_NAME, methodName, "507", new Object[] {message.getKey()});
-				this.clientState.persistBufferedMessage(message);
+				if(disconnectedMessageBuffer.isPersistBuffer()){
+					this.clientState.persistBufferedMessage(message);
+				}
 				disconnectedMessageBuffer.putMessage(message, token);
 			} else {
 				this.internalSend(message, token);

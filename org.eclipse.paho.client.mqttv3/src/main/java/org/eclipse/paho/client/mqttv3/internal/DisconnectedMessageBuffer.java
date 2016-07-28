@@ -122,5 +122,9 @@ public class DisconnectedMessageBuffer implements Runnable {
 	public void setPublishCallback(IDisconnectedBufferCallback callback) {
 		this.callback = callback;
 	}
+	
+	public boolean isPersistBuffer(){
+		return bufferOpts.isPersistBuffer();
+	}
 
 }
