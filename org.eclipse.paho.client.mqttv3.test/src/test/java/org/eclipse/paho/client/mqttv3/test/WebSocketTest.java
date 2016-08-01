@@ -247,8 +247,27 @@ public class WebSocketTest {
 	  
   }
 
+  @Test
+  public void testBasicAuth() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
 
+    String userInfo = "username:password";
 
+    String clientId = methodName;
+
+    URI serverURIWithUserInfo = new URI(serverURI.getScheme(),
+            userInfo,
+            serverURI.getHost(),
+            serverURI.getPort(),
+            serverURI.getPath(),
+            serverURI.getQuery(),
+            serverURI.getFragment());
+
+    IMqttClient client = clientFactory.createMqttClient(serverURIWithUserInfo, clientId);
+    client.connect();
+    client.disconnect();
+  }
 
   // -------------------------------------------------------------
   // Helper methods/classes
