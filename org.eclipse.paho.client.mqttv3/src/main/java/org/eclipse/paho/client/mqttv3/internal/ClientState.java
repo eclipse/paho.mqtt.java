@@ -1090,6 +1090,7 @@ public class ClientState {
 				
 				// QoS 1 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
+				persistence.remove(getSendBufferedPersistenceKey(message));
 				outboundQoS1.remove(new Integer(ack.getMessageId()));
 				decrementInFlight();
 				releaseMessageId(message.getMessageId());
@@ -1101,6 +1102,7 @@ public class ClientState {
 				// QoS 2 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
 				persistence.remove(getSendConfirmPersistenceKey(message));
+				persistence.remove(getSendBufferedPersistenceKey(message));
 				outboundQoS2.remove(new Integer(ack.getMessageId()));
 
 				inFlightPubRels--;

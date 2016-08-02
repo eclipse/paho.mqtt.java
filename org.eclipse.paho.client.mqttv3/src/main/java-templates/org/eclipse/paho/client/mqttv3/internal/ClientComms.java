@@ -160,7 +160,9 @@ public class ClientComms {
 		} else if(disconnectedMessageBuffer != null && isResting()){
 			//@TRACE 508=Client Resting, Offline Buffer available. Adding message to buffer. message={0}
 			log.fine(CLASS_NAME, methodName, "508", new Object[] {message.getKey()});
-			this.clientState.persistBufferedMessage(message);
+			if(disconnectedMessageBuffer.isPersistBuffer()){
+				this.clientState.persistBufferedMessage(message);
+			}
 			disconnectedMessageBuffer.putMessage(message, token);
 		} else {
 			//@TRACE 208=failed: not connected
