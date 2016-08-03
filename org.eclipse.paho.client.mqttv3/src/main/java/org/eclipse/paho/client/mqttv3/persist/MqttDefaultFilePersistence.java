@@ -51,9 +51,15 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	private File clientDir = null;
 	private FileLock fileLock = null;
 	
-	private static final FilenameFilter FILE_FILTER = new FilenameFilter() { 
-		public boolean accept(File dir, String name) { return name.endsWith(MESSAGE_FILE_EXTENSION); }
-		};
+	//TODO
+	private static FilenameFilter FILENAME_FILTER;
+	
+	private static FilenameFilter getFilenameFilter(){
+		if(FILENAME_FILTER == null){
+			FILENAME_FILTER =  new PersistanceFileNameFilter(MESSAGE_FILE_EXTENSION);
+		}
+		return FILENAME_FILTER;
+	}
 	
 	public MqttDefaultFilePersistence()  { //throws MqttPersistenceException {
 		this(System.getProperty("user.dir"));
@@ -245,7 +251,7 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	
 	private File[] getFiles() throws MqttPersistenceException {
 		checkIsOpen();
-		File[] files = clientDir.listFiles(FILE_FILTER);
+		File[] files = clientDir.listFiles(getFilenameFilter());
 		if (files == null) {
 			throw new MqttPersistenceException();
 		}
@@ -264,11 +270,8 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	 * @param dir The directory in which to scan and restore backups
 	 */
 	private void restoreBackups(File dir) throws MqttPersistenceException {
-		File[] files = dir.listFiles(new FileFilter() {
-			public boolean accept(File f) {
-				return f.getName().endsWith(MESSAGE_BACKUP_FILE_EXTENSION);
-			}
-		});
+		File[] files = dir.listFiles(new PersistanceFileFilter(MESSAGE_BACKUP_FILE_EXTENSION));
+
 		if (files == null) {
 			throw new MqttPersistenceException();
 		}
