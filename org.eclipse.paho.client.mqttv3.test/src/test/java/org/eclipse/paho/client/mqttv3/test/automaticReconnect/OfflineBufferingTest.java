@@ -361,6 +361,7 @@ public class OfflineBufferingTest {
 				persistence);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
+		disconnectedOpts.setPersistBuffer(true);
 		client.setBufferOpts(disconnectedOpts);
 
 		// Enable Proxy & Connect to server
@@ -406,19 +407,22 @@ public class OfflineBufferingTest {
 	public void testUnPersistBufferedMessagesOnNewClient() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
+		int qos = 2;
 
 		// Mock up an Mqtt Message to be stored in Persistence
 		MqttMessage mqttMessage = new MqttMessage(methodName.getBytes());
-		mqttMessage.setQos(0);
+		mqttMessage.setQos(qos);
 		MqttPublish pubMessage = new MqttPublish(topicPrefix + methodName, mqttMessage);
+		// If ID is not set, then the persisted message may be invalid for QoS 1 & 2
+		pubMessage.setMessageId(1);
 		final TestMemoryPersistence persistence = new TestMemoryPersistence();
 		persistence.open(null, null);
-		persistence.put("sb-0", (MqttPublish) pubMessage);
+		persistence.put("sb-1", (MqttPublish) pubMessage);
 		@SuppressWarnings("unchecked")
 		List<String> persistedKeys = Collections.list(persistence.keys());
 		log.info("There are now: " + persistedKeys.size() + " keys in persistence");
 		Assert.assertEquals(1, persistedKeys.size());
-
+	
 		// Create Subscription client to watch for the message being published
 		// as soon as the main client connects
 		log.info("Creating subscription client");
@@ -428,7 +432,7 @@ public class OfflineBufferingTest {
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion();
 		Assert.assertTrue(subClient.isConnected());
-		IMqttToken subToken = subClient.subscribe(topicPrefix + methodName, 0);
+		IMqttToken subToken = subClient.subscribe(topicPrefix + methodName, qos);
 		subToken.waitForCompletion();
 
 		// Create Real client
@@ -436,14 +440,13 @@ public class OfflineBufferingTest {
 		MqttConnectOptions optionsNew = new MqttConnectOptions();
 		optionsNew.setCleanSession(false);
 		MqttAsyncClient newClient = new MqttAsyncClient(serverURIString, methodName + "new-client11", persistence);
-
 		// Connect Client with existing persistence layer
 		IMqttToken newClientConnectToken = newClient.connect(optionsNew);
 		newClientConnectToken.waitForCompletion();
 		Assert.assertTrue(newClient.isConnected());
 
 		// Check that message is published / delivered
-		boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 0, methodName.getBytes());
+		boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, qos, methodName.getBytes());
 		Assert.assertTrue(recieved);
 		log.info("Message was successfully delivered after connect");
 
