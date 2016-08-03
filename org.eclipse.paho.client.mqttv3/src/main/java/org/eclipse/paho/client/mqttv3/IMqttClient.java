@@ -20,7 +20,7 @@
 package org.eclipse.paho.client.mqttv3;
 
 /**
- * Enables an application to communicate with an MQTT server using using blocking methods.
+ * Enables an application to communicate with an MQTT server using blocking methods.
  * <p>
  * This interface allows applications to utilize all features of the MQTT version 3.1
  * specification including:
