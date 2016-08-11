@@ -93,7 +93,10 @@ public class WebSocketHandshake {
 
 			PrintWriter pw = new PrintWriter(output);
 			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
-			pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
+            if (port != 80)
+                pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
+            else
+                pw.print("Host: " + host + LINE_SEPARATOR);
 			pw.print("Upgrade: websocket" + LINE_SEPARATOR);
 			pw.print("Connection: Upgrade" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
