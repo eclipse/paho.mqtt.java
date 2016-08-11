@@ -3,11 +3,11 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -32,7 +32,7 @@ import java.util.Map;
  * Helper class to execute a WebSocket Handshake.
  */
 public class WebSocketHandshake {
-	
+
 	// Do not change: https://tools.ietf.org/html/rfc6455#section-1.3
 	private static final String ACCEPT_SALT = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	private static final String SHA1_PROTOCOL = "SHA1";
@@ -51,8 +51,8 @@ public class WebSocketHandshake {
 	String uri;
 	String host;
 	int port;
-	
-	
+
+
 	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port){
 		this.input = input;
 		this.output = output;
@@ -61,7 +61,7 @@ public class WebSocketHandshake {
 		this.port = port;
 	}
 
-	
+
 	/**
 	 * Executes a Websocket Handshake.
 	 * Will throw an IOException if the handshake fails
@@ -73,7 +73,7 @@ public class WebSocketHandshake {
 		sendHandshakeRequest(b64Key);
 		receiveHandshakeResponse(b64Key);
 	}
-	
+
 	/**
 	 * Builds and sends the HTTP Header GET Request
 	 * for the socket.
@@ -93,10 +93,10 @@ public class WebSocketHandshake {
 
 			PrintWriter pw = new PrintWriter(output);
 			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
-            if (port != 80 && port != 443)
-                pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
-            else
-                pw.print("Host: " + host + LINE_SEPARATOR);
+			if (port != 80 && port != 443)
+				pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
+			else
+				pw.print("Host: " + host + LINE_SEPARATOR);
 			pw.print("Upgrade: websocket" + LINE_SEPARATOR);
 			pw.print("Connection: Upgrade" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
@@ -108,7 +108,7 @@ public class WebSocketHandshake {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	/**
 	 * Receives the Handshake response and verifies that it is valid.
 	 * @param Base64 encoded key
@@ -145,7 +145,7 @@ public class WebSocketHandshake {
 		if(!headerMap.containsKey(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT)){
 			throw new IOException("WebSocket Response header: Missing Sec-WebSocket-Accept");
 		}
-		
+
 		try {
 			verifyWebSocketKey(key, (String)headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT));
 		} catch (NoSuchAlgorithmException e) {
@@ -155,7 +155,7 @@ public class WebSocketHandshake {
 		}
 
 	}
-	
+
 	/**
 	 * Returns a Hashmap of HTTP headers
 	 * @param ArrayList<String> of headers
@@ -170,7 +170,7 @@ public class WebSocketHandshake {
 		}
 		return headerMap;
 	}
-	
+
 	/**
 	 * Verifies that the Accept key provided is correctly built from the
 	 * original key sent.
@@ -186,9 +186,9 @@ public class WebSocketHandshake {
 		String encodedSha1Bytes = Base64.encodeBytes(sha1Bytes).trim();
 		if(!encodedSha1Bytes.equals(encodedSha1Bytes)){
 			throw new HandshakeFailedException();
-		}	
+		}
 	}
-	
+
 	/**
 	 * Returns the sha1 byte array of the provided string.
 	 * @param input
