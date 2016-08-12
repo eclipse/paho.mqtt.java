@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 /**
  * Helper class to execute a WebSocket Handshake.
  */
@@ -68,8 +69,9 @@ public class WebSocketHandshake {
 	 * @throws IOException
 	 */
 	public void execute() throws IOException {
-		String key = "mqtt-" + (System.currentTimeMillis()/1000);
-		String b64Key = Base64.encode(key);
+		byte[] key = new byte[16];
+		System.arraycopy(UUID.randomUUID().toString().getBytes(), 0, key, 0, 16);
+		String b64Key = Base64.encodeBytes(key);
 		sendHandshakeRequest(b64Key);
 		receiveHandshakeResponse(b64Key);
 	}
@@ -130,7 +132,7 @@ public class WebSocketHandshake {
 		}
 
 		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
-		if(!upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
+		if(upgradeHeader == null || !upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
 
