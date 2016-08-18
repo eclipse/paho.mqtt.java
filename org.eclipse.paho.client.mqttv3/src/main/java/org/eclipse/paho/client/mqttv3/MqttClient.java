@@ -290,6 +290,10 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
+        public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
+                aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
+        }
+
 	/*
 	 * @see IMqttClient#subscribe(String)
 	 */

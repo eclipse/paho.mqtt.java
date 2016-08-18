@@ -647,6 +647,10 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
+        public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
+                comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
+        }
+
 	/* (non-Javadoc)
 	 * @see IMqttAsyncClient#isConnected()
 	 */
