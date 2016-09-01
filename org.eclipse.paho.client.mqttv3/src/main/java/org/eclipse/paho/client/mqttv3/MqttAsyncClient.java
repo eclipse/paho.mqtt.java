@@ -520,7 +520,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		if (comms.isClosed()) {
 			throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
 		}
-
+		if(options == null){
+			options = new MqttConnectOptions();
+		}
 		this.connOpts = options;
 		this.userContext = userContext;
 		final boolean automaticReconnect = options.isAutomaticReconnect();
@@ -1099,7 +1101,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		String methodName = "stopReconnectCycle";
 		//@Trace 504=Stop reconnect timer for client: {0}
 		log.fine(CLASS_NAME, methodName, "504", new Object[]{this.clientId});
-		reconnectTimer.cancel();
+		if(reconnectTimer != null){
+			reconnectTimer.cancel();
+		}
 		reconnectDelay = 1000; // Reset Delay Timer
 		
 	}
@@ -1108,7 +1112,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		String methodName = "rescheduleReconnectCycle";
 		//@Trace 505=Rescheduling reconnect timer for client: {0}, delay: {1}
 		log.fine(CLASS_NAME, methodName, "505", new Object[]{this.clientId, new Long(reconnectDelay)});
-		reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
+		if(reconnectTimer != null){
+			reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
+		}
 
 	}
 	
