@@ -794,18 +794,18 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			this.comms.removeMessageListener(topicFilters[i]);
 		}
 		
-		String subs = "";
+		StringBuffer subs = new StringBuffer();
 		for (int i=0;i<topicFilters.length;i++) {
 			if (i>0) {
-				subs+=", ";
+				subs.append(", ");
 			}
-			subs+= "topic="+ topicFilters[i]+" qos="+qos[i];
+			subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);
 			
 			//Check if the topic filter is valid before subscribing
 			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 		}
 		//@TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
-		log.fine(CLASS_NAME,methodName,"106",new Object[]{subs, userContext, callback});
+		log.fine(CLASS_NAME,methodName,"106",new Object[]{subs.toString(), userContext, callback});
 
 		MqttToken token = new MqttToken(getClientId());
 		token.setActionCallback(callback);
