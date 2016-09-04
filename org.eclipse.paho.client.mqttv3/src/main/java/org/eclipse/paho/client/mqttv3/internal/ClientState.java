@@ -45,7 +45,6 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -138,6 +137,7 @@ public class ClientState {
 	private Hashtable outboundQoS1 = null;
 	private Hashtable outboundQoS0 = null;
 	private Hashtable inboundQoS2 = null;
+	private Hashtable inboundQos2handle ＝ null;
 	
 	private MqttPingSender pingSender = null;
 
@@ -153,6 +153,8 @@ public class ClientState {
 		outboundQoS1 = new Hashtable();
 		outboundQoS0 = new Hashtable();
 		inboundQoS2 = new Hashtable();
+		inboundQos2handle = new Hashtable();
+		
 		pingCommand = new MqttPingReq();
 		inFlightPubRels = 0;
 		actualInFlight = 0;
@@ -216,6 +218,7 @@ public class ClientState {
 		outboundQoS1.clear();
 		outboundQoS0.clear();
 		inboundQoS2.clear();
+		inboundQos2handle.clear();
 		tokenStore.clear();
 	}
 	
@@ -563,7 +566,6 @@ public class ClientState {
 		// Because the client will have disconnected, we will want to re-open persistence
 		try {
 			message.setMessageId(getNextMessageId());
-			key = getSendBufferedPersistenceKey(message);
 			try {
 				persistence.put(key, (MqttPublish) message);
 			} catch (MqttPersistenceException mpe){
@@ -1002,6 +1004,7 @@ public class ClientState {
 				queueLock.notifyAll();
 			}
 		} else {
+			// Sub ack or unsuback
 			notifyResult(ack, token, mex);
 			releaseMessageId(ack.getMessageId());
 			tokenStore.removeToken(ack);
@@ -1048,7 +1051,9 @@ public class ClientState {
 			} else if (message instanceof MqttPubRel) {
 				MqttPublish sendMsg = (MqttPublish) inboundQoS2
 						.get(new Integer(message.getMessageId()));
-				if (sendMsg != null) {
+				String handling = (String) inboundQos2handle.get(new Integer(message.getMessageId()));
+				if (sendMsg != null && handling == null) {
+					inboundQos2handle.put(new Integer(message.getMessageId()), "true");
 					if (callback != null) {
 						callback.messageArrived(sendMsg);
 					}
@@ -1090,7 +1095,6 @@ public class ClientState {
 				
 				// QoS 1 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
-				persistence.remove(getSendBufferedPersistenceKey(message));
 				outboundQoS1.remove(new Integer(ack.getMessageId()));
 				decrementInFlight();
 				releaseMessageId(message.getMessageId());
@@ -1102,7 +1106,6 @@ public class ClientState {
 				// QoS 2 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
 				persistence.remove(getSendConfirmPersistenceKey(message));
-				persistence.remove(getSendBufferedPersistenceKey(message));
 				outboundQoS2.remove(new Integer(ack.getMessageId()));
 
 				inFlightPubRels--;
@@ -1330,6 +1333,7 @@ public class ClientState {
 		
 		persistence.remove(getReceivedPersistenceKey(message));
 		inboundQoS2.remove(new Integer(message.getMessageId()));
+		inboundQos2handle.remove(new Integer(message.getMessageId()));
 	}
 	
 	protected void deliveryComplete(int messageId) throws MqttPersistenceException {
@@ -1340,6 +1344,7 @@ public class ClientState {
 		
 		persistence.remove(getReceivedPersistenceKey(messageId));
 		inboundQoS2.remove(new Integer(messageId));
+		inboundQos2handle.remove(new Integer(messageId));
 	}
 	
 	public int getActualInFlight(){
@@ -1363,6 +1368,7 @@ public class ClientState {
 		outboundQoS1.clear();
 		outboundQoS0.clear();
 		inboundQoS2.clear();
+		inboundQos2handle.clear();
 		tokenStore.clear();
 		inUseMsgIds = null;
 		pendingMessages = null;
@@ -1371,6 +1377,7 @@ public class ClientState {
 		outboundQoS1 = null;
 		outboundQoS0 = null;
 		inboundQoS2 = null;
+		inboundQos2handle = null;
 		tokenStore = null;
 		callback = null;
 		clientComms = null;
@@ -1395,6 +1402,7 @@ public class ClientState {
 		props.put("outboundQoS1", outboundQoS1);
 		props.put("outboundQoS0", outboundQoS0);
 		props.put("inboundQoS2", inboundQoS2);
+		props.put("inboundQos2handle", inboundQos2handle);
 		props.put("tokens", tokenStore);
 		return props;
 	}
