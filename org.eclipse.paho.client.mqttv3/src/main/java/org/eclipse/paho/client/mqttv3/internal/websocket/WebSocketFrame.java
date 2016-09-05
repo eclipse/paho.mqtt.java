@@ -18,7 +18,7 @@ package org.eclipse.paho.client.mqttv3.internal.websocket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class WebSocketFrame {
 	
@@ -291,11 +291,11 @@ public class WebSocketFrame {
 	 * @return ByteArray containing the key;
 	 */
 	public static byte[] generateMaskingKey(){
-		Random randomGenerator = new Random();
-		int a = randomGenerator.nextInt(255);
-		int b = randomGenerator.nextInt(255);
-		int c = randomGenerator.nextInt(255);
-		int d = randomGenerator.nextInt(255);
+		SecureRandom secureRandomGenerator = new SecureRandom();
+		int a = secureRandomGenerator.nextInt(255);
+		int b = secureRandomGenerator.nextInt(255);
+		int c = secureRandomGenerator.nextInt(255);
+		int d = secureRandomGenerator.nextInt(255);
 		return new byte[] {(byte) a,(byte) b,(byte) c,(byte) d};
 	}
 
