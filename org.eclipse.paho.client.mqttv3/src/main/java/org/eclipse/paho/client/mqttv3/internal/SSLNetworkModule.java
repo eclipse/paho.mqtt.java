@@ -86,10 +86,8 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		super.start();
 		setEnabledCiphers(enabledCiphers);
 		int soTimeout = socket.getSoTimeout();
-		if ( soTimeout == 0 ) {
-			// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
-			socket.setSoTimeout(this.handshakeTimeoutSecs*1000);
-		}
+		// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
+		socket.setSoTimeout(this.handshakeTimeoutSecs*1000);
 		((SSLSocket)socket).startHandshake();
 		// reset timeout to default value
 		socket.setSoTimeout(soTimeout);   

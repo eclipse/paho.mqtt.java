@@ -319,6 +319,9 @@ public class ClientComms {
 		// when actions complete
 		if (callback!= null) {callback.stop(); }
 
+		// Stop the thread that handles inbound work from the network
+		if (receiver != null) {receiver.stop();}
+		
 		// Stop the network module, send and receive now not possible
 		try {
 			if (networkModules != null) {
@@ -330,9 +333,6 @@ public class ClientComms {
 		} catch (Exception ioe) {
 			// Ignore as we are shutting down
 		}
-
-		// Stop the thread that handles inbound work from the network
-		if (receiver != null) {receiver.stop();}
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
 		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
@@ -471,20 +471,26 @@ public class ClientComms {
 			discbg.start();
 		}
 	}
-	
+
+        public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
+		disconnectForcibly(quiesceTimeout, disconnectTimeout, true);
+	}	
+
 	/**
 	 * Disconnect the connection and reset all the states.
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
 		// Allow current inbound and outbound work to complete
 		clientState.quiesce(quiesceTimeout);
 		MqttToken token = new MqttToken(client.getClientId());
 		try {
 			// Send disconnect packet
-			internalSend(new MqttDisconnect(), token);
+			if(sendDisconnectPacket) {
+				internalSend(new MqttDisconnect(), token);
 
-			// Wait util the disconnect packet sent with timeout
-			token.waitForCompletion(disconnectTimeout);
+				// Wait util the disconnect packet sent with timeout
+				token.waitForCompletion(disconnectTimeout);
+			}
 		}
 		catch (Exception ex) {
 			// ignore, probably means we failed to send the disconnect packet.
