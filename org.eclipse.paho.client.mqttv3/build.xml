@@ -16,8 +16,8 @@
 	<property name="build.level" value="LYYMMDD" />
 
 	<!-- these should be moved to properties file if required -->
-	<property name="javac_target" value="1.2" />
-	<property name="javac_source" value="1.2" />
+	<property name="javac_target" value="1.7" />
+	<property name="javac_source" value="1.7" />
 	<property name="javac_debug" value="on" />
 	<property name="javac_debuglevel" value="lines,vars,source" />
 
