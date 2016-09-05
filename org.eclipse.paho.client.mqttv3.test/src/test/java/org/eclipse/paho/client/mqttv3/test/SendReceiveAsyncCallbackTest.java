@@ -16,6 +16,7 @@ package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,9 +49,10 @@ public class SendReceiveAsyncCallbackTest {
 	private static URI serverURI;
 	private static MqttClientFactoryPaho clientFactory;
 	private boolean testFinished = false;
-	private String topicFilter = "SendReceiveAsyncCallback/topic";
+	private static String topicFilter;
 	private listener myListener = new listener();
 	private onPublish myOnPublish = new onPublish(1);
+	private static String topicPrefix;
 
 	/**
 	 * @throws Exception
@@ -65,6 +67,9 @@ public class SendReceiveAsyncCallbackTest {
 			serverURI = TestProperties.getServerURI();
 			clientFactory = new MqttClientFactoryPaho();
 			clientFactory.open();
+		    topicPrefix = "SendReceiveAsyncCallbackTest-" + UUID.randomUUID().toString() + "-";
+		    topicFilter = topicPrefix + "SendReceiveAsyncCallback/topic";
+
 		} catch (Exception exception) {
 			log.log(Level.SEVERE, "caught exception:", exception);
 			throw exception;

@@ -45,6 +45,7 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -562,6 +563,7 @@ public class ClientState {
 		// Because the client will have disconnected, we will want to re-open persistence
 		try {
 			message.setMessageId(getNextMessageId());
+			key = getSendBufferedPersistenceKey(message);
 			try {
 				persistence.put(key, (MqttPublish) message);
 			} catch (MqttPersistenceException mpe){
@@ -1000,7 +1002,6 @@ public class ClientState {
 				queueLock.notifyAll();
 			}
 		} else {
-			// Sub ack or unsuback
 			notifyResult(ack, token, mex);
 			releaseMessageId(ack.getMessageId());
 			tokenStore.removeToken(ack);
@@ -1089,6 +1090,7 @@ public class ClientState {
 				
 				// QoS 1 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
+				persistence.remove(getSendBufferedPersistenceKey(message));
 				outboundQoS1.remove(new Integer(ack.getMessageId()));
 				decrementInFlight();
 				releaseMessageId(message.getMessageId());
@@ -1100,6 +1102,7 @@ public class ClientState {
 				// QoS 2 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
 				persistence.remove(getSendConfirmPersistenceKey(message));
+				persistence.remove(getSendBufferedPersistenceKey(message));
 				outboundQoS2.remove(new Integer(ack.getMessageId()));
 
 				inFlightPubRels--;

@@ -77,7 +77,7 @@ public class WebSocketHandshake {
 	/**
 	 * Builds and sends the HTTP Header GET Request
 	 * for the socket.
-	 * @param Base64 encoded key
+	 * @param key Base64 encoded key
 	 * @throws IOException
 	 */
 	private void sendHandshakeRequest(String key) throws IOException{
@@ -105,6 +105,12 @@ public class WebSocketHandshake {
 			pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Protocol: mqttv3.1" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
+
+			String userInfo = srvUri.getUserInfo();
+			if(userInfo != null) {
+				pw.print("Authorization: Basic " + Base64.encode(userInfo) + LINE_SEPARATOR);
+			}
+
 			pw.print(LINE_SEPARATOR);
 			pw.flush();
 		} catch (URISyntaxException e) {
@@ -114,7 +120,7 @@ public class WebSocketHandshake {
 	
 	/**
 	 * Receives the Handshake response and verifies that it is valid.
-	 * @param Base64 encoded key
+	 * @param key Base64 encoded key
 	 * @throws IOException
 	 */
 	private void receiveHandshakeResponse(String key) throws IOException {

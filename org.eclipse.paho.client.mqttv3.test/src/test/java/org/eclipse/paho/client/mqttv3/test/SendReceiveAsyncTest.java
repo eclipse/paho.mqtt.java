@@ -15,6 +15,7 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +45,8 @@ public class SendReceiveAsyncTest {
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
+  private static String topicPrefix;
+
 
   /**
    * @throws Exception
@@ -58,6 +61,8 @@ public class SendReceiveAsyncTest {
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
+      topicPrefix = "SendReceiveAsyncTest-" + UUID.randomUUID().toString() + "-";
+
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -170,7 +175,7 @@ public class SendReceiveAsyncTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
       connectToken.waitForCompletion();
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
@@ -232,7 +237,7 @@ public class SendReceiveAsyncTest {
       connectToken.waitForCompletion();
 
       int largeSize = 1000;
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       byte[] message = new byte[largeSize];
 
@@ -304,7 +309,7 @@ public class SendReceiveAsyncTest {
     IMqttToken disconnectToken;
 
     try {
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
 
       for (int i = 0; i < mqttPublisher.length; i++) {
@@ -410,7 +415,7 @@ public class SendReceiveAsyncTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
       connectToken.waitForCompletion();
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
@@ -548,7 +553,7 @@ public class SendReceiveAsyncTest {
   		log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
   		connectToken.waitForCompletion();
   
-  		String topic = "testLargeMsg/Topic";
+  		String topic = topicPrefix + "testLargeMsg/Topic";
   		//10MB
   		int largeSize = 20 * (1 << 20);
   		byte[] message = new byte[largeSize];
