@@ -319,6 +319,9 @@ public class ClientComms {
 		// when actions complete
 		if (callback!= null) {callback.stop(); }
 
+		// Stop the thread that handles inbound work from the network
+		if (receiver != null) {receiver.stop();}
+		
 		// Stop the network module, send and receive now not possible
 		try {
 			if (networkModules != null) {
@@ -330,9 +333,6 @@ public class ClientComms {
 		} catch (Exception ioe) {
 			// Ignore as we are shutting down
 		}
-
-		// Stop the thread that handles inbound work from the network
-		if (receiver != null) {receiver.stop();}
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
 		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
