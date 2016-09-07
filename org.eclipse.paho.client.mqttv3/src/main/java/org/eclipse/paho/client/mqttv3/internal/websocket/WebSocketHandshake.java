@@ -68,7 +68,7 @@ public class WebSocketHandshake {
 	 * @throws IOException
 	 */
 	public void execute() throws IOException {
-		String key = "mqtt-" + (System.currentTimeMillis()/1000);
+		String key = "mqtt3-" + (System.currentTimeMillis()/1000);
 		String b64Key = Base64.encode(key);
 		sendHandshakeRequest(b64Key);
 		receiveHandshakeResponse(b64Key);
