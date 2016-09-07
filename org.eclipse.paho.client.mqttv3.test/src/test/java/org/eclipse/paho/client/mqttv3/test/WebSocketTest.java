@@ -131,6 +131,9 @@ public class WebSocketTest {
     }
     finally {
       if (client != null) {
+    	  if(client.isConnected()){
+    		  client.disconnectForcibly();
+    	  }
         log.info("Close...");
         client.close();
       }
@@ -240,6 +243,9 @@ public class WebSocketTest {
 	    	e.printStackTrace();
 	    } finally {
 	      if (client != null) {
+	    	  if(client.isConnected()){
+	    		  client.disconnectForcibly();
+	    	  }
 	        log.info("Close...");
 	        client.close();
 	      }
@@ -263,10 +269,22 @@ public class WebSocketTest {
             serverURI.getPath(),
             serverURI.getQuery(),
             serverURI.getFragment());
-
-    IMqttClient client = clientFactory.createMqttClient(serverURIWithUserInfo, clientId);
-    client.connect();
-    client.disconnect();
+    IMqttClient client = null;
+    try {
+     client = clientFactory.createMqttClient(serverURIWithUserInfo, clientId);
+    	client.connect();
+    	client.disconnect();
+    } catch (Exception e){
+    	e.printStackTrace();
+    } finally {
+      if (client != null) {
+    	  if(client.isConnected()){
+    		  client.disconnectForcibly();
+    	  }
+        log.info("Close...");
+        client.close();
+      }
+    }
   }
 
   // -------------------------------------------------------------
