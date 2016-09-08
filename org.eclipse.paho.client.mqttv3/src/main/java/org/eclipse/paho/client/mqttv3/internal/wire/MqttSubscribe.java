@@ -73,6 +73,7 @@ public class MqttSubscribe extends MqttWireMessage {
 		if (names.length != qos.length) {
 		throw new IllegalArgumentException();
 		}
+		this.count = names.length;
 		
 		for (int i=0;i<qos.length;i++) {
 			MqttMessage.validateQos(qos[i]);
