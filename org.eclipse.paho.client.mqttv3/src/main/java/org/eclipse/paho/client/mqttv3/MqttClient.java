@@ -368,6 +368,81 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
 		}
 	}
+	
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String)
+	 */
+	public IMqttToken subscribeWithResponse(String topicFilter) throws MqttException {
+		return this.subscribeWithResponse(new String[] {topicFilter}, new int[] {1});
+	}
+	
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String, IMqttMessageListener)
+	 */
+	public IMqttToken subscribeWithResponse(String topicFilter, IMqttMessageListener messageListener) throws MqttException {
+		return this.subscribeWithResponse(new String[] {topicFilter}, new int[] {1}, new IMqttMessageListener[] {messageListener});
+	}
+
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String, int)
+	 */
+	public IMqttToken subscribeWithResponse(String topicFilter, int qos) throws MqttException {
+		return this.subscribeWithResponse(new String[] {topicFilter}, new int[] {qos});
+	}
+
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String, int, IMqttMessageListener)
+	 */
+	public IMqttToken subscribeWithResponse(String topicFilter, int qos, IMqttMessageListener messageListener)
+			throws MqttException {
+		return this.subscribeWithResponse(new String[] {topicFilter}, new int[] {qos}, new IMqttMessageListener[] {messageListener});
+	}
+
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String[])
+	 */
+	public IMqttToken subscribeWithResponse(String[] topicFilters) throws MqttException {
+		int[] qos = new int[topicFilters.length];
+		for (int i=0; i<qos.length; i++) {
+			qos[i] = 1;
+		}
+		return this.subscribeWithResponse(topicFilters, qos);
+	}
+
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String[], IMqttMessageListener[])
+	 */
+	public IMqttToken subscribeWithResponse(String[] topicFilters, IMqttMessageListener[] messageListeners)
+			throws MqttException {
+		int[] qos = new int[topicFilters.length];
+		for (int i=0; i<qos.length; i++) {
+			qos[i] = 1;
+		}
+		return this.subscribeWithResponse(topicFilters, qos, messageListeners);
+	}
+
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String[], int[])
+	 */
+	public IMqttToken subscribeWithResponse(String[] topicFilters, int[] qos) throws MqttException {
+		IMqttToken tok = aClient.subscribe(topicFilters, qos, null, null);
+		tok.waitForCompletion(getTimeToWait());
+		return tok;
+	}
+
+	/*
+	 * @see IMqttClient#subscribeWithResponse(String[], int[], IMqttMessageListener[])
+	 */
+	public IMqttToken subscribeWithResponse(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
+			throws MqttException {
+		IMqttToken tok = this.subscribeWithResponse(topicFilters, qos);
+		
+		// add message handlers to the list for this client
+		for (int i = 0; i < topicFilters.length; ++i) {
+			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+		}
+		return tok;
+	}
 
 	/*
 	 * @see IMqttClient#unsubscribe(String)
