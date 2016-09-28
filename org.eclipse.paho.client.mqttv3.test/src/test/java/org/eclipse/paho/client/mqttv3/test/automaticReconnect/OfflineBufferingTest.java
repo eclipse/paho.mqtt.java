@@ -209,7 +209,6 @@ public class OfflineBufferingTest {
 		// Check that all messages have been delivered
 		for (int x = 0; x < 100; x++) {
 			boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 0, Integer.toString(x).getBytes());
-			log.info("Validate Message: " + x + ": " + recieved);
 			Assert.assertTrue(recieved);
 		}
 		log.info("All messages sent and Recieved correctly.");
