@@ -957,7 +957,9 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 */
 	public static String generateClientId() {
 		//length of nanoTime = 15, so total length = 19  < 65535(defined in spec) 
-		return CLIENT_ID_PREFIX + System.nanoTime();
+		//return CLIENT_ID_PREFIX + System.nanoTime(); // Cannot use for Java 1.4.2
+		return CLIENT_ID_PREFIX + (System.currentTimeMillis() * 1000000);
+		
 	}
 
 	/* (non-Javadoc)
@@ -1097,7 +1099,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		String methodName = "startReconnectCycle";
 		//@Trace 503=Start reconnect timer for client: {0}, delay: {1}
 		log.fine(CLASS_NAME, methodName, "503", new Object[]{this.clientId, new Long(reconnectDelay)});
-		reconnectTimer = new Timer("MQTT Reconnect: " + clientId);
+		//reconnectTimer = new Timer("MQTT Reconnect: " + clientId); // Cannot use for Java 1.4.2
+		reconnectTimer = new Timer();
 		reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
 	}
 	

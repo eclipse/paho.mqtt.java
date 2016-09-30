@@ -78,7 +78,8 @@ public final class Strings {
 			char ch = cs.charAt(i);
 			for (int j = 0; j < searchLength; j++) {
 				if (searchChars[j] == ch) {
-					if (Character.isHighSurrogate(ch)) {
+					//if (Character.isHighSurrogate(ch)) { // Cannot use for Java 1.4.2
+					if(isHighSurrogate(ch)) {
 						if (j == searchLast) {
 							// missing low surrogate, fine, like String.indexOf(String)
 							return true;
@@ -95,6 +96,12 @@ public final class Strings {
 			}
 		}
 		return false;
+	}
+	
+	private static boolean isHighSurrogate(char ch){
+		char MAX = '\uDBFF';
+		char MIN = '\uD800';
+		return ch >= MIN &&  ch < (MAX +1);
 	}
 
 	/**

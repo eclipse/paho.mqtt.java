@@ -84,9 +84,11 @@ public class WebSocketHandshake {
 		try {
 			String path = "/mqtt";
 			URI srvUri = new URI(uri);
-			if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) {
+			//if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) { // Cannot use for Java 1.4.2
+			if (srvUri.getRawPath() != null && srvUri.getRawPath().length() != 0) {
 				path = srvUri.getRawPath();
-				if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) {
+				//if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) { // Cannot use for Java 1.4.2
+				if (srvUri.getRawQuery() != null && srvUri.getRawQuery().length() != 0) {
 					path += "?" + srvUri.getRawQuery();
 				}
 			}
@@ -114,7 +116,8 @@ public class WebSocketHandshake {
 			pw.print(LINE_SEPARATOR);
 			pw.flush();
 		} catch (URISyntaxException e) {
-			throw new IllegalStateException(e);
+			// throw new IllegalStateException(e.getMessage());  // Cannot use for Java 1.4.2
+			throw new IllegalStateException(e.getMessage());
 		}
 	}
 	
@@ -142,7 +145,8 @@ public class WebSocketHandshake {
 		}
 
 		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
-		if(!upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
+		//if(!upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){  // Cannot use for Java 1.4.2
+		if(upgradeHeader.toLowerCase().indexOf(HTTP_HEADER_UPGRADE_WEBSOCKET) == -1){
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
 
