@@ -377,7 +377,8 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		try {
 			uri = new URI(address);
 		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Malformed URI: " + address, e);
+			// throw new IllegalArgumentException("Malformed URI: " + address, e); // Cannot use for Java 1.4.2
+			throw new IllegalArgumentException("Malformed URI: " + address + ", " + e.getMessage());
 		}
 
 		String host = uri.getHost();
@@ -475,6 +476,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			break;
 		default:
 			// This shouldn't happen, as long as validateURI() has been called.
+			log.fine(CLASS_NAME,methodName, "119", new Object[] {address});
 			netModule = null;
 		}
 		return netModule;
