@@ -817,7 +817,6 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @param topic  to deliver the message to, for example "finance/stock/ibm".
 	 * @param message to delivery to the server
  	 * @throws MqttPersistenceException when a problem with storing the message
-	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance client not connected.
 	 */
