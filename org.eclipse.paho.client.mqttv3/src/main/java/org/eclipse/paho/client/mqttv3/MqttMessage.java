@@ -33,6 +33,7 @@ public class MqttMessage {
 
 	/**
 	 * Utility method to validate the supplied QoS value.
+	 * @param qos The QoS Level
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 */
 	public static void validateQos(int qos) {
@@ -58,6 +59,7 @@ public class MqttMessage {
 	/**
 	 * Constructs a message with the specified byte array as a payload,
 	 * and all other values set to defaults.
+	 * @param payload The Bytearray of the payload
 	 */
 	public MqttMessage(byte[] payload) {
 		setPayload(payload);
@@ -163,6 +165,7 @@ public class MqttMessage {
 	 * If a persistence mechanism is not specified, the message will not be
 	 * delivered in the event of a client failure.</li>
 	 *
+	 *</ul>
 	 * If persistence is not configured, QoS 1 and 2 messages will still be delivered
 	 * in the event of a network or server problem as the client will hold state in memory.
 	 * If the MQTT client is shutdown or fails and persistence is not configured then
@@ -223,7 +226,7 @@ public class MqttMessage {
 	/**
 	 * This is only to be used internally to provide the MQTT id of a message
 	 * received from the server.  Has no effect when publishing messages.
-	 * @param messageId
+	 * @param messageId The Message ID
 	 */
 	public void setId(int messageId) {
 		this.messageId = messageId;

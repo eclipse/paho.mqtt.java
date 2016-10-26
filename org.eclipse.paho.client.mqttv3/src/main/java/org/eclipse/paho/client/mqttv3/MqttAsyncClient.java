@@ -59,12 +59,12 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  * MQTT action completes on a background thread.
  * This implementation is compatible with all Java SE runtimes from 1.4.2 and up.
  * </p>
- * <p>An application can connect to an MQTT server using:
+ * <p>An application can connect to an MQTT server using:</p>
  * <ul>
  * <li>A plain TCP socket
  * <li>A secure SSL/TLS socket
  * </ul>
- * </p>
+ * 
  * <p>To enable messages to be delivered even across network and client restarts
  * messages need to be safely stored until the message has been delivered at the requested
  * quality of service. A pluggable persistence mechanism is provided to store the messages.
@@ -129,11 +129,12 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * <p>The address of the server to connect to is specified as a URI. Two types of
 	 * connection are supported <code>tcp://</code> for a TCP connection and
 	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS.
-	 * For example:
+	 * For example:</p>
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
 	 * </ul>
+	 * <p>
 	 * If the port is not specified, it will
 	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
 	 * </p>
@@ -183,10 +184,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		this(serverURI,clientId, new MqttDefaultFilePersistence());
 	}
 	
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
-		this(serverURI,clientId, persistence, new TimerPingSender());
-	}
-
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
 	 * <p>
@@ -207,11 +204,12 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * <p>The address of the server to connect to is specified as a URI. Two types of
 	 * connection are supported <code>tcp://</code> for a TCP connection and
 	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS.
-	 * For example:
+	 * For example:</p>
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
 	 * </ul>
+	 * <p>
 	 * If the port is not specified, it will
 	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
 	 * </p>
@@ -266,6 +264,93 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * @param clientId a client identifier that is unique on the server being connected to
  	 * @param persistence the persistence class to use to store in-flight message. If null then the
  	 * default persistence mechanism is used
+	 * @throws MqttException if any other problem was encountered
+	 */
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
+		this(serverURI,clientId, persistence, new TimerPingSender());
+	}
+
+	/**
+	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
+	 * <p>
+	 * The address of a server can be specified on the constructor. Alternatively
+	 * a list containing one or more servers can be specified using the
+	 * {@link MqttConnectOptions#setServerURIs(String[]) setServerURIs} method
+	 * on MqttConnectOptions.
+	 *
+	 * <p>The <code>serverURI</code> parameter is typically used with the
+	 * the <code>clientId</code> parameter to form a key. The key
+	 * is used to store and reference messages while they are being delivered.
+	 * Hence the serverURI specified on the constructor must still be specified even if a list
+	 * of servers is specified on an MqttConnectOptions object.
+	 * The serverURI on the constructor must remain the same across
+	 * restarts of the client for delivery of messages to be maintained from a given
+	 * client to a given server or set of servers.
+	 *
+	 * <p>The address of the server to connect to is specified as a URI. Two types of
+	 * connection are supported <code>tcp://</code> for a TCP connection and
+	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS.
+	 * For example:</p>
+	 * <ul>
+	 * 	<li><code>tcp://localhost:1883</code></li>
+	 * 	<li><code>ssl://localhost:8883</code></li>
+	 * </ul>
+	 * <p>
+	 * If the port is not specified, it will
+	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
+	 * </p>
+	 *
+	 * <p>
+	 * A client identifier <code>clientId</code> must be specified and be less that 65535 characters.
+	 * It must be unique across all clients connecting to the same
+	 * server. The clientId is used by the server to store data related to the client,
+	 * hence it is important that the clientId remain the same when connecting to a server
+	 * if durable subscriptions or reliable messaging are required.
+	 * <p>A convenience method is provided to generate a random client id that
+	 * should satisfy this criteria - {@link #generateClientId()}. As the client identifier
+	 * is used by the server to identify a client when it reconnects, the client must use the
+	 * same identifier between connections if durable subscriptions or reliable
+	 * delivery of messages is required.
+	 * </p>
+	 * <p>
+	 * In Java SE, SSL can be configured in one of several ways, which the
+	 * client will use in the following order:
+	 * </p>
+	 * <ul>
+	 * 	<li><strong>Supplying an <code>SSLSocketFactory</code></strong> - applications can
+	 * use {@link MqttConnectOptions#setSocketFactory(SocketFactory)} to supply
+	 * a factory with the appropriate SSL settings.</li>
+	 * 	<li><strong>SSL Properties</strong> - applications can supply SSL settings as a
+	 * simple Java Properties using {@link MqttConnectOptions#setSSLProperties(Properties)}.</li>
+	 * 	<li><strong>Use JVM settings</strong> - There are a number of standard
+	 * Java system properties that can be used to configure key and trust stores.</li>
+	 * </ul>
+	 *
+	 * <p>In Java ME, the platform settings are used for SSL connections.</p>
+	 * <p>
+	 * A persistence mechanism is used to enable reliable messaging.
+	 * For messages sent at qualities of service (QoS) 1 or 2 to be reliably delivered,
+	 * messages must be stored (on both the client and server) until the delivery of the message
+	 * is complete. If messages are not safely stored when being delivered then
+	 * a failure in the client or server can result in lost messages. A pluggable
+	 * persistence mechanism is supported via the {@link MqttClientPersistence}
+	 * interface. An implementer of this interface that safely stores messages
+	 * must be specified in order for delivery of messages to be reliable. In
+	 * addition {@link MqttConnectOptions#setCleanSession(boolean)} must be set
+	 * to false. In the event that only QoS 0 messages are sent or received or
+	 * cleanSession is set to true then a safe store is not needed.
+	 * </p>
+	 * <p>An implementation of file-based persistence is provided in
+	 * class {@link MqttDefaultFilePersistence} which will work in all Java SE based
+	 * systems. If no persistence is needed, the persistence parameter
+	 * can be explicitly set to <code>null</code>.</p>
+	 *
+	 * @param serverURI the address of the server to connect to, specified as a URI. Can be overridden using
+	 * {@link MqttConnectOptions#setServerURIs(String[])}
+	 * @param clientId a client identifier that is unique on the server being connected to
+ 	 * @param persistence the persistence class to use to store in-flight message. If null then the
+ 	 * default persistence mechanism is used
+	 * @param pingSender Custom {@link MqttPingSender} implementation.
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://"
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
@@ -313,7 +398,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	
 
 	/**
-	 * @param ch
+	 * @param ch the character to check.
 	 * @return returns 'true' if the character is a high-surrogate code unit
 	 */
 	protected static boolean Character_isHighSurrogate(char ch) {
@@ -325,11 +410,11 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * each of the supplied URIs
 	 *
 	 * @param address the URI for the server.
+	 * @param options the {@link MqttConnectOptions} for the connection.
 	 * @return a network module appropriate to the specified address.
+	 * @throws MqttException if an exception occurs creating the network Modules
+	 * @throws MqttSecurityException if an issue occurs creating an SSL / TLS Socket 
 	 */
-
-	// may need an array of these network modules
-
 	protected NetworkModule[] createNetworkModules(String address, MqttConnectOptions options) throws MqttException, MqttSecurityException {
 		final String methodName = "createNetworkModules";
 		// @TRACE 116=URI={0}
@@ -651,9 +736,21 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
-        public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
-                comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
-        }
+	/**
+	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
+	 * <p>
+	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
+	 * send the disconnect packet.
+	 * 
+	 * @param quiesceTimeout the amount of time in milliseconds to allow for existing work to finish before
+	 * disconnecting. A value of zero or less means the client will not quiesce.
+	 * @param disconnectTimeout the amount of time in milliseconds to allow send disconnect packet to server.
+	 * @param sendDisconnectPacket if true, will send the disconnect packet to the server
+	 * @throws MqttException if any unexpected error
+	 */
+    public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
+        comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
+    }
 
 	/* (non-Javadoc)
 	 * @see IMqttAsyncClient#isConnected()
@@ -693,12 +790,11 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 
 	/**
 	 * Get a topic object which can be used to publish messages.
-	 * <p>There are two alternative methods that should be used in preference to this one when publishing a message:
+	 * <p>There are two alternative methods that should be used in preference to this one when publishing a message:</p>
 	 * <ul>
-	 * <li>{@link MqttAsyncClient#publish(String, MqttMessage, MqttDeliveryToken)} to publish a message in a non-blocking manner or
-	 * <li>{@link MqttClient#publishBlock(String, MqttMessage, MqttDeliveryToken)} to publish a message in a blocking manner
+	 * <li>{@link MqttAsyncClient#publish(String, MqttMessage)} to publish a message in a non-blocking manner or</li>
+	 * <li>{@link MqttClient#publish(String, MqttMessage)} to publish a message in a blocking manner</li>
 	 * </ul>
-	 * </p>
 	 * <p>When you build an application,
 	 * the design of the topic tree should take into account the following principles
 	 * of topic name syntax and semantics:</p>
@@ -712,7 +808,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * 	<li>A leading "/" creates a distinct topic.  For example, <em>/finance</em> is
 	 * 	different from <em>finance</em>. <em>/finance</em> matches "+/+" and "/+", but
 	 * 	not "+".</li>
-	 * 	<li>Do not include the null character (Unicode<samp class="codeph"> \x0000</samp>) in
+	 * 	<li>Do not include the null character (Unicode \x0000) in
 	 * 	any topic.</li>
 	 * </ul>
 	 *
@@ -725,7 +821,6 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 * 	<li>There can be any number of root nodes; that is, there can be any number
 	 * 	of topic trees.</li>
 	 * 	</ul>
-	 * </p>
 	 *
 	 * @param topic the topic to use, for example "finance/stock/ibm".
 	 * @return an MqttTopic object, which can be used to publish messages to
@@ -997,6 +1092,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		return this.publish(topic, message, null, null);
 	}
 
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#publish(java.lang.String, org.eclipse.paho.client.mqttv3.MqttMessage, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
@@ -1026,7 +1122,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 
 	/**
 	 * User triggered attempt to reconnect
-	 * @throws MqttException
+	 * @throws MqttException if there is an issue with reconnecting
 	 */
 	public void reconnect() throws MqttException {
 		final String methodName = "reconnect";
@@ -1138,20 +1234,35 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	
 	/**
 	 * Sets the DisconnectedBufferOptions for this client
-	 * @param bufferOpts
+	 * @param bufferOpts the {@link DisconnectedBufferOptions}
 	 */
 	public void setBufferOpts(DisconnectedBufferOptions bufferOpts) {
 		this.comms.setDisconnectedMessageBuffer(new DisconnectedMessageBuffer(bufferOpts));
 	}
 	
+	
+	/**
+	 * Returns the number of messages in the Disconnected Message Buffer
+	 * @return Count of messages in the buffer
+	 */
 	public int getBufferedMessageCount(){
 		return this.comms.getBufferedMessageCount();
 	}
 	
+	
+	/**
+	 * Returns a message from the Disconnected Message Buffer
+	 * @param bufferIndex the index of the message to be retrieved.
+	 * @return the message located at the bufferIndex
+	 */
 	public MqttMessage getBufferedMessage(int bufferIndex){
 		return this.comms.getBufferedMessage(bufferIndex);
 	}
 	
+	/**
+	 * Deletes a message from the Disconnected Message Buffer
+	 * @param bufferIndex the index of the message to be deleted.
+	 */
 	public void deleteBufferedMessage(int bufferIndex){
 		this.comms.deleteBufferedMessage(bufferIndex);
 	}
@@ -1174,6 +1285,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 
 	/**
 	 * Return a debug object that can be used to help solve problems.
+	 * @return the {@link Debug} object
 	 */
 	public Debug getDebug() {
 		return new Debug(clientId,comms);

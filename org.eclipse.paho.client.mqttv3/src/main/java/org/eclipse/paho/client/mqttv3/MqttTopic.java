@@ -64,6 +64,10 @@ public class MqttTopic {
 	private ClientComms comms;
 	private String name;
 	
+	/**
+	 * @param name The Name of the topic
+	 * @param comms The {@link ClientComms}
+	 */
 	public MqttTopic(String name, ClientComms comms) {
 		this.comms = comms;
 		this.name = name;
@@ -78,6 +82,9 @@ public class MqttTopic {
 	 * @param payload the byte array to use as the payload
 	 * @param qos the Quality of Service.  Valid values are 0, 1 or 2.
 	 * @param retained whether or not this message should be retained by the server.
+	 * @return {@link MqttDeliveryToken}
+	 * @throws MqttException If an error occurs publishing the message
+	 * @throws MqttPersistenceException If an error occurs persisting the message
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @see #publish(MqttMessage)
 	 * @see MqttMessage#setQos(int)
@@ -100,6 +107,8 @@ public class MqttTopic {
 	 * 
 	 * @param message the message to publish
 	 * @return an MqttDeliveryToken for tracking the delivery of the message
+	 * @throws MqttException if an error occurs publishing the message
+	 * @throws MqttPersistenceException  if an error occurs persisting the message
 	 */
 	public MqttDeliveryToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
 		MqttDeliveryToken token = new MqttDeliveryToken(comms.getClient().getClientId());
@@ -141,7 +150,7 @@ public class MqttTopic {
 	 * @throws IllegalArgumentException if the topic is invalid
 	 */
 	public static void validate(String topicString, boolean wildcardAllowed) 
-			throws IllegalStateException, IllegalArgumentException{
+			throws  IllegalArgumentException{
 		int topicLen = 0;
 		try {
 			topicLen = topicString.getBytes("UTF-8").length;
@@ -238,10 +247,11 @@ public class MqttTopic {
 	 * 
 	 * @param topicFilter topic filter: wildcards allowed
 	 * @param topicName topic name: wildcards not allowed
+	 * @return true if the topic matches the filter
 	 * @throws IllegalArgumentException if the topic name or filter is invalid
 	 */
 	public static boolean isMatched(String topicFilter, String topicName) 
-	                    throws IllegalStateException, IllegalArgumentException {
+	                    throws IllegalArgumentException {
 	    int curn = 0,
 	        curf = 0;
 	    int curn_end = topicName.length();

@@ -311,6 +311,7 @@ public class ClientState {
 	
 	/**
 	 * Restores the state information from persistence.
+	 * @throws MqttException if an exception occurs whilst restoring state
 	 */
 	protected void restoreState() throws MqttException {
 		final String methodName = "restoreState";
@@ -474,7 +475,7 @@ public class ClientState {
 	 * 
 	 * @param message  the message to send
 	 * @param token the token that can be used to track delivery of the message
-	 * @throws MqttException
+	 * @throws MqttException if an exception occurs whilst sending the message
 	 */
 	public void send(MqttWireMessage message, MqttToken token) throws MqttException {
 		final String methodName = "send";
@@ -553,8 +554,7 @@ public class ClientState {
 	/**
 	 * Persists a buffered message to the persistence layer
 	 * 
-	 * @param message
-	 * @throws MqttPersistenceException
+	 * @param message The {@link MqttWireMessage} to persist
 	 */
 	public void persistBufferedMessage(MqttWireMessage message) {
 		final String methodName = "persistBufferedMessage";
@@ -569,7 +569,6 @@ public class ClientState {
 			} catch (MqttPersistenceException mpe){
 				//@TRACE 515=Could not Persist, attempting to Re-Open Persistence Store
 				log.fine(CLASS_NAME,methodName, "515");
-				// TODO - Relies on https://github.com/eclipse/paho.mqtt.java/issues/178
 				persistence.open(this.clientComms.getClient().getClientId(), this.clientComms.getClient().getClientId());
 				persistence.put(key, (MqttPublish) message);
 			}
@@ -581,17 +580,26 @@ public class ClientState {
 		} 
 	}
 	
-	public void unPersistBufferedMessage(MqttWireMessage message) throws MqttPersistenceException {
+	/**
+	 * @param message The {@link MqttWireMessage} to un-persist
+	 */
+	public void unPersistBufferedMessage(MqttWireMessage message){
 		final String methodName = "unPersistBufferedMessage";
-		//@TRACE 515=Un-Persisting Buffered message key={0}
-		log.fine(CLASS_NAME,methodName, "513", new Object[]{message.getKey()});
-		persistence.remove(getSendBufferedPersistenceKey(message));
+		try{
+			//@TRACE 517=Un-Persisting Buffered message key={0}
+			log.fine(CLASS_NAME,methodName, "517", new Object[]{message.getKey()});
+			persistence.remove(getSendBufferedPersistenceKey(message));
+		} catch (MqttPersistenceException mpe){
+			//@TRACE 518=Failed to Un-Persist Buffered message key={0}
+			log.fine(CLASS_NAME,methodName, "518", new Object[]{message.getKey()});
+		}
+		
 	}
 	
 	/**
 	 * This removes the MqttSend message from the outbound queue and persistence.
-	 * @param message
-	 * @throws MqttPersistenceException
+	 * @param message the {@link MqttPublish} message to be removed
+	 * @throws MqttPersistenceException if an exception occurs whilst removing the message
 	 */
 	protected void undo(MqttPublish message) throws MqttPersistenceException {
 		final String methodName = "undo";
@@ -622,8 +630,9 @@ public class ClientState {
 	 * 
 	 * If a ping has been sent but no data has been received in the 
 	 * last keepalive interval then the connection is deamed to be broken. 
-	 * 
+	 * @param pingCallback The {@link IMqttActionListener} to be called
 	 * @return token of ping command, null if no ping command has been sent.
+	 * @throws MqttException if an exception occurs during the Ping
 	 */
 	public MqttToken checkForActivity(IMqttActionListener pingCallback) throws MqttException {
 		final String methodName = "checkForActivity";
@@ -723,8 +732,9 @@ public class ClientState {
 	 *  - there is a message to be sent
 	 *  - the keepAlive interval is exceeded, which triggers a ping message
 	 *    to be returned
-	 *  - {@link #disconnected(MqttException, boolean)} is called
+	 *  - {@link ClientState#disconnected(MqttException)} is called
 	 * @return the next message to send, or null if the client is disconnected
+	 * @throws MqttException if an exception occurs whilst returning the next piece of work
 	 */
 	protected MqttWireMessage get() throws MqttException {
 		final String methodName = "get";
@@ -806,42 +816,6 @@ public class ClientState {
 		this.keepAlive = interval;
 	}
 	
-	/**
-	 * COMMENTED OUT AS NO LONGER USED.
-	 * Deduce how long to to wait until a ping is required.
-	 * 
-	 * In order to keep the connection alive the server must see activity within 
-	 * the keepalive interval. If the application is not sending / receiving
-	 * any messages then the client will send a ping.  This method works out
-	 * the next time that a ping must be sent in order for the server to 
-	 * know the client is alive.
-	 * @return  time before a ping needs to be sent to keep alive the connection
-	long getTimeUntilPing() {
-		long pingin = getKeepAlive();
-		// If KA is zero which means just wait for work or 
-		// if a ping is outstanding return the KA value
-		if (connected && (getKeepAlive() > 0) && !pingOutstanding) {
-		
-			long time = System.currentTimeMillis();
-			long timeSinceOut = (time-lastOutboundActivity);
-			long timeSinceIn = (time-lastInboundActivity);
-			
-			if (timeSinceOut > timeSinceIn) {
-				pingin = (getKeepAlive()-timeSinceOut);
-			} else {
-				pingin = (getKeepAlive()-timeSinceIn);
-			}
-			
-			// Unlikely to be negative or zero but in the case it is return a 
-			// small value > 0 to cause a ping to occur
-			if (pingin <= 0) {
-				pingin = 10;
-			}
-		}
-		return (pingin);
-	}
-	 */
-	
     public void notifySentBytes(int sentBytesCount) {
         final String methodName = "notifySentBytes";
         if (sentBytesCount > 0) {
@@ -855,7 +829,7 @@ public class ClientState {
 	
 	/**
 	 * Called by the CommsSender when a message has been sent
-	 * @param message
+	 * @param message the {@link MqttWireMessage} to notify
 	 */
 	protected void notifySent(MqttWireMessage message) {
 		final String methodName = "notifySent";
@@ -932,8 +906,8 @@ public class ClientState {
     /**
 	 * Called by the CommsReceiver when an ack has arrived. 
 	 * 
-	 * @param message
-	 * @throws MqttException
+	 * @param ack The {@link MqttAck} that has arrived
+	 * @throws MqttException if an exception occurs when sending / notifying
 	 */
 	protected void notifyReceivedAck(MqttAck ack) throws MqttException {
 		final String methodName = "notifyReceivedAck";
@@ -1014,8 +988,8 @@ public class ClientState {
 	 * Called by the CommsReceiver when a message has been received.
 	 * Handles inbound messages and other flows such as PUBREL. 
 	 * 
-	 * @param message
-	 * @throws MqttException
+	 * @param message The {@link MqttWireMessage} that has been received
+	 * @throws MqttException when an exception occurs whilst notifying
 	 */
 	protected void notifyReceivedMsg(MqttWireMessage message) throws MqttException {
 		final String methodName = "notifyReceivedMsg";
@@ -1069,8 +1043,8 @@ public class ClientState {
 	 * persistence and counters adjusted accordingly. Also tidy up by removing
 	 * token from store...
 	 * 
-	 * @param message
-	 * @throws MqttException
+	 * @param token The {@link MqttToken} that will be used to notify
+	 * @throws MqttException if an exception occurs during notification
 	 */
 	protected void notifyComplete(MqttToken token) throws MqttException {
 		
@@ -1160,6 +1134,7 @@ public class ClientState {
 	 * is tidied up so it only contains outstanding delivery tokens which are
 	 * valid after reconnect (if clean session is false)
 	 * @param reason The root cause of the disconnection, or null if it is a clean disconnect
+	 * @return {@link Vector} 
 	 */
 	public Vector resolveOldTokens(MqttException reason) {
 		final String methodName = "resolveOldTokens";
@@ -1266,6 +1241,7 @@ public class ClientState {
 	 * and preventing the callback on any newly received messages.
 	 * After the timeout expires, delete any pending messages except for
 	 * outbound ACKs, and wait for those ACKs to complete.
+	 * @param timeout How long to wait during Quiescing
 	 */
 	public void quiesce(long timeout) {
 		final String methodName = "quiesce";

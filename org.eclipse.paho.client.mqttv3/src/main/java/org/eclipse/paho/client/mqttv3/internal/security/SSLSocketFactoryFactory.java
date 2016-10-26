@@ -80,7 +80,8 @@ import org.eclipse.paho.client.mqttv3.logging.Logger;
  * cipher suites on the socket [see below].</li>
  * </ol>
  * <ul>
- * <li><i>For an MQTT server:</i></li>
+ * <li><i>For an MQTT server:</i>
+
  * <ol>
  * <li><b>getKeyStore(configID)</b>: Optionally, to check that if there is no
  * keystore, then that all the enabled cipher suits are anonymous.</li>
@@ -90,10 +91,12 @@ import org.eclipse.paho.client.mqttv3.logging.Logger;
  * SSLServerSocket (itself created from the SSLServerSocketFactory) whether
  * client authentication is needed.</li>
  * </ol>
- * <li><i>For an MQTT client:</i></li>
+ * </li>
+ * <li><i>For an MQTT client:</i>
  * <ol>
  * <li><b>createSocketFactory(configID)</b>: to create an SSLSocketFactory.</li>
  * </ol>
+ * </li>
  * </ul>
  */
 public class SSLSocketFactoryFactory {
@@ -182,6 +185,7 @@ public class SSLSocketFactoryFactory {
 	/**
 	 * Create new instance of class.
 	 * Constructor used by the broker.
+	 * @param logger the {@link Logger} to be used
 	 */
 	public SSLSocketFactoryFactory(Logger logger) {
 		this();
@@ -1336,7 +1340,7 @@ public class SSLSocketFactoryFactory {
 	 * @param configID
 	 *            The configuration identifier for selecting a configuration.
 	 * @return An SSLSocketFactory
-	 * @throws MqttDirectException
+	 * @throws MqttSecurityException if an error occurs whilst creating the {@link SSLSocketFactory}
 	 */
 	public SSLSocketFactory createSocketFactory(String configID) 
 			throws MqttSecurityException {

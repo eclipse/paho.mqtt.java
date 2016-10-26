@@ -65,7 +65,7 @@ public class WebSocketHandshake {
 	/**
 	 * Executes a Websocket Handshake.
 	 * Will throw an IOException if the handshake fails
-	 * @throws IOException
+	 * @throws IOException thrown if an exception occurs during the handshake
 	 */
 	public void execute() throws IOException {
 		String key = "mqtt3-" + (System.currentTimeMillis()/1000);

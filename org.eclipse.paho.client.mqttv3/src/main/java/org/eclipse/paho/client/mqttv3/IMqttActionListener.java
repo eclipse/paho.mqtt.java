@@ -24,6 +24,7 @@ public interface IMqttActionListener {
 	 * are in the process of being delivered will be delivered to the requested
 	 * quality of service next time the client connects.  
 	 * @param asyncActionToken associated with the action that has failed
+	 * @param exception thrown by the action that has failed
 	 */
 	public void onFailure(IMqttToken asyncActionToken, Throwable exception);
 }

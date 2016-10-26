@@ -155,8 +155,8 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	/**
 	 * Writes the specified persistent data to the previously specified persistence directory.
 	 * This method uses a safe overwrite policy to ensure IO errors do not lose messages.
-	 * @param message
-	 * @throws MqttPersistenceException
+	 * @param message The {@link MqttPersistable} message to be persisted
+	 * @throws MqttPersistenceException if an exception occurs whilst persisting the message
 	 */
 	public void put(String key, MqttPersistable message) throws MqttPersistenceException {
 		checkIsOpen();
@@ -235,7 +235,7 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	/**
 	 * Returns all of the persistent data from the previously specified persistence directory.
 	 * @return all of the persistent data from the persistence directory.
-	 * @throws MqttPersistenceException
+	 * @throws MqttPersistenceException if an exception is thrown whilst getting the keys
 	 */
 	public Enumeration keys() throws MqttPersistenceException {
 		checkIsOpen();

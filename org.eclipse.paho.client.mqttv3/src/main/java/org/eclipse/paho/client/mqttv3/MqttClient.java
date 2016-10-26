@@ -33,12 +33,12 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  * actions block until they have completed (or timed out).
  * This implementation is compatible with all Java SE runtimes from 1.4.2 and up.
  * </p>
- * <p>An application can connect to an MQTT server using:
+ * <p>An application can connect to an MQTT server using:</p>
  * <ul>
  * <li>A plain TCP socket
  * <li>An secure SSL/TLS socket
  * </ul>
- * </p>
+ * 
  * <p>To enable messages to be delivered even across network and client restarts
  * messages need to be safely stored until the message has been delivered at the requested
  * quality of service. A pluggable persistence mechanism is provided to store the messages.
@@ -84,11 +84,12 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * <p>The address of the server to connect to is specified as a URI. Two types of
 	 * connection are supported <code>tcp://</code> for a TCP connection and
 	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS.
-	 * For example:
+	 * For example:</p>
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
 	 * </ul>
+	 * <p>
 	 * If the port is not specified, it will
 	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
 	 * </p>
@@ -158,11 +159,12 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * <p>The address of the server to connect to is specified as a URI. Two types of
 	 * connection are supported <code>tcp://</code> for a TCP connection and
 	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS.
-	 * For example:
+	 * For example:</p>
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
 	 * </ul>
+	 * <p>
 	 * If the port is not specified, it will
 	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
 	 * </p>
@@ -290,9 +292,21 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
-        public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
-                aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
-        }
+	/**
+	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
+	 * <p>
+	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
+	 * send the disconnect packet.
+	 * 
+	 * @param quiesceTimeout the amount of time in milliseconds to allow for existing work to finish before
+	 * disconnecting. A value of zero or less means the client will not quiesce.
+	 * @param disconnectTimeout the amount of time in milliseconds to allow send disconnect packet to server.
+	 * @param sendDisconnectPacket if true, will send the disconnect packet to the server
+	 * @throws MqttException if any unexpected error
+	 */
+    public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
+    	aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
+    }
 
 	/*
 	 * @see IMqttClient#subscribe(String)
@@ -482,12 +496,13 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * Set the maximum time to wait for an action to complete.
 	 * <p>Set the maximum time to wait for an action to complete before
 	 * returning control to the invoking application. Control is returned
-	 * when:
+	 * when:</p>
 	 * <ul>
-	 * <li>the action completes
-	 * <li>or when the timeout if exceeded
-	 * <li>or when the client is disconnect/shutdown
-	 * <ul>
+	 * <li>the action completes</li>
+	 * <li>or when the timeout if exceeded</li>
+	 * <li>or when the client is disconnect/shutdown</li>
+	 * </ul>
+	 * <p>
 	 * The default value is -1 which means the action will not timeout.
 	 * In the event of a timeout the action carries on running in the
 	 * background until it completes. The timeout is used on methods that
@@ -495,6 +510,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * </p>
 	 * @param timeToWaitInMillis before the action times out. A value or 0 or -1 will wait until
 	 * the action finishes and not timeout.
+	 * @throws IllegalArgumentException if timeToWaitInMillis is invalid
 	 */
 	public void setTimeToWait(long timeToWaitInMillis) throws IllegalArgumentException{
 		if (timeToWaitInMillis < -1) {
@@ -505,6 +521,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 
 	/**
 	 * Return the maximum time to wait for an action to complete.
+	 * @return the time to wait
 	 * @see MqttClient#setTimeToWait(long)
 	 */
 	public long getTimeToWait() {
@@ -599,12 +616,17 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 		return MqttAsyncClient.generateClientId();
 	}
 	
+	/**
+	 * Will attempt to reconnect to the server after the client has lost connection.
+	 * @throws MqttException if an error occurs attempting to reconnect
+	 */
 	public void reconnect() throws MqttException {
 		aClient.reconnect();
 	}
 
 	/**
 	 * Return a debug object that can be used to help solve problems.
+	 * @return the {@link Debug} Object.
 	 */
 	public Debug getDebug() {
 		return (aClient.getDebug());

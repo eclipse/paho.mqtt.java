@@ -32,7 +32,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * Provides a "token" based system for storing and tracking actions across 
  * multiple threads. 
  * When a message is sent, a token is associated with the message
- * and saved using the {@link #saveToken(MqttToken, MqttWireMessage)} method. Anyone interested
+ * and saved using the {@link CommsTokenStore#saveToken(MqttToken, MqttWireMessage)} method. Anyone interested
  * in tacking the state can call one of the wait methods on the token or using 
  * the asynchronous listener callback method on the operation. 
  * The {@link CommsReceiver} class, on another thread, reads responses back from 
@@ -102,6 +102,8 @@ public class CommsTokenStore {
 	 * Restores a token after a client restart.  This method could be called
 	 * for a SEND of CONFIRM, but either way, the original SEND is what's 
 	 * needed to re-build the token.
+	 * @param message The {@link MqttPublish} message to restore
+	 * @return {@link MqttDeliveryToken}
 	 */
 	protected MqttDeliveryToken restoreToken(MqttPublish message) {
 		final String methodName = "restoreToken";
