@@ -15,16 +15,15 @@ package org.eclipse.paho.client.mqttv3;
  * be called withe delivery token being passed as a parameter. 
  * </ul>
  * <p> 
- * An action is in progress until either:
+ * An action is in progress until either:</p>
  * <ul>
- * <li>isComplete() returns true or 
- * <li>getException() is not null. If a client shuts down before delivery is complete. 
+ * <li>isComplete() returns true or </li>
+ * <li>getException() is not null. If a client shuts down before delivery is complete
  * an exception is returned.  As long as the Java Runtime is not stopped a delivery token
  * is valid across a connection disconnect and reconnect. In the event the client 
  * is shut down the getPendingDeliveryTokens method can be used once the client is 
- * restarted to obtain a list of delivery tokens for inflight messages.
+ * restarted to obtain a list of delivery tokens for inflight messages.</li>
  * </ul>
- * </p>
  * 
  */
 

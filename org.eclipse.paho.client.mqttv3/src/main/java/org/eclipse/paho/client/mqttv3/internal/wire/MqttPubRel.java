@@ -28,7 +28,7 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 
 	/**
 	 * Createa a pubrel message based on a pubrec
-	 * @param pubRec
+	 * @param pubRec the {@link MqttPubRec}
 	 */
 	public MqttPubRel(MqttPubRec pubRec) {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREL);
@@ -37,9 +37,9 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 	
 	/**
 	 * Creates a pubrel based on a pubrel set of bytes read fro the network
-	 * @param info
-	 * @param data
-	 * @throws IOException
+	 * @param info the info byte
+	 * @param data the byte array
+	 * @throws IOException if an exception occurs whilst reading from the input stream
 	 */
 	public MqttPubRel(byte info, byte[] data) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREL);

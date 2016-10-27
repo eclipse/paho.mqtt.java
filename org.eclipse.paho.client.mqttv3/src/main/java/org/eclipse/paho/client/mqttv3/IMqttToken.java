@@ -24,14 +24,13 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
  * An IMqttToken is used to track the state of the operation. An application can use the
  * token to wait for an operation to complete. A token is passed to callbacks
  * once the operation completes and provides context linking it to the original
- * request. A token is associated with a single operation.<p>
+ * request. A token is associated with a single operation.</p>
  * <p>
- * An action is in progress until either:
+ * An action is in progress until either:</p>
  * <ul>
- * <li>isComplete() returns true or
- * <li>getException() is not null.
+ * <li>isComplete() returns true or</li>
+ * <li>getException() is not null.</li>
  * </ul>
- * </p>
  *
  */
 public interface IMqttToken {
@@ -66,6 +65,7 @@ public interface IMqttToken {
 	 * and in the case where it failed. If the action failed {@link #getException()} will
 	 * be non null.
 	 * </p>
+	 * @return whether or not the action has finished.
 	 */
 	public boolean isComplete();
 
@@ -98,6 +98,7 @@ public interface IMqttToken {
 	/**
 	 * Returns the MQTT client that is responsible for processing the asynchronous
 	 * action
+	 * @return the client
 	 */
 	public IMqttAsyncClient getClient();
 
@@ -136,21 +137,22 @@ public interface IMqttToken {
 	 * connect, disconnect and ping operations as there can only ever
 	 * be one of these outstanding at a time. For other operations
 	 * the MQTT message id flowed over the network.
+	 * @return the message ID of the message that is associated with the token
 	 */
 	public int getMessageId();
 	
 	/**
-	 * Returns the granted QoS list from a suback 
+	 * @return the granted QoS list from a suback 
 	 */
 	public int[] getGrantedQos();
 	
 	/**
-	 * Returns the session present flag from a connack 
+	 * @return the session present flag from a connack 
 	 */
 	public boolean getSessionPresent();
 	
 	/**
-	 * Returns the response wire message
+	 * @return the response wire message
 	 */
 	public MqttWireMessage getResponse();
 

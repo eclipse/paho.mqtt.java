@@ -44,6 +44,7 @@ public class WebSocketReceiver implements Runnable{
 
 	/**
 	 * Starts up the WebSocketReceiver's thread
+	 * @param threadName The name of the thread
 	 */
 	public void start(String threadName){
 		final String methodName = "start";

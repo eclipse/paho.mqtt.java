@@ -44,8 +44,10 @@ public class MqttPublish extends MqttPersistableWireMessage {
 	 * Constructs a new MqttPublish object.
 	 * @param info the message info byte
 	 * @param data the variable header and payload bytes
+	 * @throws MqttException if an exception occurs creating the publish
+	 * @throws IOException if an exception occurs creating the publish
 	 */
-	public MqttPublish(byte info, byte[] data) throws MqttException, IOException {
+	public MqttPublish(byte info, byte[] data) throws MqttException, IOException  {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBLISH);
 		message = new MqttReceivedMessage();
 		message.setQos((info >> 1) & 0x03);

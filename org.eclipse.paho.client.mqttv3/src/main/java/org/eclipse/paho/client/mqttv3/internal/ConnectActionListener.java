@@ -50,13 +50,14 @@ public class ConnectActionListener implements IMqttActionListener {
   private boolean reconnect;
 
 /**
-   * @param persistence
-   * @param client 
-   * @param comms
-   * @param options 
-   * @param userToken  
-   * @param userContext
-   * @param userCallback
+   * @param persistence The {@link MqttClientPersistence} layer
+   * @param client the {@link MqttAsyncClient}
+   * @param comms {@link ClientComms}
+   * @param options the {@link MqttConnectOptions}
+   * @param userToken  the {@link MqttToken}
+   * @param userContext the User Context Object
+   * @param userCallback the {@link IMqttActionListener} as the callback for the user
+   * @param reconnect If true, this is a reconnect attempt
    */
   public ConnectActionListener(
       MqttAsyncClient client,
@@ -81,7 +82,7 @@ public class ConnectActionListener implements IMqttActionListener {
   /**
    * If the connect succeeded then call the users onSuccess callback
    * 
-   * @param token 
+   * @param token the {@link IMqttToken} from the successful connection
    */
   public void onSuccess(IMqttToken token) {
 	if (originalMqttVersion == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
@@ -112,8 +113,8 @@ public class ConnectActionListener implements IMqttActionListener {
    * The connect failed, so try the next URI on the list.
    * If there are no more URIs, then fail the overall connect. 
    * 
-   * @param token 
-   * @param exception 
+   * @param token the {@link IMqttToken} from the failed connection attempt
+   * @param exception the {@link Throwable} exception from the failed connection attempt
    */
   public void onFailure(IMqttToken token, Throwable exception) {
 
@@ -165,7 +166,7 @@ public class ConnectActionListener implements IMqttActionListener {
 
   /**
    * Start the connect processing
-   * @throws MqttPersistenceException 
+   * @throws MqttPersistenceException if an error is thrown whilst setting up persistence 
    */
   public void connect() throws MqttPersistenceException {
     MqttToken token = new MqttToken(client.getClientId());
@@ -192,7 +193,7 @@ public class ConnectActionListener implements IMqttActionListener {
   
   /**
    * Set the MqttCallbackExtened callback to receive connectComplete callbacks
-   * @param mqttCallbackExtended
+   * @param mqttCallbackExtended the {@link MqttCallbackExtended} to be called when the connection completes
    */
   public void setMqttCallbackExtended(MqttCallbackExtended mqttCallbackExtended) {
 		this.mqttCallbackExtended = mqttCallbackExtended;

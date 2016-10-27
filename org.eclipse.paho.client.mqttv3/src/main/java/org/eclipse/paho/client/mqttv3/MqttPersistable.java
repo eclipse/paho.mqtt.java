@@ -33,7 +33,7 @@ package org.eclipse.paho.client.mqttv3;
  * array starting at offset 1 and length 4, plus a payload byte array
  * starting at offset 30 and length 40000. There are three ways in which
  * the persistence implementation may return data to the client on
- * recovery:
+ * recovery:</p> 
  * <ul>
  * <li>It could return the data as it was passed in
  * originally, with the same byte arrays and offsets.</li>
@@ -48,8 +48,7 @@ package org.eclipse.paho.client.mqttv3;
  * and length 40004.
  * This is useful when recovering from a file where the header and payload
  * could be written as a contiguous stream of bytes.</li>
- * </ul>
- * </p>  
+ * </ul> 
  */
 public interface MqttPersistable {
 
@@ -58,18 +57,21 @@ public interface MqttPersistable {
 	 * The bytes start at {@link #getHeaderOffset()}
 	 * and continue for {@link #getHeaderLength()}.
 	 * @return the header bytes. 
+	 * @throws MqttPersistenceException if an error occurs getting the Header Bytes
 	 */
 	public byte[] getHeaderBytes() throws MqttPersistenceException;
 
 	/**
 	 * Returns the length of the header.
 	 * @return the header length
+	 * @throws MqttPersistenceException if an error occurs getting the Header length
 	 */
 	public int getHeaderLength() throws MqttPersistenceException;
 
 	/**
 	 * Returns the offset of the header within the byte array returned by {@link #getHeaderBytes()}.
 	 * @return the header offset.
+	 * @throws MqttPersistenceException if an error occurs getting the Header offset
 	 * 
 	 */
 	public int getHeaderOffset() throws MqttPersistenceException;
@@ -79,18 +81,21 @@ public interface MqttPersistable {
 	 * The bytes start at {@link #getPayloadOffset()}
 	 * and continue for {@link #getPayloadLength()}.
 	 * @return the payload bytes.  
+	 * @throws MqttPersistenceException if an error occurs getting the Payload Bytes
 	 */
 	public byte[] getPayloadBytes() throws MqttPersistenceException;
 
 	/**
 	 * Returns the length of the payload.
 	 * @return the payload length.
+	 * @throws MqttPersistenceException if an error occurs getting the Payload length
 	 */
 	public int getPayloadLength() throws MqttPersistenceException;
 
 	/**
 	 * Returns the offset of the payload within the byte array returned by {@link #getPayloadBytes()}.
 	 * @return the payload offset.
+	 * @throws MqttPersistenceException if an error occurs getting the Payload Offset
 	 * 
 	 */
 	public int getPayloadOffset() throws MqttPersistenceException;

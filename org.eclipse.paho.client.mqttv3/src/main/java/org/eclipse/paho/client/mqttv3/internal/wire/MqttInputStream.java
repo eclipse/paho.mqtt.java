@@ -68,6 +68,9 @@ public class MqttInputStream extends InputStream {
 	 * If the message cannot be fully read within the socket read timeout,
 	 * a null message is returned and the method can be called again until
 	 * the message is fully read.
+	 * @return The {@link MqttWireMessage}
+	 * @throws IOException if an exception is thrown when reading from the stream
+	 * @throws MqttException if the message is invalid 
 	 */
 	public MqttWireMessage readMqttWireMessage() throws IOException, MqttException {
 		final String methodName ="readMqttWireMessage";

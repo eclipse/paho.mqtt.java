@@ -44,10 +44,10 @@ public class MqttConnect extends MqttWireMessage {
 	/**
 	 * Constructor for an on the wire MQTT connect message
 	 * 
-	 * @param info
-	 * @param data
-	 * @throws IOException
-	 * @throws MqttException
+	 * @param info The info byte
+	 * @param data the data byte array
+	 * @throws IOException thrown if an exception occurs when reading the input streams
+	 * @throws MqttException thrown if an exception occurs when decoding UTF-8
 	 */
 	public MqttConnect(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);

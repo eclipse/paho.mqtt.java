@@ -84,6 +84,10 @@ public class ClientComms {
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle
 	 * the network calls.
+	 * @param client The {@link IMqttAsyncClient}
+	 * @param persistence the {@link MqttClientPersistence} layer.
+	 * @param pingSender the {@link MqttPingSender}
+	 * @throws MqttException if an exception occurs whilst communicating with the server
 	 */
 	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
 		this.conState = DISCONNECTED;
@@ -141,6 +145,9 @@ public class ClientComms {
 	/**
 	 * Sends a message to the broker if in connected state, but only waits for the message to be
 	 * stored, before returning.
+	 * @param message The {@link MqttWireMessage} to send
+	 * @param token The {@link MqttToken} to send.
+	 * @throws MqttException if an error occurs sending the message
 	 */
 	public void sendNoWait(MqttWireMessage message, MqttToken token) throws MqttException {
 		final String methodName = "sendNoWait";
@@ -218,6 +225,9 @@ public class ClientComms {
 	 * Sends a connect message and waits for an ACK or NACK.
 	 * Connecting is a special case which will also start up the
 	 * network connection, receive thread, and keep alive thread.
+	 * @param options The {@link MqttConnectOptions} for the connection
+	 * @param token The {@link MqttToken} to track the connection
+	 * @throws MqttException if an error occurs when connecting
 	 */
 	public void connect(MqttConnectOptions options, MqttToken token) throws MqttException {
 		final String methodName = "connect";
@@ -288,6 +298,8 @@ public class ClientComms {
 	 * an abnormal disconnection.  The method may be invoked multiple times
 	 * in parallel as each thread when it receives an error uses this method
 	 * to ensure that shutdown completes successfully.
+	 * @param token the {@link MqttToken} To track closing the connection
+	 * @param reason the {@link MqttException} thrown requiring the connection to be shut down.
 	 */
 	public void shutdownConnection(MqttToken token, MqttException reason) {
 		final String methodName = "shutdownConnection";
@@ -478,6 +490,10 @@ public class ClientComms {
 
 	/**
 	 * Disconnect the connection and reset all the states.
+	 * @param quiesceTimeout How long to wait whilst quiesing before messages are deleted.
+	 * @param disconnectTimeout How long to wait whilst disconnecting
+	 * @param sendDisconnectPacket If true, will send a disconnect packet
+	 * @throws MqttException if an error occurs whilst disconnecting
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
 		// Allow current inbound and outbound work to complete
@@ -765,7 +781,7 @@ public class ClientComms {
 	/**
 	 * When Automatic reconnect is enabled, we want ClientComs to enter the
 	 * 'resting' state if disconnected. This will allow us to publish messages
-	 * @param resting
+	 * @param resting if true, resting is enabled
 	 */
 	public void setRestingState(boolean resting) {
 		this.resting = resting;
@@ -792,7 +808,6 @@ public class ClientComms {
 	/**
 	 * When the client automatically reconnects, we want to send all messages from the
 	 * buffer first before allowing the user to send any messages
-	 * @throws MqttException 
 	 */
 	public void notifyReconnect() {
 		final String methodName = "notifyReconnect";

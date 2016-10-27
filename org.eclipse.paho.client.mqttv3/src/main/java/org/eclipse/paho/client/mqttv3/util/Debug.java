@@ -141,6 +141,9 @@ public class Debug {
 
 	/**
 	 * Return a set of properties as a formatted string
+	 * @param props The Dump Properties
+	 * @param name The associated name 
+	 * @return a set of properties as a formatted string
 	 */
 	public static String dumpProperties(Properties props, String name) {
 		

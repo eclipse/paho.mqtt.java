@@ -52,6 +52,7 @@ public class CommsReceiver implements Runnable {
 	
 	/**
 	 * Starts up the Receiver's thread.
+	 * @param threadName The name of the thread
 	 */
 	public void start(String threadName) {
 		final String methodName = "start";

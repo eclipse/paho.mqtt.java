@@ -60,7 +60,6 @@ public class LoggerFactory {
 	 * @param messageCatalogName the resource bundle containing the logging messages.
 	 * @param loggerID  unique name to identify this logger.
 	 * @return a suitable Logger.
-	 * @throws Exception
 	 */
 	public static Logger getLogger(String messageCatalogName, String loggerID) {
 		String loggerClassName = overrideloggerClassName;

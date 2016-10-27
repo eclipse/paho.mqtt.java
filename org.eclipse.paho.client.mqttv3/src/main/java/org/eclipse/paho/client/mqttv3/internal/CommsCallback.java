@@ -76,6 +76,7 @@ public class CommsCallback implements Runnable {
 
 	/**
 	 * Starts up the Callback thread.
+	 * @param threadName The name of the thread
 	 */
 	public void start(String threadName) {
 		synchronized (lifecycle) {
@@ -283,7 +284,7 @@ public class CommsCallback implements Runnable {
 	 * An action has completed - if a completion listener has been set on the
 	 * token then invoke it with the outcome of the action.
 	 * 
-	 * @param token
+	 * @param token The {@link MqttToken} that has completed
 	 */
 	public void fireActionEvent(MqttToken token) {
 		final String methodName = "fireActionEvent";
@@ -435,6 +436,7 @@ public class CommsCallback implements Runnable {
 
 	/**
 	 * Returns the thread used by this callback.
+	 * @return The {@link Thread}
 	 */
 	protected Thread getThread() {
 		return callbackThread;

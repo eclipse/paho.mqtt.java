@@ -42,6 +42,8 @@ public class ExceptionHelper {
 	 * Returns whether or not the specified class is available to the current
 	 * class loader.  This is used to protect the code against using Java SE
 	 * APIs on Java ME.
+	 * @param className The name of the class
+	 * @return If true, the class is available
 	 */
 	public static boolean isClassAvailable(String className) {
 		boolean result = false;

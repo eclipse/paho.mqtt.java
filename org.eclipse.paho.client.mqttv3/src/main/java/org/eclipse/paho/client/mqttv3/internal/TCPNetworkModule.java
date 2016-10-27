@@ -46,6 +46,10 @@ public class TCPNetworkModule implements NetworkModule {
 	 * Constructs a new TCPNetworkModule using the specified host and
 	 * port.  The supplied SocketFactory is used to supply the network
 	 * socket.
+	 * @param factory the {@link SocketFactory} to be used to set up this connection
+	 * @param host The server hostname
+	 * @param port The server port
+	 * @param resourceContext The Resource Context
 	 */
 	public TCPNetworkModule(SocketFactory factory, String host, int port, String resourceContext) {
 		log.setResourceName(resourceContext);
@@ -57,6 +61,8 @@ public class TCPNetworkModule implements NetworkModule {
 
 	/**
 	 * Starts the module, by creating a TCP socket to the server.
+	 * @throws IOException if there is an error creating the socket
+	 * @throws MqttException if there is an error connecting to the server
 	 */
 	public void start() throws IOException, MqttException {
 		final String methodName = "start";
@@ -94,6 +100,7 @@ public class TCPNetworkModule implements NetworkModule {
 
 	/**
 	 * Stops the module, by closing the TCP socket.
+	 * @throws IOException if there is an error closing the socket
 	 */
 	public void stop() throws IOException {
 		if (socket != null) {
@@ -122,7 +129,7 @@ public class TCPNetworkModule implements NetworkModule {
 	
 	/**
 	 * Set the maximum time to wait for a socket to be established
-	 * @param timeout
+	 * @param timeout  The connection timeout
 	 */
 	public void setConnectTimeout(int timeout) {
 		this.conTimeout = timeout;

@@ -23,7 +23,7 @@ public interface MqttPingSender {
 
 	/**
 	 * Initial method. Pass interal state of current client in.
-	 * @param  The core of the client, which holds the state information for pending and in-flight messages.
+	 * @param  comms The core of the client, which holds the state information for pending and in-flight messages.
 	 */
 	public void init(ClientComms comms);
 
@@ -39,7 +39,7 @@ public interface MqttPingSender {
 	
 	/**
 	 * Schedule next ping in certain delay.
-	 * @param  delay in milliseconds.
+	 * @param  delayInMilliseconds delay in milliseconds.
 	 */
 	public void schedule(long delayInMilliseconds);
 	
