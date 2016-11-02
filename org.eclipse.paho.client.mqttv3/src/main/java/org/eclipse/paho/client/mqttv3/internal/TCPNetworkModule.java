@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -71,7 +72,7 @@ public class TCPNetworkModule implements NetworkModule {
 //			socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
 			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
-			SocketAddress sockaddr = new InetSocketAddress(host, port);
+			SocketAddress sockaddr = new InetSocketAddress(InetAddress.getByName(host), port);
 			socket = factory.createSocket();
 			// Set a read timeout on the socket.
 			// If you change the value here you should also change
