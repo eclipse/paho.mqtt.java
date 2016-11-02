@@ -897,18 +897,21 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			this.comms.removeMessageListener(topicFilters[i]);
 		}
 		
-		StringBuffer subs = new StringBuffer();
-		for (int i=0;i<topicFilters.length;i++) {
-			if (i>0) {
-				subs.append(", ");
+		// Only Generate Log string if we are logging at FINE level
+		if(log.isLoggable(Logger.FINE)){
+			StringBuffer subs = new StringBuffer();
+			for (int i=0;i<topicFilters.length;i++) {
+				if (i>0) {
+					subs.append(", ");
+				}
+				subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);
+				
+				//Check if the topic filter is valid before subscribing
+				MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 			}
-			subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);
-			
-			//Check if the topic filter is valid before subscribing
-			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
+			//@TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
+			log.fine(CLASS_NAME,methodName,"106",new Object[]{subs.toString(), userContext, callback});
 		}
-		//@TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
-		log.fine(CLASS_NAME,methodName,"106",new Object[]{subs.toString(), userContext, callback});
 
 		MqttToken token = new MqttToken(getClientId());
 		token.setActionCallback(callback);
@@ -988,13 +991,22 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	 */
 	public IMqttToken unsubscribe(String[] topicFilters, Object userContext, IMqttActionListener callback) throws MqttException {
 		final String methodName = "unsubscribe";
-		String subs = "";
-		for (int i=0;i<topicFilters.length;i++) {
-			if (i>0) {
-				subs+=", ";
+		
+		// Only Generate Log string if we are logging at FINE level
+		if(log.isLoggable(Logger.FINE)){
+			String subs = "";
+			for (int i=0;i<topicFilters.length;i++) {
+				if (i>0) {
+					subs+=", ";
+				}
+				subs+=topicFilters[i];
 			}
-			subs+=topicFilters[i];
 			
+			//@TRACE 107=Unsubscribe topic={0} userContext={1} callback={2}
+			log.fine(CLASS_NAME, methodName,"107",new Object[]{subs, userContext, callback});
+		}
+		
+		for (int i=0;i<topicFilters.length;i++) {			
 			// Check if the topic filter is valid before unsubscribing
 			// Although we already checked when subscribing, but invalid
 			// topic filter is meanless for unsubscribing, just prohibit it
@@ -1002,8 +1014,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			MqttTopic.validate(topicFilters[i], true/*allow wildcards*/);
 		}
 		
-		//@TRACE 107=Unsubscribe topic={0} userContext={1} callback={2}
-		log.fine(CLASS_NAME, methodName,"107",new Object[]{subs, userContext, callback});
+		
 		
 		// remove message handlers from the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
