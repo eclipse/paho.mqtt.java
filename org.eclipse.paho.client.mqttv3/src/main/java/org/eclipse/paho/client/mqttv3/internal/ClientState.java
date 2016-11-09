@@ -569,7 +569,7 @@ public class ClientState {
 			} catch (MqttPersistenceException mpe){
 				//@TRACE 515=Could not Persist, attempting to Re-Open Persistence Store
 				log.fine(CLASS_NAME,methodName, "515");
-				persistence.open(this.clientComms.getClient().getClientId(), this.clientComms.getClient().getClientId());
+				persistence.open(this.clientComms.getClient().getClientId(), this.clientComms.getClient().getServerURI());
 				persistence.put(key, (MqttPublish) message);
 			}
 			//@TRACE 513=Persisted Buffered Message key={0}
