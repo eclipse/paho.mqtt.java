@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundle.name
+Bundle-SymbolicName: org.eclipse.paho.client.mqttv3
+Bundle-Version: 1.1.1.qualifier
+Bundle-Localization: bundle
+Export-Package: org.eclipse.paho.client.mqttv3;version="1.1.1.qualifier",
+ org.eclipse.paho.client.mqttv3.logging;version="1.1.1.qualifier",
+ org.eclipse.paho.client.mqttv3.persist;version="1.1.1.qualifier",
+ org.eclipse.paho.client.mqttv3.util;version="1.1.1.qualifier"
+Bundle-Vendor: %bundle.provider
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Import-Package: javax.net;resolution:=optional,
+ javax.net.ssl;resolution:=optional

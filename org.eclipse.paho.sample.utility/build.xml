@@ -1,0 +1,130 @@
+<project name="org.eclipse.paho.sample.utility" default="full">
+
+	<description>Builds a redistributable JAR and documentation for the Paho Java client.</description>
+
+    	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+
+	<property name="property.file" value="antbuild.properties"/>
+	<property file="${property.file}"/>
+
+	<property name="source.folder" value="./" />
+	<property name="output.folder" value="./target/work" />
+	<property name="ship.folder" value="./target/ship" />
+
+	<property name="paho-utility-jar" value="org.eclipse.paho.sample.utility.jar" />
+	<property name="paho-client-jar" value="/home/icraggs/util/org.eclipse.paho.client.mqttv3.jar" />
+	<property name="build.level" value="LYYMMDD" />
+
+	<!-- these should be moved to properties file if required -->
+	<property name="javac_target" value="1.2" />
+	<property name="javac_source" value="1.2" />
+	<property name="javac_debug" value="on" />
+	<property name="javac_debuglevel" value="lines,vars,source" />
+
+	<target name="init">
+		<mkdir dir="${output.folder}/src" />
+		<mkdir dir="${output.folder}/bin" />
+	</target>
+	
+	<target name="updateManifest" description="Update manifest file.">
+		<manifest file="${folder}/main/resources/META-INF/MANIFEST.MF" mode="update">
+			<attribute name="Bundle-Version" value="${bundleVersion}" />
+			<attribute name="Bundle-Vendor" value="${bundleVendor}" />
+			<attribute name="Bundle-ManifestVersion" value="2" />
+			<attribute name="Bundle-ClassPath" value="${bundle_classpath}" />
+			<attribute name="Implementation-Version" value="${client.release.version}" />
+			<attribute name="Build-Level" value="${build.level}" />
+		</manifest>
+<!--		<if><isset property="jar.copyright"/>
+			<then>
+				<manifest file="${folder}/META-INF/MANIFEST.MF" mode="update">
+					<attribute name="Bundle-Copyright" value="${jar.copyright}" />
+				</manifest>
+			</then>
+		</if> -->
+	</target>
+
+	<target name="compile" depends="init" description="Compile Java classes.">
+		<echo>Compiling client library...</echo>
+		<copy overwrite="true" todir="${output.folder}/src">
+			<fileset dir="${source.folder}/src" />
+		</copy>
+
+		<replace file="${output.folder}/src/main/java/org/eclipse/paho/sample/utility/MQTTFrame.java"
+			token="@@BUILDLEVEL@@"
+			value="${build.level}"/>
+		<replace file="${output.folder}/src/main/java/org/eclipse/paho/sample/utility/MQTTFrame.java"
+			token="@@VERSION@@"
+			value="${client.release.version}"/>
+
+		<javac srcdir="${output.folder}/src"
+		    destdir="${output.folder}/bin"
+		    source="${javac_source}"
+		    target="${javac_target}"
+		    debug="${javac_debug}"
+		    debuglevel="${javac_debuglevel}"
+                    classpath="${paho-client-jar}"
+		    includeantruntime="false" >
+		</javac>
+
+		<!-- Copy additional source files to the output tree -->
+		<copy overwrite="true" todir="${output.folder}/bin/main/resources">
+			<fileset dir="${source.folder}/src/main/resources">
+				<include name="META-INF/*" />
+			</fileset>
+			<fileset dir="${source.folder}/src/main/resources">
+				<include name="**/*.properties" />
+			</fileset>
+		</copy>
+
+		<antcall target="updateManifest">
+			<param name="folder" value="${output.folder}/bin" />
+			<param name="bundle_classpath" value="." />
+		</antcall>
+
+	</target>
+
+
+	<target name="javadoc" depends="compile" description="Build Javadoc.">
+		<echo>Generating documentation...</echo>
+		<mkdir dir="${ship.folder}/javadoc" />
+		<javadoc access="public"
+		    defaultexcludes="yes"
+		    destdir="${ship.folder}/javadoc"
+		    author="false"
+		    version="true"
+		    breakiterator="true"
+		    use="true"
+		    windowtitle="Eclipse Paho MQTT v3.1 Client API">
+			<classpath>
+				<pathelement location="${output.folder}/bin" />
+			</classpath>
+			<packageset dir="${output.folder}/src/">
+				<include name="org/eclipse/paho/client/mqttv3/**" />
+				<exclude name="**/internal/**" />
+			</packageset>
+			<group title="Eclipse Paho MQTT v3.1 Client API" 
+				packages="org.eclipse.paho.client.mqttv3" />
+		</javadoc>
+	</target>
+
+	<target name="package" depends="compile" description="Build JAR file.">
+		<echo>Creating JAR file...</echo>
+		<mkdir dir="${ship.folder}" />
+		<jar jarfile="${ship.folder}/${paho-utility-jar}"
+		    excludes=""
+		    basedir="${output.folder}/bin"
+		    manifest="${output.folder}/src/main/resources/META-INF/MANIFEST.MF" >
+		</jar>
+	</target>
+
+	<target name="clean" description="Clean up build artefacts.">
+		<echo>Cleaning project...</echo>
+		<delete dir="${output.folder}" />
+		<delete dir="${ship.folder}" />
+	</target>
+
+	<target name="full" depends="clean,compile,package" 
+		description="Clean, build and package." />
+
+</project>

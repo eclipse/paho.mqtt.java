@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="org.eclipse.paho.mqtt.ui.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="%perspective.name"
+            class="org.eclipse.paho.mqtt.ui.Perspective"
+            id="org.eclipse.paho.ui.perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="%view.name"
+            allowMultiple="true"
+            icon="icons/connection.gif"
+            class="org.eclipse.paho.mqtt.ui.views.NavigationView"
+            id="org.eclipse.paho.ui.navigationView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="%category.name"
+            id="org.eclipse.paho.ui.category">
+      </category>
+      
+      <command
+            name="%command.name"
+            description="%command.description"
+            categoryId="org.eclipse.paho.ui.category"
+            id="org.eclipse.paho.ui.actions.newConnection">
+      </command>
+      
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.eclipse.paho.mqtt.ui.views.ConnectionEditorPart"
+            id="org.eclipse.paho.mqtt.ui.views.ConnectionEditorPart"
+            name="%editor.name">
+      </editor>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.eclipse.paho.ui.actions.newConnection"
+            schemeId="org.eclipse.paho.ui.pahoAcceleratorConfiguration"
+            sequence="CTRL+N">
+      </key>
+      <key
+            commandId="org.eclipse.ui.file.exit"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+SHIFT+Q">
+      </key>
+      <scheme
+            id="org.eclipse.paho.ui.pahoAcceleratorConfiguration"
+            name="%scheme.name">
+      </scheme>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipse.paho.ui.core.application"
+            name="%product.name">
+         <property
+               name="aboutText"
+               value="Paho MQTT Utility">
+         </property>
+         <property
+               name="windowImages"
+               value="icons/paho-small.png,icons/paho-small.png">
+         </property>
+         <property
+               name="aboutImage"
+               value="icons/paho_logo_400.png">
+         </property>
+         <property
+               name="appName"
+               value="Paho MQTT Utility">
+         </property>
+         <property
+               name="startupForegroundColor"
+               value="000000">
+         </property>
+         <property
+               name="startupProgressRect"
+               value="38,275,390,15">
+         </property>
+         <property
+               name="startupMessageRect"
+               value="40,252,390,20">
+         </property>
+         <property
+               name="preferenceCustomization"
+               value="plugin_customization.ini">
+         </property>
+      </product>
+   </extension>
+
+   
+</plugin>

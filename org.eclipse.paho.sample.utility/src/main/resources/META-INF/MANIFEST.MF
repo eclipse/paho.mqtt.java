@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: org.eclipse.paho.sample.utility.MQTTFrame
+Class-Path: org.eclipse.paho.client.mqttv3.jar
+Bundle-Copyright:  (C) Copyright IBM Corp. 2002, 2007 All Rights Reserved.
