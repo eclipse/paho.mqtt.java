@@ -18,18 +18,18 @@
 package org.eclipse.paho.client.mqttv5.packet;
 
 /**
- * Represents a Multi-Byte Integer (MBI), as defined by the MQTT v5
+ * Represents a Variable Byte Integer (VBI), as defined by the MQTT v5 (1.5.5)
  * specification.
  */
-public class MultiByteInteger {
-	private long value;
+public class VariableByteInteger {
+	private int value;
 	private int length;
 	
-	public MultiByteInteger(long value){
+	public VariableByteInteger(int value){
 		this(value, -1);
 	}
 	
-	public MultiByteInteger(long value, int length){
+	public VariableByteInteger(int value, int length){
 		this.value = value;
 		this.length = length;
 	}
@@ -44,7 +44,7 @@ public class MultiByteInteger {
 	/**
 	 * Returns the value of this MBI.
 	 */
-	public long getValue() {
+	public int getValue() {
 		return value;
 	}
 }
