@@ -20,16 +20,6 @@ import org.eclipse.paho.client.mqttv5.util.MqttException;
 
 public class MqttPublish extends MqttWireMessage {
 
-	@Override
-	protected byte getMessageInfo() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	protected byte[] getVariableHeader() throws MqttException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 }

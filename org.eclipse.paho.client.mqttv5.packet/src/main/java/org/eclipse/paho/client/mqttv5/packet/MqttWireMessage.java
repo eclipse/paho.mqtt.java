@@ -145,7 +145,7 @@ public abstract class MqttWireMessage {
 			 ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			 DataOutputStream dos = new DataOutputStream(baos);
 			 dos.writeByte(first);
-			 dos.write(encodeMBI(remLen));
+			 dos.write(encodeVariableByteInteger(remLen));
 			 dos.write(varHeader);
 			 dos.flush();
 			 return baos.toByteArray();
@@ -200,7 +200,7 @@ public abstract class MqttWireMessage {
 			 int first = in.readUnsignedByte();
 			 byte type = (byte) (first >> 4);
 			 byte info = (byte) (first &= 0x0f);
-			 long remLen = readMBI(in).getValue();
+			 long remLen = readVariableByteInteger(in).getValue();
 			 long totalToRead = counter.getCounter() + remLen;
 			 
 			 MqttWireMessage result;
@@ -271,7 +271,9 @@ public abstract class MqttWireMessage {
 		 }
 	 }
 	 
-	 protected static byte[] encodeMBI(long number){
+
+	 
+	 protected static byte[] encodeVariableByteInteger(int number){
 		 int numBytes = 0;
 		 long no = number;
 		 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -293,9 +295,9 @@ public abstract class MqttWireMessage {
 	 /**
 	  * Decodes an MQTT Multi-Byte Integer from the given stream
 	  */
-	 protected static MultiByteInteger readMBI(DataInputStream in) throws IOException {
+	 protected static VariableByteInteger readVariableByteInteger(DataInputStream in) throws IOException {
 		 byte digit;
-		 long msgLength = 0;
+		 int msgLength = 0;
 		 int multiplier = 1;
 		 int count = 0;
 		 
@@ -306,7 +308,7 @@ public abstract class MqttWireMessage {
 			 multiplier *= 128;
 		 } while ((digit & 0x80) != 0);
 		 
-		 return new MultiByteInteger(msgLength, count);
+		 return new VariableByteInteger(msgLength, count);
 		 
 	 }
 	 
