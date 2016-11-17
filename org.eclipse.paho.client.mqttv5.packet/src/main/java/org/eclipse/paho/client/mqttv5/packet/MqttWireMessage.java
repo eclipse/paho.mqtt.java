@@ -217,7 +217,7 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_CONNECT:
 			 		result = new MqttConnect(info, data);
 			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
+			 	/**case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
 			 		result = new MqttPublish(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBACK:
@@ -258,7 +258,7 @@ public abstract class MqttWireMessage {
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_AUTH:
 			 		result = new MqttAuth(info, data);
-			 		break;
+			 		break;*/
 			 	default:
 			 		throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 			 		
