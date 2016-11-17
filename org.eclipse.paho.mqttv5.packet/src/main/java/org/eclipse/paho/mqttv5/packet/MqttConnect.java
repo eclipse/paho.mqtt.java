@@ -450,8 +450,7 @@ public class MqttConnect extends MqttWireMessage {
 	public byte[] getAuthData() {
 		return authData;
 	}
-	
-	
+
 	@Override
 	public String toString() {
 		return "MqttConnect [info=" + info + ", clientId=" + clientId + ", cleanSession=" + cleanSession

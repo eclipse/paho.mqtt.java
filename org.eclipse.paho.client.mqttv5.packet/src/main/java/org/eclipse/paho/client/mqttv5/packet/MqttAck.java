@@ -14,7 +14,7 @@
  * 	  Dave Locke - Original MQTTv3 implementation
  *    James Sutton - Initial MQTTv5 implementation
  */
-package org.eclipse.paho.mqttv5.packet;
+package org.eclipse.paho.client.mqttv5.packet;
 
 /**
  * Abstract super-class of all acknowledgement messages.
@@ -24,6 +24,7 @@ public abstract class MqttAck extends MqttWireMessage {
 		super(type);
 	}
 	
+	@Override
 	protected byte getMessageInfo() {
 		return 0;
 	}
@@ -31,6 +32,7 @@ public abstract class MqttAck extends MqttWireMessage {
 	/**
 	 * @return String representation of the wire message
 	 */
+	@Override
 	public String toString() {
 		return super.toString() + " msgId " + msgId;
 	}
