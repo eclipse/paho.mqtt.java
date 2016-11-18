@@ -5,7 +5,7 @@
   <artifactId>java-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  
+
   <name>Eclipse Paho MQTT-v5 client</name>
   <url>http://www.eclipse.org/paho</url>
 	<description>
@@ -28,7 +28,7 @@
 		<url>http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.java.git</url>
 		<connection>scm:git://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.java.git</connection>
 	</scm>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>repo.eclipse.org</id>
@@ -41,15 +41,15 @@
 			<url>https://repo.eclipse.org/content/repositories/paho-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
-  
+
   <modules>
-    <module>org.eclipse.paho.client.mqttv5.packet</module>
-    <module>org.eclipse.paho.client.mqttv5.util</module>
+    <module>org.eclipse.paho.mqttv5.packet</module>
+    <module>org.eclipse.paho.mqttv5.util</module>
   </modules>
-  
+
   <properties>
   	<java.version>1.8</java.version>
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  
+
 </project>
