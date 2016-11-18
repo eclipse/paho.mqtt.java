@@ -110,11 +110,11 @@ public class MqttConnectTest{
 		MqttConnect mqttConnectPacket = new MqttConnect(clientId,
 														mqttVersion,
 														cleanSession,
-														keepAliveInterval,
-														userName,
-														password,
-														willMessage,
-														willDestination);
+														keepAliveInterval);
+		mqttConnectPacket.setUserName(userName);
+		mqttConnectPacket.setPassword(password);
+		mqttConnectPacket.setWillMessage(willMessage);
+		mqttConnectPacket.setWillDestination(willDestination);
 		mqttConnectPacket.setSessionExpiryInterval(sessionExpiryInterval);
 		mqttConnectPacket.setWillDelayInterval(willDelayInterval);
 		mqttConnectPacket.setTopicAliasMaximum(topicAliasMax);
