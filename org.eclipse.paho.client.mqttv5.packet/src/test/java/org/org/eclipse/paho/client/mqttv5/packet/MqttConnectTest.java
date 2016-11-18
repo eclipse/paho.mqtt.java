@@ -26,9 +26,9 @@ import org.eclipse.paho.client.mqttv5.packet.MqttWireMessage;
 import org.eclipse.paho.client.mqttv5.util.MqttException;
 
 import org.junit.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class MqttConnectTest extends TestCase{
+public class MqttConnectTest{
 	
 	private static final String clientId = "testClientId";
 	private static final int mqttVersion = 5;
@@ -55,10 +55,11 @@ public class MqttConnectTest extends TestCase{
 	private static final String userValue3 = "userValue3";
 
 	/**
-	 * Tests that an MqttConnect packet can be serialised successfully
+	 * Tests that an MqttConnect packet can be encoded successfully
 	 * without throwing any exceptions.
 	 * @throws MqttException 
 	 */
+	@Test
 	public void testEncodingMqttConnect() throws MqttException{
 		MqttConnect mqttConnectPacket = generateConnectPacket();
 		mqttConnectPacket.getHeader();
@@ -66,11 +67,12 @@ public class MqttConnectTest extends TestCase{
 	}
 	
 	/**
-	 * Tests that an MqttConnect packet can be deserialised 
+	 * Tests that an MqttConnect packet can be decoded 
 	 * successfully.
 	 * @throws IOException
 	 * @throws MqttException
 	 */
+	@Test
 	public void testDecodingMqttConnect() throws IOException, MqttException{
 		MqttConnect mqttConnectPacket = generateConnectPacket();
 		byte[] header = mqttConnectPacket.getHeader();
@@ -99,6 +101,8 @@ public class MqttConnectTest extends TestCase{
 		Assert.assertEquals(decodedConnectPacket.getUserDefinedPairs().get(userKey1), userValue1);
 		Assert.assertEquals(decodedConnectPacket.getUserDefinedPairs().get(userKey2), userValue2);
 		Assert.assertEquals(decodedConnectPacket.getUserDefinedPairs().get(userKey3), userValue3);
+		Assert.assertEquals(decodedConnectPacket.getAuthMethod(), authMethod);
+		Assert.assertArrayEquals(decodedConnectPacket.getAuthData(), authData);
 		}
 	
 	private MqttConnect generateConnectPacket(){

@@ -17,6 +17,8 @@ public class MqttException extends Exception{
 	public static final int REASON_CODE_INVALID_IDENTIFIER 			= 50000;
 	
 	
+	
+	
 
 	// CONNACK return codes
 	/** The protocol version requested is not supported by the server. */
