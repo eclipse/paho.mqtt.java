@@ -13,7 +13,7 @@ public class MqttException extends Exception{
 	// Issues with CONNECT Packet
 	/** An unknown Identifier was inside the IV fields **/
 	public static final int REASON_CODE_INVALID_IDENTIFIER 			= 50000;
-
+	
 	// CONNACK return codes
 	/** The protocol version requested is not supported by the server. */
 	public static final short REASON_CODE_INVALID_PROTOCOL_VERSION		= 0x01;
