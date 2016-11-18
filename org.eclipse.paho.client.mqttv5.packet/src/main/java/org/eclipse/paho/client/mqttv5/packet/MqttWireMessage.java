@@ -49,6 +49,7 @@ public abstract class MqttWireMessage {
 	public static final byte MESSAGE_TYPE_AUTH			= 15;
 	
 	protected static final String STRING_ENCODING = "UTF-8";
+	protected static final String MQTT = "MQTT";
 	
 	private static final String[] PACKET_NAMES = {
 			"reserved",
@@ -217,7 +218,10 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_CONNECT:
 			 		result = new MqttConnect(info, data);
 			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
+			 	case MqttWireMessage.MESSAGE_TYPE_CONNACK:
+			 		result = new MqttConnack(info, data);
+			 		break;
+			 	/**case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
 			 		result = new MqttPublish(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBACK:
@@ -225,9 +229,6 @@ public abstract class MqttWireMessage {
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
 			 		result = new MqttPubComp(info, data);
-			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_CONNACK:
-			 		result = new MqttConnack(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
 			 		result = new MqttPingReq(info, data);
@@ -258,7 +259,7 @@ public abstract class MqttWireMessage {
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_AUTH:
 			 		result = new MqttAuth(info, data);
-			 		break;
+			 		break;*/
 			 	default:
 			 		throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 			 		

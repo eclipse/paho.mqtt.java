@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public class MqttConnect extends MqttWireMessage {
 		DataInputStream dis = new DataInputStream(bais);
 		
 		String protocolName = decodeUTF8(dis);
-		if(protocolName != "MQTT"){
+		if(!protocolName.equalsIgnoreCase(MQTT)){
 			throw new MqttException(MqttException.REASON_CODE_CLIENT_EXCEPTION);
 		}
 		mqttVersion = dis.readByte();
@@ -97,8 +98,8 @@ public class MqttConnect extends MqttWireMessage {
 		if(willFlag){
 			willDestination = decodeUTF8(dis);
 			int willMessageLength = dis.readShort();
-			byte[] willMessageBytes = null;
-			dis.read(willMessageBytes, 0, willMessageLength);
+			byte[] willMessageBytes = new byte[willMessageLength];
+			dis.read(willMessageBytes);
 			willMessage = new MqttMessage(willMessageBytes);
 			willMessage.setQos(willQoS);
 			willMessage.setRetained(willRetain);
@@ -108,7 +109,8 @@ public class MqttConnect extends MqttWireMessage {
 		}
 		if(passwordFlag){
 			int passwordLength = dis.readShort();
-			dis.read(password, 0, passwordLength);
+			password = new byte[passwordLength];
+			dis.read(password);
 		}
 		
 		
@@ -127,12 +129,6 @@ public class MqttConnect extends MqttWireMessage {
 		this.mqttVersion = mqttVersion;
 	}
 	
-	@Override
-	public String toString(){
-		String rc = super.toString();
-		rc += " clientId: " + clientId + " keepAliveInterval: " + keepAliveInterval;
-		return rc;
-	}
 	
 	@Override
 	protected byte getMessageInfo() {
@@ -195,43 +191,43 @@ public class MqttConnect extends MqttWireMessage {
 	
 	private byte[] getIdentifierValueFields() throws MqttException {
 		try {
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			DataOutputStream dos = new DataOutputStream(outputStream);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream outputStream= new DataOutputStream(baos);
 			
 			// If Present, encode the Session Expiry Interval (3.1.2.12)
 			if(sessionExpiryInterval != null){
-				dos.write(SESSION_EXPIRY_INTERVAL_IDENTIFIER);
-				dos.writeInt(sessionExpiryInterval);
+				outputStream.write(SESSION_EXPIRY_INTERVAL_IDENTIFIER);
+				outputStream.writeInt(sessionExpiryInterval);
 			}
 			
 			// If Present, encode the Will Delay Interval (3.1.2.13)
 			if(willDelayInterval != null){
-				dos.write(WILL_DELAY_INTERVAL_IDENTIFIER);
-				dos.writeInt(willDelayInterval);
+				outputStream.write(WILL_DELAY_INTERVAL_IDENTIFIER);
+				outputStream.writeInt(willDelayInterval);
 			}
 			
 			// If present, encode the Receive Maximum (3.1.2.14)
 			if(receiveMaximum != null){
-				dos.write(RECEIVE_MAXIMUM_IDENTIFIER);
-				dos.writeShort(receiveMaximum);
+				outputStream.write(RECEIVE_MAXIMUM_IDENTIFIER);
+				outputStream.writeShort(receiveMaximum);
 			}
 			
 			// If present, encode the Topic Alias Maximum (3.1.2.15)
 			if(topicAliasMaximum != null){
-				dos.write(TOPIC_ALIAS_MAXIMUM_IDENTIFIER);
-				dos.writeShort(topicAliasMaximum);
+				outputStream.write(TOPIC_ALIAS_MAXIMUM_IDENTIFIER);
+				outputStream.writeShort(topicAliasMaximum);
 			}
 			
 			// If present, encode the Request Reply Info (3.1.2.16)
 			if(requestReplyInfo != null){
-				dos.write(REQUEST_REPLY_INFO_IDENTIFIER);
-				dos.write(requestReplyInfo ? 1 : 0);
+				outputStream.write(REQUEST_REPLY_INFO_IDENTIFIER);
+				outputStream.write(requestReplyInfo ? 1 : 0);
 			}
 			
 			// If present, encode the Request Problem Info (3.1.2.17)
 			if(requestProblemInfo != null){
-				dos.write(REQUEST_PROBLEM_INFO_IDENTIFIER);
-				dos.write(requestProblemInfo ? 1 : 0);
+				outputStream.write(REQUEST_PROBLEM_INFO_IDENTIFIER);
+				outputStream.write(requestProblemInfo ? 1 : 0);
 			}
 			
 			// If present, encode the User Defined Name-Value Pairs (3.1.2.18)
@@ -239,27 +235,27 @@ public class MqttConnect extends MqttWireMessage {
 				for(Map.Entry<String, String> entry : userDefinedPairs.entrySet()){
 					String identifier = entry.getKey();
 					String value = entry.getValue();
-					dos.write(USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(dos, identifier);
-					encodeUTF8(dos, value);
+					outputStream.write(USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, identifier);
+					encodeUTF8(outputStream, value);
 				}
 			}
 			
 			// If present, encode the Auth Method (3.1.2.19)
 			if(authMethod != null){
-				dos.write(AUTH_METHOD_IDENTIFIER);
-				encodeUTF8(dos, authMethod);
+				outputStream.write(AUTH_METHOD_IDENTIFIER);
+				encodeUTF8(outputStream, authMethod);
 			}
 			
 			// If present, encode the Auth Data (3.1.2.20)
 			if(authData != null){
-			dos.write(AUTH_DATA_IDENTIFIER);
-			dos.writeShort(authData.length);
-			dos.write(authData);
+			outputStream.write(AUTH_DATA_IDENTIFIER);
+			outputStream.writeShort(authData.length);
+			outputStream.write(authData);
 			}
-			dos.flush();
+			outputStream.flush();
 			
-			return outputStream.toByteArray();
+			return baos.toByteArray();
 		} catch (IOException ioe){
 			throw new MqttException(ioe);
 		}
@@ -270,44 +266,45 @@ public class MqttConnect extends MqttWireMessage {
 	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException{
 		// First get the length of the IV fields
 		int lengthMbi = readVariableByteInteger(dis).getValue();
-		byte[] identifierValueByteArray = null;
-		dis.read(identifierValueByteArray, 0, lengthMbi);
-		ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
-		DataInputStream inputStream = new DataInputStream(bais);
-	
-		while(inputStream.available() > 0){
-			// Get the first byte (Identifier)
-			byte identifier = inputStream.readByte();
-			
-			if(identifier ==  17){
-				sessionExpiryInterval = inputStream.readInt();
-			} else if(identifier ==  24){
-				willDelayInterval = inputStream.readInt();
-			} else if(identifier ==  33){
-				receiveMaximum = (int) inputStream.readShort();
-			} else if(identifier ==  34){
-				topicAliasMaximum = (int) inputStream.readShort();
-			} else if(identifier ==  25){
-				requestReplyInfo = inputStream.read() !=0;
-			} else if(identifier ==  23){
-				requestProblemInfo = inputStream.read() != 0;
-			} else if(identifier ==  38){
-				String key = decodeUTF8(inputStream);
-				String value = decodeUTF8(inputStream);
-				userDefinedPairs.put(key, value);
-			} else if(identifier ==  21){
-				authMethod = decodeUTF8(inputStream);
-			} else if(identifier ==  22){
-				int authDataLength = inputStream.readShort();
-				inputStream.read(authData, 0, authDataLength);
-			} else {
-				// Unidentified Identifier
-				throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
+		if(lengthMbi > 0){
+			byte[] identifierValueByteArray = new byte[lengthMbi];
+			dis.read(identifierValueByteArray);
+			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
+			DataInputStream inputStream = new DataInputStream(bais);
+		
+			while(inputStream.available() > 0){
+				// Get the first byte (Identifier)
+				byte identifier = inputStream.readByte();
+				
+				if(identifier ==  SESSION_EXPIRY_INTERVAL_IDENTIFIER){
+					sessionExpiryInterval = inputStream.readInt();
+				} else if(identifier ==  WILL_DELAY_INTERVAL_IDENTIFIER){
+					willDelayInterval = inputStream.readInt();
+				} else if(identifier ==  RECEIVE_MAXIMUM_IDENTIFIER){
+					receiveMaximum = (int) inputStream.readShort();
+				} else if(identifier ==  TOPIC_ALIAS_MAXIMUM_IDENTIFIER){
+					topicAliasMaximum = (int) inputStream.readShort();
+				} else if(identifier ==  REQUEST_REPLY_INFO_IDENTIFIER){
+					requestReplyInfo = inputStream.read() !=0;
+				} else if(identifier ==  REQUEST_PROBLEM_INFO_IDENTIFIER){
+					requestProblemInfo = inputStream.read() != 0;
+				} else if(identifier ==  USER_DEFINED_PAIR_IDENTIFIER){
+					String key = decodeUTF8(inputStream);
+					String value = decodeUTF8(inputStream);
+					userDefinedPairs.put(key, value);
+				} else if(identifier ==  AUTH_METHOD_IDENTIFIER){
+					authMethod = decodeUTF8(inputStream);
+				} else if(identifier ==  AUTH_DATA_IDENTIFIER){
+					int authDataLength = inputStream.readShort();
+					authData = new byte[authDataLength];
+					inputStream.read(authData);
+				} else {
+					// Unidentified Identifier
+					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
+				}
 			}
 		}
 	}
-	
-		
 	
 	
 	@Override
@@ -378,7 +375,94 @@ public class MqttConnect extends MqttWireMessage {
 	}
 	
 	
+	public void setAuthMethod(String authMethod) {
+		this.authMethod = authMethod;
+	}
+
+	public void setAuthData(byte[] authData) {
+		this.authData = authData;
+	}
+
+	public byte getInfo() {
+		return info;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public MqttMessage getWillMessage() {
+		return willMessage;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public byte[] getPassword() {
+		return password;
+	}
+
+	public int getKeepAliveInterval() {
+		return keepAliveInterval;
+	}
+
+	public String getWillDestination() {
+		return willDestination;
+	}
+
+	public int getMqttVersion() {
+		return mqttVersion;
+	}
+
+	public int getSessionExpiryInterval() {
+		return sessionExpiryInterval;
+	}
+
+	public int getWillDelayInterval() {
+		return willDelayInterval;
+	}
+
+	public int getReceiveMaximum() {
+		return receiveMaximum;
+	}
+
+	public int getTopicAliasMaximum() {
+		return topicAliasMaximum;
+	}
+
+	public Boolean getRequestReplyInfo() {
+		return requestReplyInfo;
+	}
+
+	public Boolean getRequestProblemInfo() {
+		return requestProblemInfo;
+	}
+
+	public Map<String, String> getUserDefinedPairs() {
+		return userDefinedPairs;
+	}
+
+	public String getAuthMethod() {
+		return authMethod;
+	}
+
+	public byte[] getAuthData() {
+		return authData;
+	}
 	
+	
+	@Override
+	public String toString() {
+		return "MqttConnect [info=" + info + ", clientId=" + clientId + ", cleanSession=" + cleanSession
+				+ ", willMessage=" + willMessage + ", userName=" + userName + ", password=" + Arrays.toString(password)
+				+ ", keepAliveInterval=" + keepAliveInterval + ", willDestination=" + willDestination + ", mqttVersion="
+				+ mqttVersion + ", sessionExpiryInterval=" + sessionExpiryInterval + ", willDelayInterval="
+				+ willDelayInterval + ", receiveMaximum=" + receiveMaximum + ", topicAliasMaximum=" + topicAliasMaximum
+				+ ", requestReplyInfo=" + requestReplyInfo + ", requestProblemInfo=" + requestProblemInfo
+				+ ", userDefinedPairs=" + userDefinedPairs + ", authMethod=" + authMethod + ", authData="
+				+ Arrays.toString(authData) + "]";
+	}
 
 
 }

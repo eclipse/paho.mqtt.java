@@ -1,7 +1,5 @@
 package org.eclipse.paho.client.mqttv5.util;
 
-import java.io.IOException;
-
 public class MqttException extends Exception{
 
 	private static final long serialVersionUID = 1L;
@@ -15,8 +13,6 @@ public class MqttException extends Exception{
 	// Issues with CONNECT Packet
 	/** An unknown Identifier was inside the IV fields **/
 	public static final int REASON_CODE_INVALID_IDENTIFIER 			= 50000;
-	
-	
 
 	// CONNACK return codes
 	/** The protocol version requested is not supported by the server. */
