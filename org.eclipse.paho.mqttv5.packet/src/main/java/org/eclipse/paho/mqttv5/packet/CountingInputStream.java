@@ -11,7 +11,7 @@
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- * 	  Dave Locke - Original MQTTv3 implementation
+ * 	  Dave Locke   - Original MQTTv3 implementation
  *    James Sutton - Initial MQTTv5 implementation
  */
 package org.eclipse.paho.mqttv5.packet;

@@ -204,7 +204,7 @@ public class MqttConnack extends MqttAck {
 		int lengthVBI = readVariableByteInteger(dis).getValue();
 		if(lengthVBI > 0){
 			byte[] identifierValueByteArray = new byte[lengthVBI];
-			dis.read(identifierValueByteArray);
+			dis.read(identifierValueByteArray, 0, lengthVBI);
 			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
 			DataInputStream inputStream = new DataInputStream(bais);
 			while(inputStream.available() > 0){
@@ -231,7 +231,7 @@ public class MqttConnack extends MqttAck {
 				} else if(identifier == AUTH_DATA_IDENTIFIER){
 					int authDataLength = inputStream.readShort();
 					authData = new byte[authDataLength];
-					inputStream.read(authData);
+					inputStream.read(authData, 0, authDataLength);
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);

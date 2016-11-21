@@ -42,7 +42,7 @@
 		</snapshotRepository>
 	</distributionManagement>
 
-  <modules>
+<modules>
     <module>org.eclipse.paho.mqttv5.packet</module>
     <module>org.eclipse.paho.mqttv5.util</module>
   </modules>

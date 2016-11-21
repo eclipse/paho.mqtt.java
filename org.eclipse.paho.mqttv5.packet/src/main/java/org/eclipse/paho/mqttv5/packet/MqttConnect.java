@@ -11,7 +11,7 @@
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- * 	  Dave Locke - Original MQTTv3 implementation
+ * 	  Dave Locke   - Original MQTTv3 implementation
  *    James Sutton - Initial MQTTv5 implementation
  */
 package org.eclipse.paho.mqttv5.packet;
@@ -65,7 +65,7 @@ public class MqttConnect extends MqttWireMessage {
 
 	
 	/**
-	 * Constructor for an on the wire MQTT connect message
+	 * Constructor for an on the wire MQTT Connect message
 	 * 
 	 * @param info
 	 * @param data
@@ -99,7 +99,7 @@ public class MqttConnect extends MqttWireMessage {
 			willDestination = decodeUTF8(dis);
 			int willMessageLength = dis.readShort();
 			byte[] willMessageBytes = new byte[willMessageLength];
-			dis.read(willMessageBytes);
+			dis.read(willMessageBytes, 0, willMessageLength);
 			willMessage = new MqttMessage(willMessageBytes);
 			willMessage.setQos(willQoS);
 			willMessage.setRetained(willRetain);
@@ -110,26 +110,32 @@ public class MqttConnect extends MqttWireMessage {
 		if(passwordFlag){
 			int passwordLength = dis.readShort();
 			password = new byte[passwordLength];
-			dis.read(password);
+			dis.read(password,0, passwordLength);
 		}
 		
 		
 		dis.close();
 	}
 	
-	public MqttConnect(String clientId, int mqttVersion, boolean cleanSession, int keepAliveInterval, String userName, byte[] password, MqttMessage willMessage, String willDestination) {
+	/**
+	 * Constructor for a new MQTT Connect Message
+	 * 
+	 * @param clientId - The Client Identifier
+	 * @param mqttVersion - The MQTT Protocol version
+	 * @param cleanSession - The Clean Session Identifier
+	 * @param keepAliveInterval - The Keep Alive Interval
+
+	 */
+	public MqttConnect(String clientId, int mqttVersion, boolean cleanSession, int keepAliveInterval) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
+		this.mqttVersion = mqttVersion;
 		this.cleanSession = cleanSession;
 		this.keepAliveInterval = keepAliveInterval;
-		this.userName = userName;
-		this.password = password;
-		this.willMessage = willMessage;
-		this.willDestination = willDestination;
-		this.mqttVersion = mqttVersion;
+		
 	}
 	
-	
+
 	@Override
 	protected byte getMessageInfo() {
 		return (byte) 0;
@@ -259,16 +265,15 @@ public class MqttConnect extends MqttWireMessage {
 		} catch (IOException ioe){
 			throw new MqttException(ioe);
 		}
-		
-		
 	}
+	
 	
 	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException{
 		// First get the length of the IV fields
-		int lengthMbi = readVariableByteInteger(dis).getValue();
-		if(lengthMbi > 0){
-			byte[] identifierValueByteArray = new byte[lengthMbi];
-			dis.read(identifierValueByteArray);
+		int lengthVBI = readVariableByteInteger(dis).getValue();
+		if(lengthVBI > 0){
+			byte[] identifierValueByteArray = new byte[lengthVBI];
+			dis.read(identifierValueByteArray, 0, lengthVBI);
 			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
 			DataInputStream inputStream = new DataInputStream(bais);
 		
@@ -297,7 +302,7 @@ public class MqttConnect extends MqttWireMessage {
 				} else if(identifier ==  AUTH_DATA_IDENTIFIER){
 					int authDataLength = inputStream.readShort();
 					authData = new byte[authDataLength];
-					inputStream.read(authData);
+					inputStream.read(authData, 0, authDataLength);
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
@@ -344,6 +349,22 @@ public class MqttConnect extends MqttWireMessage {
 	@Override
 	public String getKey() {
 		return KEY;
+	}
+	
+	public void setWillMessage(MqttMessage willMessage) {
+		this.willMessage = willMessage;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public void setPassword(byte[] password) {
+		this.password = password;
+	}
+
+	public void setWillDestination(String willDestination) {
+		this.willDestination = willDestination;
 	}
 
 	public void setSessionExpiryInterval(int sessionExpiryInterval) {
@@ -450,8 +471,7 @@ public class MqttConnect extends MqttWireMessage {
 	public byte[] getAuthData() {
 		return authData;
 	}
-	
-	
+
 	@Override
 	public String toString() {
 		return "MqttConnect [info=" + info + ", clientId=" + clientId + ", cleanSession=" + cleanSession
