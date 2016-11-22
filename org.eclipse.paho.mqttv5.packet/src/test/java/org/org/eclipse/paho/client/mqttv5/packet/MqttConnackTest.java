@@ -27,9 +27,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttConnackTest {
-	private boolean sessionPresent = true;
-	private int returnCode = MqttConnack.RETURN_CODE_SERVER_MOVED;
 	
+	private static final boolean sessionPresent = true;
+	private static final int returnCode = MqttConnack.RETURN_CODE_SERVER_MOVED;
 	private static final int receiveMaximum = 100;
 	private static final boolean retainUnavailableAdvertisement = true;
 	private static final String assignedClientIdentifier = "AssignedClientId";

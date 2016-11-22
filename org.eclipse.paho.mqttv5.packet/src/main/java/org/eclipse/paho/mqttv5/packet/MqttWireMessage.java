@@ -224,10 +224,10 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
 			 		result = new MqttPublish(info, data);
 			 		break;
-			 		/**case MqttWireMessage.MESSAGE_TYPE_PUBACK:
-			 		result = new MqttPubAck(info, data);
+			 	case MqttWireMessage.MESSAGE_TYPE_PUBACK:
+			 		result = new MqttPuback(info, data);
 			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
+			 		/**case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
 			 		result = new MqttPubComp(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
