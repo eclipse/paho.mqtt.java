@@ -42,7 +42,7 @@ public class MqttConnack extends MqttAck {
 	public static final int RETURN_CODE_BAD_USERNAME_OR_PASSWORD		= 0x86;
 	public static final int RETURN_CODE_NOT_AUTHORIZED					= 0x87;
 	public static final int RETURN_CODE_SERVER_UNAVAILABLE				= 0x88;
-	public static final int RETURN_CODE_SERVER_BUSY					= 0x89;
+	public static final int RETURN_CODE_SERVER_BUSY						= 0x89;
 	public static final int RETURN_CODE_BANNED							= 0x8A;
 	public static final int RETURN_CODE_BAD_AUTHENTICATION				= 0x8C;
 	public static final int RETURN_CODE_TOPIC_INVALID					= 0x90;
@@ -50,21 +50,19 @@ public class MqttConnack extends MqttAck {
 	public static final int RETURN_CODE_USE_ANOTHER_SERVER				= 0x9C;
 	public static final int RETURN_CODE_SERVER_MOVED					= 0x9D;
 	
-	
-	
 	// Identifier / Value Identifiers
-	private static final byte RECEIVE_MAXIMUM_IDENTIFIER = 33;
-	private static final byte RETAIN_UNAVAILABLE_ADVERTISEMENT_IDENTIFIER = 37;
-	private static final byte ASSIGNED_CLIENT_IDENTIFIER_IDENTIFIER = 18;
-	private static final byte TOPIC_ALIAS_MAXIMUM_IDENTIFIER = 34;
-	private static final byte REASON_STRING_IDENTIFIER = 31;
-	private static final byte SERVER_KEEP_ALIVE_IDENTIFIER = 19;
-	private static final byte REPLY_INFO_IDENTIFIER = 26;
-	private static final byte SERVER_REFERENCE_IDENTIFIER = 28;
-	private static final byte AUTH_METHOD_IDENTIFIER = 21;
-	private static final byte AUTH_DATA_IDENTIFIER = 22;
+	private static final byte RECEIVE_MAXIMUM_IDENTIFIER 					= 0x21;
+	private static final byte RETAIN_UNAVAILABLE_ADVERTISEMENT_IDENTIFIER 	= 0x25;
+	private static final byte ASSIGNED_CLIENT_IDENTIFIER_IDENTIFIER 		= 0x12;
+	private static final byte TOPIC_ALIAS_MAXIMUM_IDENTIFIER 				= 0x22;
+	private static final byte REASON_STRING_IDENTIFIER 						= 0x1F;
+	private static final byte SERVER_KEEP_ALIVE_IDENTIFIER 					= 0x13;
+	private static final byte REPLY_INFO_IDENTIFIER							= 0x1A;
+	private static final byte SERVER_REFERENCE_IDENTIFIER 					= 0x1C;
+	private static final byte AUTH_METHOD_IDENTIFIER 						= 0x15;
+	private static final byte AUTH_DATA_IDENTIFIER 							= 0x16;
 	
-	// Identifier / Value Fields
+	// Fields
 	private Integer receiveMaximum;
 	private boolean retainUnavailableAdvertisement = false;
 	private String assignedClientIdentifier;

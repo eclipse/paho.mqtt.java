@@ -31,6 +31,18 @@ public class MqttConnect extends MqttWireMessage {
 	
 	public static final String KEY = "Con";
 	
+	// Identifier / Value Identifiers
+	private static final byte SESSION_EXPIRY_INTERVAL_IDENTIFIER 	= 0x11;
+	private static final byte WILL_DELAY_INTERVAL_IDENTIFIER 		= 0x18;
+	private static final byte RECEIVE_MAXIMUM_IDENTIFIER 			= 0x21;
+	private static final byte TOPIC_ALIAS_MAXIMUM_IDENTIFIER 		= 0x22;
+	private static final byte REQUEST_REPLY_INFO_IDENTIFIER 		= 0x19;
+	private static final byte REQUEST_PROBLEM_INFO_IDENTIFIER 		= 0x17;
+	private static final byte USER_DEFINED_PAIR_IDENTIFIER 			= 0x26;
+	private static final byte AUTH_METHOD_IDENTIFIER 				= 0x15;
+	private static final byte AUTH_DATA_IDENTIFIER 					= 0x16;
+	
+	// Fields
 	private byte info;
 	private String clientId;
 	private boolean cleanSession;
@@ -40,18 +52,6 @@ public class MqttConnect extends MqttWireMessage {
 	private int keepAliveInterval;
 	private String willDestination;
 	private int mqttVersion;
-	
-	private static final byte SESSION_EXPIRY_INTERVAL_IDENTIFIER = 17;
-	private static final byte WILL_DELAY_INTERVAL_IDENTIFIER = 24;
-	private static final byte RECEIVE_MAXIMUM_IDENTIFIER = 33;
-	private static final byte TOPIC_ALIAS_MAXIMUM_IDENTIFIER = 34;
-	private static final byte REQUEST_REPLY_INFO_IDENTIFIER = 25;
-	private static final byte REQUEST_PROBLEM_INFO_IDENTIFIER = 23;
-	private static final byte USER_DEFINED_PAIR_IDENTIFIER = 38;
-	private static final byte AUTH_METHOD_IDENTIFIER = 21;
-	private static final byte AUTH_DATA_IDENTIFIER = 22;
-	
-	// Identifier / Value Fields
 	private Integer sessionExpiryInterval;
 	private Integer willDelayInterval;
 	private Integer receiveMaximum;
@@ -239,11 +239,9 @@ public class MqttConnect extends MqttWireMessage {
 			// If present, encode the User Defined Name-Value Pairs (3.1.2.18)
 			if(userDefinedPairs.size() != 0){
 				for(Map.Entry<String, String> entry : userDefinedPairs.entrySet()){
-					String identifier = entry.getKey();
-					String value = entry.getValue();
 					outputStream.write(USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, identifier);
-					encodeUTF8(outputStream, value);
+					encodeUTF8(outputStream, entry.getKey());
+					encodeUTF8(outputStream, entry.getValue());
 				}
 			}
 			

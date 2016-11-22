@@ -30,15 +30,15 @@ public class MqttConnackTest {
 	private boolean sessionPresent = true;
 	private int returnCode = MqttConnack.RETURN_CODE_SERVER_MOVED;
 	
-	private int receiveMaximum = 100;
-	private boolean retainUnavailableAdvertisement = true;
-	private String assignedClientIdentifier = "AssignedClientId";
-	private int topicAliasMaximum = 100;
-	private String reasonString = "Everything is fine.";
-	private int serverKeepAlive = 60;
-	private String replyInfo = "assignedTopicForSession";
-	private String serverReference = "127.0.0.1";
-	private String authMethod = "PASSWORD";
+	private static final int receiveMaximum = 100;
+	private static final boolean retainUnavailableAdvertisement = true;
+	private static final String assignedClientIdentifier = "AssignedClientId";
+	private static final int topicAliasMaximum = 100;
+	private static final String reasonString = "Everything is fine.";
+	private static final int serverKeepAlive = 60;
+	private static final String replyInfo = "assignedTopicForSession";
+	private static final String serverReference = "127.0.0.1";
+	private static final String authMethod = "PASSWORD";
 	private static final byte[] authData = "secretPassword123".getBytes();
 
 	

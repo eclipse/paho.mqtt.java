@@ -221,10 +221,10 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_CONNACK:
 			 		result = new MqttConnack(info, data);
 			 		break;
-			 	/**case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
+			 	case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
 			 		result = new MqttPublish(info, data);
 			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_PUBACK:
+			 		/**case MqttWireMessage.MESSAGE_TYPE_PUBACK:
 			 		result = new MqttPubAck(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
@@ -331,6 +331,10 @@ public abstract class MqttWireMessage {
 	 
 	 public void setDuplicate(boolean duplicate){
 		 this.duplicate = duplicate;
+	 }
+	 
+	 public boolean isDuplicate(){
+		 return this.duplicate;
 	 }
 	 
 	 /**
