@@ -29,7 +29,7 @@ import org.eclipse.paho.mqttv5.util.MqttException;
 /**
  * An on-the-wire representation of an MQTT CONNACK.
  */
-public class MqttConnack extends MqttAck {
+public class MqttConnAck extends MqttAck {
 	public static final String KEY = "Con";
 	
 	// CONNACK Return Codes
@@ -78,7 +78,7 @@ public class MqttConnack extends MqttAck {
 	private int returnCode;
 	private boolean sessionPresent;
 	
-	public MqttConnack(byte info, byte[] variableHeader) throws IOException, MqttException {
+	public MqttConnAck(byte info, byte[] variableHeader) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
 		ByteArrayInputStream bais = new ByteArrayInputStream(variableHeader);
 		DataInputStream dis = new DataInputStream(bais);
@@ -88,7 +88,7 @@ public class MqttConnack extends MqttAck {
 		dis.close();
 	}
 	
-	public MqttConnack(boolean sessionPresent, int returnCode){
+	public MqttConnAck(boolean sessionPresent, int returnCode){
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
 		this.sessionPresent = sessionPresent;
 		this.returnCode = returnCode;

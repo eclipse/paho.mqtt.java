@@ -20,16 +20,16 @@ package org.org.eclipse.paho.client.mqttv5.packet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.eclipse.paho.mqttv5.packet.MqttConnack;
+import org.eclipse.paho.mqttv5.packet.MqttConnAck;
 import org.eclipse.paho.mqttv5.packet.MqttWireMessage;
 import org.eclipse.paho.mqttv5.util.MqttException;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MqttConnackTest {
+public class MqttConnAckTest {
 	
 	private static final boolean sessionPresent = true;
-	private static final int returnCode = MqttConnack.RETURN_CODE_SERVER_MOVED;
+	private static final int returnCode = MqttConnAck.RETURN_CODE_SERVER_MOVED;
 	private static final int receiveMaximum = 100;
 	private static final boolean retainUnavailableAdvertisement = true;
 	private static final String assignedClientIdentifier = "AssignedClientId";
@@ -50,7 +50,7 @@ public class MqttConnackTest {
 	 */
 	@Test
 	public void testEncodingMqttConnack() throws MqttException {
-		MqttConnack mqttConnackPacket = generateMqttConnackPacket();
+		MqttConnAck mqttConnackPacket = generateMqttConnackPacket();
 		mqttConnackPacket.getHeader();
 		mqttConnackPacket.getPayload();
 	}
@@ -62,14 +62,14 @@ public class MqttConnackTest {
 	 */
 	@Test
 	public void testDecodingMqttConnack() throws IOException, MqttException {
-		MqttConnack mqttConnackPacket = generateMqttConnackPacket();
+		MqttConnAck mqttConnackPacket = generateMqttConnackPacket();
 		byte[] header = mqttConnackPacket.getHeader();
 		byte[] payload = mqttConnackPacket.getPayload();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
 		outputStream.write(payload);
 		
-		MqttConnack decodedConnackPacket = (MqttConnack) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttConnAck decodedConnackPacket = (MqttConnAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
 		Assert.assertEquals(decodedConnackPacket.getSessionPresent(), sessionPresent);
 		Assert.assertEquals(decodedConnackPacket.getReturnCode(), returnCode);
@@ -91,13 +91,13 @@ public class MqttConnackTest {
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testServerReferenceException(){
-		MqttConnack mqttConnackPacket = new MqttConnack(sessionPresent, MqttConnack.RETURN_CODE_SUCCESS);
+		MqttConnAck mqttConnackPacket = new MqttConnAck(sessionPresent, MqttConnAck.RETURN_CODE_SUCCESS);
 		mqttConnackPacket.setServerReference(serverReference);
 	}
 	
 	
-	private MqttConnack generateMqttConnackPacket(){
-		MqttConnack mqttConnackPacket = new MqttConnack(sessionPresent, returnCode);
+	private MqttConnAck generateMqttConnackPacket(){
+		MqttConnAck mqttConnackPacket = new MqttConnAck(sessionPresent, returnCode);
 		mqttConnackPacket.setReceiveMaximum(100);
 		
 		mqttConnackPacket.setReceiveMaximum(receiveMaximum);

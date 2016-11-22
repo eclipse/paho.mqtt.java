@@ -219,13 +219,16 @@ public abstract class MqttWireMessage {
 			 		result = new MqttConnect(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_CONNACK:
-			 		result = new MqttConnack(info, data);
+			 		result = new MqttConnAck(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
 			 		result = new MqttPublish(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBACK:
-			 		result = new MqttPuback(info, data);
+			 		result = new MqttPubAck(info, data);
+			 		break;
+			 	case MqttWireMessage.MESSAGE_TYPE_PUBREC:
+			 		result = new MqttPubRec(info, data);
 			 		break;
 			 		/**case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
 			 		result = new MqttPubComp(info, data);
@@ -250,9 +253,6 @@ public abstract class MqttWireMessage {
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBREL:
 			 		result = new MqttPubRel(info, data);
-			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_PUBREC:
-			 		result = new MqttPubRec(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_DISCONNECT:
 			 		result = new MqttDisconnect(info, data);

@@ -24,27 +24,26 @@ import java.io.IOException;
 
 import org.eclipse.paho.mqttv5.util.MqttException;
 
-public class MqttPuback extends MqttAck{
-	
+public class MqttPubRec extends MqttAck {
 	// Return Codes
-	public static final int RETURN_CODE_SUCCESS							= 0x00;
-	public static final int RETURN_CODE_NO_MATCHING_SUBSCRIBERS			= 0x10;
-	public static final int RETURN_CODE_UNSPECIFIED_ERROR				= 0x80;
-	public static final int RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR	= 0x83;
-	public static final int RETURN_CODE_NOT_AUTHORIZED					= 0x87;
-	public static final int RETURN_CODE_TOPIC_INVALID					= 0x90;
-	public static final int RETURN_CODE_PACKET_TOO_LARGE				= 0x95;
-	public static final int RETURN_CODE_QOS_LEVEL_NOT_SUPPORTED			= 0x9A;
-	
+	public static final int RETURN_CODE_SUCCESS = 0x00;
+	public static final int RETURN_CODE_NO_MATCHING_SUBSCRIBERS = 0x10;
+	public static final int RETURN_CODE_UNSPECIFIED_ERROR = 0x80;
+	public static final int RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR = 0x83;
+	public static final int RETURN_CODE_NOT_AUTHORIZED = 0x87;
+	public static final int RETURN_CODE_TOPIC_INVALID = 0x8B;
+	public static final int RETURN_CODE_PACKET_TOO_LARGE = 0x85;
+	public static final int RETURN_CODE_QOS_LEVEL_NOT_SUPPORTED = 0x9A;
+
 	// Identifier / Value Identifiers
-	private static final byte REASON_STRING_IDENTIFIER 					= 0x1F;
-	
+	private static final byte REASON_STRING_IDENTIFIER = 0x1F;
+
 	// Fields
 	private int returnCode;
 	private String reasonString;
 
-	public MqttPuback(byte info, byte[] data) throws IOException, MqttException {
-		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
+	public MqttPubRec(byte info, byte[] data) throws IOException, MqttException {
+		super(MqttWireMessage.MESSAGE_TYPE_PUBREC);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
@@ -52,67 +51,65 @@ public class MqttPuback extends MqttAck{
 		parseIdentifierValueFields(dis);
 		dis.close();
 	}
-	
-	public MqttPuback(int returnCode){
-		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
+
+	public MqttPubRec(int returnCode) {
+		super(MqttWireMessage.MESSAGE_TYPE_PUBREC);
 		this.returnCode = returnCode;
 	}
 
-	
 	@Override
 	protected byte[] getVariableHeader() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
-			
+
 			// Encode the Message ID
 			outputStream.writeShort(msgId);
-			
+
 			// Encode the Return Code
-			outputStream.write( (byte) returnCode);
-			
+			outputStream.write((byte) returnCode);
+
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
 			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 			outputStream.write(identifierValueFieldsByteArray);
 			outputStream.flush();
-			return baos.toByteArray();	
-		} catch (IOException ioe){
+			return baos.toByteArray();
+		} catch (IOException ioe) {
 			throw new MqttException(ioe);
 		}
 	}
-	
+
 	private byte[] getIdentifierValueFields() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
-			
+
 			// If Present, encode the Reason String (3.4.2.3)
-			if(reasonString != null){
+			if (reasonString != null) {
 				outputStream.write(REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
 			}
-			
+
 			outputStream.flush();
 			return baos.toByteArray();
-		} catch (IOException ioe){
+		} catch (IOException ioe) {
 			throw new MqttException(ioe);
 		}
 	}
-	
-	
+
 	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
 		// First get the length of the IV fields
 		int length = readVariableByteInteger(dis).getValue();
-		if(length > 0){
+		if (length > 0) {
 			byte[] identifierValueByteArray = new byte[length];
 			dis.read(identifierValueByteArray, 0, length);
-			ByteArrayInputStream bais =  new ByteArrayInputStream(identifierValueByteArray);
+			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
 			DataInputStream inputStream = new DataInputStream(bais);
-			while(inputStream.available() > 0){
+			while (inputStream.available() > 0) {
 				// Get the first Byte
 				byte identifier = inputStream.readByte();
-				if(identifier == REASON_STRING_IDENTIFIER){
+				if (identifier == REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
 				} else {
 					// Unidentified Identifier
@@ -137,5 +134,4 @@ public class MqttPuback extends MqttAck{
 	public void setReasonString(String reasonString) {
 		this.reasonString = reasonString;
 	}
-
 }
