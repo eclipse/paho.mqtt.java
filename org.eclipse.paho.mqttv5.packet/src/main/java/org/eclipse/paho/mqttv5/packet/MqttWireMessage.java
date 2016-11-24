@@ -230,17 +230,20 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_PUBREC:
 			 		result = new MqttPubRec(info, data);
 			 		break;
-			 		/**case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
+			 	case MqttWireMessage.MESSAGE_TYPE_PUBREL:
+			 		result = new MqttPubRel(info, data);
+			 		break;
+			 	case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
 			 		result = new MqttPubComp(info, data);
 			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
+			 	case MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE:
+			 		result = new MqttSubscribe(info, data);
+			 		break;
+			 	/**case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
 			 		result = new MqttPingReq(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PINGRESP:
 			 		result = new MqttPingResp(info, data);
-			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE:
-			 		result = new MqttSubscribe(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_SUBACK:
 			 		result = new MqttSubAck(info, data);
@@ -250,9 +253,6 @@ public abstract class MqttWireMessage {
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_UNSUBACK:
 			 		result = new MqttUnsubAck(info, data);
-			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_PUBREL:
-			 		result = new MqttPubRel(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_DISCONNECT:
 			 		result = new MqttDisconnect(info, data);

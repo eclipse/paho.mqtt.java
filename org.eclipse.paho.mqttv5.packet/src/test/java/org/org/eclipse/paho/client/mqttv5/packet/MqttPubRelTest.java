@@ -16,49 +16,51 @@
  */
 package org.org.eclipse.paho.client.mqttv5.packet;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.eclipse.paho.mqttv5.packet.MqttPubAck;
+import org.eclipse.paho.mqttv5.packet.MqttPubRel;
 import org.eclipse.paho.mqttv5.packet.MqttWireMessage;
 import org.eclipse.paho.mqttv5.util.MqttException;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MqttPubAckTest {
-	private static final int returnCode = MqttPubAck.RETURN_CODE_UNSPECIFIED_ERROR;
+public class MqttPubRelTest {
+	private static final int returnCode = MqttPubRel.RETURN_CODE_PACKET_ID_NOT_FOUND;
 	private static final String reasonString = "Reason String 123.";
 	
 	@Test
-	public void testEncodingMqttPuback() throws MqttException {
-		MqttPubAck mqttPubackPacket = generateMqttPubackPacket();
-		mqttPubackPacket.getHeader();
-		mqttPubackPacket.getPayload();
+	public void testEncodingMqttPubRel() throws MqttException {
+		MqttPubRel mqttPubRelPacket = generateMqttPubRelPacket();
+		mqttPubRelPacket.getHeader();
+		mqttPubRelPacket.getPayload();
 	}
 	
 	@Test
-	public void testDecodingMqttPuback() throws MqttException, IOException {
-		MqttPubAck mqttPubackPacket = generateMqttPubackPacket();
-		byte[] header = mqttPubackPacket.getHeader();
-		byte[] payload = mqttPubackPacket.getPayload();
+	public void testDecodingMqttPubRel() throws MqttException, IOException {
+		MqttPubRel mqttPubRelPacket = generateMqttPubRelPacket();
+		byte[] header = mqttPubRelPacket.getHeader();
+		byte[] payload = mqttPubRelPacket.getPayload();
 		
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
 		outputStream.write(payload);
 		
-		MqttPubAck decodedPubackPacket = (MqttPubAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttPubRel decodedPubRelPacket = (MqttPubRel) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
-		Assert.assertEquals(returnCode, decodedPubackPacket.getReturnCode());
-		Assert.assertEquals(reasonString, decodedPubackPacket.getReasonString());
+		Assert.assertEquals(returnCode, decodedPubRelPacket.getReturnCode());
+		Assert.assertEquals(reasonString, decodedPubRelPacket.getReasonString());
 		
 		
 	}
 	
-	public MqttPubAck generateMqttPubackPacket(){
-		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode);
-		mqttPubackPacket.setReasonString(reasonString);
+	public MqttPubRel generateMqttPubRelPacket(){
+		MqttPubRel mqttPubRelPacket = new MqttPubRel(returnCode);
+		mqttPubRelPacket.setReasonString(reasonString);
 		
-		return mqttPubackPacket;
+		return mqttPubRelPacket;
 	}
+	
 
 }

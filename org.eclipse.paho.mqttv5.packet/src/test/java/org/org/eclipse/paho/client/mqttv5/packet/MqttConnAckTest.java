@@ -44,45 +44,45 @@ public class MqttConnAckTest {
 	
 
 	/**
-	 * Tests that an MqttConnack packet can be encoded successfully
+	 * Tests that an MqttConnAck packet can be encoded successfully
 	 * without throwing any exceptions. 
 	 * @throws MqttException 
 	 */
 	@Test
-	public void testEncodingMqttConnack() throws MqttException {
-		MqttConnAck mqttConnackPacket = generateMqttConnackPacket();
-		mqttConnackPacket.getHeader();
-		mqttConnackPacket.getPayload();
+	public void testEncodingMqttConnAck() throws MqttException {
+		MqttConnAck mqttConnAckPacket = generateMqttConnAckPacket();
+		mqttConnAckPacket.getHeader();
+		mqttConnAckPacket.getPayload();
 	}
 	
 	
 	/**
-	 * Tests that an MqttConnack packet can be decoded
+	 * Tests that an MqttConnAck packet can be decoded
 	 * successfully
 	 */
 	@Test
-	public void testDecodingMqttConnack() throws IOException, MqttException {
-		MqttConnAck mqttConnackPacket = generateMqttConnackPacket();
-		byte[] header = mqttConnackPacket.getHeader();
-		byte[] payload = mqttConnackPacket.getPayload();
+	public void testDecodingMqttConnAck() throws IOException, MqttException {
+		MqttConnAck mqttConnAckPacket = generateMqttConnAckPacket();
+		byte[] header = mqttConnAckPacket.getHeader();
+		byte[] payload = mqttConnAckPacket.getPayload();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
 		outputStream.write(payload);
 		
-		MqttConnAck decodedConnackPacket = (MqttConnAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttConnAck decodedConnAckPacket = (MqttConnAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
-		Assert.assertEquals(decodedConnackPacket.getSessionPresent(), sessionPresent);
-		Assert.assertEquals(decodedConnackPacket.getReturnCode(), returnCode);
-		Assert.assertEquals(decodedConnackPacket.getReceiveMaximum(), receiveMaximum);
-		Assert.assertEquals(decodedConnackPacket.getRetainUnavailableAdvertisement(), retainUnavailableAdvertisement);
-		Assert.assertEquals(decodedConnackPacket.getAssignedClientIdentifier(), assignedClientIdentifier);
-		Assert.assertEquals(decodedConnackPacket.getTopicAliasMaximum(), topicAliasMaximum);
-		Assert.assertEquals(decodedConnackPacket.getReasonString(), reasonString);
-		Assert.assertEquals(decodedConnackPacket.getServerKeepAlive(), serverKeepAlive);
-		Assert.assertEquals(decodedConnackPacket.getReplyInfo(), replyInfo);
-		Assert.assertEquals(decodedConnackPacket.getServerReference(), serverReference);
-		Assert.assertEquals(decodedConnackPacket.getAuthMethod(), authMethod);
-		Assert.assertArrayEquals(decodedConnackPacket.getAuthData(), authData);
+		Assert.assertEquals(sessionPresent, decodedConnAckPacket.getSessionPresent());
+		Assert.assertEquals(returnCode, decodedConnAckPacket.getReturnCode());
+		Assert.assertEquals(receiveMaximum, decodedConnAckPacket.getReceiveMaximum());
+		Assert.assertEquals(retainUnavailableAdvertisement, decodedConnAckPacket.getRetainUnavailableAdvertisement());
+		Assert.assertEquals(assignedClientIdentifier, decodedConnAckPacket.getAssignedClientIdentifier());
+		Assert.assertEquals(topicAliasMaximum, decodedConnAckPacket.getTopicAliasMaximum());
+		Assert.assertEquals(reasonString, decodedConnAckPacket.getReasonString());
+		Assert.assertEquals(serverKeepAlive, decodedConnAckPacket.getServerKeepAlive());
+		Assert.assertEquals(replyInfo, decodedConnAckPacket.getReplyInfo());
+		Assert.assertEquals(serverReference, decodedConnAckPacket.getServerReference());
+		Assert.assertEquals(authMethod, decodedConnAckPacket.getAuthMethod());
+		Assert.assertArrayEquals(authData, decodedConnAckPacket.getAuthData());
 	}
 	
 	/**
@@ -91,27 +91,27 @@ public class MqttConnAckTest {
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testServerReferenceException(){
-		MqttConnAck mqttConnackPacket = new MqttConnAck(sessionPresent, MqttConnAck.RETURN_CODE_SUCCESS);
-		mqttConnackPacket.setServerReference(serverReference);
+		MqttConnAck mqttConnAckPacket = new MqttConnAck(sessionPresent, MqttConnAck.RETURN_CODE_SUCCESS);
+		mqttConnAckPacket.setServerReference(serverReference);
 	}
 	
 	
-	private MqttConnAck generateMqttConnackPacket(){
-		MqttConnAck mqttConnackPacket = new MqttConnAck(sessionPresent, returnCode);
-		mqttConnackPacket.setReceiveMaximum(100);
+	private MqttConnAck generateMqttConnAckPacket(){
+		MqttConnAck mqttConnAckPacket = new MqttConnAck(sessionPresent, returnCode);
+		mqttConnAckPacket.setReceiveMaximum(100);
 		
-		mqttConnackPacket.setReceiveMaximum(receiveMaximum);
-		mqttConnackPacket.setRetainUnavailableAdvertisement(retainUnavailableAdvertisement);
-		mqttConnackPacket.setAssignedClientIdentifier(assignedClientIdentifier);
-		mqttConnackPacket.setTopicAliasMaximum(topicAliasMaximum);
-		mqttConnackPacket.setReasonString(reasonString);
-		mqttConnackPacket.setServerKeepAlive(serverKeepAlive);
-		mqttConnackPacket.setReplyInfo(replyInfo);
-		mqttConnackPacket.setServerReference(serverReference);
-		mqttConnackPacket.setAuthMethod(authMethod);
-		mqttConnackPacket.setAuthData(authData);
+		mqttConnAckPacket.setReceiveMaximum(receiveMaximum);
+		mqttConnAckPacket.setRetainUnavailableAdvertisement(retainUnavailableAdvertisement);
+		mqttConnAckPacket.setAssignedClientIdentifier(assignedClientIdentifier);
+		mqttConnAckPacket.setTopicAliasMaximum(topicAliasMaximum);
+		mqttConnAckPacket.setReasonString(reasonString);
+		mqttConnAckPacket.setServerKeepAlive(serverKeepAlive);
+		mqttConnAckPacket.setReplyInfo(replyInfo);
+		mqttConnAckPacket.setServerReference(serverReference);
+		mqttConnAckPacket.setAuthMethod(authMethod);
+		mqttConnAckPacket.setAuthData(authData);
 		
-		return mqttConnackPacket;
+		return mqttConnAckPacket;
 	}
 
 }

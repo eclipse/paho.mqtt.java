@@ -70,21 +70,21 @@ public class MqttPublishTest {
 		
 		MqttPublish decodedPublishPacket = (MqttPublish) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
-		Assert.assertEquals(decodedPublishPacket.getTopicName(), topic);
-		Assert.assertEquals(decodedPublishPacket.getMessage().getQos(), qos);
-		Assert.assertArrayEquals(decodedPublishPacket.getMessage().getPayload(), payloadMessage.getBytes());
-		Assert.assertEquals(decodedPublishPacket.getMessage().isRetained(), retained);
-		Assert.assertEquals(decodedPublishPacket.getPayloadFormat(), payloadFormat);
-		Assert.assertEquals(decodedPublishPacket.getPublicationExpiryInterval(), publicationExpiryInterval);
-		Assert.assertEquals(decodedPublishPacket.getTopicAlias(), topicAlias);
-		Assert.assertEquals(decodedPublishPacket.getReplyTopic(), replyTopic);
-		Assert.assertArrayEquals(decodedPublishPacket.getCorrelationData(), correlationData);
-		Assert.assertEquals(decodedPublishPacket.getUserDefinedPairs().size(), 3);
-		Assert.assertEquals(decodedPublishPacket.getUserDefinedPairs().get(userKey1), userValue1);
-		Assert.assertEquals(decodedPublishPacket.getUserDefinedPairs().get(userKey2), userValue2);
-		Assert.assertEquals(decodedPublishPacket.getUserDefinedPairs().get(userKey3), userValue3);
-		Assert.assertEquals(decodedPublishPacket.getMessageId(), messageId);
-		Assert.assertEquals(decodedPublishPacket.isDuplicate(), duplicate);
+		Assert.assertEquals(topic, decodedPublishPacket.getTopicName());
+		Assert.assertEquals(qos, decodedPublishPacket.getMessage().getQos());
+		Assert.assertArrayEquals(payloadMessage.getBytes(), decodedPublishPacket.getMessage().getPayload());
+		Assert.assertEquals(retained, decodedPublishPacket.getMessage().isRetained());
+		Assert.assertEquals(payloadFormat, decodedPublishPacket.getPayloadFormat());
+		Assert.assertEquals(publicationExpiryInterval, decodedPublishPacket.getPublicationExpiryInterval());
+		Assert.assertEquals(topicAlias, decodedPublishPacket.getTopicAlias());
+		Assert.assertEquals(replyTopic, decodedPublishPacket.getReplyTopic());
+		Assert.assertArrayEquals(correlationData, decodedPublishPacket.getCorrelationData());
+		Assert.assertEquals(3, decodedPublishPacket.getUserDefinedPairs().size());
+		Assert.assertEquals(userValue1, decodedPublishPacket.getUserDefinedPairs().get(userKey1));
+		Assert.assertEquals(userValue2, decodedPublishPacket.getUserDefinedPairs().get(userKey2));
+		Assert.assertEquals(userValue3, decodedPublishPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertEquals(messageId, decodedPublishPacket.getMessageId());
+		Assert.assertEquals(duplicate, decodedPublishPacket.isDuplicate());
 		
 		
 	}

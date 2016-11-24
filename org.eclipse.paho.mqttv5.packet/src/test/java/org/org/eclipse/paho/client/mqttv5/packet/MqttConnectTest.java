@@ -82,26 +82,26 @@ public class MqttConnectTest{
 					
 		MqttConnect decodedConnectPacket = (MqttConnect) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
-		Assert.assertEquals(decodedConnectPacket.getClientId(), clientId);
-		Assert.assertEquals(decodedConnectPacket.getMqttVersion(), mqttVersion);
-		Assert.assertEquals(decodedConnectPacket.isCleanSession(), cleanSession);
-		Assert.assertEquals(decodedConnectPacket.getKeepAliveInterval(), keepAliveInterval);
-		Assert.assertEquals(decodedConnectPacket.getUserName(), userName);
-		Assert.assertArrayEquals(decodedConnectPacket.getPassword(), password);
-		Assert.assertArrayEquals(decodedConnectPacket.getWillMessage().getPayload(), willPayload.getBytes());
-		Assert.assertEquals(decodedConnectPacket.getWillMessage().getQos(), willQoS);
-		Assert.assertEquals(decodedConnectPacket.getWillDestination(), willDestination);
-		Assert.assertEquals(decodedConnectPacket.getSessionExpiryInterval(), sessionExpiryInterval);
-		Assert.assertEquals(decodedConnectPacket.getWillDelayInterval(), willDelayInterval);
-		Assert.assertEquals(decodedConnectPacket.getTopicAliasMaximum(), topicAliasMax);
-		Assert.assertEquals(decodedConnectPacket.getRequestReplyInfo(), requestReplyInfo);
-		Assert.assertEquals(decodedConnectPacket.getRequestProblemInfo(), requestPropblemInfo);
-		Assert.assertEquals(decodedConnectPacket.getUserDefinedPairs().size(), 3);
-		Assert.assertEquals(decodedConnectPacket.getUserDefinedPairs().get(userKey1), userValue1);
-		Assert.assertEquals(decodedConnectPacket.getUserDefinedPairs().get(userKey2), userValue2);
-		Assert.assertEquals(decodedConnectPacket.getUserDefinedPairs().get(userKey3), userValue3);
-		Assert.assertEquals(decodedConnectPacket.getAuthMethod(), authMethod);
-		Assert.assertArrayEquals(decodedConnectPacket.getAuthData(), authData);
+		Assert.assertEquals(clientId, decodedConnectPacket.getClientId());
+		Assert.assertEquals(mqttVersion, decodedConnectPacket.getMqttVersion());
+		Assert.assertEquals(cleanSession, decodedConnectPacket.isCleanSession());
+		Assert.assertEquals(keepAliveInterval, decodedConnectPacket.getKeepAliveInterval());
+		Assert.assertEquals(userName, decodedConnectPacket.getUserName());
+		Assert.assertArrayEquals(password, decodedConnectPacket.getPassword());
+		Assert.assertArrayEquals(willPayload.getBytes(), decodedConnectPacket.getWillMessage().getPayload());
+		Assert.assertEquals(willQoS, decodedConnectPacket.getWillMessage().getQos());
+		Assert.assertEquals(willDestination, decodedConnectPacket.getWillDestination());
+		Assert.assertEquals(sessionExpiryInterval, decodedConnectPacket.getSessionExpiryInterval());
+		Assert.assertEquals(willDelayInterval, decodedConnectPacket.getWillDelayInterval());
+		Assert.assertEquals(topicAliasMax, decodedConnectPacket.getTopicAliasMaximum());
+		Assert.assertEquals(requestReplyInfo, decodedConnectPacket.getRequestReplyInfo());
+		Assert.assertEquals(requestPropblemInfo, decodedConnectPacket.getRequestProblemInfo());
+		Assert.assertEquals(3, decodedConnectPacket.getUserDefinedPairs().size());
+		Assert.assertEquals(userValue1, decodedConnectPacket.getUserDefinedPairs().get(userKey1));
+		Assert.assertEquals(userValue2, decodedConnectPacket.getUserDefinedPairs().get(userKey2));
+		Assert.assertEquals(userValue3, decodedConnectPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertEquals(authMethod, decodedConnectPacket.getAuthMethod());
+		Assert.assertArrayEquals(authData, decodedConnectPacket.getAuthData());
 		}
 	
 	private MqttConnect generateConnectPacket(){

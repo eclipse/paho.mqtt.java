@@ -30,35 +30,35 @@ public class MqttPubRecTest {
 	private static final String reasonString = "Reason String 123.";
 	
 	@Test
-	public void testEncodingMqttPubrec() throws MqttException {
-		MqttPubRec mqttPubrecPacket = generateMqttPubrecPacket();
-		mqttPubrecPacket.getHeader();
-		mqttPubrecPacket.getPayload();
+	public void testEncodingMqttPubRec() throws MqttException {
+		MqttPubRec mqttPubRecPacket = generateMqttPubRecPacket();
+		mqttPubRecPacket.getHeader();
+		mqttPubRecPacket.getPayload();
 	}
 	
 	@Test
-	public void testDecodingMqttPubrec() throws MqttException, IOException {
-		MqttPubRec mqttPubrecPacket = generateMqttPubrecPacket();
-		byte[] header = mqttPubrecPacket.getHeader();
-		byte[] payload = mqttPubrecPacket.getPayload();
+	public void testDecodingMqttPubRec() throws MqttException, IOException {
+		MqttPubRec mqttPubRecPacket = generateMqttPubRecPacket();
+		byte[] header = mqttPubRecPacket.getHeader();
+		byte[] payload = mqttPubRecPacket.getPayload();
 		
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
 		outputStream.write(payload);
 		
-		MqttPubRec decodedPubrecPacket = (MqttPubRec) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttPubRec decodedPubRecPacket = (MqttPubRec) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
-		Assert.assertEquals(decodedPubrecPacket.getReturnCode(), returnCode);
-		Assert.assertEquals(decodedPubrecPacket.getReasonString(), reasonString);
+		Assert.assertEquals(returnCode, decodedPubRecPacket.getReturnCode());
+		Assert.assertEquals(reasonString, decodedPubRecPacket.getReasonString());
 		
 		
 	}
 	
-	public MqttPubRec generateMqttPubrecPacket(){
-		MqttPubRec mqttPubrecPacket = new MqttPubRec(returnCode);
-		mqttPubrecPacket.setReasonString(reasonString);
+	public MqttPubRec generateMqttPubRecPacket(){
+		MqttPubRec mqttPubRecPacket = new MqttPubRec(returnCode);
+		mqttPubRecPacket.setReasonString(reasonString);
 		
-		return mqttPubrecPacket;
+		return mqttPubRecPacket;
 	}
 
 }
