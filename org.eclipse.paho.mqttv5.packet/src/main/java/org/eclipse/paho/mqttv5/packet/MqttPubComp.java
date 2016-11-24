@@ -80,7 +80,7 @@ public class MqttPubComp  extends MqttAck {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
-			// If Present, encode the Reason String (3.4.2.3)
+			// If Present, encode the Reason String (3.7.2.3)
 			if (reasonString != null) {
 				outputStream.write(REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
