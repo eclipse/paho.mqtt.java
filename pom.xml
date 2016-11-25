@@ -43,8 +43,7 @@
 	</distributionManagement>
 
 <modules>
-    <module>org.eclipse.paho.mqttv5.packet</module>
-    <module>org.eclipse.paho.mqttv5.util</module>
+    <module>org.eclipse.paho.mqttv5.common</module>
   </modules>
 
   <properties>
