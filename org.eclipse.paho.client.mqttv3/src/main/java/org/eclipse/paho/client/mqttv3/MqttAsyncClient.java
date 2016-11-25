@@ -412,6 +412,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 			// Create the network module...
 			netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId);
 			((SSLNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
+			((SSLNetworkModule)netModule).setSSLHostnameVerifier(options.getSSLHostnameVerifier());
 			// Ciphers suites need to be set, if they are available
 			if (factoryFactory != null) {
 				String[] enabledCiphers = factoryFactory.getEnabledCipherSuites(null);
