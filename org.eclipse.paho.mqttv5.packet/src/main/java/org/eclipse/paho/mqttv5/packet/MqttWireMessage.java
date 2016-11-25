@@ -245,14 +245,14 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE:
 			 		result = new MqttUnsubscribe(info, data);
 			 		break;
+			 	case MqttWireMessage.MESSAGE_TYPE_UNSUBACK:
+			 		result = new MqttUnsubAck(info, data);
+			 		break;
 			 	/**case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
 			 		result = new MqttPingReq(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PINGRESP:
 			 		result = new MqttPingResp(info, data);
-			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_UNSUBACK:
-			 		result = new MqttUnsubAck(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_DISCONNECT:
 			 		result = new MqttDisconnect(info, data);

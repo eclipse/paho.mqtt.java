@@ -40,16 +40,16 @@ public class MqttSubAckTest {
 	
 	@Test
 	public void testEncodingMqttSubAck() throws MqttException {
-		MqttSubAck MqttSubAckPacket = generateMqttSubAckPacket();
-		MqttSubAckPacket.getHeader();
-		MqttSubAckPacket.getPayload();
+		MqttSubAck mqttSubAckPacket = generatemqttSubAckPacket();
+		mqttSubAckPacket.getHeader();
+		mqttSubAckPacket.getPayload();
 	}
 	
 	@Test
 	public void testDecodingMqttSubAck() throws MqttException, IOException {
-		MqttSubAck MqttSubAckPacket = generateMqttSubAckPacket();
-		byte[] header = MqttSubAckPacket.getHeader();
-		byte[] payload = MqttSubAckPacket.getPayload();
+		MqttSubAck mqttSubAckPacket = generatemqttSubAckPacket();
+		byte[] header = mqttSubAckPacket.getHeader();
+		byte[] payload = mqttSubAckPacket.getPayload();
 		
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
@@ -63,11 +63,11 @@ public class MqttSubAckTest {
 		
 	}
 	
-	public MqttSubAck generateMqttSubAckPacket(){
-		MqttSubAck MqttSubAckPacket = new MqttSubAck(returnCodes);
-		MqttSubAckPacket.setReasonString(reasonString);
+	private MqttSubAck generatemqttSubAckPacket(){
+		MqttSubAck mqttSubAckPacket = new MqttSubAck(returnCodes);
+		mqttSubAckPacket.setReasonString(reasonString);
 		
-		return MqttSubAckPacket;
+		return mqttSubAckPacket;
 	}
 
 }
