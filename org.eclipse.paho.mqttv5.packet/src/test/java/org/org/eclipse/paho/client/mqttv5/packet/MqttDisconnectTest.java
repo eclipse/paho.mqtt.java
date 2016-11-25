@@ -68,13 +68,6 @@ public class MqttDisconnectTest {
 		return mqttDisconnectPacket;
 	}
 	
-	private void printByteArray(byte[] bytes){
-		for (byte b1 : bytes){
-			String s1 = String.format("%8s", Integer.toBinaryString(b1 & 0xFF)).replace(' ', '0');
-			s1 += " " + Integer.toHexString(b1);
-			s1 += " " + b1;
-			System.out.println(s1);
-		}
-	}
+
 
 }
