@@ -10,8 +10,8 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>org.eclipse.paho.mqttv5.packet</artifactId>
-	<name>org.eclipse.paho.mqttv5.packet</name>
+	<artifactId>org.eclipse.paho.mqttv5.common</artifactId>
+	<name>org.eclipse.paho.mqttv5.common</name>
 
 
 	<dependencies>
