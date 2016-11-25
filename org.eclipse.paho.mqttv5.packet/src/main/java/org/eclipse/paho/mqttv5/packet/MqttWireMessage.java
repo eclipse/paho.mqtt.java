@@ -248,7 +248,7 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_UNSUBACK:
 			 		result = new MqttUnsubAck(info, data);
 			 		break;
-			 	/**case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
+			 	case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
 			 		result = new MqttPingReq(info, data);
 			 		break;
 			 	case MqttWireMessage.MESSAGE_TYPE_PINGRESP:
@@ -257,7 +257,7 @@ public abstract class MqttWireMessage {
 			 	case MqttWireMessage.MESSAGE_TYPE_DISCONNECT:
 			 		result = new MqttDisconnect(info, data);
 			 		break;
-			 	case MqttWireMessage.MESSAGE_TYPE_AUTH:
+			 	/**case MqttWireMessage.MESSAGE_TYPE_AUTH:
 			 		result = new MqttAuth(info, data);
 			 		break;*/
 			 	default:
