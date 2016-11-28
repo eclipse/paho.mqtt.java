@@ -84,6 +84,7 @@ public class MqttConnect extends MqttWireMessage {
 		
 		
 		
+		
 		byte connectFlags = dis.readByte();
 		reservedByte = (connectFlags & 0x01) != 0;
 		cleanSession = (connectFlags & 0x02) != 0;
@@ -507,6 +508,10 @@ public class MqttConnect extends MqttWireMessage {
 				+ topicAliasMaximum + ", requestResponseInfo=" + requestResponseInfo + ", requestProblemInfo="
 				+ requestProblemInfo + ", userDefinedPairs=" + userDefinedPairs + ", authMethod=" + authMethod
 				+ ", authData=" + Arrays.toString(authData) + "]";
+	}
+
+	public boolean isReservedByte() {
+		return reservedByte;
 	}
 
 	public boolean isReservedByte() {
