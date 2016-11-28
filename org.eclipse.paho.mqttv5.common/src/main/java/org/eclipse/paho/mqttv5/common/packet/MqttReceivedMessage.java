@@ -16,6 +16,8 @@
  */
 package org.eclipse.paho.mqttv5.common.packet;
 
+import org.eclipse.paho.mqttv5.common.MqttMessage;
+
 public class MqttReceivedMessage extends MqttMessage {
 	
 	public void setMessageId(int messageId){

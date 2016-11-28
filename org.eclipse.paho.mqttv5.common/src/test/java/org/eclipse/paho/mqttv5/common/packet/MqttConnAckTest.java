@@ -88,15 +88,16 @@ public class MqttConnAckTest {
 	/**
 	 * Tests that you cannot assign a server reference if the return code
 	 * is not 0x9C or 0x9D
+	 * @throws MqttException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testServerReferenceException(){
+	public void testServerReferenceException() throws MqttException{
 		MqttConnAck mqttConnAckPacket = new MqttConnAck(sessionPresent, MqttConnAck.RETURN_CODE_SUCCESS);
 		mqttConnAckPacket.setServerReference(serverReference);
 	}
 	
 	
-	private MqttConnAck generateMqttConnAckPacket(){
+	private MqttConnAck generateMqttConnAckPacket() throws MqttException{
 		MqttConnAck mqttConnAckPacket = new MqttConnAck(sessionPresent, returnCode);
 		mqttConnAckPacket.setReceiveMaximum(100);
 		

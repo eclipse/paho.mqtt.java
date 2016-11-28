@@ -23,6 +23,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttDisconnect extends MqttWireMessage {
 
@@ -90,7 +91,7 @@ public class MqttDisconnect extends MqttWireMessage {
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream inputStream = new DataInputStream(counter);
 		returnCode = inputStream.readUnsignedByte();
-		validateReturnCode(returnCode);
+		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(inputStream);
 		
 		inputStream.close();
@@ -98,7 +99,7 @@ public class MqttDisconnect extends MqttWireMessage {
 	
 	public MqttDisconnect(int returnCode) throws MqttException{
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
-		validateReturnCode(returnCode);
+		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
 	
@@ -180,20 +181,6 @@ public class MqttDisconnect extends MqttWireMessage {
 	}
 	
 	
-	
-	/**  
-	 * Validates that a return code is valid for this Packet
-	 * @param returnCode - The return code to validate
-	 * @throws MqttException - Thrown if the return code is not valid
-	 */
-	private void validateReturnCode(int returnCode) throws MqttException{
-		for(int validReturnCode : validReturnCodes){
-			if(returnCode == validReturnCode){
-				return;
-			}
-		}
-		throw new MqttException(MqttException.REASON_CODE_INVALID_RETURN_CODE);
-	}
 	
 	
 	public int getSessionExpiryInterval() {

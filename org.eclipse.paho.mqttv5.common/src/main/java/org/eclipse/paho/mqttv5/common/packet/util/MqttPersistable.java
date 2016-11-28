@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  * Copyright (c) 2016 IBM Corp.
  *
@@ -15,36 +14,22 @@
  * 	  Dave Locke - Original MQTTv3 implementation
  *    James Sutton - Initial MQTTv5 implementation
  */
-package org.eclipse.paho.mqttv5.common.packet;
+package org.eclipse.paho.mqttv5.common.packet.util;
 
-/**
- * Represents a Variable Byte Integer (VBI), as defined by the MQTT v5 (1.5.5)
- * specification.
- */
-public class VariableByteInteger {
-	private int value;
-	private int length;
+import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
+
+public interface MqttPersistable {
+	//TODO complete javadoc
+	public byte[] getHeaderBytes()  throws MqttPersistenceException;
 	
-	public VariableByteInteger(int value){
-		this(value, -1);
-	}
+	public int getHeaderLength() throws MqttPersistenceException;
 	
-	public VariableByteInteger(int value, int length){
-		this.value = value;
-		this.length = length;
-	}
+	public int getHeaderOffset() throws MqttPersistenceException;
 	
-	/**
-	 * Returns the number of bytes read when decoding this MBI
-	 */
-	public int getEncodedLength(){
-		return length;
-	}
+	public byte[] getPayloadBytes() throws MqttPersistenceException;
 	
-	/**
-	 * Returns the value of this MBI.
-	 */
-	public int getValue() {
-		return value;
-	}
+	public int getPayloadLength() throws MqttPersistenceException;
+	
+	public int getPayloadOffset() throws MqttPersistenceException;
+
 }

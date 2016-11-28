@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
+/**
+ * An on-the-wire representation of an MQTT AUTH message.
+ * MQTTv5 - 3.15
+ */
 public class MqttAuth extends MqttWireMessage {
 
 	// Return codes
@@ -44,6 +48,14 @@ public class MqttAuth extends MqttWireMessage {
 	private String authMethod;
 	private byte[] authData;
 	
+	
+	/**
+	 * Constructs an Auth message from a raw byte array
+	 * @param info - Info Byte
+	 * @param data - The Data
+	 * @throws IOException
+	 * @throws MqttException
+	 */
 	public MqttAuth(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
@@ -53,9 +65,15 @@ public class MqttAuth extends MqttWireMessage {
 		inputStream.close();
 	}
 	
+	
+	/**
+	 * Constructs an Auth message from the return code
+	 * @param returnCode - The Auth Return Code
+	 * @throws MqttException
+	 */
 	public MqttAuth(int returnCode) throws MqttException{
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
-		validateReturnCode(returnCode);
+		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
 	
@@ -129,19 +147,7 @@ public class MqttAuth extends MqttWireMessage {
 		}
 	}
 	
-	/**  
-	 * Validates that a return code is valid for this Packet
-	 * @param returnCode - The return code to validate
-	 * @throws MqttException - Thrown if the return code is not valid
-	 */
-	private void validateReturnCode(int returnCode) throws MqttException{
-		for(int validReturnCode : validReturnCodes){
-			if(returnCode == validReturnCode){
-				return;
-			}
-		}
-		throw new MqttException(MqttException.REASON_CODE_INVALID_RETURN_CODE);
-	}
+	
 
 	@Override
 	protected byte getMessageInfo() {

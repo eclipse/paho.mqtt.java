@@ -14,7 +14,7 @@
  * 	  Dave Locke   - Original MQTTv3 implementation
  *    James Sutton - Initial MQTTv5 implementation
  */
-package org.eclipse.paho.mqttv5.common.packet;
+package org.eclipse.paho.mqttv5.common;
 
 public class MqttSubscription {
 

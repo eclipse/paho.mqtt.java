@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 /**
  * An on-the-wire representation of an MQTT Publish message.
