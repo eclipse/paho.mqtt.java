@@ -54,7 +54,7 @@ public class MqttPubAckTest {
 		
 	}
 	
-	public MqttPubAck generateMqttPubackPacket(){
+	public MqttPubAck generateMqttPubackPacket() throws MqttException{
 		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode);
 		mqttPubackPacket.setReasonString(reasonString);
 		

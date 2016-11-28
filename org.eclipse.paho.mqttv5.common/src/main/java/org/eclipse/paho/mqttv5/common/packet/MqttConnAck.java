@@ -50,6 +50,25 @@ public class MqttConnAck extends MqttAck {
 	public static final int RETURN_CODE_USE_ANOTHER_SERVER				= 0x9C;
 	public static final int RETURN_CODE_SERVER_MOVED					= 0x9D;
 	
+	private static final int[] validReturnCodes = {
+			RETURN_CODE_SUCCESS,
+			RETURN_CODE_UNSPECIFIED_ERROR,
+			RETURN_CODE_MALFORMED_CONTROL_PACKET,
+			RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
+			RETURN_CODE_UNSUPPORTED_PROTOCOL_VERSION,
+			RETURN_CODE_IDENTIFIER_NOT_VALID,
+			RETURN_CODE_BAD_USERNAME_OR_PASSWORD,
+			RETURN_CODE_NOT_AUTHORIZED,
+			RETURN_CODE_SERVER_UNAVAILABLE,
+			RETURN_CODE_SERVER_BUSY,
+			RETURN_CODE_BANNED,
+			RETURN_CODE_BAD_AUTHENTICATION,
+			RETURN_CODE_TOPIC_INVALID,
+			RETURN_CODE_PACKET_TOO_LARGE,
+			RETURN_CODE_USE_ANOTHER_SERVER,
+			RETURN_CODE_SERVER_MOVED 
+	};
+	
 	// Identifier / Value Identifiers
 	private static final byte RECEIVE_MAXIMUM_IDENTIFIER 					= 0x21;
 	private static final byte RETAIN_UNAVAILABLE_ADVERTISEMENT_IDENTIFIER 	= 0x25;
@@ -84,18 +103,17 @@ public class MqttConnAck extends MqttAck {
 		DataInputStream dis = new DataInputStream(bais);
 		sessionPresent = (dis.readUnsignedByte() & 0x01) == 0x01;
 		returnCode = dis.readUnsignedByte();
+		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(dis);
 		dis.close();
 	}
 	
-	public MqttConnAck(boolean sessionPresent, int returnCode){
+	public MqttConnAck(boolean sessionPresent, int returnCode) throws MqttException{
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
 		this.sessionPresent = sessionPresent;
 		this.returnCode = returnCode;
+		validateReturnCode(returnCode, validReturnCodes);
 	}
-	
-	
-
 	
 	@Override
 	protected byte[] getVariableHeader() throws MqttException {

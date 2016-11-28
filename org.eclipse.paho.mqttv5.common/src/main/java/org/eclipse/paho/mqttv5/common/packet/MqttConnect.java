@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 public class MqttConnect extends MqttWireMessage {
 	
@@ -45,6 +46,7 @@ public class MqttConnect extends MqttWireMessage {
 	// Fields
 	private byte info;
 	private String clientId;
+	private boolean reservedByte;
 	private boolean cleanSession;
 	private MqttMessage willMessage;
 	private String userName;
@@ -84,7 +86,9 @@ public class MqttConnect extends MqttWireMessage {
 		}
 		mqttVersion = dis.readByte();
 		
+		
 		byte connectFlags = dis.readByte();
+		reservedByte = (connectFlags & 0x01) != 0;
 		cleanSession = (connectFlags & 0x02) != 0;
 		boolean willFlag = (connectFlags & 0x04) != 0;
 		int willQoS = (connectFlags >>3) & 0x03;
@@ -480,6 +484,10 @@ public class MqttConnect extends MqttWireMessage {
 				+ ", requestReplyInfo=" + requestReplyInfo + ", requestProblemInfo=" + requestProblemInfo
 				+ ", userDefinedPairs=" + userDefinedPairs + ", authMethod=" + authMethod + ", authData="
 				+ Arrays.toString(authData) + "]";
+	}
+
+	public boolean isReservedByte() {
+		return reservedByte;
 	}
 
 

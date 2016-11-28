@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttUnsubscribe extends MqttWireMessage{
 	

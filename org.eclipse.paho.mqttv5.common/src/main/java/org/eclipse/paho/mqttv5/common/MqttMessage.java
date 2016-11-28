@@ -14,7 +14,7 @@
  * 	  Dave Locke - Original MQTTv3 implementation
  *    James Sutton - Initial MQTTv5 implementation
  */
-package org.eclipse.paho.mqttv5.common.packet;
+package org.eclipse.paho.mqttv5.common;
 
 
 /**
@@ -207,7 +207,7 @@ public class MqttMessage {
 		}
 	}
 
-	protected void setDuplicate(boolean dup) {
+	public void setDuplicate(boolean dup) {
 		this.dup = dup;
 	}
 

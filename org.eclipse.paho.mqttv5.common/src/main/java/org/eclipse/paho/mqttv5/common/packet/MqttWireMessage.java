@@ -25,6 +25,10 @@ import java.io.InputStream;
 
 import org.eclipse.paho.mqttv5.common.ExceptionHelper;
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
+import org.eclipse.paho.mqttv5.common.packet.util.MqttPersistable;
+import org.eclipse.paho.mqttv5.common.packet.util.MultiByteArrayInputStream;
+import org.eclipse.paho.mqttv5.common.packet.util.VariableByteInteger;
 
 /**
  * An on-the wire representation of an MQTTv5 Message
@@ -390,7 +394,20 @@ public abstract class MqttWireMessage {
 	 }
 	 
 	 
-	 
+ 	/**  
+	 * Validates that a return code is valid for this Packet
+	 * @param returnCode - The return code to validate
+	 * @param validReturnCodes - The list of valid return codes
+	 * @throws MqttException - Thrown if the return code is not valid
+	 */
+	protected void validateReturnCode(int returnCode, int[] validReturnCodes) throws MqttException{
+		for(int validReturnCode : validReturnCodes){
+			if(returnCode == validReturnCode){
+				return;
+			}
+		}
+		throw new MqttException(MqttException.REASON_CODE_INVALID_RETURN_CODE);
+	}
 	 
 	 
 	 
