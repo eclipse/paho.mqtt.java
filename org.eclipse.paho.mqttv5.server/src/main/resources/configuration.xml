@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration>
+    <listener>
+        <type>mqtt</type>
+        <port>1883</port>
+        <name>My First Listener</name>
+    </listener>
+    <listener>
+        <type>webSockets</type>
+        <port>1833</port>
+        <name>My Second Listener</name>
+    </listener>
+</configuration>
