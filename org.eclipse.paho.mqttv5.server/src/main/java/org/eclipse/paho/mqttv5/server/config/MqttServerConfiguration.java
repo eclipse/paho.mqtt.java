@@ -14,16 +14,14 @@
  * 	  Dave Locke   - Original MQTTv3 implementation
  *    James Sutton - Initial MQTTv5 implementation
  */
-package org.eclipse.paho.mqttv5.server;
+package org.eclipse.paho.mqttv5.server.config;
 
 import java.io.File;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
-import org.eclipse.paho.mqttv5.server.config.Configuration;;
+import javax.xml.bind.Unmarshaller;;
 
 
 public class MqttServerConfiguration {

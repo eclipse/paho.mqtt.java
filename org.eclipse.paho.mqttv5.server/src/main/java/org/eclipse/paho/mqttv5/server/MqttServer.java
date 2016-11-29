@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import javax.xml.bind.JAXBException;
 
 import org.eclipse.paho.mqttv5.server.config.Configuration;
+import org.eclipse.paho.mqttv5.server.config.MqttServerConfiguration;
 import org.eclipse.paho.mqttv5.server.listener.ListenerController;
 
 public class MqttServer 

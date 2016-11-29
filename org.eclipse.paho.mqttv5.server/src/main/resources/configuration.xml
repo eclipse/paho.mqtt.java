@@ -5,9 +5,4 @@
         <port>1883</port>
         <name>My First Listener</name>
     </listener>
-    <listener>
-        <type>webSockets</type>
-        <port>1833</port>
-        <name>My Second Listener</name>
-    </listener>
 </configuration>
