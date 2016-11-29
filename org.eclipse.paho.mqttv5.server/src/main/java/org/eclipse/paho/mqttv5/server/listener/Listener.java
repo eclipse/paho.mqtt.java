@@ -18,5 +18,15 @@ package org.eclipse.paho.mqttv5.server.listener;
 
 public interface Listener {
 	
+	/**
+	 * Starts the Listener thread
+	 */
+	public void start();
+	
+	/**
+	 * Stops the Listener thread
+	 */
+	public void stop();
+	
 
 }

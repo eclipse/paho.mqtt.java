@@ -16,6 +16,8 @@
  */
 package org.eclipse.paho.mqttv5.server.listener;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -23,23 +25,25 @@ import org.eclipse.paho.mqttv5.server.config.ListenerConfiguration;
 
 public class ListenerController {
 	
+	private static final String LISTENER_TYPE_MQTT = "mqtt";
+	
 	private static final Logger LOG = Logger.getLogger(ListenerController.class.getName());
 
 	
-	private List<Runnable> listeners;
+	private List<Listener> listeners = Collections.synchronizedList(new ArrayList<Listener>());
 	
 
 	public ListenerController(List<ListenerConfiguration> listenerConfigurations){
 		
-		LOG.info("Initialising Listeners...");
+		LOG.info("Initialising Listeners, count: " +  listenerConfigurations.size());
 		 for(ListenerConfiguration listenerConfiguration : listenerConfigurations){
-	    	 if(listenerConfiguration.getType() == "mqtt"){
-	    		 listeners.add(new MqttListener(listenerConfiguration));
-	    	 }
+	    	if(listenerConfiguration.getType().equalsIgnoreCase(LISTENER_TYPE_MQTT)){
+	    		 listeners.add(new MqttListenerThread(listenerConfiguration));
+	    	}
 	     }
 		 
-		 for(Runnable listener : listeners){
-			 listener.run();
+		 for(Listener listener : listeners){
+			  listener.start();
 		 }
 	}
 }

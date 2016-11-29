@@ -16,29 +16,24 @@
  */
 package org.eclipse.paho.mqttv5.server.listener;
 
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.net.Socket;
 
-import org.eclipse.paho.mqttv5.server.config.ListenerConfiguration;
-
-public class MqttListener implements Runnable, Listener{
+public class MqttListener extends Thread {
 	
-	private static final Logger LOG = Logger.getLogger(MqttListener.class.getName());
-
+	Socket socket;
 	
-	
-	private int port;
-	private String name;
-	
-	public MqttListener(ListenerConfiguration listenerConfiguration){
-		this.port = listenerConfiguration.getPort();
-		this.name = listenerConfiguration.getName();
-		LOG.info("MqttListener Thread created!, name: " + this.name + ", on port: " +  this.port);
-
+	public MqttListener (Socket socket){
+		this.socket = socket;
 	}
 
 	@Override
 	public void run() {
-		LOG.info("MqttListener Thread Starting, name: " + this.name + ", on port: " +  this.port);
+		try {
+			
+		} catch (IOException ioe){
+			
+		}
 		
 	}
 
