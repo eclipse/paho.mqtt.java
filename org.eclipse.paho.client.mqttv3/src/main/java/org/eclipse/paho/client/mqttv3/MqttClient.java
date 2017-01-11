@@ -489,7 +489,10 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 */
 	public void publish(String topic, MqttMessage message) throws MqttException,
 			MqttPersistenceException {
-		aClient.publish(topic, message, null, null).waitForCompletion(getTimeToWait());
+		IMqttDeliveryToken tok = aClient.publish(topic, message, null, null);
+		if (message.getQos() > 0){
+			tok.waitForCompletion(getTimeToWait());
+		}
 	}
 
 	/**
