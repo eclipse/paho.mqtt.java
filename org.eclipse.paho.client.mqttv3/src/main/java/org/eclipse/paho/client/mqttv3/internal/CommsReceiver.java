@@ -22,6 +22,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttInputStream;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubAck;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -124,6 +127,11 @@ public class CommsReceiver implements Runnable {
 							// can occur before request processing is complete if not!
 							clientState.notifyReceivedAck((MqttAck)message);
 						}
+					} else if(message instanceof MqttPubRec || message instanceof MqttPubComp || message instanceof MqttPubAck) {
+						//This is an ack for a message we no longer have a ticket for.
+						//This probably means we already received this message and it's being send again
+						//because of timeouts, crashes, disconnects, restarts etc.
+						//It should be safe to ignore these unexpected messages.
 					} else {
 						// It its an ack and there is no token then something is not right.
 						// An ack should always have a token assoicated with it.
