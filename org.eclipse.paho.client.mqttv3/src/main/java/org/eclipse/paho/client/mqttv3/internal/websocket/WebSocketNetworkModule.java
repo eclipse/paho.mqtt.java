@@ -28,6 +28,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+import org.eclipse.paho.client.mqttv3.socket.ConnectionSocketFactory;
 
 public class WebSocketNetworkModule extends TCPNetworkModule {
 	
@@ -62,7 +63,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 		}
 	};
 	
-	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext){
+	public WebSocketNetworkModule(ConnectionSocketFactory factory, String uri, String host, int port, String resourceContext){
 		super(factory, host, port, resourceContext);
 		this.uri = uri;
 		this.host = host;

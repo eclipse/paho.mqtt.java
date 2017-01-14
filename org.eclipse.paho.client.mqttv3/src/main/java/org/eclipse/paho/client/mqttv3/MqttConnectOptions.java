@@ -21,6 +21,7 @@ import java.util.Properties;
 
 import javax.net.SocketFactory;
 
+import org.eclipse.paho.client.mqttv3.socket.ConnectionSocketFactory;
 import org.eclipse.paho.client.mqttv3.util.Debug;
 
 import java.net.URI;
@@ -66,9 +67,11 @@ public class MqttConnectOptions {
 	private String userName;
 	private char[] password;
 	private SocketFactory socketFactory;
+	private ConnectionSocketFactory connectionSocketFactory;
 	private Properties sslClientProps = null;
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
+	private int soLinger = -1;
 	private String[] serverURIs = null;
 	private int MqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
@@ -271,6 +274,17 @@ public class MqttConnectOptions {
 		this.connectionTimeout = connectionTimeout;
 	}
 
+	public int getSoLinger() {
+		return soLinger;
+	}
+	
+	public void setSoLinger(int soLinger) {
+		if (soLinger < 0) {
+			throw new IllegalArgumentException();
+		}
+		this.soLinger = soLinger;
+	}
+
 	/**
 	 * Returns the socket factory that will be used when connecting, or
 	 * <code>null</code> if one has not been set.
@@ -288,6 +302,14 @@ public class MqttConnectOptions {
 	 */
 	public void setSocketFactory(SocketFactory socketFactory) {
 		this.socketFactory = socketFactory;
+	}
+
+	public ConnectionSocketFactory getConnectionSocketFactory() {
+		return connectionSocketFactory;
+	}
+	
+	public void setConnectionSocketFactory(ConnectionSocketFactory connectionSocketFactory) {
+		this.connectionSocketFactory = connectionSocketFactory;
 	}
 
 	/**

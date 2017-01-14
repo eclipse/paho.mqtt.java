@@ -28,6 +28,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+import org.eclipse.paho.client.mqttv3.socket.ConnectionSocketFactory;
 
 public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	
@@ -62,7 +63,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 		}
 	};
 
-	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId) {
+	public WebSocketSecureNetworkModule(ConnectionSocketFactory factory, String uri, String host, int port, String clientId) {
 		super(factory, host, port, clientId);
 		this.uri = uri;
 		this.host = host;
