@@ -197,7 +197,7 @@ public class WebSocketHandshake {
 		// then we check that the response is the same.
 		byte[] sha1Bytes = sha1(key + ACCEPT_SALT);
 		String encodedSha1Bytes = Base64.encodeBytes(sha1Bytes).trim();
-		if(!encodedSha1Bytes.equals(encodedSha1Bytes)){
+		if(!encodedSha1Bytes.equals(accept.trim())){
 			throw new HandshakeFailedException();
 		}	
 	}
