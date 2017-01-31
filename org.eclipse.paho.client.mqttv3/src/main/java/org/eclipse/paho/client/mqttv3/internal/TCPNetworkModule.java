@@ -28,6 +28,7 @@ import javax.net.SocketFactory;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+import org.eclipse.paho.client.mqttv3.socket.ConnectionSocketFactory;
 
 /**
  * A network module for connecting over TCP. 
@@ -37,17 +38,18 @@ public class TCPNetworkModule implements NetworkModule {
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
 	protected Socket socket;
-	private SocketFactory factory;
+	protected ConnectionSocketFactory factory;
 	private String host;
 	private int port;
 	private int conTimeout;
+	private int soLinger = -1;
 	
 	/**
 	 * Constructs a new TCPNetworkModule using the specified host and
 	 * port.  The supplied SocketFactory is used to supply the network
 	 * socket.
 	 */
-	public TCPNetworkModule(SocketFactory factory, String host, int port, String resourceContext) {
+	public TCPNetworkModule(ConnectionSocketFactory factory, String host, int port, String resourceContext) {
 		log.setResourceName(resourceContext);
 		this.factory = factory;
 		this.host = host;
@@ -65,9 +67,15 @@ public class TCPNetworkModule implements NetworkModule {
 //			socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
 			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
-			SocketAddress sockaddr = new InetSocketAddress(host, port);
+			InetSocketAddress sockaddr = new InetSocketAddress(host, port);
 			socket = factory.createSocket();
-			socket.connect(sockaddr, conTimeout*1000);
+			if (soLinger >= 0) {
+				socket.setSoLinger(true, soLinger*1000);
+			}
+			socket = factory.connectSocket(conTimeout*1000, socket, host, sockaddr, null);
+			if (soLinger >= 0) {
+				socket.setSoLinger(true, soLinger*1000);
+			}
 		
 			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm. 
 			// This should not be required.
@@ -103,6 +111,10 @@ public class TCPNetworkModule implements NetworkModule {
 	 */
 	public void setConnectTimeout(int timeout) {
 		this.conTimeout = timeout;
+	}
+
+	public void setSoLinger(int soLinger) {
+		this.soLinger = soLinger;
 	}
 
 	public String getServerURI() {

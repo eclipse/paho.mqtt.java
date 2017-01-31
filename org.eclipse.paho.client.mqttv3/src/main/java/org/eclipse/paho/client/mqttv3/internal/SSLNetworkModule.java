@@ -23,6 +23,8 @@ import javax.net.ssl.SSLSocketFactory;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+import org.eclipse.paho.client.mqttv3.socket.ConnectionSocketFactory;
+import org.eclipse.paho.client.mqttv3.socket.SSLConnectionSocketFactory;
 
 /**
  * A network module for connecting over SSL.
@@ -41,7 +43,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	 * port.  The supplied SSLSocketFactory is used to supply the network
 	 * socket.
 	 */
-	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext) {
+	public SSLNetworkModule(ConnectionSocketFactory factory, String host, int port, String resourceContext) {
 		super(factory, host, port, resourceContext);
 		this.host = host;
 		this.port = port;
@@ -83,16 +85,12 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	}
 	
 	public void start() throws IOException, MqttException {
-		super.start();
-		setEnabledCiphers(enabledCiphers);
-		int soTimeout = socket.getSoTimeout();
-		if ( soTimeout == 0 ) {
-			// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
-			socket.setSoTimeout(this.handshakeTimeoutSecs*1000);
+		if (enabledCiphers != null) {
+			((SSLConnectionSocketFactory) factory).setSupportedCipherSuites(enabledCiphers);
 		}
-		((SSLSocket)socket).startHandshake();
-		// reset timeout to default value
-		socket.setSoTimeout(soTimeout);   
+		((SSLConnectionSocketFactory) factory).setSSLHandshakeTimeout(this.handshakeTimeoutSecs*1000);
+
+		super.start();
 	}
 	
 	public String getServerURI() {
