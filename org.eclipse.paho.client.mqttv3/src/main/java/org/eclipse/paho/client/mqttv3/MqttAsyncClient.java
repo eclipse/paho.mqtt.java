@@ -104,7 +104,7 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 	private Timer reconnectTimer; // Automatic reconnect timer
 	private static int reconnectDelay = 1000;  // Reconnect delay, starts at 1 second
 	private boolean reconnecting = false;
-	
+	private static Object clientLock = new Object(); // Simple lock
 
 
 
@@ -1217,21 +1217,32 @@ public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvide
 		String methodName = "stopReconnectCycle";
 		//@Trace 504=Stop reconnect timer for client: {0}
 		log.fine(CLASS_NAME, methodName, "504", new Object[]{this.clientId});
-		if(reconnectTimer != null){
-			reconnectTimer.cancel();
+		synchronized(clientLock) {
+			if (this.connOpts.isAutomaticReconnect()) {
+				if(reconnectTimer != null){
+					reconnectTimer.cancel();
+					reconnectTimer = null;
+				}
+				reconnectDelay = 1000; // Reset Delay Timer
+			}
 		}
-		reconnectDelay = 1000; // Reset Delay Timer
-		
 	}
 	
 	private void rescheduleReconnectCycle(int delay){
 		String methodName = "rescheduleReconnectCycle";
 		//@Trace 505=Rescheduling reconnect timer for client: {0}, delay: {1}
 		log.fine(CLASS_NAME, methodName, "505", new Object[]{this.clientId, new Long(reconnectDelay)});
-		if(reconnectTimer != null){
-			reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
+		synchronized(clientLock) {
+			if(this.connOpts.isAutomaticReconnect()) {
+				if (reconnectTimer != null) {
+					reconnectTimer.schedule(new ReconnectTask(), delay);
+				} else {
+					// The previous reconnect timer was cancelled
+					reconnectDelay = delay;
+					startReconnectCycle();
+				}
+			}
 		}
-
 	}
 	
 	private class ReconnectTask extends TimerTask {
