@@ -483,26 +483,26 @@ public class MqttConnectOptions {
 	 * @return the URI type
 	 */
 
-	protected static int validateURI(String srvURI) {
+	public static int validateURI(String srvURI) {
 		try {
 			URI vURI = new URI(srvURI);
-			if (vURI.getScheme().equals("ws")){
+			if ("ws".equals(vURI.getScheme())){
 				return URI_TYPE_WS;
 			}
-			else if (vURI.getScheme().equals("wss")) {
+			else if ("wss".equals(vURI.getScheme())) {
 				return URI_TYPE_WSS;
 			}
 
-			if (!vURI.getPath().equals("")) {
+			if ((vURI.getPath() != null) && !vURI.getPath().isEmpty()) {
 				throw new IllegalArgumentException(srvURI);
 			}
-			if (vURI.getScheme().equals("tcp")) {
+			if ("tcp".equals(vURI.getScheme())) {
 				return URI_TYPE_TCP;
 			}
-			else if (vURI.getScheme().equals("ssl")) {
+			else if ("ssl".eauals(vURI.getScheme())) {
 				return URI_TYPE_SSL;
 			}
-			else if (vURI.getScheme().equals("local")) {
+			else if ("local".equals(vURI.getScheme())) {
 				return URI_TYPE_LOCAL;
 			}
 			else {
