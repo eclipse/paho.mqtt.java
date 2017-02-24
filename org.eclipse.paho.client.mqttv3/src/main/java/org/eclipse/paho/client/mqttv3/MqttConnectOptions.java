@@ -501,35 +501,36 @@ public class MqttConnectOptions {
 	 * @return the URI type
 	 */
 	public static int validateURI(String srvURI) {
+		URI vURI;
 		try {
-			URI vURI = new URI(srvURI);
-			if ("ws".equals(vURI.getScheme())){
-				return URI_TYPE_WS;
-			}
-			else if ("wss".equals(vURI.getScheme())) {
-				return URI_TYPE_WSS;
-			}
-
-			if ((vURI.getPath() == null) || vURI.getPath().isEmpty()) {
-				// No op path must be empty
-			}
-			else {
-				throw new IllegalArgumentException(srvURI);
-			} 
-			if ("tcp".equals(vURI.getScheme())) {
-				return URI_TYPE_TCP;
-			}
-			else if ("ssl".equals(vURI.getScheme())) {
-				return URI_TYPE_SSL;
-			}
-			else if ("local".equals(vURI.getScheme())) {
-				return URI_TYPE_LOCAL;
-			}
-			else {
-				throw new IllegalArgumentException(srvURI);
-			}
+			vURI = new URI(srvURI);
 		} catch (URISyntaxException ex) {
-			throw new IllegalArgumentException(srvURI);
+			throw new IllegalArgumentException("Can't parse string to URI \"" + srvURI + "\"", ex);
+		}
+
+		if ("ws".equals(vURI.getScheme())){
+			return URI_TYPE_WS;
+		}
+		else if ("wss".equals(vURI.getScheme())) {
+			return URI_TYPE_WSS;
+		}
+		if ((vURI.getPath() == null) || vURI.getPath().isEmpty()) {
+			// No op path must be empty
+		}
+		else {
+			throw new IllegalArgumentException("URI path must be empty \"" + srvURI + "\"");
+		} 
+		if ("tcp".equals(vURI.getScheme())) {
+			return URI_TYPE_TCP;
+		}
+		else if ("ssl".equals(vURI.getScheme())) {
+			return URI_TYPE_SSL;
+		}
+		else if ("local".equals(vURI.getScheme())) {
+			return URI_TYPE_LOCAL;
+		}
+		else {
+			throw new IllegalArgumentException("Unknown scheme \"" + vURI.getScheme() + "\" of URI \"" + srvURI + "\"");
 		}
 	}
 	
