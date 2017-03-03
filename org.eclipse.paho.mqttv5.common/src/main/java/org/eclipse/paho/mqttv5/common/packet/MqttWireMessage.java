@@ -53,7 +53,8 @@ public abstract class MqttWireMessage {
 	public static final byte MESSAGE_TYPE_AUTH			= 15;
 	
 	protected static final String STRING_ENCODING = "UTF-8";
-	protected static final String MQTT = "MQTT";
+	protected static final String DEFAULT_PROTOCOL_NAME = "MQTT";
+	protected static final int DEFAULT_PROTOCOL_VERSION = 5;
 	
 	private static final String[] PACKET_NAMES = {
 			"reserved",
@@ -265,9 +266,7 @@ public abstract class MqttWireMessage {
 			 		result = new MqttAuth(info, data);
 			 		break;
 			 	default:
-			 		throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
-			 		
-				 				
+			 		throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_MALFORMED_PACKET);
 			 }
 			 return result;
 					 
@@ -384,7 +383,7 @@ public abstract class MqttWireMessage {
 			 
 			 return new String(encodedString, STRING_ENCODING);
 		 } catch (IOException ioe){
-			 throw new MqttException(ioe);
+			 throw new MqttException(MqttException.REASON_CODE_MALFORMED_PACKET, ioe);
 		 }
 	 }
 	 

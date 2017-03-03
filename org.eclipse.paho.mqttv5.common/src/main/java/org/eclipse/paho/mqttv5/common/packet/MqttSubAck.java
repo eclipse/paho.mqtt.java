@@ -27,16 +27,18 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttSubAck extends MqttAck{
 	
-	// Return Codes
-	public static final int RETURN_CODE_MAX_QOS_0 						= 0x00;
-	public static final int RETURN_CODE_MAX_QOS_1 						= 0x01;
-	public static final int RETURN_CODE_MAX_QOS_2 						= 0x02;
-	public static final int RETURN_CODE_UNSPECIFIED_ERROR 				= 0x80;
-	public static final int RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR	= 0x83;
-	public static final int RETURN_CODE_NOT_AUTHORIZED					= 0x87;
-	public static final int RETURN_CODE_TOPIC_FILTER_NOT_VALID			= 0x90;
-	public static final int RETURN_CODE_PACKET_ID_IN_USE				= 0x91;
-	public static final int RETURN_CODE_SHARED_SUB_NOT_SUPPORTED 		= 0x97;
+	
+	private static final int[] validReturnCodes = {
+			MqttReturnCode.RETURN_CODE_MAX_QOS_0,
+			MqttReturnCode.RETURN_CODE_MAX_QOS_1,
+			MqttReturnCode.RETURN_CODE_MAX_QOS_2,
+			MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
+			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
+			MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
+			MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
+			MqttReturnCode.RETURN_CODE_PACKET_ID_IN_USE,
+			MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED
+	};
 
 	// Identifier / Value Identifiers
 	private static final byte REASON_STRING_IDENTIFIER = 0x1F;
@@ -57,8 +59,11 @@ public class MqttSubAck extends MqttAck{
 		returnCodes = new int[remainingLength];
 		
 		for(int i = 0; i < remainingLength; i++){
-			returnCodes[i] = inputStream.readUnsignedByte();
+			int returnCode = inputStream.readUnsignedByte();
+			validateReturnCode(returnCode, validReturnCodes);
+			returnCodes[i] = returnCode;
 		}
+
 		
 		inputStream.close();
 	}

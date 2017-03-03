@@ -43,6 +43,7 @@ public class MqttConnect extends MqttWireMessage {
 	private static final byte AUTH_METHOD_IDENTIFIER 				= 0x15;
 	private static final byte AUTH_DATA_IDENTIFIER 					= 0x16;
 	
+	
 	// Fields
 	private byte info;
 	private String clientId;
@@ -53,7 +54,7 @@ public class MqttConnect extends MqttWireMessage {
 	private byte[] password;
 	private int keepAliveInterval;
 	private String willDestination;
-	private int mqttVersion;
+	private int mqttVersion = DEFAULT_PROTOCOL_VERSION;
 	private Integer sessionExpiryInterval;
 	private Integer willDelayInterval;
 	private Integer receiveMaximum;
@@ -80,11 +81,15 @@ public class MqttConnect extends MqttWireMessage {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		
+		// Verify the Protocol name and version
 		String protocolName = decodeUTF8(dis);
-		if(!protocolName.equalsIgnoreCase(MQTT)){
-			throw new MqttException(MqttException.REASON_CODE_CLIENT_EXCEPTION);
+		if(!protocolName.equalsIgnoreCase(DEFAULT_PROTOCOL_NAME)){
+			throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_UNSUPPORTED_PROTOCOL_NAME);
 		}
 		mqttVersion = dis.readByte();
+		if(mqttVersion != DEFAULT_PROTOCOL_VERSION){
+			throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_UNSUPPORTED_PROTOCOL_VERSION);
+		}
 		
 		
 		byte connectFlags = dis.readByte();
@@ -96,10 +101,19 @@ public class MqttConnect extends MqttWireMessage {
 		boolean passwordFlag = (connectFlags & 0x40) !=0;
 		boolean usernameFlag = (connectFlags & 0x80) !=0;
 		
+		if(reservedByte){
+			throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_INVALID_RESERVE_FLAG);
+		}
+		
+		
+		
 		keepAliveInterval = dis.readUnsignedShort();
 		parseIdentifierValueFields(dis);
 		clientId = decodeUTF8(dis);
 		if(willFlag){
+			if(willQoS == 3){
+				throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_INVALID_WILL_QOS);
+			}
 			willDestination = decodeUTF8(dis);
 			int willMessageLength = dis.readShort();
 			byte[] willMessageBytes = new byte[willMessageLength];

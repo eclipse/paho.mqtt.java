@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttAuthTest {
-	private static final int returnCode = MqttAuth.RETURN_CODE_CONTINUE_AUTHENTICATION;
+	private static final int returnCode = MqttReturnCode.RETURN_CODE_CONTINUE_AUTHENTICATION;
 	private static final String authMethod = "AuthMethodString";
 	private static final byte[] authData = "AuthData".getBytes();
 	

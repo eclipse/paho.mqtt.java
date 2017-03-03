@@ -29,7 +29,7 @@ import org.junit.Test;
 public class MqttConnAckTest {
 	
 	private static final boolean sessionPresent = true;
-	private static final int returnCode = MqttConnAck.RETURN_CODE_SERVER_MOVED;
+	private static final int returnCode = MqttReturnCode.RETURN_CODE_SERVER_MOVED;
 	private static final int receiveMaximum = 100;
 	private static final boolean retainUnavailableAdvertisement = true;
 	private static final String assignedClientIdentifier = "AssignedClientId";
@@ -92,7 +92,7 @@ public class MqttConnAckTest {
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testServerReferenceException() throws MqttException{
-		MqttConnAck mqttConnAckPacket = new MqttConnAck(sessionPresent, MqttConnAck.RETURN_CODE_SUCCESS);
+		MqttConnAck mqttConnAckPacket = new MqttConnAck(sessionPresent, MqttReturnCode.RETURN_CODE_SUCCESS);
 		mqttConnAckPacket.setServerReference(serverReference);
 	}
 	

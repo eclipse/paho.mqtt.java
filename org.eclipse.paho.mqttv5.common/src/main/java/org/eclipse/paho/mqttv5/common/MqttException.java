@@ -13,28 +13,13 @@ public class MqttException extends Exception{
 	 */
 	public static final short REASON_CODE_CLIENT_EXCEPTION              = 0x00;
 	
-	// Issues with CONNECT Packet
-	/** An unknown Identifier was inside the IV fields **/
-	public static final int REASON_CODE_INVALID_IDENTIFIER 			= 50000;
-	public static final int REASON_CODE_INVALID_RETURN_CODE			= 50001;
+	// CONNECT packet exceptions
+	public static final int REASON_CODE_INVALID_IDENTIFIER 				= 50000; // Invalid Identifier in the IV fields
+	public static final int REASON_CODE_INVALID_RETURN_CODE				= 50001; // Invalid Return code
+	public static final int REASON_CODE_MALFORMED_PACKET				= 50002; // Packet was somehow malformed and did not comply to the MQTTv5 specification
+	public static final int REASON_CODE_UNSUPPORTED_PROTOCOL_VERSION    = 50003; // The CONNECT packet did not contain the correct protocol name or version
 	
-	// CONNACK return codes
-	/** The protocol version requested is not supported by the server. */
-	public static final short REASON_CODE_INVALID_PROTOCOL_VERSION		= 0x01;
-	/** The server has rejected the supplied client ID */
-	public static final short REASON_CODE_INVALID_CLIENT_ID      		= 0x02;
-	/** The broker was not available to handle the request. */
-	public static final short REASON_CODE_BROKER_UNAVAILABLE             = 0x03;
-	/** Authentication with the server has failed, due to a bad user name or password. */
-	public static final short REASON_CODE_FAILED_AUTHENTICATION			= 0x04; 
-	/** Not authorized to perform the requested operation */
-	public static final short REASON_CODE_NOT_AUTHORIZED				= 0x05;
 
-	/** An unexpected error has occurred. */
-	public static final short REASON_CODE_UNEXPECTED_ERROR				= 0x06;
-	
-	/** Error from subscribe - returned from the server. */
-	public static final short REASON_CODE_SUBSCRIBE_FAILED				= 0x80;
 	
 	/** 
 	 * Client timed out while waiting for a response from the server.
@@ -200,6 +185,7 @@ public class MqttException extends Exception{
 	 * @return the Throwable that was the root cause of this exception,
 	 * which may be <code>null</code>.
 	 */
+	@Override
 	public Throwable getCause() {
 		return cause;
 	}

@@ -25,10 +25,11 @@ import java.io.IOException;
 import org.eclipse.paho.mqttv5.common.MqttException;
 
 public class MqttPubComp  extends MqttAck {
-	// Return Codes
-	public static final int RETURN_CODE_SUCCESS 			= 0x00;
-	public static final int RETURN_CODE_PACKET_ID_NOT_FOUND = 0x92;
 	
+	private static final int[] validReturnCodes = {
+			MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND
+	};
 
 	// Identifier / Value Identifiers
 	private static final byte REASON_STRING_IDENTIFIER = 0x1F;
@@ -43,6 +44,7 @@ public class MqttPubComp  extends MqttAck {
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
 		returnCode = dis.readUnsignedByte();
+		// FIXME - Validate return code
 		parseIdentifierValueFields(dis);
 		dis.close();
 	}

@@ -32,41 +32,29 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 public class MqttConnAck extends MqttAck {
 	public static final String KEY = "Con";
 	
-	// CONNACK Return Codes
-	public static final int RETURN_CODE_SUCCESS 						= 0x00;
-	public static final int RETURN_CODE_UNSPECIFIED_ERROR 				= 0x80;
-	public static final int RETURN_CODE_MALFORMED_CONTROL_PACKET 		= 0x81;
-	public static final int RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR 	= 0x83;
-	public static final int RETURN_CODE_UNSUPPORTED_PROTOCOL_VERSION 	= 0x84;
-	public static final int RETURN_CODE_IDENTIFIER_NOT_VALID			= 0x85;
-	public static final int RETURN_CODE_BAD_USERNAME_OR_PASSWORD		= 0x86;
-	public static final int RETURN_CODE_NOT_AUTHORIZED					= 0x87;
-	public static final int RETURN_CODE_SERVER_UNAVAILABLE				= 0x88;
-	public static final int RETURN_CODE_SERVER_BUSY						= 0x89;
-	public static final int RETURN_CODE_BANNED							= 0x8A;
-	public static final int RETURN_CODE_BAD_AUTHENTICATION				= 0x8C;
-	public static final int RETURN_CODE_TOPIC_INVALID					= 0x90;
-	public static final int RETURN_CODE_PACKET_TOO_LARGE				= 0x95;
-	public static final int RETURN_CODE_USE_ANOTHER_SERVER				= 0x9C;
-	public static final int RETURN_CODE_SERVER_MOVED					= 0x9D;
+	
 	
 	private static final int[] validReturnCodes = {
-			RETURN_CODE_SUCCESS,
-			RETURN_CODE_UNSPECIFIED_ERROR,
-			RETURN_CODE_MALFORMED_CONTROL_PACKET,
-			RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
-			RETURN_CODE_UNSUPPORTED_PROTOCOL_VERSION,
-			RETURN_CODE_IDENTIFIER_NOT_VALID,
-			RETURN_CODE_BAD_USERNAME_OR_PASSWORD,
-			RETURN_CODE_NOT_AUTHORIZED,
-			RETURN_CODE_SERVER_UNAVAILABLE,
-			RETURN_CODE_SERVER_BUSY,
-			RETURN_CODE_BANNED,
-			RETURN_CODE_BAD_AUTHENTICATION,
-			RETURN_CODE_TOPIC_INVALID,
-			RETURN_CODE_PACKET_TOO_LARGE,
-			RETURN_CODE_USE_ANOTHER_SERVER,
-			RETURN_CODE_SERVER_MOVED 
+			MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
+			MqttReturnCode.RETURN_CODE_MALFORMED_CONTROL_PACKET,
+			MqttReturnCode.RETURN_CODE_PROTOCOL_ERROR,
+			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
+			MqttReturnCode.RETURN_CODE_UNSUPPORTED_PROTOCOL_VERSION,
+			MqttReturnCode.RETURN_CODE_IDENTIFIER_NOT_VALID,
+			MqttReturnCode.RETURN_CODE_BAD_USERNAME_OR_PASSWORD,
+			MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
+			MqttReturnCode.RETURN_CODE_SERVER_UNAVAILABLE,
+			MqttReturnCode.RETURN_CODE_SERVER_BUSY,
+			MqttReturnCode.RETURN_CODE_BANNED,
+			MqttReturnCode.RETURN_CODE_BAD_AUTHENTICATION,
+			MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID,
+			MqttReturnCode.RETURN_CODE_PACKET_TOO_LARGE,
+			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
+			MqttReturnCode.RETURN_CODE_RETAIN_NOT_SUPPORTED,
+			MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER,
+			MqttReturnCode.RETURN_CODE_SERVER_MOVED,
+			MqttReturnCode.RETURN_CODE_CONNECTION_RATE_EXCEEDED
 	};
 	
 	// Identifier / Value Identifiers
@@ -346,7 +334,7 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public void setServerReference(String serverReference) {
-		if((returnCode == RETURN_CODE_USE_ANOTHER_SERVER) || (returnCode == RETURN_CODE_SERVER_MOVED)){
+		if((returnCode == MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER) || (returnCode == MqttReturnCode.RETURN_CODE_SERVER_MOVED)){
 			this.serverReference = serverReference;
 		} else {
 			// FIXME

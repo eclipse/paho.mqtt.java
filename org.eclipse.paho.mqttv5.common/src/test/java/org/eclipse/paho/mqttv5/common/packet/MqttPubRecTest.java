@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttPubRecTest {
-	private static final int returnCode = MqttPubRec.RETURN_CODE_UNSPECIFIED_ERROR;
+	private static final int returnCode = MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR;
 	private static final String reasonString = "Reason String 123.";
 	
 	@Test

@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttDisconnectTest {
-	private static final int returnCode = MqttDisconnect.RETURN_CODE_PROTOCOL_ERROR;
+	private static final int returnCode = MqttReturnCode.RETURN_CODE_PROTOCOL_ERROR;
 	private static final String reasonString = "Reason String 123.";
 	private static final int sessionExpiryInterval = 60;
 	private static final String serverReference = "127.0.0.1";

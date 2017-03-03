@@ -27,15 +27,15 @@ import org.junit.Test;
 
 public class MqttSubAckTest {
 	private static final int[] returnCodes = {
-		MqttSubAck.RETURN_CODE_MAX_QOS_0,
-		MqttSubAck.RETURN_CODE_MAX_QOS_1,
-		MqttSubAck.RETURN_CODE_MAX_QOS_2,
-		MqttSubAck.RETURN_CODE_UNSPECIFIED_ERROR,
-		MqttSubAck.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
-		MqttSubAck.RETURN_CODE_NOT_AUTHORIZED,
-		MqttSubAck.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
-		MqttSubAck.RETURN_CODE_PACKET_ID_IN_USE,
-		MqttSubAck.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED	};
+		MqttReturnCode.RETURN_CODE_MAX_QOS_0,
+		MqttReturnCode.RETURN_CODE_MAX_QOS_1,
+		MqttReturnCode.RETURN_CODE_MAX_QOS_2,
+		MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
+		MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
+		MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
+		MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
+		MqttReturnCode.RETURN_CODE_PACKET_ID_IN_USE,
+		MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED	};
 	private static final String reasonString = "Reason String 123.";
 	
 	@Test
