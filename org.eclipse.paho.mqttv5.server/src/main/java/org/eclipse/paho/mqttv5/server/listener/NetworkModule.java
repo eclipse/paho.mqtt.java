@@ -17,24 +17,16 @@
 package org.eclipse.paho.mqttv5.server.listener;
 
 import java.io.IOException;
-import java.net.Socket;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public class MqttListener extends Thread {
+
+public interface NetworkModule {
 	
-	Socket socket;
+	public InputStream getInputStream() throws IOException;
 	
-	public MqttListener (Socket socket){
-		this.socket = socket;
-	}
-
-	@Override
-	public void run() {
-		try {
-			
-		} catch (IOException ioe){
-			
-		}
-		
-	}
-
+	public OutputStream getOutputStream() throws IOException;
+	
+	public void stop() throws IOException;
+	
 }

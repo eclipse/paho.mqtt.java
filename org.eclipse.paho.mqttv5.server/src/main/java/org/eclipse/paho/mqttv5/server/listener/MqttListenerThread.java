@@ -48,7 +48,7 @@ public class MqttListenerThread implements Runnable, Listener{
 		try {
 			ServerSocket listener = new ServerSocket(this.port);
 			while(running){
-				new MqttListener(listener.accept()).start();
+				//new TCPNetworkModule(listener.accept()).start();
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
