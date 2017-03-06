@@ -83,6 +83,7 @@ public class MqttConnAck extends MqttAck {
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 		validateReturnCode(returnCode, validReturnCodes);
+		this.returnCode = returnCode;
 	}
 
 	@Override
