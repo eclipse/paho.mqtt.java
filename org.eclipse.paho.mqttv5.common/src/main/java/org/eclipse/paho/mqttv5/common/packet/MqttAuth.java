@@ -61,6 +61,7 @@ public class MqttAuth extends MqttWireMessage {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream inputStream  = new DataInputStream(bais);
 		returnCode = inputStream.readUnsignedByte();
+		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(inputStream);
 		inputStream.close();
 	}

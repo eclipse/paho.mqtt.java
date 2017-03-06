@@ -45,13 +45,14 @@ public class MqttPubRel  extends MqttAck {
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
 		returnCode = dis.readUnsignedByte();
-		// FIXME - Validate return codes
+		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(dis);
 		dis.close();
 	}
 
-	public MqttPubRel(int returnCode) {
+	public MqttPubRel(int returnCode) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREL);
+		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
 

@@ -68,8 +68,11 @@ public class MqttSubAck extends MqttAck{
 		inputStream.close();
 	}
 	
-	public MqttSubAck(int[] returnCodes){
+	public MqttSubAck(int[] returnCodes) throws MqttException{
 		super(MqttWireMessage.MESSAGE_TYPE_SUBACK);
+		for(int returnCode : returnCodes){
+			validateReturnCode(returnCode, validReturnCodes);
+		}
 		this.returnCodes = returnCodes;
 	}
 	

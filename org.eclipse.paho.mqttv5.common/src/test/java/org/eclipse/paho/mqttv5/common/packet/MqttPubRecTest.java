@@ -54,7 +54,7 @@ public class MqttPubRecTest {
 		
 	}
 	
-	public MqttPubRec generateMqttPubRecPacket(){
+	public MqttPubRec generateMqttPubRecPacket() throws MqttException{
 		MqttPubRec mqttPubRecPacket = new MqttPubRec(returnCode);
 		mqttPubRecPacket.setReasonString(reasonString);
 		

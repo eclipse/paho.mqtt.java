@@ -37,8 +37,6 @@ public class MqttPubAck extends MqttAck{
 			MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID,
 			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
 			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID
-			//MqttReturnCode.RETURN_CODE_PACKET_TOO_LARGE,
-			//MqttReturnCode.RETURN_CODE_QOS_LEVEL_NOT_SUPPORTED,
 	};
 	
 	// Identifier / Value Identifiers

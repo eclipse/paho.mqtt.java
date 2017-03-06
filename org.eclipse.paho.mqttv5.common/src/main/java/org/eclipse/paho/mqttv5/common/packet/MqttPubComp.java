@@ -44,13 +44,14 @@ public class MqttPubComp  extends MqttAck {
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
 		returnCode = dis.readUnsignedByte();
-		// FIXME - Validate return code
+		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(dis);
 		dis.close();
 	}
 
-	public MqttPubComp(int returnCode) {
+	public MqttPubComp(int returnCode) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBCOMP);
+		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
 

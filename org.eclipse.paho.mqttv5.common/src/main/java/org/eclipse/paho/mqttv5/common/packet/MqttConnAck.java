@@ -99,8 +99,8 @@ public class MqttConnAck extends MqttAck {
 	public MqttConnAck(boolean sessionPresent, int returnCode) throws MqttException{
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
 		this.sessionPresent = sessionPresent;
-		this.returnCode = returnCode;
 		validateReturnCode(returnCode, validReturnCodes);
+		this.returnCode = returnCode;
 	}
 	
 	@Override

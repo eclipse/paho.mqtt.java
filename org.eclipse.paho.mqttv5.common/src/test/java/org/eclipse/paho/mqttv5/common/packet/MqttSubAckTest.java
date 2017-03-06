@@ -63,7 +63,7 @@ public class MqttSubAckTest {
 		
 	}
 	
-	private MqttSubAck generatemqttSubAckPacket(){
+	private MqttSubAck generatemqttSubAckPacket() throws MqttException{
 		MqttSubAck mqttSubAckPacket = new MqttSubAck(returnCodes);
 		mqttSubAckPacket.setReasonString(reasonString);
 		

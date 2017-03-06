@@ -55,7 +55,7 @@ public class MqttPubCompTest {
 		
 	}
 	
-	public MqttPubComp generateMqttPubCompPacket(){
+	public MqttPubComp generateMqttPubCompPacket() throws MqttException{
 		MqttPubComp mqttPubCompPacket = new MqttPubComp(returnCode);
 		mqttPubCompPacket.setReasonString(reasonString);
 		
