@@ -102,7 +102,7 @@ public class LiveTakeOverTest {
    * Test that a client actively doing work can be taken over
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testLiveTakeOver() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);

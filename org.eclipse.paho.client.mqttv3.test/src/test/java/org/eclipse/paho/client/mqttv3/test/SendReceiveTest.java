@@ -93,7 +93,7 @@ public class SendReceiveTest {
    * service
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -129,7 +129,7 @@ public class SendReceiveTest {
    * Test connection using a remote host name for the local host.
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testRemoteConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -184,7 +184,7 @@ public class SendReceiveTest {
   /**
    * Test client pubSub using largish messages
    */
-  @Test
+  @Test(timeout=10000)
   public void testLargeMessage() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -245,7 +245,7 @@ public class SendReceiveTest {
   /**
    * Test that QOS values are preserved between MQTT publishers and subscribers.
    */
-  @Test
+  @Test(timeout=10000)
   public void testQoSPreserved() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -305,7 +305,7 @@ public class SendReceiveTest {
    * Multiple publishers and subscribers.
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=30000)
   public void testMultipleClients() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -388,7 +388,7 @@ public class SendReceiveTest {
    * Test the behaviour of the cleanStart flag, used to clean up before re-connecting.
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testCleanStart() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);

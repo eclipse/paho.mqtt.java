@@ -78,7 +78,7 @@ public class SSLSessionResumptionTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	@Test(timeout=30000)
 	public void testSSLSessionInvalidated() throws Exception {
 		// System.setProperty("javax.net.debug", "all");
 
@@ -120,7 +120,7 @@ public class SSLSessionResumptionTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	@Test(timeout=10000)
 	public void testSSLSessionCached() throws Exception {
 		// System.setProperty("javax.net.debug", "all");
 

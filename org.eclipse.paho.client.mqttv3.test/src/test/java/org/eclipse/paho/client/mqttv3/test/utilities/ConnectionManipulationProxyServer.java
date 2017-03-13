@@ -203,7 +203,11 @@ public class ConnectionManipulationProxyServer implements Runnable {
 				}
 			}
 			log.fine("Proxy: Proxy Thread finishing..");
-			serverSocket.close();
+			if(!serverSocket.isClosed()){
+				serverSocket.close();
+			}
+			log.fine("Proxy: Server Socket Closed, returning...");
+			
 		} catch(IOException ex) {
 			log.warning("Proxy: 5 Thread Connection lost: " + ex.getMessage());
 			ex.printStackTrace();

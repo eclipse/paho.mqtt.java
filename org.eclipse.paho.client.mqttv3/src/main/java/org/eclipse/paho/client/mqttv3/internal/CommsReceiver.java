@@ -132,6 +132,8 @@ public class CommsReceiver implements Runnable {
 						//This probably means we already received this message and it's being send again
 						//because of timeouts, crashes, disconnects, restarts etc.
 						//It should be safe to ignore these unexpected messages.
+						log.fine(CLASS_NAME, methodName, "857");
+
 					} else {
 						// It its an ack and there is no token then something is not right.
 						// An ack should always have a token assoicated with it.

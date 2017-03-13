@@ -136,7 +136,7 @@ public class PerSubscriptionMessageHandlerTest {
 	   * 
 	   * @throws Exception
 	   */
-	  @Test
+	  @Test(timeout=10000)
 	  public void testSyncSubs1() throws Exception {
 	    final String methodName = Utility.getMethodName();
 	    LoggingUtilities.banner(log, cclass, methodName);
@@ -166,7 +166,7 @@ public class PerSubscriptionMessageHandlerTest {
 	    
 	  }
 	  
-	  @Test
+	  @Test(timeout=10000)
 	  public void testAsyncSubs1() throws Exception {
 	    final String methodName = Utility.getMethodName();
 	    LoggingUtilities.banner(log, cclass, methodName);
@@ -204,7 +204,7 @@ public class PerSubscriptionMessageHandlerTest {
 	   *  Check handlers still exist after reconnection non-cleansession
 	   */
 	  
-	  @Test
+	  @Test(timeout=10000)
 	  public void testSyncCleanSessionFalse() throws Exception {
 		    final String methodName = Utility.getMethodName();
 		    LoggingUtilities.banner(log, cclass, methodName);
@@ -256,7 +256,7 @@ public class PerSubscriptionMessageHandlerTest {
 		    mqttClient.close();
 	  }
 	  
-	  @Test
+	  @Test(timeout=10000)
 	  public void testAsyncCleanSessionFalse() throws Exception {
 		    final String methodName = Utility.getMethodName();
 		    LoggingUtilities.banner(log, cclass, methodName);

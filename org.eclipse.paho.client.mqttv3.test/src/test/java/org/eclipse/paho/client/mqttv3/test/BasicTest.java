@@ -95,7 +95,7 @@ public class BasicTest {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testConnect() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -141,7 +141,7 @@ public class BasicTest {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testHAConnect() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -191,7 +191,7 @@ public class BasicTest {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testPubSub() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -241,7 +241,7 @@ public class BasicTest {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testMsgProperties() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -309,7 +309,7 @@ public class BasicTest {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testConnOptDefaults() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);

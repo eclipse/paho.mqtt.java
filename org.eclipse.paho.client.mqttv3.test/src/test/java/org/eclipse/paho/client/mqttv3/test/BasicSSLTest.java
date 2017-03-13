@@ -97,7 +97,7 @@ public class BasicSSLTest {
    * An ssl connection with server cert authentication, simple pub/sub
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testSSL() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
@@ -160,7 +160,7 @@ public class BasicSSLTest {
    * An ssl connection with server cert authentication, small workload with multiple clients
    * @throws Exception
    */
-  @Test
+  @Test(timeout=60000)
   public void testSSLWorkload() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
@@ -256,7 +256,7 @@ public class BasicSSLTest {
    * 'messageSize' defined at start of test, change it to meet your requirements
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testSSLLargeMessage() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
@@ -322,7 +322,7 @@ public class BasicSSLTest {
    * A non ssl connection to an ssl channel
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testNonSSLtoSSLChannel() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -372,7 +372,7 @@ public class BasicSSLTest {
    * Try ssl connection to channel without ssl
    * @throws Exception
    */
-  @Test
+  @Test(timeout=30000)
   public void testSSLtoNonSSLChannel() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);

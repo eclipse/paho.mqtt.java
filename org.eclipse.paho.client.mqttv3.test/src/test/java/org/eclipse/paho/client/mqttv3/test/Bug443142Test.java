@@ -46,7 +46,7 @@ public class Bug443142Test {
         }
     }
 
-    @Test
+    @Test(timeout=30000)
     public void testBug443142() throws Exception {
         CountDownLatch stopLatch = new CountDownLatch(1);
         MqttClient client1 = new MqttClient(serverURI.toString(), "Bug443142Test-" + UUID.randomUUID().toString());

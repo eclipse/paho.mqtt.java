@@ -84,7 +84,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  *
  * @see IMqttAsyncClient
  */
-public class MqttAsyncClient implements IMqttAsyncClient { // DestinationProvider {
+public class MqttAsyncClient implements IMqttAsyncClient { 
 	private static final String CLASS_NAME = MqttAsyncClient.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 

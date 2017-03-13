@@ -94,7 +94,7 @@ public class WebSocketTest {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testWebSocketConnect() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -144,7 +144,7 @@ public class WebSocketTest {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testWebSocketPubSub() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -203,7 +203,7 @@ public class WebSocketTest {
    * that it recieves the same payload.
  * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void largePayloadTest() throws Exception{
 	  // Generate large byte array;
 	  byte[] largeByteArray = new byte[32000];
@@ -253,7 +253,7 @@ public class WebSocketTest {
 	  
   }
 
-  @Test
+  @Test(timeout=10000)
   public void testBasicAuth() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -343,7 +343,7 @@ public class WebSocketTest {
      * @throws Exception 
      */
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-      logger2.info("message arrived: " + new String(message.getPayload()) + "'");
+      logger2.info("message arrived: " + message.getId() + "'");
 
       synchronized (messages) {
         messages.add(message);

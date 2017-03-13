@@ -295,7 +295,7 @@ public class SendReceiveAsyncCallbackTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	@Test(timeout=10000)
 	public void test1() throws Exception {
 		final String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);

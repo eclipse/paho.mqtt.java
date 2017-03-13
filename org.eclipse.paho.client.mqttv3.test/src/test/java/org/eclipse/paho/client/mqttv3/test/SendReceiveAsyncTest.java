@@ -95,7 +95,7 @@ public class SendReceiveAsyncTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -142,7 +142,7 @@ public class SendReceiveAsyncTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testRemoteConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -214,7 +214,7 @@ public class SendReceiveAsyncTest {
   /**
    * Test client pubSub using very large messages
    */
-  @Test
+  @Test(timeout=10000)
   public void testLargeMessage() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -291,7 +291,7 @@ public class SendReceiveAsyncTest {
   /**
    * Multiple publishers and subscribers.
    */
-  @Test
+  @Test(timeout=20000)
   public void testMultipleClients() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -386,7 +386,7 @@ public class SendReceiveAsyncTest {
    * Test the behaviour of the cleanStart flag, used to clean up before
    * re-connecting.
    */
-  @Test
+  @Test(timeout=10000)
   public void testCleanStart() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -532,7 +532,7 @@ public class SendReceiveAsyncTest {
    * 
    * Since no other activity (messages from the client to the broker) is generated, the broker disconnects the client.
    */
-  @Test
+  @Test(timeout=300000)
   public void testVeryLargeMessageWithShortKeepAlive() {
   	final String methodName = Utility.getMethodName();
   	LoggingUtilities.banner(log, cclass, methodName);
@@ -601,7 +601,7 @@ public class SendReceiveAsyncTest {
    * Test the behavior of the connection timeout when connecting to a non MQTT server.
    * i.e. ssh port 22
    */
-  @Test
+  @Test(timeout=60000)
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();
 	  LoggingUtilities.banner(log, cclass, methodName);

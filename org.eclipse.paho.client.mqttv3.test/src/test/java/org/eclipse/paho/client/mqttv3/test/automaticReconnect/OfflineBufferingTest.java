@@ -68,7 +68,7 @@ public class OfflineBufferingTest {
 	 * disconnected state and is then delivered once the client has reconnected
 	 * automatically.
 	 */
-	@Test
+	@Test(timeout=20000)
 	public void testSingleMessageBufferAndDeliver() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -139,7 +139,7 @@ public class OfflineBufferingTest {
 	 * disconnected state and that they are all then delivered once the client
 	 * has connected automatically.
 	 */
-	@Test
+	@Test(timeout=20000)
 	public void testManyMessageBufferAndDeliver() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -205,6 +205,8 @@ public class OfflineBufferingTest {
 		isConnected = client.isConnected();
 		log.info("Proxy Re-Enabled isConnected: " + isConnected);
 		Assert.assertTrue(isConnected);
+		
+		Thread.sleep(5000);
 
 		// Check that all messages have been delivered
 		for (int x = 0; x < 100; x++) {
@@ -229,7 +231,7 @@ public class OfflineBufferingTest {
 	 * Tests that the buffer correctly handles messages being buffered when the
 	 * buffer is full and deleteOldestBufferedMessage is set to true.
 	 */
-	@Test
+	@Test(timeout=20000)
 	public void testDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -285,7 +287,7 @@ public class OfflineBufferingTest {
 	 * Tests that A message cannot be buffered when the buffer is full and
 	 * deleteOldestBufferedMessage is set to false.
 	 */
-	@Test
+	@Test(timeout=20000)
 	public void testNoDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -343,7 +345,7 @@ public class OfflineBufferingTest {
 	 * Tests that if enabled, buffered messages are persisted to the persistence
 	 * layer
 	 */
-	@Test
+	@Test(timeout=20000)
 	public void testPersistBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -403,7 +405,7 @@ public class OfflineBufferingTest {
 	 * Tests that persisted buffered messages are published correctly when the
 	 * client connects for the first time and are un persisted.
 	 */
-	@Test
+	@Test(timeout=20000)
 	public void testUnPersistBufferedMessagesOnNewClient() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
