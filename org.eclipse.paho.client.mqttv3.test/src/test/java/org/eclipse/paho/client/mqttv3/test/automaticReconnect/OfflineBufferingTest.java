@@ -149,7 +149,7 @@ public class OfflineBufferingTest {
 
 		// Client Options
 		MqttConnectOptions options = new MqttConnectOptions();
-		options.setCleanSession(false);
+		options.setCleanSession(true);
 		options.setAutomaticReconnect(true);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
@@ -235,19 +235,20 @@ public class OfflineBufferingTest {
 	public void testDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
+		int maxMessages = 10;
 
 		// Tokens
 		IMqttToken connectToken;
 
 		// Client Options
 		MqttConnectOptions options = new MqttConnectOptions();
-		options.setCleanSession(false);
+		options.setCleanSession(true);
 		options.setAutomaticReconnect(true);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		// Set buffer to 100 to save time
-		disconnectedOpts.setBufferSize(100);
+		disconnectedOpts.setBufferSize(maxMessages);
 		disconnectedOpts.setDeleteOldestMessages(true);
 		client.setBufferOpts(disconnectedOpts);
 
@@ -266,7 +267,7 @@ public class OfflineBufferingTest {
 		Assert.assertFalse(isConnected);
 
 		// Publish 100 messages
-		for (int x = 0; x < 100; x++) {
+		for (int x = 0; x < maxMessages; x++) {
 			client.publish(topicPrefix + methodName, new MqttMessage(Integer.toString(x).getBytes()));
 		}
 
@@ -291,19 +292,20 @@ public class OfflineBufferingTest {
 	public void testNoDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
+		int maxMessages = 10;
 
 		// Tokens
 		IMqttToken connectToken;
 
 		// Client Options
 		MqttConnectOptions options = new MqttConnectOptions();
-		options.setCleanSession(false);
+		options.setCleanSession(true);
 		options.setAutomaticReconnect(true);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		// Set buffer to 100 to save time
-		disconnectedOpts.setBufferSize(100);
+		disconnectedOpts.setBufferSize(maxMessages);
 		client.setBufferOpts(disconnectedOpts);
 
 		// Enable Proxy & Connect to server
@@ -321,7 +323,7 @@ public class OfflineBufferingTest {
 		Assert.assertFalse(isConnected);
 
 		// Publish 100 messages
-		for (int x = 0; x < 100; x++) {
+		for (int x = 0; x < maxMessages; x++) {
 			client.publish(topicPrefix + methodName, new MqttMessage(Integer.toString(x).getBytes()));
 		}
 		log.info("About to publish one message too many");
