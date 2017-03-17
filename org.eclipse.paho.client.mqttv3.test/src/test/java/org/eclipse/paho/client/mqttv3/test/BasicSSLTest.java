@@ -372,7 +372,7 @@ public class BasicSSLTest {
    * Try ssl connection to channel without ssl
    * @throws Exception
    */
-  @Test(timeout=10000)
+  @Test
   public void testSSLtoNonSSLChannel() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -412,7 +412,6 @@ public class BasicSSLTest {
         }
         if (mqttClient != null) {
           log.info("Close...");
-          mqttClient.disconnect();
           mqttClient.close();
         }
 
