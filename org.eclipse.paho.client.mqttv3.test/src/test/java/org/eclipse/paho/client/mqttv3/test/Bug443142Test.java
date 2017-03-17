@@ -1,6 +1,7 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +29,7 @@ import org.junit.Test;
 public class Bug443142Test {
     private static final Logger log = Logger.getLogger(Bug443142Test.class.getName());
     private static URI serverURI;
+    private static String topicPrefix;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -35,6 +37,8 @@ public class Bug443142Test {
             String methodName = Utility.getMethodName();
             LoggingUtilities.banner(log, Bug443142Test.class, methodName);
             serverURI = TestProperties.getServerURI();
+            topicPrefix = "Bug443142Test-" + UUID.randomUUID().toString() + "-";
+
         }
         catch (Exception exception) {
             log.log(Level.SEVERE, "caught exception:", exception);
@@ -42,20 +46,21 @@ public class Bug443142Test {
         }
     }
 
-    @Test
+    @Test(timeout=30000)
     public void testBug443142() throws Exception {
         CountDownLatch stopLatch = new CountDownLatch(1);
-        MqttClient client1 = new MqttClient(serverURI.toString(), "foo");
+        MqttClient client1 = new MqttClient(serverURI.toString(), "Bug443142Test-" + UUID.randomUUID().toString());
         client1.connect();
-        MqttClient client2 = new MqttClient(serverURI.toString(), "bar");
+        MqttClient client2 = new MqttClient(serverURI.toString(),"Bug443142Test-" + UUID.randomUUID().toString());
         client2.setCallback(new MyMqttCallback(stopLatch));
         client2.connect();
-        client2.subscribe("bar");
+        String barTopic = topicPrefix + "bar";
+        client2.subscribe( barTopic);
 
         // publish messages until the queue is full > 10
         for (int i = 0; i < 16; i++) {
             MqttMessage message = new MqttMessage(("foo-" + i).getBytes());
-            client1.publish("bar", message);
+            client1.publish(barTopic, message);
             log.info("client1 publish: " + message);
         }
 

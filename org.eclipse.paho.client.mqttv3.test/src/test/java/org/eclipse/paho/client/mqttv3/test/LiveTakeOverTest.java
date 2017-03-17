@@ -15,6 +15,7 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +42,8 @@ public class LiveTakeOverTest {
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
+  private static String topicPrefix;
+
 
   static enum FirstClientState {
     INITIAL,
@@ -51,7 +54,7 @@ public class LiveTakeOverTest {
   }
 
   private static String ClientId = "TakeOverClient";
-  private static String FirstSubTopicString = "FirstClient/Topic";
+  private static String FirstSubTopicString;
 
   /**
    * @throws Exception 
@@ -66,6 +69,9 @@ public class LiveTakeOverTest {
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
+      topicPrefix = "FirstClientState-" + UUID.randomUUID().toString() + "-";
+      FirstSubTopicString = topicPrefix + "FirstClient/Topic";
+
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -96,7 +102,7 @@ public class LiveTakeOverTest {
    * Test that a client actively doing work can be taken over
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testLiveTakeOver() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -132,7 +138,7 @@ public class LiveTakeOverTest {
       mqttClient.setCallback(mqttV3Receiver);
       MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
       mqttConnectOptions.setCleanSession(false);
-      mqttConnectOptions.setWill("WillTopic", "payload".getBytes(), 2, true);
+      mqttConnectOptions.setWill(topicPrefix+"WillTopic", "payload".getBytes(), 2, true);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + ClientId);
       mqttClient.connect(mqttConnectOptions);
 
@@ -227,7 +233,7 @@ public class LiveTakeOverTest {
         mqttClient.setCallback(mqttV3Receiver);
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setCleanSession(false);
-        mqttConnectOptions.setWill("WillTopic", "payload".getBytes(), 2, true);
+        mqttConnectOptions.setWill(topicPrefix + "WillTopic", "payload".getBytes(), 2, true);
         log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + ClientId);
         mqttClient.connect(mqttConnectOptions);
         log.info("Subscribing to..." + FirstSubTopicString);

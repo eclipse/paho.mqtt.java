@@ -38,7 +38,7 @@ import java.util.ResourceBundle;
  * one of the predefined level constants such as Logger.SEVERE and Logger.FINE
  * with the appropriate log(int level...) or trace(int level...) methods.
  * <p>
- * The levels in descending order are:
+ * The levels in descending order are:</p>
  * <ul>
  * <li>SEVERE (log - highest value)</li>
  * <li>WARNING (log)</li>
@@ -48,7 +48,7 @@ import java.util.ResourceBundle;
  * <li>FINER (trace)</li>
  * <li>FINEST (trace - lowest value)</li>
  * </ul>
- * <p>
+ * 
  */
 public interface Logger {
 	/**
@@ -119,6 +119,7 @@ public interface Logger {
 	/**
 	 * Set a name that can be used to provide context with each log record.
 	 * This overrides the value passed in on initialise
+	 * @param logContext The Log context name
 	 */
 	public void setResourceName(String logContext);
 	
@@ -552,6 +553,8 @@ public interface Logger {
 	 *            would format two inserts into the message.
 	 * @param inserts
 	 *            Array of parameters to the message, may be null.
+	 * @param ex 
+	 * 			Throwable associated with log message.
 	 */
 	public void trace(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex);
 

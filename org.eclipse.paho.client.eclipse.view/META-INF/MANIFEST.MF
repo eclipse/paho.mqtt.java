@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundle.name
 Bundle-SymbolicName: org.eclipse.paho.client.eclipse.view;singleton:=true
-Bundle-Version: 1.1.0
+Bundle-Version: 1.1.1
 Bundle-Activator: org.eclipse.paho.client.eclipse.view.Activator
 Bundle-Vendor: %bundle.provider
 Bundle-Localization: plugin

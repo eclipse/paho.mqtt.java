@@ -15,6 +15,7 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,8 @@ public class SendReceiveTest {
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
+  private static String topicPrefix;
+
 
   /**
    * @throws Exception 
@@ -57,6 +60,8 @@ public class SendReceiveTest {
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
+      topicPrefix = "SendReceiveTest-" + UUID.randomUUID().toString() + "-";
+
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -88,7 +93,7 @@ public class SendReceiveTest {
    * service
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -124,7 +129,7 @@ public class SendReceiveTest {
    * Test connection using a remote host name for the local host.
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testRemoteConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -146,7 +151,7 @@ public class SendReceiveTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
       mqttClient.connect(mqttConnectOptions);
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       log.info("Subscribing to..." + topicNames[0]);
       mqttClient.subscribe(topicNames, topicQos);
@@ -179,7 +184,7 @@ public class SendReceiveTest {
   /**
    * Test client pubSub using largish messages
    */
-  @Test
+  @Test(timeout=10000)
   public void testLargeMessage() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -195,7 +200,7 @@ public class SendReceiveTest {
       mqttClient.connect();
 
       int largeSize = 10000;
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       byte[] message = new byte[largeSize];
 
@@ -240,7 +245,7 @@ public class SendReceiveTest {
   /**
    * Test that QOS values are preserved between MQTT publishers and subscribers.
    */
-  @Test
+  @Test(timeout=10000)
   public void testQoSPreserved() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -255,7 +260,7 @@ public class SendReceiveTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
       mqttClient.connect();
 
-      String[] topicNames = new String[]{methodName + "/Topic0", methodName + "/Topic1", methodName + "/Topic2"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic0", topicPrefix + methodName + "/Topic1", topicPrefix + methodName + "/Topic2"};
       int[] topicQos = {0, 1, 2};
       for (int i = 0; i < topicNames.length; i++) {
     	  log.info("Subscribing to..." + topicNames[i] + " at Qos " + topicQos[i]);
@@ -300,7 +305,7 @@ public class SendReceiveTest {
    * Multiple publishers and subscribers.
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=30000)
   public void testMultipleClients() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -309,7 +314,7 @@ public class SendReceiveTest {
     IMqttClient[] mqttPublisher = new IMqttClient[2];
     IMqttClient[] mqttSubscriber = new IMqttClient[10];
     try {
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
 
       MqttTopic[] mqttTopic = new MqttTopic[mqttPublisher.length];
@@ -383,7 +388,7 @@ public class SendReceiveTest {
    * Test the behaviour of the cleanStart flag, used to clean up before re-connecting.
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=10000)
   public void testCleanStart() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -404,7 +409,7 @@ public class SendReceiveTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
       mqttClient.connect(mqttConnectOptions);
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       log.info("Subscribing to..." + topicNames[0]);
       mqttClient.subscribe(topicNames, topicQos);

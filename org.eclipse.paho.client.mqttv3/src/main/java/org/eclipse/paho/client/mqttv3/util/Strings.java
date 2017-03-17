@@ -26,8 +26,7 @@ public final class Strings {
 	 * Checks if the CharSequence equals any character in the given set of characters.
 	 * 
 	 * @param cs the CharSequence to check
-	 * @param first the first CharSequence
-	 * @param rest the rest CharSequence
+	 * @param strs the set of characters to check against
 	 * @return true if equals any
 	 */
 	public static boolean equalsAny(CharSequence cs, CharSequence[] strs) {
@@ -78,7 +77,8 @@ public final class Strings {
 			char ch = cs.charAt(i);
 			for (int j = 0; j < searchLength; j++) {
 				if (searchChars[j] == ch) {
-					if (Character.isHighSurrogate(ch)) {
+					//if (Character.isHighSurrogate(ch)) { // Cannot use for Java 1.4.2
+					if(isHighSurrogate(ch)) {
 						if (j == searchLast) {
 							// missing low surrogate, fine, like String.indexOf(String)
 							return true;
@@ -95,6 +95,12 @@ public final class Strings {
 			}
 		}
 		return false;
+	}
+	
+	private static boolean isHighSurrogate(char ch){
+		char MAX = '\uDBFF';
+		char MIN = '\uD800';
+		return ch >= MIN &&  ch < (MAX +1);
 	}
 
 	/**

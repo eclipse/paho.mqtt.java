@@ -18,6 +18,7 @@ package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,6 +47,8 @@ public class PerSubscriptionMessageHandlerTest {
 
 	  private static URI serverURI;
 	  private static MqttClientFactoryPaho clientFactory;
+	  private static String topicPrefix;
+
 	  
 	  /**
 	   * @throws Exception
@@ -60,6 +63,8 @@ public class PerSubscriptionMessageHandlerTest {
 	      serverURI = TestProperties.getServerURI();
 	      clientFactory = new MqttClientFactoryPaho();
 	      clientFactory.open();
+	      topicPrefix = "PerSubscriptionMessageHandlerTest-" + UUID.randomUUID().toString() + "-";
+
 	    }
 	    catch (Exception exception) {
 	      log.log(Level.SEVERE, "caught exception:", exception);
@@ -131,7 +136,7 @@ public class PerSubscriptionMessageHandlerTest {
 	   * 
 	   * @throws Exception
 	   */
-	  @Test
+	  @Test(timeout=10000)
 	  public void testSyncSubs1() throws Exception {
 	    final String methodName = Utility.getMethodName();
 	    LoggingUtilities.banner(log, cclass, methodName);
@@ -139,7 +144,7 @@ public class PerSubscriptionMessageHandlerTest {
     
 	    listener mylistener = new listener();
 	    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
-	    String mytopic = "PerSubscriptionTest/topic";
+	    String mytopic = topicPrefix + "PerSubscriptionTest/topic";
 	    
 	    mqttClient.connect();
 	    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
@@ -161,7 +166,7 @@ public class PerSubscriptionMessageHandlerTest {
 	    
 	  }
 	  
-	  @Test
+	  @Test(timeout=10000)
 	  public void testAsyncSubs1() throws Exception {
 	    final String methodName = Utility.getMethodName();
 	    LoggingUtilities.banner(log, cclass, methodName);
@@ -169,7 +174,7 @@ public class PerSubscriptionMessageHandlerTest {
 	   
 	    listener mylistener = new listener();
 	    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
-	    String mytopic = "PerSubscriptionTest/topic";
+	    String mytopic = topicPrefix + "PerSubscriptionTest/topic";
 	    
 	    IMqttToken token = mqttClient.connect(null, null);
 	    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
@@ -199,7 +204,7 @@ public class PerSubscriptionMessageHandlerTest {
 	   *  Check handlers still exist after reconnection non-cleansession
 	   */
 	  
-	  @Test
+	  @Test(timeout=10000)
 	  public void testSyncCleanSessionFalse() throws Exception {
 		    final String methodName = Utility.getMethodName();
 		    LoggingUtilities.banner(log, cclass, methodName);
@@ -207,7 +212,7 @@ public class PerSubscriptionMessageHandlerTest {
 	    
 		    listener mylistener = new listener();
 		    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
-		    String mytopic = "PerSubscriptionTest/topic";
+		    String mytopic = topicPrefix + "PerSubscriptionTest/topic";
 		    
 		    MqttConnectOptions opts = new MqttConnectOptions();
 		    opts.setCleanSession(false);
@@ -251,7 +256,7 @@ public class PerSubscriptionMessageHandlerTest {
 		    mqttClient.close();
 	  }
 	  
-	  @Test
+	  @Test(timeout=10000)
 	  public void testAsyncCleanSessionFalse() throws Exception {
 		    final String methodName = Utility.getMethodName();
 		    LoggingUtilities.banner(log, cclass, methodName);
@@ -259,7 +264,7 @@ public class PerSubscriptionMessageHandlerTest {
 		   
 		    listener mylistener = new listener();
 		    IMqttAsyncClient mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
-		    String mytopic = "PerSubscriptionTest/topic";
+		    String mytopic = topicPrefix + "PerSubscriptionTest/topic";
 		    
 		    MqttConnectOptions opts = new MqttConnectOptions();
 		    opts.setCleanSession(false);
@@ -322,7 +327,7 @@ public class PerSubscriptionMessageHandlerTest {
 	    
 		    listener mylistener = new listener();
 		    IMqttClient mqttClient = clientFactory.createMqttClient(serverURI, methodName);
-		    String mytopic = "PerSubscriptionTest/topic";
+		    String mytopic = topicPrefix + "PerSubscriptionTest/topic";
 		    
 		    MqttConnectOptions opts = new MqttConnectOptions();
 		    opts.setCleanSession(false);

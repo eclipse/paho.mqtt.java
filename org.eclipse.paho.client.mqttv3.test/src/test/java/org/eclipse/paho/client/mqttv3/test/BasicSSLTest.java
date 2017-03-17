@@ -15,15 +15,11 @@ package org.eclipse.paho.client.mqttv3.test;
 
 import java.io.File;
 import java.net.URI;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
@@ -51,6 +47,8 @@ public class BasicSSLTest {
   private static MqttClientFactoryPaho clientFactory;
   private static File keystorePath;
   private static int messageSize = 100000;
+  private static String topicPrefix;
+
 
   /**
    * @throws Exception 
@@ -66,6 +64,8 @@ public class BasicSSLTest {
       serverHost = serverURI.getHost();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
+      topicPrefix = "BasicSSLTest-" + UUID.randomUUID().toString() + "-";
+
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -97,7 +97,7 @@ public class BasicSSLTest {
    * An ssl connection with server cert authentication, simple pub/sub
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testSSL() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
@@ -118,7 +118,7 @@ public class BasicSSLTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
       mqttClient.connect();
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {2};
       log.info("Subscribing to..." + topicNames[0]);
       mqttClient.subscribe(topicNames, topicQos);
@@ -160,7 +160,7 @@ public class BasicSSLTest {
    * An ssl connection with server cert authentication, small workload with multiple clients
    * @throws Exception
    */
-  @Test
+  @Test(timeout=60000)
   public void testSSLWorkload() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
@@ -170,7 +170,7 @@ public class BasicSSLTest {
     IMqttClient[] mqttPublisher = new IMqttClient[4];
     IMqttClient[] mqttSubscriber = new IMqttClient[20];
     try {
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
 
       MqttTopic[] mqttTopic = new MqttTopic[mqttPublisher.length];
@@ -256,7 +256,7 @@ public class BasicSSLTest {
    * 'messageSize' defined at start of test, change it to meet your requirements
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testSSLLargeMessage() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
@@ -278,7 +278,7 @@ public class BasicSSLTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
       mqttClient.connect();
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {2};
       log.info("Subscribing to..." + topicNames[0]);
       mqttClient.subscribe(topicNames, topicQos);
@@ -322,7 +322,7 @@ public class BasicSSLTest {
    * A non ssl connection to an ssl channel
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testNonSSLtoSSLChannel() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);

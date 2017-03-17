@@ -44,6 +44,7 @@ public class WebSocketReceiver implements Runnable{
 
 	/**
 	 * Starts up the WebSocketReceiver's thread
+	 * @param threadName The name of the thread
 	 */
 	public void start(String threadName){
 		final String methodName = "start";
@@ -65,21 +66,25 @@ public class WebSocketReceiver implements Runnable{
 	public void stop() {
 		final String methodName = "stop";
 		stopping = true;
+        boolean closed = false;
 		synchronized (lifecycle) {
 			//@TRACE 850=stopping
 			log.fine(CLASS_NAME,methodName, "850");
 			if(running) {
 				running = false;
 				receiving = false;
+                closed = true;
 				closeOutputStream();
-				if( !Thread.currentThread().equals(receiverThread)) {
-					try {
-						// Wait for the thread to finish
-						receiverThread.join();
-					} catch (InterruptedException ex) {
-						// Interrupted Exception
-					}
-				}
+
+			}
+		}
+		if(closed && !Thread.currentThread().equals(receiverThread)) {
+			try {
+				// Wait for the thread to finish
+		        //This must not happen in the synchronized block, otherwise we can deadlock ourselves!
+				receiverThread.join();
+			} catch (InterruptedException ex) {
+				// Interrupted Exception
 			}
 		}
 		receiverThread = null;

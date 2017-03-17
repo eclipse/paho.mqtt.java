@@ -65,10 +65,10 @@ public class WebSocketHandshake {
 	/**
 	 * Executes a Websocket Handshake.
 	 * Will throw an IOException if the handshake fails
-	 * @throws IOException
+	 * @throws IOException thrown if an exception occurs during the handshake
 	 */
 	public void execute() throws IOException {
-		String key = "mqtt-" + (System.currentTimeMillis()/1000);
+		String key = "mqtt3-" + (System.currentTimeMillis()/1000);
 		String b64Key = Base64.encode(key);
 		sendHandshakeRequest(b64Key);
 		receiveHandshakeResponse(b64Key);
@@ -77,38 +77,53 @@ public class WebSocketHandshake {
 	/**
 	 * Builds and sends the HTTP Header GET Request
 	 * for the socket.
-	 * @param Base64 encoded key
+	 * @param key Base64 encoded key
 	 * @throws IOException
 	 */
 	private void sendHandshakeRequest(String key) throws IOException{
 		try {
 			String path = "/mqtt";
 			URI srvUri = new URI(uri);
-			if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) {
+			//if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) { // Cannot use for Java 1.4.2
+			if (srvUri.getRawPath() != null && srvUri.getRawPath().length() != 0) {
 				path = srvUri.getRawPath();
-				if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) {
+				//if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) { // Cannot use for Java 1.4.2
+				if (srvUri.getRawQuery() != null && srvUri.getRawQuery().length() != 0) {
 					path += "?" + srvUri.getRawQuery();
 				}
 			}
 
 			PrintWriter pw = new PrintWriter(output);
 			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
-			pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
+			if (port != 80 && port != 443) {
+				pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
+			}
+			else {
+				pw.print("Host: " + host + LINE_SEPARATOR);
+			}
+
 			pw.print("Upgrade: websocket" + LINE_SEPARATOR);
 			pw.print("Connection: Upgrade" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Protocol: mqttv3.1" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
+
+			String userInfo = srvUri.getUserInfo();
+			if(userInfo != null) {
+				pw.print("Authorization: Basic " + Base64.encode(userInfo) + LINE_SEPARATOR);
+			}
+
 			pw.print(LINE_SEPARATOR);
 			pw.flush();
 		} catch (URISyntaxException e) {
-			throw new IllegalStateException(e);
+			// throw new IllegalStateException(e.getMessage());  // Cannot use for Java 1.4.2
+			throw new IllegalStateException(e.getMessage());
 		}
 	}
 	
 	/**
 	 * Receives the Handshake response and verifies that it is valid.
-	 * @param Base64 encoded key
+	 * @param key Base64 encoded key
 	 * @throws IOException
 	 */
 	private void receiveHandshakeResponse(String key) throws IOException {
@@ -130,7 +145,8 @@ public class WebSocketHandshake {
 		}
 
 		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
-		if(!upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
+		//if(!upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){  // Cannot use for Java 1.4.2
+		if(upgradeHeader.toLowerCase().indexOf(HTTP_HEADER_UPGRADE_WEBSOCKET) == -1){
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
 
@@ -181,7 +197,7 @@ public class WebSocketHandshake {
 		// then we check that the response is the same.
 		byte[] sha1Bytes = sha1(key + ACCEPT_SALT);
 		String encodedSha1Bytes = Base64.encodeBytes(sha1Bytes).trim();
-		if(!encodedSha1Bytes.equals(encodedSha1Bytes)){
+		if(!encodedSha1Bytes.equals(accept.trim())){
 			throw new HandshakeFailedException();
 		}	
 	}

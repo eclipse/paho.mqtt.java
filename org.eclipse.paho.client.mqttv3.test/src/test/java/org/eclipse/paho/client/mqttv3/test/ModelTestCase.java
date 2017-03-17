@@ -167,7 +167,7 @@ public class ModelTestCase implements MqttCallback {
   /**
    * @throws Exception 
    */
-  @Test
+  @Test(timeout=150000)
   public void testRunModel() throws Exception {
     log.info("Test core operations and parameters by random selection");
     log.info("See file: " + logFilename + " for details of selected test sequence");

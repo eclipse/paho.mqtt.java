@@ -51,6 +51,7 @@ public class CommsSender implements Runnable {
 	
 	/**
 	 * Starts up the Sender thread.
+	 * @param threadName The name of the thread
 	 */
 	public void start(String threadName) {
 		synchronized (lifecycle) {

@@ -18,7 +18,7 @@ package org.eclipse.paho.client.mqttv3.internal.websocket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class WebSocketFrame {
 	
@@ -48,9 +48,9 @@ public class WebSocketFrame {
 
 	/**
 	 * Initialise a new WebSocketFrame
-	 * @param opcode
-	 * @param fin
-	 * @param payload
+	 * @param opcode WebSocket Opcode
+	 * @param fin If it's final
+	 * @param payload The payload
 	 */
 	public WebSocketFrame(byte opcode, boolean fin, byte[] payload){
 		this.opcode = opcode;
@@ -61,7 +61,7 @@ public class WebSocketFrame {
 	
 	/**
 	 * Initialise WebSocketFrame from raw Data
-	 * @param rawFrame
+	 * @param rawFrame The raw byte buffer
 	 */
 	public  WebSocketFrame (byte[] rawFrame){
 			
@@ -126,8 +126,8 @@ public class WebSocketFrame {
 	
 	/**
 	 * Takes an input stream and parses it into a Websocket frame.
-	 * @param input
-	 * @throws IOException
+	 * @param input The incoming {@link InputStream}
+	 * @throws IOException if an exception occurs whilst reading the input stream
 	 */
 	public WebSocketFrame(InputStream input) throws IOException {
 		byte firstByte = (byte) input.read();
@@ -219,9 +219,9 @@ public class WebSocketFrame {
 	
 	/**
 	 * Appends the Length and Mask to the buffer
-	 * @param buffer
-	 * @param length
-	 * @param mask
+	 * @param buffer the outgoing {@link ByteBuffer}
+	 * @param length the length of the frame
+	 * @param mask The WebSocket Mask
 	 */
 	public static void appendLengthAndMask(ByteBuffer buffer, int length, byte mask[]){
 		if(mask != null){
@@ -267,9 +267,9 @@ public class WebSocketFrame {
 
 	/**
 	 * Appends the Fin flag and the OpCode
-	 * @param buffer
-	 * @param opcode
-	 * @param fin
+	 * @param buffer The outgoing buffer
+	 * @param opcode The Websocket OpCode
+	 * @param fin if this is a final frame
 	 */
 	public static void appendFinAndOpCode(ByteBuffer buffer, byte opcode, boolean fin){
 		byte b = 0x00;
@@ -291,11 +291,11 @@ public class WebSocketFrame {
 	 * @return ByteArray containing the key;
 	 */
 	public static byte[] generateMaskingKey(){
-		Random randomGenerator = new Random();
-		int a = randomGenerator.nextInt(255);
-		int b = randomGenerator.nextInt(255);
-		int c = randomGenerator.nextInt(255);
-		int d = randomGenerator.nextInt(255);
+		SecureRandom secureRandomGenerator = new SecureRandom();
+		int a = secureRandomGenerator.nextInt(255);
+		int b = secureRandomGenerator.nextInt(255);
+		int c = secureRandomGenerator.nextInt(255);
+		int d = secureRandomGenerator.nextInt(255);
 		return new byte[] {(byte) a,(byte) b,(byte) c,(byte) d};
 	}
 

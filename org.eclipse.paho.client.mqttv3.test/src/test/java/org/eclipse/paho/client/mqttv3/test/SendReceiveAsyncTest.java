@@ -15,6 +15,7 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +45,8 @@ public class SendReceiveAsyncTest {
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
+  private static String topicPrefix;
+
 
   /**
    * @throws Exception
@@ -58,6 +61,8 @@ public class SendReceiveAsyncTest {
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
+      topicPrefix = "SendReceiveAsyncTest-" + UUID.randomUUID().toString() + "-";
+
     }
     catch (Exception exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
@@ -90,7 +95,7 @@ public class SendReceiveAsyncTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -137,7 +142,7 @@ public class SendReceiveAsyncTest {
    * 
    * @throws Exception
    */
-  @Test
+  @Test(timeout=10000)
   public void testRemoteConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -170,7 +175,7 @@ public class SendReceiveAsyncTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
       connectToken.waitForCompletion();
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
@@ -209,7 +214,7 @@ public class SendReceiveAsyncTest {
   /**
    * Test client pubSub using very large messages
    */
-  @Test
+  @Test(timeout=10000)
   public void testLargeMessage() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -232,7 +237,7 @@ public class SendReceiveAsyncTest {
       connectToken.waitForCompletion();
 
       int largeSize = 1000;
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       byte[] message = new byte[largeSize];
 
@@ -286,7 +291,7 @@ public class SendReceiveAsyncTest {
   /**
    * Multiple publishers and subscribers.
    */
-  @Test
+  @Test(timeout=20000)
   public void testMultipleClients() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -304,7 +309,7 @@ public class SendReceiveAsyncTest {
     IMqttToken disconnectToken;
 
     try {
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
 
       for (int i = 0; i < mqttPublisher.length; i++) {
@@ -381,7 +386,7 @@ public class SendReceiveAsyncTest {
    * Test the behaviour of the cleanStart flag, used to clean up before
    * re-connecting.
    */
-  @Test
+  @Test(timeout=10000)
   public void testCleanStart() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -410,7 +415,7 @@ public class SendReceiveAsyncTest {
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
       connectToken.waitForCompletion();
 
-      String[] topicNames = new String[]{methodName + "/Topic"};
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
       subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
@@ -527,7 +532,7 @@ public class SendReceiveAsyncTest {
    * 
    * Since no other activity (messages from the client to the broker) is generated, the broker disconnects the client.
    */
-  @Test
+  @Test(timeout=300000)
   public void testVeryLargeMessageWithShortKeepAlive() {
   	final String methodName = Utility.getMethodName();
   	LoggingUtilities.banner(log, cclass, methodName);
@@ -548,7 +553,7 @@ public class SendReceiveAsyncTest {
   		log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
   		connectToken.waitForCompletion();
   
-  		String topic = "testLargeMsg/Topic";
+  		String topic = topicPrefix + "testLargeMsg/Topic";
   		//10MB
   		int largeSize = 20 * (1 << 20);
   		byte[] message = new byte[largeSize];
@@ -596,7 +601,7 @@ public class SendReceiveAsyncTest {
    * Test the behavior of the connection timeout when connecting to a non MQTT server.
    * i.e. ssh port 22
    */
-  @Test
+  @Test(timeout=60000)
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();
 	  LoggingUtilities.banner(log, cclass, methodName);

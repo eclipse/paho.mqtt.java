@@ -4,23 +4,11 @@
 	<parent>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>java-parent</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1</version>
 	</parent>
 
 	<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	
-	<profiles>
-		<profile>
-			<id>doclint-java8-disable</id>
-	    		<activation>
-				<jdk>[1.8,)</jdk>
-			</activation>
-			<properties>
-				<javadoc.opts>-Xdoclint:none</javadoc.opts>
-			</properties>
-		</profile>
-	</profiles>
 
 	<build>
 		<plugins>
@@ -77,40 +65,28 @@
 					<target>${mqttclient.java.version}</target>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
+
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.3</version>
+				<version>2.10.4</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
 						<goals>
+							<goal>javadoc-no-fork</goal>
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-                					<additionalparam>${javadoc.opts}</additionalparam>
-            					</configuration>
+                			<additionalparam>${javadoc.opts}</additionalparam>
+            			</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-document-bundle-plugin</artifactId>
-		        <executions>
-					<execution>
-						<id>javadoc</id>
-						<goals>
-							<goal>javadoc</goal>
-						</goals>
-						<configuration>
-						<javadocOptions>-sourcepath src/main/java:src/main/java-templates org.eclipse.paho.client.mqttv3	</javadocOptions>
-						</configuration>
-					</execution>
-				</executions>     
-			</plugin> -->
+
 		</plugins>
 		<pluginManagement>
-			<plugins> 
+			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>

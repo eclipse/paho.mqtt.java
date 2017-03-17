@@ -50,7 +50,7 @@ public interface MqttClientPersistence {
 	/**
 	 * Close the persistent store that was previously opened.
 	 * This will be called when a client application disconnects from the broker.
-	 * @throws MqttPersistenceException 
+	 * @throws MqttPersistenceException if an error occurs closing the persistence store.
 	 */	
 	public void close() throws MqttPersistenceException;
 
@@ -74,23 +74,29 @@ public interface MqttClientPersistence {
 	
 	/**
 	 * Remove the data for the specified key.
+	 * @param key The key for the data to remove
+	 * @throws MqttPersistenceException if there was a problem removing the data.
 	 */
 	public void remove(String key) throws MqttPersistenceException;
 
 	/**
 	 * Returns an Enumeration over the keys in this persistent data store.
 	 * @return an enumeration of {@link String} objects.
+	 * @throws MqttPersistenceException if there was a problem getting they keys
 	 */
 	public Enumeration keys() throws MqttPersistenceException;
 	
 	/**
 	 * Clears persistence, so that it no longer contains any persisted data.
+	 * @throws MqttPersistenceException if there was a problem clearing all data from the persistence store
 	 */
 	public void clear() throws MqttPersistenceException;
 	
 	/**
 	 * Returns whether or not data is persisted using the specified key.
 	 * @param key the key for data, which was used when originally saving it.
+	 * @return True if the persistence store contains the key
+	 * @throws MqttPersistenceException if there was a problem checking whether they key existed.
 	 */
 	public boolean containsKey(String key) throws MqttPersistenceException;
 }
