@@ -46,8 +46,7 @@ public class MQTTHist extends JDialog implements ActionListener, Runnable {
     
 	/**
 	 * Constructor for MQTTHist.
-	 * @param owner The frame from whcih this dialog is descended
-	 * @param title The title text to display in the window bar
+	 * @param theOwner The frame owner
 	 * @param connOptions the COnnOpts panel which started this dialog
 	 */
 	public MQTTHist( JFrame theOwner, ConnOpts connOptions ) {

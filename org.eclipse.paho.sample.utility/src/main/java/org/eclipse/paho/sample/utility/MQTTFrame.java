@@ -309,6 +309,7 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
      * @param message The data to be published
      * @param qos The Quality of Service at which the publication should be delivered.
      * @param retained Is this a retained publication or not?
+     * @throws Exception on error
      */
     public void publish( String topic, byte[] message, int qos, boolean retained ) throws Exception {
 		setTitleText( "" );
@@ -369,12 +370,12 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
     /**
      * A wrapper for the MQTT connect method. If the ip address, port number or persistence flag
      * has changed since the last time then a new MqttClient object is required. If these values haven't changed then
-     * any previously created object can be used.<P>
-     * Check whether Last Will & Testament is required and call the appropriate connect method. The only persistence implementation supported at the moment is
-     * MqttFilePersistence.
-     * @param ipAddr The IP address or hostname to connect to.
-     * @param port The IP port number to connect to.
+     * any previously created object can be used.
+     * Check whether Last Will and Testament is required and call the appropriate connect method.
+     * The only persistence implementation supported at the moment is MqttFilePersistence.
+     * @param connStr Connection string
      * @param usePersistence Is persistence required?
+     * @throws MqttException on error
      */
     public void connect( String connStr, boolean usePersistence ) throws MqttException {
 		// Connect to the broker
@@ -723,6 +724,7 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
 
     /**
      * This method calls the MQTT startTrace method to produce trace of the protocol flows
+     * @throws MqttException on error
      */    
     public void startTrace() throws MqttException {
     	traceEnabled = true;
