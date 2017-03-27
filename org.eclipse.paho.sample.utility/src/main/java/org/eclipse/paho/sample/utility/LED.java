@@ -236,6 +236,10 @@ public void setAmber() {
 }
 /**
  * Set the LED colour to a user specified RGB
+ *
+ * @param r red value
+ * @param g green value
+ * @param b blue value
  */
 public void setColor(int r, int g, int b) {
 
@@ -254,6 +258,8 @@ public void setColor(int r, int g, int b) {
 /**
  * Query the flashing variable to determine if the LED is 
  * currently in a state of flashing or not.
+ *
+ * @return true if flashing
  */
 public boolean isFlashing() {
 	return flashing;

@@ -66,8 +66,7 @@ public class ConnOpts extends JPanel implements ActionListener {
 	/**
 	 * Constructor for ConnOpts. The constructor builds all the GUI objects required and creates the
 	 * dialog in hidden mode ready to be made visible when required.
-	 * @param owner Required by the JDialog superclass
-	 * @param title The text displayed in the window title bar. Required by the JDialog superclass.
+	 *
 	 * @param mgr The object that manages the MQIsdp connection
 	 * @param props The properties object created from the config file on disk
 	 */
