@@ -20,6 +20,7 @@ package org.eclipse.paho.client.mqttv3;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
 
 import org.eclipse.paho.client.mqttv3.util.Debug;
 
@@ -73,6 +74,7 @@ public class MqttConnectOptions {
 	private char[] password;
 	private SocketFactory socketFactory;
 	private Properties sslClientProps = null;
+	private HostnameVerifier sslHostnameVerifier = null;
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	private String[] serverURIs = null;
@@ -406,6 +408,26 @@ public class MqttConnectOptions {
 	 */
 	public void setSSLProperties(Properties props) {
 		this.sslClientProps = props;
+	}
+
+	/**
+     * Returns the HostnameVerifier for the SSL connection.
+     * @return the HostnameVerifier for the SSL connection
+     */
+	public HostnameVerifier getSSLHostnameVerifier() {
+	    return sslHostnameVerifier;
+	}
+
+    /**
+     * Sets the HostnameVerifier for the SSL connection. Note that it will be
+     * used after handshake on a connection and you should do actions by
+     * yourserlf when hostname is verified error.
+     * <p>
+     * There is no default HostnameVerifier
+     * </p>
+     */
+	public void setSSLHostnameVerifier(HostnameVerifier hostnameVerifier) {
+	    this.sslHostnameVerifier = hostnameVerifier;
 	}
 
 	/**
