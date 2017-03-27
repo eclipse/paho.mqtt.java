@@ -257,7 +257,7 @@ public class LiveTakeOverTest {
           }
           byte[] payload = ("Message payload " + getClass().getName() + ".publish" + (i++)).getBytes();
           MqttTopic mqttTopic = mqttClient.getTopic(FirstSubTopicString);
-          log.info("Publishing to..." + FirstSubTopicString);
+          log.fine("Publishing to..." + FirstSubTopicString);
           mqttTopic.publish(payload, 1, false);
 
         }
@@ -267,6 +267,7 @@ public class LiveTakeOverTest {
           // Its likely the publish rate is too high i.e. inflight window is full
         }
       }
+      log.info("Sent at least " + i + " messages.");
     }
 
     public void run() {
