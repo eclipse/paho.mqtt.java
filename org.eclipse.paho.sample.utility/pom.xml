@@ -4,7 +4,7 @@
 	<parent>
         <groupId>org.eclipse.paho</groupId>
         <artifactId>java-parent</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.paho.mqtt.utility</artifactId>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
+            <version>1.1.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

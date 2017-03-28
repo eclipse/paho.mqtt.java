@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-	<bundle id="org.eclipse.paho.client.mqttv3" version="1.1.1.qualifier">
+	<bundle id="org.eclipse.paho.client.mqttv3" version="1.1.2.qualifier">
 		<category name="Paho MQTT Java"/>
 	</bundle>
-	<bundle id="org.eclipse.paho.client.eclipse.view" version="1.1.1.qualifier">
+	<bundle id="org.eclipse.paho.client.eclipse.view" version="1.1.2.qualifier">
 		<category name="Paho MQTT Java"/>
 	</bundle>
 	<category-def name="Paho MQTT Java" label="Paho MQTT Java">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Paho MQTT Utility" uid="org.eclipse.paho.ui.app" id="org.eclipse.paho.ui.core.product" application="org.eclipse.paho.ui.core.application" version="1.1.1.qualifier" useFeatures="false" includeLaunchers="true">
+<product name="Paho MQTT Utility" uid="org.eclipse.paho.ui.app" id="org.eclipse.paho.ui.core.product" application="org.eclipse.paho.ui.core.application" version="1.1.2.qualifier" useFeatures="false" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/paho_logo_400.png"/>
