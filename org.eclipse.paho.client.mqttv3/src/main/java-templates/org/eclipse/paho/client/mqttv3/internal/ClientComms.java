@@ -186,8 +186,8 @@ public class ClientComms {
 			} else {
 				this.internalSend(message, token);
 			}
-		} else if(disconnectedMessageBuffer != null && isResting()){
-			//@TRACE 508=Client Resting, Offline Buffer available. Adding message to buffer. message={0}
+		} else if(disconnectedMessageBuffer != null) {
+			//@TRACE 508=Offline Buffer available. Adding message to buffer. message={0}
 			log.fine(CLASS_NAME, methodName, "508", new Object[] {message.getKey()});
 			if(disconnectedMessageBuffer.isPersistBuffer()){
 				this.clientState.persistBufferedMessage(message);
@@ -830,13 +830,13 @@ public class ClientComms {
 	
 
 	/**
-	 * When the client automatically reconnects, we want to send all messages from the
+	 * When the client connects, we want to send all messages from the
 	 * buffer first before allowing the user to send any messages
 	 */
-	public void notifyReconnect() {
-		final String methodName = "notifyReconnect";
+	public void notifyConnect() {
+		final String methodName = "notifyConnect";
 		if(disconnectedMessageBuffer != null){
-			//@TRACE 509=Client Reconnected, Offline Buffer Available. Sending Buffered Messages.
+			//@TRACE 509=Client Connected, Offline Buffer Available. Sending Buffered Messages.
 			log.fine(CLASS_NAME, methodName, "509");
 			disconnectedMessageBuffer.setPublishCallback(new IDisconnectedBufferCallback() {
 				
