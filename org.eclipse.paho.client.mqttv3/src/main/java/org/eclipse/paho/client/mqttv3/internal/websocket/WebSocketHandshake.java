@@ -86,11 +86,9 @@ public class WebSocketHandshake {
 		try {
 			String path = "/mqtt";
 			URI srvUri = new URI(uri);
-			//if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) { // Cannot use for Java 1.4.2
-			if (srvUri.getRawPath() != null && srvUri.getRawPath().length() != 0) {
+			if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) { 
 				path = srvUri.getRawPath();
-				//if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) { // Cannot use for Java 1.4.2
-				if (srvUri.getRawQuery() != null && srvUri.getRawQuery().length() != 0) {
+				if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) { 
 					path += "?" + srvUri.getRawQuery();
 				}
 			}
@@ -118,7 +116,6 @@ public class WebSocketHandshake {
 			pw.print(LINE_SEPARATOR);
 			pw.flush();
 		} catch (URISyntaxException e) {
-			// throw new IllegalStateException(e.getMessage());  // Cannot use for Java 1.4.2
 			throw new IllegalStateException(e.getMessage());
 		}
 	}

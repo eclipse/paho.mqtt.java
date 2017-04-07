@@ -862,4 +862,8 @@ public class ClientComms {
 		}
 	}
 
+	public int getActualInFlight() {
+		return this.clientState.getActualInFlight();
+	}
+
 }

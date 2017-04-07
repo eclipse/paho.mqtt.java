@@ -63,7 +63,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  * <p>This class implements the non-blocking {@link IMqttAsyncClient} client interface
  * allowing applications to initiate MQTT actions and then carry on working while the
  * MQTT action completes on a background thread.
- * This implementation is compatible with all Java SE runtimes from 1.4.2 and up.
+ * This implementation is compatible with all Java SE runtimes from 1.7 and up.
  * </p>
  * <p>An application can connect to an MQTT server using:</p>
  * <ul>
@@ -480,7 +480,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		try {
 			uri = new URI(address);
 		} catch (URISyntaxException e) {
-			// throw new IllegalArgumentException("Malformed URI: " + address, e); // Cannot use for Java 1.4.2
 			throw new IllegalArgumentException("Malformed URI: " + address + ", " + e.getMessage());
 		}
 
@@ -1084,8 +1083,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 */
 	public static String generateClientId() {
 		//length of nanoTime = 15, so total length = 19  < 65535(defined in spec)
-		//return CLIENT_ID_PREFIX + System.nanoTime(); // Cannot use for Java 1.4.2
-		return CLIENT_ID_PREFIX + (System.currentTimeMillis() * 1000000);
+		return CLIENT_ID_PREFIX + System.nanoTime();
 
 	}
 
@@ -1227,8 +1225,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		String methodName = "startReconnectCycle";
 		//@Trace 503=Start reconnect timer for client: {0}, delay: {1}
 		log.fine(CLASS_NAME, methodName, "503", new Object[]{this.clientId, new Long(reconnectDelay)});
-		//reconnectTimer = new Timer("MQTT Reconnect: " + clientId); // Cannot use for Java 1.4.2
-		reconnectTimer = new Timer();
+		reconnectTimer = new Timer("MQTT Reconnect: " + clientId);
 		reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
 	}
 
@@ -1307,7 +1304,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	public void deleteBufferedMessage(int bufferIndex){
 		this.comms.deleteBufferedMessage(bufferIndex);
 	}
-	
+
 	/**
 	 * Returns the current number of outgoing in-flight messages
 	 * being sent by the client. Note that this number cannot be

@@ -3,11 +3,11 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -32,14 +32,14 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  *
  * <p>This class implements the blocking {@link IMqttClient} client interface where all
  * actions block until they have completed (or timed out).
- * This implementation is compatible with all Java SE runtimes from 1.4.2 and up.
+ * This implementation is compatible with all Java SE runtimes from 1.7 and up.
  * </p>
  * <p>An application can connect to an MQTT server using:</p>
  * <ul>
  * <li>A plain TCP socket
  * <li>An secure SSL/TLS socket
  * </ul>
- * 
+ *
  * <p>To enable messages to be delivered even across network and client restarts
  * messages need to be safely stored until the message has been delivered at the requested
  * quality of service. A pluggable persistence mechanism is provided to store the messages.
@@ -331,7 +331,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public void connect(MqttConnectOptions options) throws MqttSecurityException, MqttException {
 		aClient.connect(options, null, null).waitForCompletion(getTimeToWait());
 	}
-	
+
 	/*
 	 * @see IMqttClient#connect(MqttConnectOptions)
 	 */
@@ -357,7 +357,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly()
 	 */
 	public void disconnectForcibly() throws MqttException {
@@ -366,7 +366,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long)
 	 */
 	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
@@ -375,7 +375,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long)
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
@@ -387,7 +387,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * <p>
 	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
 	 * send the disconnect packet.
-	 * 
+	 *
 	 * @param quiesceTimeout the amount of time in milliseconds to allow for existing work to finish before
 	 * disconnecting. A value of zero or less means the client will not quiesce.
 	 * @param disconnectTimeout the amount of time in milliseconds to allow send disconnect packet to server.
@@ -437,14 +437,14 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 			throw new MqttException(MqttException.REASON_CODE_SUBSCRIBE_FAILED);
 		}
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
 	public void subscribe(String topicFilter, IMqttMessageListener messageListener) throws MqttException {
 		this.subscribe(new String[] {topicFilter}, new int[] {1}, new IMqttMessageListener[] {messageListener});
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
@@ -463,23 +463,23 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 		this.subscribe(new String[] {topicFilter}, new int[] {qos}, new IMqttMessageListener[] {messageListener});
 	}
 
-	
-	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {			
+
+	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {
 		this.subscribe(topicFilters, qos);
-		
+
 		// add message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
 			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
 		}
 	}
-	
+
 	/*
 	 * @see IMqttClient#subscribeWithResponse(String)
 	 */
 	public IMqttToken subscribeWithResponse(String topicFilter) throws MqttException {
 		return this.subscribeWithResponse(new String[] {topicFilter}, new int[] {1});
 	}
-	
+
 	/*
 	 * @see IMqttClient#subscribeWithResponse(String, IMqttMessageListener)
 	 */
@@ -540,7 +540,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public IMqttToken subscribeWithResponse(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
 		IMqttToken tok = this.subscribeWithResponse(topicFilters, qos);
-		
+
 		// add message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
 			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
@@ -645,16 +645,16 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public String getServerURI() {
 		return aClient.getServerURI();
 	}
-	
+
 	/**
 	 * Returns the currently connected Server URI
 	 * Implemented due to: https://bugs.eclipse.org/bugs/show_bug.cgi?id=481097
-	 * 
+	 *
 	 * Where getServerURI only returns the URI that was provided in
 	 * MqttAsyncClient's constructor, getCurrentServerURI returns the URI of the
 	 * Server that the client is currently connected to. This would be different in scenarios
 	 * where multiple server URIs have been provided to the MqttConnectOptions.
-	 * 
+	 *
 	 * @return the currently connected server URI
 	 */
 	public String getCurrentServerURI(){
@@ -681,14 +681,14 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public void setCallback(MqttCallback callback) {
 		aClient.setCallback(callback);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#setCallback(org.eclipse.paho.client.mqttv3.MqttCallback)
 	 */
 	public void setManualAcks(boolean manualAcks) {
 		aClient.setManualAcks(manualAcks);
 	}
-	
+
 	public void messageArrivedComplete(int messageId, int qos) throws MqttException {
 		aClient.messageArrivedComplete(messageId, qos);
 	}
@@ -705,7 +705,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public static String generateClientId() {
 		return MqttAsyncClient.generateClientId();
 	}
-	
+
 	/**
 	 * Will attempt to reconnect to the server after the client has lost connection.
 	 * @throws MqttException if an error occurs attempting to reconnect
@@ -721,5 +721,5 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public Debug getDebug() {
 		return (aClient.getDebug());
 	}
-	
+
 }

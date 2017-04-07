@@ -8,9 +8,9 @@
 
 	<properties>
 		<!-- source & target java version for MQTT Client -->
-		<mqttclient.java.version>1.4</mqttclient.java.version>
+		<mqttclient.java.version>1.7</mqttclient.java.version>
 		<!-- source & target java version for others modules -->
-		<java.version>1.6</java.version>
+		<java.version>1.7</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<build.level>${maven.build.timestamp}</build.level>
 		<tycho.version>0.20.0</tycho.version>
