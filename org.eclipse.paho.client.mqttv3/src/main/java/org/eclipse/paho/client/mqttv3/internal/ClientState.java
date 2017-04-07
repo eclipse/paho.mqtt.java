@@ -480,7 +480,9 @@ public class ClientState {
 	public void send(MqttWireMessage message, MqttToken token) throws MqttException {
 		final String methodName = "send";
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
-			message.setMessageId(getNextMessageId());
+				if(message instanceof MqttPublish  && (((MqttPublish) message).getMessage().getQos() != 0)){
+						message.setMessageId(getNextMessageId());
+				} 
 		}
 		if (token != null ) {
 			try {

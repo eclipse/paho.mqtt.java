@@ -1307,6 +1307,17 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	public void deleteBufferedMessage(int bufferIndex){
 		this.comms.deleteBufferedMessage(bufferIndex);
 	}
+	
+	/**
+	 * Returns the current number of outgoing in-flight messages
+	 * being sent by the client. Note that this number cannot be
+	 * guaranteed to be 100% accurate as some messages may have
+	 * been sent or queued in the time taken for this method to return.
+	 * @return the current number of in-flight messages.
+	 */
+	public int getInFlightMessageCount(){
+		return this.comms.getActualInFlight();
+	}
 
 
 
