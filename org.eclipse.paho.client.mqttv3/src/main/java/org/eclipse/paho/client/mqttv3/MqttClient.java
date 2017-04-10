@@ -250,11 +250,12 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * connection are supported <code>tcp://</code> for a TCP connection and
 	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS.
 	 * For example:
+	 * </p>
 	 * <ul>
 	 * 	<li><code>tcp://localhost:1883</code></li>
 	 * 	<li><code>ssl://localhost:8883</code></li>
 	 * </ul>
-	 * If the port is not specified, it will
+	 * <p>If the port is not specified, it will
 	 * default to 1883 for <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
 	 * </p>
 	 *

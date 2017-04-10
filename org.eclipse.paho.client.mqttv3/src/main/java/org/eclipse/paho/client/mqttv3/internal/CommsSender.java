@@ -57,7 +57,7 @@ public class CommsSender implements Runnable {
 
 	/**
 	 * Starts up the Sender thread.
-	 * @param threadName
+	 * @param threadName the threadname
 	 * @param executorService used to execute the thread
 	 */
 	public void start(String threadName, ExecutorService executorService) {

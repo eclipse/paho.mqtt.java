@@ -91,6 +91,7 @@ public class ClientComms {
 	 * @param client The {@link IMqttAsyncClient}
 	 * @param persistence the {@link MqttClientPersistence} layer.
 	 * @param pingSender the {@link MqttPingSender}
+	 * @param executorService the {@link ExecutorService}
 	 * @throws MqttException if an exception occurs whilst communicating with the server
 	 */
 	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {

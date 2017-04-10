@@ -60,7 +60,7 @@ public class CommsReceiver implements Runnable {
 
 	/**
 	 * Starts up the Receiver's thread.
-	 * @param threadName
+	 * @param threadName the thread name.
 	 * @param executorService used to execute the thread
 	 */
 	public void start(String threadName, ExecutorService executorService) {

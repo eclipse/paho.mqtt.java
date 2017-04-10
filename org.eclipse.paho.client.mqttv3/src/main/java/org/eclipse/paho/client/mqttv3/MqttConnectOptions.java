@@ -425,6 +425,7 @@ public class MqttConnectOptions {
      * <p>
      * There is no default HostnameVerifier
      * </p>
+     * @param hostnameVerifier the {@link HostnameVerifier}
      */
 	public void setSSLHostnameVerifier(HostnameVerifier hostnameVerifier) {
 	    this.sslHostnameVerifier = hostnameVerifier;

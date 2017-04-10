@@ -81,6 +81,7 @@ public class CommsCallback implements Runnable {
 	/**
 	 * Starts up the Callback thread.
 	 * @param threadName The name of the thread
+	 * @param executorService the {@link ExecutorService}
 	 */
 	public void start(String threadName, ExecutorService executorService) {
 		this.threadName = threadName;
