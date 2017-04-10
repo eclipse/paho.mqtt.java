@@ -94,7 +94,7 @@ public class WebSocketTest {
   /**
    * @throws Exception 
    */
-  @Test(timeout=10000)
+  @Test()
   public void testWebSocketConnect() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -182,7 +182,10 @@ public class WebSocketTest {
 
       log.info("Disconnecting...");
       client.disconnect();
-    }
+    } catch (MqttException exception) {
+        log.log(Level.SEVERE, "caught exception:", exception);
+        Assert.fail("Unexpected exception: " + exception);
+      }
     finally {
       if (client != null) {
     	  if(client.isConnected()){
@@ -239,9 +242,10 @@ public class WebSocketTest {
 	      log.info("Disconnecting...");
 	      client.disconnect();
 	      log.info("Disconnected...");
-	    } catch (Exception e){
-	    	e.printStackTrace();
-	    } finally {
+	    } catch (MqttException exception) {
+	        log.log(Level.SEVERE, "caught exception:", exception);
+	        Assert.fail("Unexpected exception: " + exception);
+	      } finally {
 	      if (client != null) {
 	    	  if(client.isConnected()){
 	    		  client.disconnectForcibly();
@@ -274,9 +278,10 @@ public class WebSocketTest {
      client = clientFactory.createMqttClient(serverURIWithUserInfo, clientId);
     	client.connect();
     	client.disconnect();
-    } catch (Exception e){
-    	e.printStackTrace();
-    } finally {
+    }catch (MqttException exception) {
+        log.log(Level.SEVERE, "caught exception:", exception);
+        Assert.fail("Unexpected exception: " + exception);
+      } finally {
       if (client != null) {
     	  if(client.isConnected()){
     		  client.disconnectForcibly();

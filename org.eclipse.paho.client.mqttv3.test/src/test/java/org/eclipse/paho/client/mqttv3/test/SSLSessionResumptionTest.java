@@ -59,7 +59,7 @@ public class SSLSessionResumptionTest {
 		try {
 			String methodName = Utility.getMethodName();
 			LoggingUtilities.banner(log, cclass, methodName);
-			serverURI = "ssl://" + TestProperties.getServerURI().getHost();
+			serverURI = "ssl://" + TestProperties.getServerURI().getHost() + ":" +TestProperties.getServerSSLPort();
 			serverHost = TestProperties.getServerURI().getHost();
 			serverPort = TestProperties.getServerSSLPort();
 
@@ -80,7 +80,7 @@ public class SSLSessionResumptionTest {
 	 */
 	@Test(timeout=30000)
 	public void testSSLSessionInvalidated() throws Exception {
-		// System.setProperty("javax.net.debug", "all");
+		 //System.setProperty("javax.net.debug", "all");
 
 		SSLSocketFactory factory = getSocketFactory();
 

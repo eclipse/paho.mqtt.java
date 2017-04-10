@@ -1,1 +1,2 @@
 language: java
+script: mvn test -Dtest.server_ssl_port=18885 -Dtest.server_uri=tcp://mqtt.iotree.co.uk:1883 -Dtest.server_websocket_uri=ws://mqtt.iotree.co.uk:8080 -B

@@ -52,6 +52,7 @@
 					<systemPropertyVariables>
 						<SERVER_URI>${test.server_uri}</SERVER_URI>
 						<SERVER_SSL_PORT>${test.server_ssl_port}</SERVER_SSL_PORT>
+						<SERVER_WEBSOCKET_URI>${test.server_websocket_url}</SERVER_WEBSOCKET_URI>
 					</systemPropertyVariables>
 					<excludes>
 						<exclude>${test.exclude}</exclude>

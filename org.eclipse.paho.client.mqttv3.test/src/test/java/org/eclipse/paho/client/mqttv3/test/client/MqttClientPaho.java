@@ -17,6 +17,7 @@ package org.eclipse.paho.client.mqttv3.test.client;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 
 /**
@@ -30,7 +31,7 @@ public class MqttClientPaho extends MqttClient {
    * @throws MqttException
    */
   public MqttClientPaho(String serverURI, String clientId) throws MqttException {
-    super(serverURI, clientId);
+    super(serverURI, clientId, new MemoryPersistence());
   }
 
   /**
