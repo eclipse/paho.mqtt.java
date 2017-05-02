@@ -19,7 +19,7 @@
 package org.eclipse.paho.client.mqttv3;
 
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.SocketFactory;
 
@@ -315,8 +315,8 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
-	public MqttClient(String serverURI, String clientId, MqttClientPersistence persistence, ExecutorService executorService) throws MqttException {
-		aClient = new MqttAsyncClient(serverURI, clientId, persistence, new TimerPingSender(), executorService);
+	public MqttClient(String serverURI, String clientId, MqttClientPersistence persistence, ScheduledExecutorService executorService) throws MqttException {
+		aClient = new MqttAsyncClient(serverURI, clientId, persistence, new ScheduledExecutorPingSender(executorService), executorService);
 	}
 
 	/*
