@@ -46,21 +46,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	 * This allows us to encode the MQTT payload into a WebSocket
 	 *  Frame before passing it through to the real socket.
 	 */
-	private ByteArrayOutputStream outputStream = new ByteArrayOutputStream(){
-		
-		public void flush() throws IOException {
-			final ByteBuffer byteBuffer;
-			synchronized (this) {
-				byteBuffer = ByteBuffer.wrap(toByteArray());
-				reset();
-			}
-			WebSocketFrame frame = new WebSocketFrame((byte)0x02, true, byteBuffer.array());
-			byte[] rawFrame = frame.encodeFrame();
-			getSocketOutputStream().write(rawFrame);
-			getSocketOutputStream().flush();
-			
-		}
-	};
+	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
 	
 	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext){
 		super(factory, host, port, resourceContext);
@@ -80,11 +66,11 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 		webSocketReceiver.start("webSocketReceiver");
 	}
 	
-	private OutputStream getSocketOutputStream() throws IOException {
+	OutputStream getSocketOutputStream() throws IOException {
 		return super.getOutputStream();
 	}
 	
-	private InputStream getSocketInputStream() throws IOException {
+	InputStream getSocketInputStream() throws IOException {
 		return super.getInputStream();
 	}
 	

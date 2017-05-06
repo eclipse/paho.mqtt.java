@@ -644,26 +644,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				userContext,
 				callback });
 		comms.setNetworkModules(createNetworkModules(serverURI, options));
-		comms.setReconnectCallback(new MqttCallbackExtended() {
-
-			public void messageArrived(String topic, MqttMessage message) throws Exception {
-			}
-			public void deliveryComplete(IMqttDeliveryToken token) {
-			}
-			public void connectComplete(boolean reconnect, String serverURI) {
-			}
-
-			public void connectionLost(Throwable cause) {
-				if(automaticReconnect){
-						// Automatic reconnect is set so make sure comms is in resting state
-						comms.setRestingState(true);
-						reconnecting = true;
-						startReconnectCycle();
-					}
-			}
-		});
-
-
+		comms.setReconnectCallback(new MqttReconnectCallback(automaticReconnect));
 
 
 		// Insert our own callback to iterate through the URIs till the connect succeeds
@@ -682,6 +663,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 		return userToken;
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnect(java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
@@ -1191,24 +1173,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		//@Trace 500=Attempting to reconnect client: {0}
 		log.fine(CLASS_NAME, methodName, "500", new Object[]{this.clientId});
 		try {
-			connect(this.connOpts, this.userContext,new IMqttActionListener() {
-
-				public void onSuccess(IMqttToken asyncActionToken) {
-					//@Trace 501=Automatic Reconnect Successful: {0}
-					log.fine(CLASS_NAME, methodName, "501", new Object[]{asyncActionToken.getClient().getClientId()});
-					comms.setRestingState(false);
-					stopReconnectCycle();
-				}
-
-				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-					//@Trace 502=Automatic Reconnect failed, rescheduling: {0}
-					log.fine(CLASS_NAME, methodName, "502", new Object[]{asyncActionToken.getClient().getClientId()});
-					if(reconnectDelay < 128000){
-						reconnectDelay = reconnectDelay * 2;
-					}
-					rescheduleReconnectCycle(reconnectDelay);
-				}
-			});
+			connect(this.connOpts, this.userContext,new MqttReconnectActionListener(methodName));
 		} catch (MqttSecurityException ex) {
 			//@TRACE 804=exception
 			log.fine(CLASS_NAME,methodName,"804",null, ex);
@@ -1269,7 +1234,58 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			attemptReconnect();
 		}
 	}
+	
+	class MqttReconnectCallback implements MqttCallbackExtended{
 
+		final boolean automaticReconnect;
+
+		MqttReconnectCallback(boolean isAutomaticReconnect){
+			automaticReconnect = isAutomaticReconnect;
+		}
+		
+		public void connectionLost(Throwable cause) {
+			if(automaticReconnect){
+				// Automatic reconnect is set so make sure comms is in resting state
+				comms.setRestingState(true);
+				reconnecting = true;
+				startReconnectCycle();
+			}
+		}
+
+		public void messageArrived(String topic, MqttMessage message) throws Exception {}
+
+		public void deliveryComplete(IMqttDeliveryToken token) {}
+
+		public void connectComplete(boolean reconnect, String serverURI) {}
+		
+	}
+	
+	class MqttReconnectActionListener implements IMqttActionListener{
+		
+			final String methodName;
+			
+			MqttReconnectActionListener(String methodName) {
+				this.methodName = methodName;
+			}
+
+			public void onSuccess(IMqttToken asyncActionToken) {
+				//@Trace 501=Automatic Reconnect Successful: {0}
+				log.fine(CLASS_NAME, methodName, "501", new Object[]{asyncActionToken.getClient().getClientId()});
+				comms.setRestingState(false);
+				stopReconnectCycle();
+			}
+			
+			public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+				//@Trace 502=Automatic Reconnect failed, rescheduling: {0}
+				log.fine(CLASS_NAME, methodName, "502", new Object[]{asyncActionToken.getClient().getClientId()});
+				if(reconnectDelay < 128000){
+					reconnectDelay = reconnectDelay * 2;
+				}
+				rescheduleReconnectCycle(reconnectDelay);
+			}
+		
+	}
+	
 	/**
 	 * Sets the DisconnectedBufferOptions for this client
 	 * @param bufferOpts the {@link DisconnectedBufferOptions}
