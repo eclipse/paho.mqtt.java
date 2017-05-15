@@ -46,6 +46,9 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubAck;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -482,7 +485,16 @@ public class ClientState {
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
 				if(message instanceof MqttPublish  && (((MqttPublish) message).getMessage().getQos() != 0)){
 						message.setMessageId(getNextMessageId());
-				} 
+				}else if(message instanceof MqttPubAck ||
+						message instanceof MqttPubRec ||
+						message instanceof MqttPubRel ||
+						message instanceof MqttPubComp ||
+						message instanceof MqttSubscribe ||
+						message instanceof MqttSuback ||
+						message instanceof MqttUnsubscribe || 
+						message instanceof MqttUnsubAck){
+					message.setMessageId(getNextMessageId());
+				}
 		}
 		if (token != null ) {
 			try {
