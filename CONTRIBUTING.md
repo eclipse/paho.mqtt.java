@@ -20,8 +20,6 @@ Please read the [Eclipse Foundation policy on accepting contributions via Git](h
 
 ## Contributing a change
 
-## Contributing a change
-
 1. [Fork the repository on GitHub](https://github.com/eclipse/paho.mqtt.java/fork)
 2. Clone the forked repository onto your computer: ``` git clone https://github.com/<your username>/paho.mqtt.java.git ```
 3. Create a new branch from the latest ```develop``` branch with ```git checkout -b YOUR_BRANCH_NAME origin/develop```
