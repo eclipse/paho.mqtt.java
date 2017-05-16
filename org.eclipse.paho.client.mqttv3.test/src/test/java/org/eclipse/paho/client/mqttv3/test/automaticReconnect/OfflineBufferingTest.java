@@ -50,7 +50,7 @@ public class OfflineBufferingTest {
 		    topicPrefix = "OfflineBufferingTest-" + UUID.randomUUID().toString() + "-";
 
 			// Use 0 for the first time.
-			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 0);
+			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 2883);
 			proxy.startProxy();
 			while (!proxy.isPortSet()) {
 				Thread.sleep(0);
@@ -68,7 +68,7 @@ public class OfflineBufferingTest {
 	 * disconnected state and is then delivered once the client has reconnected
 	 * automatically.
 	 */
-	@Test(timeout=60000)
+	@Test
 	public void testSingleMessageBufferAndDeliver() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -139,7 +139,7 @@ public class OfflineBufferingTest {
 	 * disconnected state and that they are all then delivered once the client
 	 * has connected automatically.
 	 */
-	@Test(timeout=60000)
+	@Test
 	public void testManyMessageBufferAndDeliver() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -231,7 +231,7 @@ public class OfflineBufferingTest {
 	 * Tests that the buffer correctly handles messages being buffered when the
 	 * buffer is full and deleteOldestBufferedMessage is set to true.
 	 */
-	@Test(timeout=60000)
+	@Test
 	public void testDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -288,7 +288,7 @@ public class OfflineBufferingTest {
 	 * Tests that A message cannot be buffered when the buffer is full and
 	 * deleteOldestBufferedMessage is set to false.
 	 */
-	@Test(timeout=60000)
+	@Test
 	public void testNoDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -347,7 +347,7 @@ public class OfflineBufferingTest {
 	 * Tests that if enabled, buffered messages are persisted to the persistence
 	 * layer
 	 */
-	@Test(timeout=60000)
+	@Test
 	public void testPersistBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -407,7 +407,7 @@ public class OfflineBufferingTest {
 	 * Tests that persisted buffered messages are published correctly when the
 	 * client connects for the first time and are un persisted.
 	 */
-	@Test(timeout=60000)
+	@Test
 	public void testUnPersistBufferedMessagesOnNewClient() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);

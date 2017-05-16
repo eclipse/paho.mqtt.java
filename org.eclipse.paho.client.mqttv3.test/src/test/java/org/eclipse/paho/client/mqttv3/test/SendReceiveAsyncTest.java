@@ -95,7 +95,7 @@ public class SendReceiveAsyncTest {
    * 
    * @throws Exception
    */
-  @Test(timeout=10000)
+  @Test
   public void testConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -142,7 +142,7 @@ public class SendReceiveAsyncTest {
    * 
    * @throws Exception
    */
-  @Test(timeout=10000)
+  @Test
   public void testRemoteConnect() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -214,7 +214,7 @@ public class SendReceiveAsyncTest {
   /**
    * Test client pubSub using very large messages
    */
-  @Test(timeout=10000)
+  @Test
   public void testLargeMessage() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -291,7 +291,7 @@ public class SendReceiveAsyncTest {
   /**
    * Multiple publishers and subscribers.
    */
-  @Test(timeout=20000)
+  @Test
   public void testMultipleClients() {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -386,7 +386,7 @@ public class SendReceiveAsyncTest {
    * Test the behaviour of the cleanStart flag, used to clean up before
    * re-connecting.
    */
-  @Test(timeout=10000)
+  @Test
   public void testCleanStart() throws Exception {
     final String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
@@ -532,7 +532,7 @@ public class SendReceiveAsyncTest {
    * 
    * Since no other activity (messages from the client to the broker) is generated, the broker disconnects the client.
    */
-  @Test(timeout=300000)
+  @Test
   public void testVeryLargeMessageWithShortKeepAlive() {
   	final String methodName = Utility.getMethodName();
   	LoggingUtilities.banner(log, cclass, methodName);

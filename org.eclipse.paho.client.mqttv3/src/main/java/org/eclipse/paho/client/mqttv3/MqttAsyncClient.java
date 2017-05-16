@@ -27,25 +27,22 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
+
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
 import org.eclipse.paho.client.mqttv3.internal.ConnectActionListener;
 import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
-import org.eclipse.paho.client.mqttv3.internal.LocalNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
-import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModule;
+import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
@@ -115,7 +112,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 
 
-	private ExecutorService executorService;
+	private ScheduledExecutorService executorService;
 
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
@@ -369,8 +366,8 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
-		final String methodName = "MqttAsyncClient";
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender, ScheduledExecutorService executorService) throws MqttException {
+        	final String methodName = "MqttAsyncClient";
 
 		log.setResourceName(clientId);
 
@@ -400,7 +397,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 		this.executorService = executorService;
 		if (this.executorService == null) {
-			this.executorService = Executors.newFixedThreadPool(10);
+			this.executorService = Executors.newScheduledThreadPool(10);
 		}
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
@@ -574,9 +571,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				}
 			}
 			break;
-		case MqttConnectOptions.URI_TYPE_LOCAL :
-			netModule = new LocalNetworkModule(address.substring(8));
-			break;
 		default:
 			// This shouldn't happen, as long as validateURI() has been called.
 			log.fine(CLASS_NAME,methodName, "119", new Object[] {address});
@@ -644,26 +638,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				userContext,
 				callback });
 		comms.setNetworkModules(createNetworkModules(serverURI, options));
-		comms.setReconnectCallback(new MqttCallbackExtended() {
-
-			public void messageArrived(String topic, MqttMessage message) throws Exception {
-			}
-			public void deliveryComplete(IMqttDeliveryToken token) {
-			}
-			public void connectComplete(boolean reconnect, String serverURI) {
-			}
-
-			public void connectionLost(Throwable cause) {
-				if(automaticReconnect){
-						// Automatic reconnect is set so make sure comms is in resting state
-						comms.setRestingState(true);
-						reconnecting = true;
-						startReconnectCycle();
-					}
-			}
-		});
-
-
+		comms.setReconnectCallback(new MqttReconnectCallback(automaticReconnect));
 
 
 		// Insert our own callback to iterate through the URIs till the connect succeeds
@@ -682,6 +657,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 		return userToken;
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnect(java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
@@ -1191,24 +1167,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		//@Trace 500=Attempting to reconnect client: {0}
 		log.fine(CLASS_NAME, methodName, "500", new Object[]{this.clientId});
 		try {
-			connect(this.connOpts, this.userContext,new IMqttActionListener() {
-
-				public void onSuccess(IMqttToken asyncActionToken) {
-					//@Trace 501=Automatic Reconnect Successful: {0}
-					log.fine(CLASS_NAME, methodName, "501", new Object[]{asyncActionToken.getClient().getClientId()});
-					comms.setRestingState(false);
-					stopReconnectCycle();
-				}
-
-				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-					//@Trace 502=Automatic Reconnect failed, rescheduling: {0}
-					log.fine(CLASS_NAME, methodName, "502", new Object[]{asyncActionToken.getClient().getClientId()});
-					if(reconnectDelay < 128000){
-						reconnectDelay = reconnectDelay * 2;
-					}
-					rescheduleReconnectCycle(reconnectDelay);
-				}
-			});
+			connect(this.connOpts, this.userContext,new MqttReconnectActionListener(methodName));
 		} catch (MqttSecurityException ex) {
 			//@TRACE 804=exception
 			log.fine(CLASS_NAME,methodName,"804",null, ex);
@@ -1269,7 +1228,58 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			attemptReconnect();
 		}
 	}
+	
+	class MqttReconnectCallback implements MqttCallbackExtended{
 
+		final boolean automaticReconnect;
+
+		MqttReconnectCallback(boolean isAutomaticReconnect){
+			automaticReconnect = isAutomaticReconnect;
+		}
+		
+		public void connectionLost(Throwable cause) {
+			if(automaticReconnect){
+				// Automatic reconnect is set so make sure comms is in resting state
+				comms.setRestingState(true);
+				reconnecting = true;
+				startReconnectCycle();
+			}
+		}
+
+		public void messageArrived(String topic, MqttMessage message) throws Exception {}
+
+		public void deliveryComplete(IMqttDeliveryToken token) {}
+
+		public void connectComplete(boolean reconnect, String serverURI) {}
+		
+	}
+	
+	class MqttReconnectActionListener implements IMqttActionListener{
+		
+			final String methodName;
+			
+			MqttReconnectActionListener(String methodName) {
+				this.methodName = methodName;
+			}
+
+			public void onSuccess(IMqttToken asyncActionToken) {
+				//@Trace 501=Automatic Reconnect Successful: {0}
+				log.fine(CLASS_NAME, methodName, "501", new Object[]{asyncActionToken.getClient().getClientId()});
+				comms.setRestingState(false);
+				stopReconnectCycle();
+			}
+			
+			public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+				//@Trace 502=Automatic Reconnect failed, rescheduling: {0}
+				log.fine(CLASS_NAME, methodName, "502", new Object[]{asyncActionToken.getClient().getClientId()});
+				if(reconnectDelay < 128000){
+					reconnectDelay = reconnectDelay * 2;
+				}
+				rescheduleReconnectCycle(reconnectDelay);
+			}
+		
+	}
+	
 	/**
 	 * Sets the DisconnectedBufferOptions for this client
 	 * @param bufferOpts the {@link DisconnectedBufferOptions}
