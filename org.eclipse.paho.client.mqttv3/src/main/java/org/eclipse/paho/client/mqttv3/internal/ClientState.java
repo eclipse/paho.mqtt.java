@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2017 IBM Corp and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@
  *    James Sutton - Ping Callback (bug 473928)
  *    Ian Craggs - fix for NPE bug 470718
  *    James Sutton - Automatic Reconnect & Offline Buffering
+ *    Jens Reimann - Fix issue #370
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -1340,7 +1341,9 @@ public class ClientState {
 	 */
 	protected void close() {
 		inUseMsgIds.clear();
-		pendingMessages.clear();
+		if (pendingMessages != null) {
+			pendingMessages.clear();
+		}
 		pendingFlows.clear();
 		outboundQoS2.clear();
 		outboundQoS1.clear();
