@@ -32,17 +32,17 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
+
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
 import org.eclipse.paho.client.mqttv3.internal.ConnectActionListener;
 import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
-import org.eclipse.paho.client.mqttv3.internal.LocalNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
-import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModule;
+import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
@@ -570,9 +570,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 					((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
 				}
 			}
-			break;
-		case MqttConnectOptions.URI_TYPE_LOCAL :
-			netModule = new LocalNetworkModule(address.substring(8));
 			break;
 		default:
 			// This shouldn't happen, as long as validateURI() has been called.
