@@ -27,8 +27,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -112,7 +112,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 
 
-	private ExecutorService executorService;
+	private ScheduledExecutorService executorService;
 
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
@@ -366,8 +366,8 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
 	 * @throws MqttException if any other problem was encountered
 	 */
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
-		final String methodName = "MqttAsyncClient";
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender, ScheduledExecutorService executorService) throws MqttException {
+        	final String methodName = "MqttAsyncClient";
 
 		log.setResourceName(clientId);
 
@@ -397,7 +397,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 		this.executorService = executorService;
 		if (this.executorService == null) {
-			this.executorService = Executors.newFixedThreadPool(10);
+			this.executorService = Executors.newScheduledThreadPool(10);
 		}
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
