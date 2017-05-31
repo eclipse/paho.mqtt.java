@@ -18,6 +18,7 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +47,7 @@ public class CommsSender implements Runnable {
 
 	private String threadName;
 	private final Semaphore runningSemaphore = new Semaphore(1);
+	private Future senderFuture;
 
 	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out) {
 		this.out = new MqttOutputStream(clientState, out);
@@ -65,7 +67,7 @@ public class CommsSender implements Runnable {
 		synchronized (lifecycle) {
 			if (!running) {
 				running = true;
-				executorService.execute(this);
+				senderFuture = executorService.submit(this);
 			}
 		}
 	}
@@ -77,6 +79,9 @@ public class CommsSender implements Runnable {
 		final String methodName = "stop";
 
 		synchronized (lifecycle) {
+			if (senderFuture != null) {
+				senderFuture.cancel(true);
+			}
 			//@TRACE 800=stopping sender
 			log.fine(CLASS_NAME,methodName,"800");
 			if (running) {
