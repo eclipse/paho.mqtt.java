@@ -838,28 +838,37 @@ public class ClientComms {
 		if(disconnectedMessageBuffer != null){
 			//@TRACE 509=Client Reconnected, Offline Buffer Available. Sending Buffered Messages.
 			log.fine(CLASS_NAME, methodName, "509");
-			disconnectedMessageBuffer.setPublishCallback(new IDisconnectedBufferCallback() {
-				
-				public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
-					if (isConnected()) {
-						while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-1)){
-							// We need to Yield to the other threads to allow the in flight messages to clear
-							Thread.yield();
-							
-						}
-						//@TRACE 510=Publising Buffered message message={0}
-						log.fine(CLASS_NAME, methodName, "510", new Object[] {bufferedMessage.getMessage().getKey()});
-						internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());
-						// Delete from persistence if in there
-						clientState.unPersistBufferedMessage(bufferedMessage.getMessage());
-					} else {
-						//@TRACE 208=failed: not connected
-						log.fine(CLASS_NAME, methodName, "208");
-						throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
-					}	
-				}
-			});
+
+			disconnectedMessageBuffer.setPublishCallback(new ReconnectDisconnectedBufferCallback(methodName));
 			executorService.execute(disconnectedMessageBuffer);
+		}
+	}
+	
+	class ReconnectDisconnectedBufferCallback implements IDisconnectedBufferCallback{
+		
+		final String methodName;
+		
+		ReconnectDisconnectedBufferCallback(String methodName) {
+			this.methodName = methodName;
+		}
+		
+		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
+			if (isConnected()) {
+				while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-1)){
+					// We need to Yield to the other threads to allow the in flight messages to clear
+					Thread.yield();
+					
+				}
+				//@TRACE 510=Publising Buffered message message={0}
+				log.fine(CLASS_NAME, methodName, "510", new Object[] {bufferedMessage.getMessage().getKey()});
+				internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());
+				// Delete from persistence if in there
+				clientState.unPersistBufferedMessage(bufferedMessage.getMessage());
+			} else {
+				//@TRACE 208=failed: not connected
+				log.fine(CLASS_NAME, methodName, "208");
+				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
+			}	
 		}
 	}
 
