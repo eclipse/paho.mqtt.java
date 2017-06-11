@@ -623,8 +623,17 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#close()
 	 */
 	public void close() throws MqttException {
-		aClient.close();
+		aClient.close(false);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#close()
+	 */
+	public void close(boolean force) throws MqttException {
+		aClient.close(force);
+	}
+	
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getClientId()
