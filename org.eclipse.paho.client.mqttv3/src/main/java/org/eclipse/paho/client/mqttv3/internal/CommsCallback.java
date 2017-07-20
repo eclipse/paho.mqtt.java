@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -65,6 +66,7 @@ public class CommsCallback implements Runnable {
 	private boolean manualAcks = false;
 	private String threadName;
 	private final Semaphore runningSemaphore = new Semaphore(1);
+	private Future callbackFuture;
 
 	CommsCallback(ClientComms clientComms) {
 		this.clientComms = clientComms;
@@ -94,7 +96,7 @@ public class CommsCallback implements Runnable {
 
 				running = true;
 				quiescing = false;
-				executorService.execute(this);
+				callbackFuture = executorService.submit(this);
 			}
 		}
 	}
@@ -106,6 +108,9 @@ public class CommsCallback implements Runnable {
 	public void stop() {
 		final String methodName = "stop";
 		synchronized (lifecycle) {
+			if (callbackFuture != null) {
+				callbackFuture.cancel(true);
+			}
 			if (running) {
 				// @TRACE 700=stopping
 				log.fine(CLASS_NAME, methodName, "700");

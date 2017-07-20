@@ -519,7 +519,9 @@ public class ClientComms {
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
 		// Allow current inbound and outbound work to complete
-		clientState.quiesce(quiesceTimeout);
+		if (clientState != null) {
+			clientState.quiesce(quiesceTimeout);
+		}
 		MqttToken token = new MqttToken(client.getClientId());
 		try {
 			// Send disconnect packet

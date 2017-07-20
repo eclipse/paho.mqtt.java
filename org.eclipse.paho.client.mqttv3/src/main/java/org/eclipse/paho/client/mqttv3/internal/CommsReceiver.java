@@ -18,6 +18,7 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -48,6 +49,7 @@ public class CommsReceiver implements Runnable {
 	private volatile boolean receiving;
 	private final Semaphore runningSemaphore = new Semaphore(1);
 	private String threadName;
+	private Future receiverFuture;
 
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
@@ -71,7 +73,7 @@ public class CommsReceiver implements Runnable {
 		synchronized (lifecycle) {
 			if (!running) {
 				running = true;
-				executorService.execute(this);
+				receiverFuture = executorService.submit(this);
 			}
 		}
 	}
@@ -82,6 +84,9 @@ public class CommsReceiver implements Runnable {
 	public void stop() {
 		final String methodName = "stop";
 		synchronized (lifecycle) {
+			if (receiverFuture != null) {
+				receiverFuture.cancel(true);
+			}
 			//@TRACE 850=stopping
 			log.fine(CLASS_NAME,methodName, "850");
 			if (running) {
