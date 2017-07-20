@@ -1217,7 +1217,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 		final boolean automaticReconnect;
 
-
 		MqttReconnectCallback(boolean isAutomaticReconnect){
 			automaticReconnect = isAutomaticReconnect;
 		}
@@ -1234,7 +1233,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		public void messageArrived(String topic, MqttMessage message) throws Exception {}
 
 		public void deliveryComplete(IMqttDeliveryToken token) {}
-
 
 		public void connectComplete(boolean reconnect, String serverURI) {}
 		
