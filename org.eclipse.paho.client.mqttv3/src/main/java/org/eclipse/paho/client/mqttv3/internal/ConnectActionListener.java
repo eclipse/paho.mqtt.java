@@ -92,9 +92,7 @@ public class ConnectActionListener implements IMqttActionListener {
     userToken.internalTok.notifyComplete();
     userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
 
-    if(reconnect){
-		comms.notifyReconnect();
-    }
+	comms.notifyConnect();
 
     if (userCallback != null) {
       userToken.setUserContext(userContext);
