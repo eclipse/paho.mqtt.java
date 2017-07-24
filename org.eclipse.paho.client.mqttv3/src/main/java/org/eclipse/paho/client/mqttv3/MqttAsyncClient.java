@@ -1203,22 +1203,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		}
 	}
 
-	private void rescheduleReconnectCycle(int delay){
-		String methodName = "rescheduleReconnectCycle";
-		//@Trace 505=Rescheduling reconnect timer for client: {0}, delay: {1}
-		log.fine(CLASS_NAME, methodName, "505", new Object[]{this.clientId, new Long(reconnectDelay)});
-		synchronized(clientLock) {
-			if(this.connOpts.isAutomaticReconnect()) {
-				if (reconnectTimer != null) {
-					reconnectTimer.schedule(new ReconnectTask(), delay);
-				} else {
-					// The previous reconnect timer was cancelled
-					reconnectDelay = delay;
-					startReconnectCycle();
-				}
-			}
-		}
-	}
 
 	private class ReconnectTask extends TimerTask {
 		private static final String methodName = "ReconnectTask.run";
@@ -1277,6 +1261,23 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				}
 				rescheduleReconnectCycle(reconnectDelay);
 			}
+			
+			private void rescheduleReconnectCycle(int delay){
+				String reschedulemethodName = methodName+ ":rescheduleReconnectCycle";
+				//@Trace 505=Rescheduling reconnect timer for client: {0}, delay: {1}
+				log.fine(CLASS_NAME, reschedulemethodName, "505", new Object[]{MqttAsyncClient.this.clientId, String.valueOf(reconnectDelay)});
+				synchronized(clientLock) {
+					if(MqttAsyncClient.this.connOpts.isAutomaticReconnect()) {
+						if (reconnectTimer != null) {
+							reconnectTimer.schedule(new ReconnectTask(), delay);
+						} else {
+							// The previous reconnect timer was cancelled
+							reconnectDelay = delay;
+							startReconnectCycle();
+						}
+					}
+				}
+			}
 		
 	}
 	
@@ -1326,17 +1327,22 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		return this.comms.getActualInFlight();
 	}
 
-
+	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#close()
+	 */
+	public void close() throws MqttException {
+		close(false);
+	}
 
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#close()
 	 */
-	public void close() throws MqttException {
+	public void close(boolean force) throws MqttException {
 		final String methodName = "close";
 		//@TRACE 113=<
 		log.fine(CLASS_NAME,methodName,"113");
-		comms.close();
+		comms.close(force);
 		//@TRACE 114=>
 		log.fine(CLASS_NAME,methodName,"114");
 

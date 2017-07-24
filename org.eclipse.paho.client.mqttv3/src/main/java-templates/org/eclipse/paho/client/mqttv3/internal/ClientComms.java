@@ -207,12 +207,12 @@ public class ClientComms {
 	 * store which normally survives a disconnect.
 	 * @throws MqttException  if not disconnected
 	 */
-	public void close() throws MqttException {
+	public void close(boolean force) throws MqttException {
 		final String methodName = "close";
 		synchronized (conLock) {
 			if (!isClosed()) {
-				// Must be disconnected before close can take place
-				if (!isDisconnected()) {
+				// Must be disconnected before close can take place or if we are being forced
+				if (!isDisconnected() || force) {
 					//@TRACE 224=failed: not disconnected
 					log.fine(CLASS_NAME, methodName, "224");
 
@@ -427,7 +427,7 @@ public class ClientComms {
 		synchronized(conLock) {
 			if (closePending) {
 				try {
-					close();
+					close(true);
 				} catch (Exception e) { // ignore any errors as closing
 				}
 			}
