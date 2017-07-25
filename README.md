@@ -1,5 +1,5 @@
 # Eclipse Paho Java Client
-[![Build Status](https://travis-ci.org/eclipse/paho.mqtt.java.svg?branch=master)](https://travis-ci.org/eclipse/paho.mqtt.java)
+[![Build Status](https://travis-ci.org/eclipse/paho.mqtt.java.svg?branch=develop)](https://travis-ci.org/eclipse/paho.mqtt.java)
 
 The Paho Java Client is an MQTT client library written in Java for developing applications that run on the JVM or other Java compatible platforms such as Android
 
