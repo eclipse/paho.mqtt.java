@@ -87,8 +87,8 @@ public class MqttOutputStream extends OutputStream {
         	clientState.notifySentBytes(length);
         }		
 		
-		// @TRACE 500= sent {0}
-    	log.fine(CLASS_NAME, methodName, "500", new Object[]{message});
+		// @TRACE 529= sent {0}
+    	log.fine(CLASS_NAME, methodName, "529", new Object[]{message});
 	}
 }
 
