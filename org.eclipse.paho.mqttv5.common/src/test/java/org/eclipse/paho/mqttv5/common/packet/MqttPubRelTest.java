@@ -27,7 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttPubRelTest {
-	private static final int returnCode = MqttPubRel.RETURN_CODE_PACKET_ID_NOT_FOUND;
+	private static final int returnCode = MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND;
 	private static final String reasonString = "Reason String 123.";
 	
 	@Test
@@ -55,7 +55,7 @@ public class MqttPubRelTest {
 		
 	}
 	
-	public MqttPubRel generateMqttPubRelPacket(){
+	public MqttPubRel generateMqttPubRelPacket() throws MqttException{
 		MqttPubRel mqttPubRelPacket = new MqttPubRel(returnCode);
 		mqttPubRelPacket.setReasonString(reasonString);
 		

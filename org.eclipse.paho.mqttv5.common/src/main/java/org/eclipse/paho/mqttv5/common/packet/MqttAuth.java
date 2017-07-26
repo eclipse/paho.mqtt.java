@@ -31,12 +31,12 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 public class MqttAuth extends MqttWireMessage {
 
 	// Return codes
-	public static final int RETURN_CODE_SUCCESS					= 0x00;
-	public static final int RETURN_CODE_CONTINUE_AUTHENTICATION	= 0x18;
+
 	
 	private static final int[] validReturnCodes = {
-			RETURN_CODE_SUCCESS,
-			RETURN_CODE_CONTINUE_AUTHENTICATION
+			MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_CONTINUE_AUTHENTICATION,
+			MqttReturnCode.RETURN_CODE_RE_AUTHENTICATE
 	};
 	
 	// Identifier / Value Identifiers
@@ -61,6 +61,7 @@ public class MqttAuth extends MqttWireMessage {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream inputStream  = new DataInputStream(bais);
 		returnCode = inputStream.readUnsignedByte();
+		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(inputStream);
 		inputStream.close();
 	}

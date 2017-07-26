@@ -28,23 +28,16 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttUnsubAck extends MqttAck{
 	
-	// Return Codes
-	public static final int RETURN_CODE_SUCCESS							= 0x00;
-	public static final int RETURN_CODE_NO_SUBSCRIPTION_EXISTED			= 0x11;
-	public static final int RETURN_CODE_UNSPECIFIED_ERROR				= 0x80;
-	public static final int RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR	= 0x83;
-	public static final int RETURN_CODE_NOT_AUTHORIZED					= 0x87;
-	public static final int RETURN_CODE_TOPIC_FILTER_NOT_VALID			= 0x90;
-	public static final int RETURN_CODE_PACKET_ID_IN_USE				= 0x91;
+
 	
 	private static final int[] validReturnCodes = {
-			RETURN_CODE_SUCCESS,
-			RETURN_CODE_NO_SUBSCRIPTION_EXISTED,
-			RETURN_CODE_UNSPECIFIED_ERROR,
-			RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
-			RETURN_CODE_NOT_AUTHORIZED,
-			RETURN_CODE_TOPIC_FILTER_NOT_VALID,
-			RETURN_CODE_PACKET_ID_IN_USE
+			MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_NO_SUBSCRIPTION_EXISTED,
+			MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
+			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
+			MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
+			MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
+			MqttReturnCode.RETURN_CODE_PACKET_ID_IN_USE
 	};
 	
 	// Fields

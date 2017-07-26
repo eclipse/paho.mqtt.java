@@ -44,6 +44,7 @@
 
 <modules>
     <module>org.eclipse.paho.mqttv5.common</module>
+    <module>org.eclipse.paho.mqttv5.client</module>
   </modules>
 
   <properties>

@@ -21,18 +21,12 @@ package org.eclipse.paho.mqttv5.common;
  */
 public class ExceptionHelper {
 	public static MqttException createMqttException(int reasonCode) {
-		if ((reasonCode == MqttException.REASON_CODE_FAILED_AUTHENTICATION) || 
-			(reasonCode == MqttException.REASON_CODE_NOT_AUTHORIZED)) {
-			return new MqttSecurityException(reasonCode);
-		}
 		
 		return new MqttException(reasonCode);
 	}
 
 	public static MqttException createMqttException(Throwable cause) {
-		if (cause.getClass().getName().equals("java.security.GeneralSecurityException")) {
-			return new MqttSecurityException(cause);
-		}
+
 		return new MqttException(cause);
 	}
 	

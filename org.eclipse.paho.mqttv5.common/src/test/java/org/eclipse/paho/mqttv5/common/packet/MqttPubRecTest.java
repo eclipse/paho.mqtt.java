@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttPubRecTest {
-	private static final int returnCode = MqttPubRec.RETURN_CODE_UNSPECIFIED_ERROR;
+	private static final int returnCode = MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR;
 	private static final String reasonString = "Reason String 123.";
 	
 	@Test
@@ -54,7 +54,7 @@ public class MqttPubRecTest {
 		
 	}
 	
-	public MqttPubRec generateMqttPubRecPacket(){
+	public MqttPubRec generateMqttPubRecPacket() throws MqttException{
 		MqttPubRec mqttPubRecPacket = new MqttPubRec(returnCode);
 		mqttPubRecPacket.setReasonString(reasonString);
 		
