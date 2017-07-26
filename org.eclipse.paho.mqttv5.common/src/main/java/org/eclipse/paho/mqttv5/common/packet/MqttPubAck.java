@@ -39,6 +39,17 @@ public class MqttPubAck extends MqttAck{
 			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID
 	};
 	
+	private static final int[] validReturnCodes = {
+			RETURN_CODE_SUCCESS,
+			RETURN_CODE_NO_MATCHING_SUBSCRIBERS,
+			RETURN_CODE_UNSPECIFIED_ERROR,
+			RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
+			RETURN_CODE_NOT_AUTHORIZED,
+			RETURN_CODE_TOPIC_INVALID,
+			RETURN_CODE_PACKET_TOO_LARGE,
+			RETURN_CODE_QOS_LEVEL_NOT_SUPPORTED
+	};
+	
 	// Identifier / Value Identifiers
 	private static final byte REASON_STRING_IDENTIFIER 					= 0x1F;
 	
