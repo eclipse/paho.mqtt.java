@@ -92,6 +92,7 @@ public class MqttConnect extends MqttWireMessage {
 		}
 		
 		
+		
 		byte connectFlags = dis.readByte();
 		reservedByte = (connectFlags & 0x01) != 0;
 		cleanSession = (connectFlags & 0x02) != 0;
