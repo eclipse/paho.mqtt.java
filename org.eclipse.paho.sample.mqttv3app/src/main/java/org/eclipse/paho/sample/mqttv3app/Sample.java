@@ -383,7 +383,7 @@ public class Sample implements MqttCallback {
 	              "     \n\n SSL Options \n" +
 	              "    -v  SSL enabled; true - (default is false) " +
 	              "    -k  Use this JKS format key store to verify the client\n" +
-	              "    -w  Passpharse to verify certificates in the keys store\n" +
+	              "    -w  Passphrase to verify certificates in the keys store\n" +
 	              "    -r  Use this JKS format keystore to verify the server\n" +
 	              " If javax.net.ssl properties have been set only the -v flag needs to be set\n" +
 	              "Delimit strings containing spaces with \"\"\n\n" +
