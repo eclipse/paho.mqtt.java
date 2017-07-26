@@ -45,8 +45,6 @@
 <modules>
     <module>org.eclipse.paho.mqttv5.common</module>
     <module>org.eclipse.paho.mqttv5.client</module>
-    <module>org.eclipse.paho.mqttv5.server</module>
-    <module>org.eclipse.paho.mqttv5.server-vertx</module>
   </modules>
 
   <properties>
