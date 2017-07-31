@@ -42,6 +42,7 @@ public class MqttUnsubAckTest {
 	private static final String userValue2 = "userValue2";
 	private static final String userValue3 = "userValue3";
 
+
 	@Test
 	public void testEncodingMqttUnsubAck() throws MqttException {
 		MqttUnsubAck mqttUnsubAckPacket = generateMqttUnsubAckPacket();

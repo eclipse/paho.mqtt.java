@@ -369,8 +369,7 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public void setServerReference(String serverReference) {
-		if ((returnCode == MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER)
-				|| (returnCode == MqttReturnCode.RETURN_CODE_SERVER_MOVED)) {
+		if((returnCode == MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER) || (returnCode == MqttReturnCode.RETURN_CODE_SERVER_MOVED)){
 			this.serverReference = serverReference;
 		} else {
 			// FIXME

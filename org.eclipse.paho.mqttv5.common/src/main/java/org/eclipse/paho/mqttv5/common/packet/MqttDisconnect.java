@@ -29,6 +29,7 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttDisconnect extends MqttWireMessage {
 
+
 	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
 			MqttReturnCode.RETURN_CODE_DISCONNECT_WITH_WILL_MESSAGE, MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
 			MqttReturnCode.RETURN_CODE_MALFORMED_CONTROL_PACKET, MqttReturnCode.RETURN_CODE_PROTOCOL_ERROR,
@@ -41,13 +42,9 @@ public class MqttDisconnect extends MqttWireMessage {
 			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED, MqttReturnCode.RETURN_CODE_ADMINISTRITIVE_ACTION,
 			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID, MqttReturnCode.RETURN_CODE_RETAIN_NOT_SUPPORTED,
 			MqttReturnCode.RETURN_CODE_QOS_NOT_SUPPORTED, MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER,
-			MqttReturnCode.RETURN_CODE_SERVER_MOVED,
-
-			MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED,
-
+			MqttReturnCode.RETURN_CODE_SERVER_MOVED, MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED,
 			MqttReturnCode.RETURN_CODE_CONNECTION_RATE_EXCEEDED, MqttReturnCode.RETURN_CODE_MAXIMUM_CONNECT_TIME,
-			MqttReturnCode.RETURN_CODE_SUB_IDENTIFIERS_NOT_SUPPORTED,
-			MqttReturnCode.RETURN_CODE_WILDCARD_SUB_NOT_SUPPORTED };
+			MqttReturnCode.RETURN_CODE_SUB_IDENTIFIERS_NOT_SUPPORTED, MqttReturnCode.RETURN_CODE_WILDCARD_SUB_NOT_SUPPORTED };
 
 	// Fields
 	private int returnCode;

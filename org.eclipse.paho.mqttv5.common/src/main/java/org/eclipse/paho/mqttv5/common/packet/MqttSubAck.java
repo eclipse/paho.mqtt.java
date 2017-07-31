@@ -51,11 +51,12 @@ public class MqttSubAck extends MqttAck {
 		int remainingLength = data.length - counter.getCounter();
 		returnCodes = new int[remainingLength];
 
-		for (int i = 0; i < remainingLength; i++) {
+		for(int i = 0; i < remainingLength; i++){
 			int returnCode = inputStream.readUnsignedByte();
 			validateReturnCode(returnCode, validReturnCodes);
 			returnCodes[i] = returnCode;
 		}
+
 
 		inputStream.close();
 	}

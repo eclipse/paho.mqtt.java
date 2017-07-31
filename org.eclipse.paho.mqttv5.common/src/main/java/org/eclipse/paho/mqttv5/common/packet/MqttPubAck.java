@@ -28,8 +28,6 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 
 public class MqttPubAck extends MqttAck{
 	
-
-	
 	private static final int[] validReturnCodes = {
 			MqttReturnCode.RETURN_CODE_SUCCESS,
 			MqttReturnCode.RETURN_CODE_NO_MATCHING_SUBSCRIBERS,

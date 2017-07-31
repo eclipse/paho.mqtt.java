@@ -38,7 +38,7 @@ public class MqttSubAckTest {
 		MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
 		MqttReturnCode.RETURN_CODE_PACKET_ID_IN_USE,
 		MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED	};
-	
+
 	private static final String reasonString = "Reason String 123.";
 	private static final String userKey1 = "userKey1";
 	private static final String userKey2 = "userKey2";
