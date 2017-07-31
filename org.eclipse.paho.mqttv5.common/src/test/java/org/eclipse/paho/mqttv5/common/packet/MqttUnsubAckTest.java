@@ -18,6 +18,8 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttUnsubAck;
@@ -26,41 +28,60 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttUnsubAckTest {
-	
-	private static final int[] returnCodes = {
-			MqttReturnCode.RETURN_CODE_SUCCESS,
-			MqttReturnCode.RETURN_CODE_NO_SUBSCRIPTION_EXISTED,
-			MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
-			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
-			MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
-			MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
-			MqttReturnCode.RETURN_CODE_PACKET_ID_IN_USE
-	};
+
+	private static final int[] returnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_NO_SUBSCRIPTION_EXISTED, MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
+			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR, MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
+			MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID, MqttReturnCode.RETURN_CODE_PACKET_ID_IN_USE };
+
+	private static final String reasonString = "Reason String 123.";
+	private static final String userKey1 = "userKey1";
+	private static final String userKey2 = "userKey2";
+	private static final String userKey3 = "userKey3";
+	private static final String userValue1 = "userValue1";
+	private static final String userValue2 = "userValue2";
+	private static final String userValue3 = "userValue3";
 
 	@Test
 	public void testEncodingMqttUnsubAck() throws MqttException {
-		MqttUnsubAck mqttUnsubAckPacket = new MqttUnsubAck(returnCodes);
+		MqttUnsubAck mqttUnsubAckPacket = generateMqttUnsubAckPacket();
 		mqttUnsubAckPacket.getHeader();
 		mqttUnsubAckPacket.getPayload();
 	}
-	
+
 	@Test
 	public void testDecodingMqttUnsubAck() throws MqttException, IOException {
-		MqttUnsubAck mqttUnsubAckPacket = new MqttUnsubAck(returnCodes);
+		MqttUnsubAck mqttUnsubAckPacket = generateMqttUnsubAckPacket();
+
 		byte[] header = mqttUnsubAckPacket.getHeader();
 		byte[] payload = mqttUnsubAckPacket.getPayload();
-		
+
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
 		outputStream.write(payload);
-		
-		MqttUnsubAck decodedUnsubAckPacket = (MqttUnsubAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
-		
+
+		MqttUnsubAck decodedUnsubAckPacket = (MqttUnsubAck) MqttWireMessage
+				.createWireMessage(outputStream.toByteArray());
+
+		Assert.assertEquals(reasonString, decodedUnsubAckPacket.getReasonString());
+		Assert.assertEquals(3, decodedUnsubAckPacket.getUserDefinedPairs().size());
+		Assert.assertEquals(userValue1, decodedUnsubAckPacket.getUserDefinedPairs().get(userKey1));
+		Assert.assertEquals(userValue2, decodedUnsubAckPacket.getUserDefinedPairs().get(userKey2));
+		Assert.assertEquals(userValue3, decodedUnsubAckPacket.getUserDefinedPairs().get(userKey3));
 		Assert.assertArrayEquals(returnCodes, decodedUnsubAckPacket.getReturnCodes());
-		
-		
+
 	}
-	
-	
+
+	private MqttUnsubAck generateMqttUnsubAckPacket() throws MqttException {
+		MqttUnsubAck mqttUnsubAckPacket = new MqttUnsubAck(returnCodes);
+		mqttUnsubAckPacket.setReasonString(reasonString);
+		Map<String, String> userDefinedPairs = new HashMap<String, String>();
+		userDefinedPairs.put(userKey1, userValue1);
+		userDefinedPairs.put(userKey2, userValue2);
+		userDefinedPairs.put(userKey3, userValue3);
+		mqttUnsubAckPacket.setUserDefinedPairs(userDefinedPairs);
+
+		return mqttUnsubAckPacket;
+	}
 
 }

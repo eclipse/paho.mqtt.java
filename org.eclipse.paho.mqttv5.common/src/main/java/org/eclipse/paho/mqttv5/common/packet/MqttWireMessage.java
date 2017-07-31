@@ -407,14 +407,8 @@ public abstract class MqttWireMessage {
 		}
 		throw new MqttException(MqttException.REASON_CODE_INVALID_RETURN_CODE);
 	}
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
+	
+ 
 	 
 	 
 	

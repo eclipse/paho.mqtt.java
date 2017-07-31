@@ -16,7 +16,7 @@
 package org.eclipse.paho.mqttv5.common.packet;
 
 /**
- * Reference of MQTT v5 Return Codes - 2.2.2
+ * Reference of MQTT v5 Return Codes - 2.4
  */
 public class MqttReturnCode {
 	

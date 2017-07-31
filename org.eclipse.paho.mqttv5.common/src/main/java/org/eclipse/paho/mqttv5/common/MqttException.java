@@ -13,7 +13,7 @@ public class MqttException extends Exception{
 	 */
 	public static final short REASON_CODE_CLIENT_EXCEPTION              = 0x00;
 	
-	// CONNECT packet exceptions
+	// New MQTTv5 Packet Errors
 	public static final int REASON_CODE_INVALID_IDENTIFIER 				= 50000; // Invalid Identifier in the IV fields
 	public static final int REASON_CODE_INVALID_RETURN_CODE				= 50001; // Invalid Return code
 	public static final int REASON_CODE_MALFORMED_PACKET				= 50002; // Packet was somehow malformed and did not comply to the MQTTv5 specification

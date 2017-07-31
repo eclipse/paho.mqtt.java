@@ -41,6 +41,7 @@ public class MqttConnectTest{
 	
 	private static final int sessionExpiryInterval = 60;
 	private static final int willDelayInterval = 60;
+	private static final int maxPacketSize = 128000;
 	private static final int topicAliasMax = 5;
 	private static final boolean requestReplyInfo = true;
 	private static final boolean requestPropblemInfo = true;
@@ -93,6 +94,7 @@ public class MqttConnectTest{
 		Assert.assertEquals(willDestination, decodedConnectPacket.getWillDestination());
 		Assert.assertEquals(sessionExpiryInterval, decodedConnectPacket.getSessionExpiryInterval());
 		Assert.assertEquals(willDelayInterval, decodedConnectPacket.getWillDelayInterval());
+		Assert.assertEquals(maxPacketSize,  decodedConnectPacket.getMaximumPacketSize());
 		Assert.assertEquals(topicAliasMax, decodedConnectPacket.getTopicAliasMaximum());
 		Assert.assertEquals(requestReplyInfo, decodedConnectPacket.getRequestReplyInfo());
 		Assert.assertEquals(requestPropblemInfo, decodedConnectPacket.getRequestProblemInfo());
@@ -117,6 +119,7 @@ public class MqttConnectTest{
 		mqttConnectPacket.setWillDestination(willDestination);
 		mqttConnectPacket.setSessionExpiryInterval(sessionExpiryInterval);
 		mqttConnectPacket.setWillDelayInterval(willDelayInterval);
+		mqttConnectPacket.setMaximumPacketSize(maxPacketSize);
 		mqttConnectPacket.setTopicAliasMaximum(topicAliasMax);
 		mqttConnectPacket.setRequestReplyInfo(requestReplyInfo);
 		mqttConnectPacket.setRequestProblemInfo(requestPropblemInfo);

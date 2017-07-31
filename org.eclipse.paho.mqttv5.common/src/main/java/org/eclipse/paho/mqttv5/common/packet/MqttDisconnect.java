@@ -21,59 +21,41 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttDisconnect extends MqttWireMessage {
 
-
-	
-	private static final int[] validReturnCodes = {
-			MqttReturnCode.RETURN_CODE_SUCCESS,
-			MqttReturnCode.RETURN_CODE_DISCONNECT_WITH_WILL_MESSAGE,
-			MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
-			MqttReturnCode.RETURN_CODE_MALFORMED_CONTROL_PACKET,
-			MqttReturnCode.RETURN_CODE_PROTOCOL_ERROR,
-			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
-			MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
-			MqttReturnCode.RETURN_CODE_SERVER_BUSY,
-			MqttReturnCode.RETURN_CODE_SERVER_SHUTTING_DOWN,
-			MqttReturnCode.RETURN_CODE_KEEP_ALIVE_TIMEOUT,
-			MqttReturnCode.RETURN_CODE_SESSION_TAKEN_OVER,
-			MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
-			MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID,
-			MqttReturnCode.RETURN_CODE_RECEIVE_MAXIMUM_EXCEEDED,
-			MqttReturnCode.RETURN_CODE_ALIAS_NOT_ACCEPTED,
-			MqttReturnCode.RETURN_CODE_PACKET_TOO_LARGE,
-			MqttReturnCode.RETURN_CODE_MESSAGE_RATE_TOO_HIGH,
-			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
-			MqttReturnCode.RETURN_CODE_ADMINISTRITIVE_ACTION,
-			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID,
-			MqttReturnCode.RETURN_CODE_RETAIN_NOT_SUPPORTED,
-			MqttReturnCode.RETURN_CODE_QOS_NOT_SUPPORTED,
-			MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER,
+	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_DISCONNECT_WITH_WILL_MESSAGE, MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
+			MqttReturnCode.RETURN_CODE_MALFORMED_CONTROL_PACKET, MqttReturnCode.RETURN_CODE_PROTOCOL_ERROR,
+			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR, MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
+			MqttReturnCode.RETURN_CODE_SERVER_BUSY, MqttReturnCode.RETURN_CODE_SERVER_SHUTTING_DOWN,
+			MqttReturnCode.RETURN_CODE_KEEP_ALIVE_TIMEOUT, MqttReturnCode.RETURN_CODE_SESSION_TAKEN_OVER,
+			MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID, MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID,
+			MqttReturnCode.RETURN_CODE_RECEIVE_MAXIMUM_EXCEEDED, MqttReturnCode.RETURN_CODE_ALIAS_NOT_ACCEPTED,
+			MqttReturnCode.RETURN_CODE_PACKET_TOO_LARGE, MqttReturnCode.RETURN_CODE_MESSAGE_RATE_TOO_HIGH,
+			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED, MqttReturnCode.RETURN_CODE_ADMINISTRITIVE_ACTION,
+			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID, MqttReturnCode.RETURN_CODE_RETAIN_NOT_SUPPORTED,
+			MqttReturnCode.RETURN_CODE_QOS_NOT_SUPPORTED, MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER,
 			MqttReturnCode.RETURN_CODE_SERVER_MOVED,
 
 			MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED,
 
-			MqttReturnCode.RETURN_CODE_CONNECTION_RATE_EXCEEDED,
-			MqttReturnCode.RETURN_CODE_MAXIMUM_CONNECT_TIME,
+			MqttReturnCode.RETURN_CODE_CONNECTION_RATE_EXCEEDED, MqttReturnCode.RETURN_CODE_MAXIMUM_CONNECT_TIME,
 			MqttReturnCode.RETURN_CODE_SUB_IDENTIFIERS_NOT_SUPPORTED,
-			MqttReturnCode.RETURN_CODE_WILDCARD_SUB_NOT_SUPPORTED
-	};
-	
-	// Identifier / Value Identifiers
-	private static final byte SESSION_EXPIRY_INTERVAL_IDENTIFIER 	= 0x11;
-	private static final byte REASON_STRING_IDENTIFIER				= 0x1F;
-	private static final byte SERVER_REFERENCE_IDENTIFIER			= 0x1C;
-	
+			MqttReturnCode.RETURN_CODE_WILDCARD_SUB_NOT_SUPPORTED };
+
 	// Fields
 	private int returnCode;
 	private Integer sessionExpiryInterval;
 	private String reasonString;
 	private String serverReference;
-	
+	private Map<String, String> userDefinedPairs = new HashMap<>();
+
 	public MqttDisconnect(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
@@ -82,25 +64,24 @@ public class MqttDisconnect extends MqttWireMessage {
 		returnCode = inputStream.readUnsignedByte();
 		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(inputStream);
-		
+
 		inputStream.close();
 	}
-	
-	public MqttDisconnect(int returnCode) throws MqttException{
+
+	public MqttDisconnect(int returnCode) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
-	
+
 	@Override
-	protected byte[] getVariableHeader() throws MqttException{
+	protected byte[] getVariableHeader() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
 			// Encode the Return Code
 			outputStream.writeByte(returnCode);
-
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
@@ -112,28 +93,36 @@ public class MqttDisconnect extends MqttWireMessage {
 			throw new MqttException(ioe);
 		}
 	}
-	
-	
+
 	private byte[] getIdentifierValueFields() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
-			
-			// If Present, encode the Session Expiry Interval (3.14.2.3)
-			if(sessionExpiryInterval != null){
-				outputStream.write(SESSION_EXPIRY_INTERVAL_IDENTIFIER);
+
+			// If Present, encode the Session Expiry Interval (3.14.2.2.2)
+			if (sessionExpiryInterval != null) {
+				outputStream.write(MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER);
 				outputStream.writeInt(sessionExpiryInterval);
 			}
-			
-			// If Present, encode the Reason String (3.14.2.4)
+
+			// If Present, encode the Reason String (3.14.2.2.3)
 			if (reasonString != null) {
-				outputStream.write(REASON_STRING_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
 			}
-			
-			// If present, encode the Server Reference (3.14.2.5)
-			if(serverReference != null){
-				outputStream.write(SERVER_REFERENCE_IDENTIFIER);
+
+			// If Present, encode the User Defined Name-Value Pairs (3.14.2.2.4)
+			if (userDefinedPairs.size() != 0) {
+				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, entry.getKey());
+					encodeUTF8(outputStream, entry.getValue());
+				}
+			}
+
+			// If present, encode the Server Reference (3.14.2.2.5)
+			if (serverReference != null) {
+				outputStream.write(MqttPropertyIdentifiers.SERVER_REFERENCE_IDENTIFIER);
 				encodeUTF8(outputStream, serverReference);
 			}
 
@@ -143,67 +132,82 @@ public class MqttDisconnect extends MqttWireMessage {
 			throw new MqttException(ioe);
 		}
 	}
-	
+
 	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
 		// First, get the length of the IV fields
 		int lengthVBI = readVariableByteInteger(dis).getValue();
-		if(lengthVBI > 0){
+		if (lengthVBI > 0) {
 			byte[] identifierValueByteArray = new byte[lengthVBI];
 			dis.read(identifierValueByteArray, 0, lengthVBI);
 			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
 			DataInputStream inputStream = new DataInputStream(bais);
-			while(inputStream.available() > 0){
+			while (inputStream.available() > 0) {
 				// Get the first byte (identifier)
 				byte identifier = inputStream.readByte();
-				if(identifier == SESSION_EXPIRY_INTERVAL_IDENTIFIER){
+				if (identifier == MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER) {
 					sessionExpiryInterval = inputStream.readInt();
-				}  else if(identifier == REASON_STRING_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
-				}  else if(identifier == SERVER_REFERENCE_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
+					String key = decodeUTF8(inputStream);
+					String value = decodeUTF8(inputStream);
+					userDefinedPairs.put(key, value);
+				} else if (identifier == MqttPropertyIdentifiers.SERVER_REFERENCE_IDENTIFIER) {
 					serverReference = decodeUTF8(inputStream);
-				}  else {
+				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
 				}
 			}
 		}
 	}
-	
-	
-	
-	
+
 	public int getSessionExpiryInterval() {
 		return sessionExpiryInterval;
 	}
+
 	public void setSessionExpiryInterval(Integer sessionExpiryInterval) {
 		this.sessionExpiryInterval = sessionExpiryInterval;
 	}
+
 	public String getReasonString() {
 		return reasonString;
 	}
+
 	public void setReasonString(String reasonString) {
 		this.reasonString = reasonString;
 	}
+
 	public String getServerReference() {
 		return serverReference;
 	}
+
 	public void setServerReference(String serverReference) {
 		this.serverReference = serverReference;
 	}
+
 	public int getReturnCode() {
 		return returnCode;
 	}
+
+	public Map<String, String> getUserDefinedPairs() {
+		return userDefinedPairs;
+	}
+
+	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
+		this.userDefinedPairs = userDefinedPairs;
+	}
+
 	@Override
 	public String toString() {
 		return "MqttDisconnect [returnCode=" + returnCode + ", sessionExpiryInterval=" + sessionExpiryInterval
-				+ ", reasonString=" + reasonString + ", serverReference=" + serverReference + "]";
+				+ ", reasonString=" + reasonString + ", serverReference=" + serverReference + ", userDefinedPairs="
+				+ userDefinedPairs + "]";
 	}
 
 	@Override
 	protected byte getMessageInfo() {
 		return (byte) 0;
 	}
-	
-	
-	
+
 }

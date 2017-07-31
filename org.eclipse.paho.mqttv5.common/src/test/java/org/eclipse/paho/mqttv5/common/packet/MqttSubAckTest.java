@@ -18,6 +18,8 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttSubAck;
@@ -36,7 +38,14 @@ public class MqttSubAckTest {
 		MqttReturnCode.RETURN_CODE_TOPIC_FILTER_NOT_VALID,
 		MqttReturnCode.RETURN_CODE_PACKET_ID_IN_USE,
 		MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED	};
+	
 	private static final String reasonString = "Reason String 123.";
+	private static final String userKey1 = "userKey1";
+	private static final String userKey2 = "userKey2";
+	private static final String userKey3 = "userKey3";
+	private static final String userValue1 = "userValue1";
+	private static final String userValue2 = "userValue2";
+	private static final String userValue3 = "userValue3";
 	
 	@Test
 	public void testEncodingMqttSubAck() throws MqttException {
@@ -58,6 +67,10 @@ public class MqttSubAckTest {
 		MqttSubAck decodedSubAckPacket = (MqttSubAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
 		Assert.assertEquals(reasonString, decodedSubAckPacket.getReasonString());
+		Assert.assertEquals(3, decodedSubAckPacket.getUserDefinedPairs().size());
+		Assert.assertEquals(userValue1, decodedSubAckPacket.getUserDefinedPairs().get(userKey1));
+		Assert.assertEquals(userValue2, decodedSubAckPacket.getUserDefinedPairs().get(userKey2));
+		Assert.assertEquals(userValue3, decodedSubAckPacket.getUserDefinedPairs().get(userKey3));
 		Assert.assertArrayEquals(returnCodes, decodedSubAckPacket.getReturnCodes());
 		
 		
@@ -66,6 +79,11 @@ public class MqttSubAckTest {
 	private MqttSubAck generatemqttSubAckPacket() throws MqttException{
 		MqttSubAck mqttSubAckPacket = new MqttSubAck(returnCodes);
 		mqttSubAckPacket.setReasonString(reasonString);
+		Map<String, String> userDefinedPairs = new HashMap<String,String>();
+		userDefinedPairs.put(userKey1, userValue1);
+		userDefinedPairs.put(userKey2, userValue2);
+		userDefinedPairs.put(userKey3, userValue3);
+		mqttSubAckPacket.setUserDefinedPairs(userDefinedPairs);
 		
 		return mqttSubAckPacket;
 	}

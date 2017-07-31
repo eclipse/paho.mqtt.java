@@ -39,7 +39,7 @@ public class MqttPublishTest {
 	private static final int payloadFormat = MqttPublish.PAYLOAD_FORMAT_UTF8;
 	private static final int publicationExpiryInterval = 60;
 	private static final int topicAlias = 1;
-	private static final String replyTopic = "replyTopic";
+	private static final String responseTopic = "replyTopic";
 	private static final byte[] correlationData = "correlationData".getBytes();
 	private static final String userKey1 = "userKey1";
 	private static final String userKey2 = "userKey2";
@@ -47,6 +47,9 @@ public class MqttPublishTest {
 	private static final String userValue1 = "userValue1";
 	private static final String userValue2 = "userValue2";
 	private static final String userValue3 = "userValue3";
+	private static final String contentType = "JSON";
+	private static final int subscriptionIdentifier = 42424242;
+	
 	private static final int messageId = 25;
 	private static final boolean duplicate = false;
 	
@@ -77,12 +80,14 @@ public class MqttPublishTest {
 		Assert.assertEquals(payloadFormat, decodedPublishPacket.getPayloadFormat());
 		Assert.assertEquals(publicationExpiryInterval, decodedPublishPacket.getPublicationExpiryInterval());
 		Assert.assertEquals(topicAlias, decodedPublishPacket.getTopicAlias());
-		Assert.assertEquals(replyTopic, decodedPublishPacket.getReplyTopic());
+		Assert.assertEquals(responseTopic, decodedPublishPacket.getResponseTopic());
 		Assert.assertArrayEquals(correlationData, decodedPublishPacket.getCorrelationData());
 		Assert.assertEquals(3, decodedPublishPacket.getUserDefinedPairs().size());
 		Assert.assertEquals(userValue1, decodedPublishPacket.getUserDefinedPairs().get(userKey1));
 		Assert.assertEquals(userValue2, decodedPublishPacket.getUserDefinedPairs().get(userKey2));
 		Assert.assertEquals(userValue3, decodedPublishPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertEquals(contentType, decodedPublishPacket.getContentType());
+		Assert.assertEquals(subscriptionIdentifier, decodedPublishPacket.getSubscriptionIdentifier());
 		Assert.assertEquals(messageId, decodedPublishPacket.getMessageId());
 		Assert.assertEquals(duplicate, decodedPublishPacket.isDuplicate());
 		
@@ -101,7 +106,7 @@ public class MqttPublishTest {
 		mqttPublish.setPayloadFormat(payloadFormat);
 		mqttPublish.setPublicationExpiryInterval(publicationExpiryInterval);
 		mqttPublish.setTopicAlias(topicAlias);
-		mqttPublish.setReplyTopic(replyTopic);
+		mqttPublish.setResponseTopic(responseTopic);
 		mqttPublish.setCorrelationData(correlationData);
 		
 		Map<String, String> userDefinedPairs = new HashMap<String,String>();
@@ -109,6 +114,9 @@ public class MqttPublishTest {
 		userDefinedPairs.put(userKey2, userValue2);
 		userDefinedPairs.put(userKey3, userValue3);
 		mqttPublish.setUserDefinedPairs(userDefinedPairs);
+		
+		mqttPublish.setContentType(contentType);
+		mqttPublish.setSubscriptionIdentifier(subscriptionIdentifier);
 		
 		return mqttPublish;
 	}
