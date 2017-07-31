@@ -21,63 +21,61 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
 /**
- * An on-the-wire representation of an MQTT AUTH message.
- * MQTTv5 - 3.15
+ * An on-the-wire representation of an MQTT AUTH message. MQTTv5 - 3.15
  */
 public class MqttAuth extends MqttWireMessage {
 
 	// Return codes
 
-	
-	private static final int[] validReturnCodes = {
-			MqttReturnCode.RETURN_CODE_SUCCESS,
-			MqttReturnCode.RETURN_CODE_CONTINUE_AUTHENTICATION,
-			MqttReturnCode.RETURN_CODE_RE_AUTHENTICATE
-	};
-	
-	// Identifier / Value Identifiers
-	private static final byte AUTH_METHOD_IDENTIFIER 	= 0x15;
-	private static final byte AUTH_DATA_IDENTIFIER 		= 0x16;
-	
+	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_CONTINUE_AUTHENTICATION, MqttReturnCode.RETURN_CODE_RE_AUTHENTICATE };
+
 	// Fields
 	private int returnCode;
 	private String authMethod;
 	private byte[] authData;
-	
-	
+	private String reasonString;
+	private Map<String, String> userDefinedPairs = new HashMap<>();
+
 	/**
 	 * Constructs an Auth message from a raw byte array
-	 * @param info - Info Byte
-	 * @param data - The Data
+	 * 
+	 * @param info
+	 *            - Info Byte
+	 * @param data
+	 *            - The Data
 	 * @throws IOException
 	 * @throws MqttException
 	 */
 	public MqttAuth(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
-		DataInputStream inputStream  = new DataInputStream(bais);
+		DataInputStream inputStream = new DataInputStream(bais);
 		returnCode = inputStream.readUnsignedByte();
 		validateReturnCode(returnCode, validReturnCodes);
 		parseIdentifierValueFields(inputStream);
 		inputStream.close();
 	}
-	
-	
+
 	/**
 	 * Constructs an Auth message from the return code
-	 * @param returnCode - The Auth Return Code
+	 * 
+	 * @param returnCode
+	 *            - The Auth Return Code
 	 * @throws MqttException
 	 */
-	public MqttAuth(int returnCode) throws MqttException{
+	public MqttAuth(int returnCode) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
-	
+
 	@Override
 	protected byte[] getVariableHeader() throws MqttException {
 		try {
@@ -97,23 +95,38 @@ public class MqttAuth extends MqttWireMessage {
 			throw new MqttException(ioe);
 		}
 	}
-	
+
 	private byte[] getIdentifierValueFields() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
-			
-			// If Present, encode the Auth Method (3.15.2.3)
+
+			// If Present, encode the Auth Method (3.15.2.2.2)
 			if (authMethod != null) {
-				outputStream.write(AUTH_METHOD_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER);
 				encodeUTF8(outputStream, authMethod);
 			}
-			
-			// If present, encode the Auth Data (3.15.2.4)
-			if(authData != null){
-				outputStream.write(AUTH_DATA_IDENTIFIER);
+
+			// If present, encode the Auth Data (3.15.2.2.3)
+			if (authData != null) {
+				outputStream.write(MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER);
 				outputStream.writeShort(authData.length);
 				outputStream.write(authData);
+			}
+
+			// If Present, encode the Reason String (3.15.2.2.?)
+			if (reasonString != null) {
+				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
+				encodeUTF8(outputStream, reasonString);
+			}
+
+			// If Present, encode the User Properties (3.15.2.2.4)
+			if (userDefinedPairs.size() != 0) {
+				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, entry.getKey());
+					encodeUTF8(outputStream, entry.getValue());
+				}
 			}
 
 			outputStream.flush();
@@ -122,24 +135,30 @@ public class MqttAuth extends MqttWireMessage {
 			throw new MqttException(ioe);
 		}
 	}
-	
+
 	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
 		// First, get the length of the IV fields
 		int lengthVBI = readVariableByteInteger(dis).getValue();
-		if(lengthVBI > 0){
+		if (lengthVBI > 0) {
 			byte[] identifierValueByteArray = new byte[lengthVBI];
 			dis.read(identifierValueByteArray, 0, lengthVBI);
 			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
 			DataInputStream inputStream = new DataInputStream(bais);
-			while(inputStream.available() > 0){
+			while (inputStream.available() > 0) {
 				// Get the first byte (identifier)
 				byte identifier = inputStream.readByte();
-				if(identifier ==  AUTH_METHOD_IDENTIFIER){
+				if (identifier == MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER) {
 					authMethod = decodeUTF8(inputStream);
-				} else if(identifier ==  AUTH_DATA_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER) {
 					int authDataLength = inputStream.readShort();
 					authData = new byte[authDataLength];
 					inputStream.read(authData, 0, authDataLength);
+				} else if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
+					reasonString = decodeUTF8(inputStream);
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
+					String key = decodeUTF8(inputStream);
+					String value = decodeUTF8(inputStream);
+					userDefinedPairs.put(key, value);
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
@@ -147,12 +166,10 @@ public class MqttAuth extends MqttWireMessage {
 			}
 		}
 	}
-	
-	
 
 	@Override
 	protected byte getMessageInfo() {
-		return (byte)(1);
+		return (byte) (1);
 	}
 
 	public String getAuthMethod() {
@@ -174,6 +191,21 @@ public class MqttAuth extends MqttWireMessage {
 	public int getReturnCode() {
 		return returnCode;
 	}
-	
-	
+
+	public String getReasonString() {
+		return reasonString;
+	}
+
+	public void setReasonString(String reasonString) {
+		this.reasonString = reasonString;
+	}
+
+	public Map<String, String> getUserDefinedPairs() {
+		return userDefinedPairs;
+	}
+
+	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
+		this.userDefinedPairs = userDefinedPairs;
+	}
+
 }

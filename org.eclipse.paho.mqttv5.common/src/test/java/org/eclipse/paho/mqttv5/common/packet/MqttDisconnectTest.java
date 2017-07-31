@@ -18,6 +18,8 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
@@ -30,6 +32,12 @@ public class MqttDisconnectTest {
 	private static final String reasonString = "Reason String 123.";
 	private static final int sessionExpiryInterval = 60;
 	private static final String serverReference = "127.0.0.1";
+	private static final String userKey1 = "userKey1";
+	private static final String userKey2 = "userKey2";
+	private static final String userKey3 = "userKey3";
+	private static final String userValue1 = "userValue1";
+	private static final String userValue2 = "userValue2";
+	private static final String userValue3 = "userValue3";
 	
 	@Test
 	public void testEncodingMqttDisconnect() throws MqttException {
@@ -56,6 +64,10 @@ public class MqttDisconnectTest {
 		Assert.assertEquals(reasonString, decodedDisconnectPacket.getReasonString());
 		Assert.assertEquals(sessionExpiryInterval, decodedDisconnectPacket.getSessionExpiryInterval());
 		Assert.assertEquals(serverReference, decodedDisconnectPacket.getServerReference());
+		Assert.assertEquals(3, decodedDisconnectPacket.getUserDefinedPairs().size());
+		Assert.assertEquals(userValue1, decodedDisconnectPacket.getUserDefinedPairs().get(userKey1));
+		Assert.assertEquals(userValue2, decodedDisconnectPacket.getUserDefinedPairs().get(userKey2));
+		Assert.assertEquals(userValue3, decodedDisconnectPacket.getUserDefinedPairs().get(userKey3));
 		
 		
 	}
@@ -65,6 +77,11 @@ public class MqttDisconnectTest {
 		mqttDisconnectPacket.setReasonString(reasonString);
 		mqttDisconnectPacket.setSessionExpiryInterval(sessionExpiryInterval);
 		mqttDisconnectPacket.setServerReference(serverReference);
+		Map<String, String> userDefinedPairs = new HashMap<String,String>();
+		userDefinedPairs.put(userKey1, userValue1);
+		userDefinedPairs.put(userKey2, userValue2);
+		userDefinedPairs.put(userKey3, userValue3);
+		mqttDisconnectPacket.setUserDefinedPairs(userDefinedPairs);
 		return mqttDisconnectPacket;
 	}
 	

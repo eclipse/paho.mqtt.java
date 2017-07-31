@@ -19,6 +19,8 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
@@ -31,15 +33,26 @@ public class MqttConnAckTest {
 	private static final boolean sessionPresent = true;
 	private static final int returnCode = MqttReturnCode.RETURN_CODE_SERVER_MOVED;
 	private static final int receiveMaximum = 100;
-	private static final boolean retainUnavailableAdvertisement = true;
+	private static final int maximumQoS = 1;
+	private static final boolean retainAvailableAdvertisement = true;
+	private static final int maximumPacketSize = 128000;
 	private static final String assignedClientIdentifier = "AssignedClientId";
 	private static final int topicAliasMaximum = 100;
 	private static final String reasonString = "Everything is fine.";
+	private static final boolean wildcardSubscriptionsAvailable = true;
+	private static final boolean subscriptionIdentifiersAvailable = true;
+	private static final boolean sharedSubscriptionAvailable = true;
 	private static final int serverKeepAlive = 60;
-	private static final String replyInfo = "assignedTopicForSession";
+	private static final String responseInfo = "assignedTopicForSession";
 	private static final String serverReference = "127.0.0.1";
 	private static final String authMethod = "PASSWORD";
 	private static final byte[] authData = "secretPassword123".getBytes();
+	private static final String userKey1 = "userKey1";
+	private static final String userKey2 = "userKey2";
+	private static final String userKey3 = "userKey3";
+	private static final String userValue1 = "userValue1";
+	private static final String userValue2 = "userValue2";
+	private static final String userValue3 = "userValue3";
 
 	
 
@@ -71,18 +84,27 @@ public class MqttConnAckTest {
 		
 		MqttConnAck decodedConnAckPacket = (MqttConnAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
-		Assert.assertEquals(sessionPresent, decodedConnAckPacket.getSessionPresent());
-		Assert.assertEquals(returnCode, decodedConnAckPacket.getReturnCode());
 		Assert.assertEquals(receiveMaximum, decodedConnAckPacket.getReceiveMaximum());
-		Assert.assertEquals(retainUnavailableAdvertisement, decodedConnAckPacket.getRetainUnavailableAdvertisement());
+		Assert.assertEquals(maximumQoS, decodedConnAckPacket.getMaximumQoS());
+		Assert.assertEquals(retainAvailableAdvertisement, decodedConnAckPacket.getRetainUnavailableAdvertisement());
+		Assert.assertEquals(maximumPacketSize, decodedConnAckPacket.getMaximumPacketSize());
 		Assert.assertEquals(assignedClientIdentifier, decodedConnAckPacket.getAssignedClientIdentifier());
 		Assert.assertEquals(topicAliasMaximum, decodedConnAckPacket.getTopicAliasMaximum());
 		Assert.assertEquals(reasonString, decodedConnAckPacket.getReasonString());
+		Assert.assertEquals(3, decodedConnAckPacket.getUserDefinedPairs().size());
+		Assert.assertEquals(userValue1, decodedConnAckPacket.getUserDefinedPairs().get(userKey1));
+		Assert.assertEquals(userValue2, decodedConnAckPacket.getUserDefinedPairs().get(userKey2));
+		Assert.assertEquals(userValue3, decodedConnAckPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertEquals(wildcardSubscriptionsAvailable, decodedConnAckPacket.isWildcardSubscriptionsAvailable());
+		Assert.assertEquals(subscriptionIdentifiersAvailable, decodedConnAckPacket.isSubscriptionIdentifiersAvailable());
+		Assert.assertEquals(sharedSubscriptionAvailable, decodedConnAckPacket.isSharedSubscriptionAvailable());
 		Assert.assertEquals(serverKeepAlive, decodedConnAckPacket.getServerKeepAlive());
-		Assert.assertEquals(replyInfo, decodedConnAckPacket.getReplyInfo());
+		Assert.assertEquals(responseInfo, decodedConnAckPacket.getReplyInfo());
 		Assert.assertEquals(serverReference, decodedConnAckPacket.getServerReference());
 		Assert.assertEquals(authMethod, decodedConnAckPacket.getAuthMethod());
 		Assert.assertArrayEquals(authData, decodedConnAckPacket.getAuthData());
+		Assert.assertEquals(sessionPresent, decodedConnAckPacket.getSessionPresent());
+		Assert.assertEquals(returnCode, decodedConnAckPacket.getReturnCode());
 	}
 	
 	/**
@@ -102,12 +124,22 @@ public class MqttConnAckTest {
 		mqttConnAckPacket.setReceiveMaximum(100);
 		
 		mqttConnAckPacket.setReceiveMaximum(receiveMaximum);
-		mqttConnAckPacket.setRetainUnavailableAdvertisement(retainUnavailableAdvertisement);
+		mqttConnAckPacket.setMaximumQoS(maximumQoS);
+		mqttConnAckPacket.setRetainAvailableAdvertisement(retainAvailableAdvertisement);
+		mqttConnAckPacket.setMaximumPacketSize(maximumPacketSize);
 		mqttConnAckPacket.setAssignedClientIdentifier(assignedClientIdentifier);
 		mqttConnAckPacket.setTopicAliasMaximum(topicAliasMaximum);
 		mqttConnAckPacket.setReasonString(reasonString);
+		Map<String, String> userDefinedPairs = new HashMap<String,String>();
+		userDefinedPairs.put(userKey1, userValue1);
+		userDefinedPairs.put(userKey2, userValue2);
+		userDefinedPairs.put(userKey3, userValue3);
+		mqttConnAckPacket.setUserDefinedPairs(userDefinedPairs);
+		mqttConnAckPacket.setWildcardSubscriptionsAvailable(wildcardSubscriptionsAvailable);
+		mqttConnAckPacket.setSubscriptionIdentifiersAvailable(subscriptionIdentifiersAvailable);
+		mqttConnAckPacket.setSharedSubscriptionAvailable(sharedSubscriptionAvailable);
 		mqttConnAckPacket.setServerKeepAlive(serverKeepAlive);
-		mqttConnAckPacket.setReplyInfo(replyInfo);
+		mqttConnAckPacket.setResponseInfo(responseInfo);
 		mqttConnAckPacket.setServerReference(serverReference);
 		mqttConnAckPacket.setAuthMethod(authMethod);
 		mqttConnAckPacket.setAuthData(authData);
@@ -116,3 +148,6 @@ public class MqttConnAckTest {
 	}
 
 }
+
+
+

@@ -32,18 +32,6 @@ public class MqttConnect extends MqttWireMessage {
 	
 	public static final String KEY = "Con";
 	
-	// Identifier / Value Identifiers
-	private static final byte SESSION_EXPIRY_INTERVAL_IDENTIFIER 	= 0x11;
-	private static final byte WILL_DELAY_INTERVAL_IDENTIFIER 		= 0x18;
-	private static final byte RECEIVE_MAXIMUM_IDENTIFIER 			= 0x21;
-	private static final byte TOPIC_ALIAS_MAXIMUM_IDENTIFIER 		= 0x22;
-	private static final byte REQUEST_REPLY_INFO_IDENTIFIER 		= 0x19;
-	private static final byte REQUEST_PROBLEM_INFO_IDENTIFIER 		= 0x17;
-	private static final byte USER_DEFINED_PAIR_IDENTIFIER 			= 0x26;
-	private static final byte AUTH_METHOD_IDENTIFIER 				= 0x15;
-	private static final byte AUTH_DATA_IDENTIFIER 					= 0x16;
-	
-	
 	// Fields
 	private byte info;
 	private String clientId;
@@ -58,8 +46,11 @@ public class MqttConnect extends MqttWireMessage {
 	private Integer sessionExpiryInterval;
 	private Integer willDelayInterval;
 	private Integer receiveMaximum;
+	private Integer maximumPacketSize;
+
+
 	private Integer topicAliasMaximum;
-	private Boolean requestReplyInfo;
+	private Boolean requestResponseInfo;
 	private Boolean requestProblemInfo;
 	private Map<String, String> userDefinedPairs = new HashMap<>();
 	private String authMethod;
@@ -219,60 +210,66 @@ public class MqttConnect extends MqttWireMessage {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream= new DataOutputStream(baos);
 			
-			// If Present, encode the Session Expiry Interval (3.1.2.12)
+			// If Present, encode the Session Expiry Interval (3.1.2.11.2)
 			if(sessionExpiryInterval != null){
-				outputStream.write(SESSION_EXPIRY_INTERVAL_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER);
 				outputStream.writeInt(sessionExpiryInterval);
 			}
 			
-			// If Present, encode the Will Delay Interval (3.1.2.13)
+			// If Present, encode the Will Delay Interval (3.1.2.11.3)
 			if(willDelayInterval != null){
-				outputStream.write(WILL_DELAY_INTERVAL_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.WILL_DELAY_INTERVAL_IDENTIFIER);
 				outputStream.writeInt(willDelayInterval);
 			}
 			
-			// If present, encode the Receive Maximum (3.1.2.14)
+			// If present, encode the Receive Maximum (3.1.2.11.4)
 			if(receiveMaximum != null){
-				outputStream.write(RECEIVE_MAXIMUM_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.RECEIVE_MAXIMUM_IDENTIFIER);
 				outputStream.writeShort(receiveMaximum);
 			}
 			
-			// If present, encode the Topic Alias Maximum (3.1.2.15)
+			// If present, encode the Maximum Packet Size (3.1.2.11.5)
+			if(maximumPacketSize != null){
+				outputStream.write(MqttPropertyIdentifiers.MAXIMUM_PACKET_SIZE_IDENTIFIER);
+				outputStream.writeInt(maximumPacketSize);
+			}
+			
+			// If present, encode the Topic Alias Maximum (3.1.2.11.6)
 			if(topicAliasMaximum != null){
-				outputStream.write(TOPIC_ALIAS_MAXIMUM_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.TOPIC_ALIAS_MAXIMUM_IDENTIFIER);
 				outputStream.writeShort(topicAliasMaximum);
 			}
 			
-			// If present, encode the Request Reply Info (3.1.2.16)
-			if(requestReplyInfo != null){
-				outputStream.write(REQUEST_REPLY_INFO_IDENTIFIER);
-				outputStream.write(requestReplyInfo ? 1 : 0);
+			// If present, encode the Request Reply Info (3.1.2.11.7)
+			if(requestResponseInfo != null){
+				outputStream.write(MqttPropertyIdentifiers.REQUEST_RESPONSE_INFO_IDENTIFIER);
+				outputStream.write(requestResponseInfo ? 1 : 0);
 			}
 			
-			// If present, encode the Request Problem Info (3.1.2.17)
+			// If present, encode the Request Problem Info (3.1.2.11.8)
 			if(requestProblemInfo != null){
-				outputStream.write(REQUEST_PROBLEM_INFO_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.REQUEST_PROBLEM_INFO_IDENTIFIER);
 				outputStream.write(requestProblemInfo ? 1 : 0);
 			}
 			
-			// If present, encode the User Defined Name-Value Pairs (3.1.2.18)
+			// If present, encode the User Defined Name-Value Pairs (3.1.2.11.9)
 			if(userDefinedPairs.size() != 0){
 				for(Map.Entry<String, String> entry : userDefinedPairs.entrySet()){
-					outputStream.write(USER_DEFINED_PAIR_IDENTIFIER);
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, entry.getKey());
 					encodeUTF8(outputStream, entry.getValue());
 				}
 			}
 			
-			// If present, encode the Auth Method (3.1.2.19)
+			// If present, encode the Auth Method (3.1.2.11.10)
 			if(authMethod != null){
-				outputStream.write(AUTH_METHOD_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER);
 				encodeUTF8(outputStream, authMethod);
 			}
 			
-			// If present, encode the Auth Data (3.1.2.20)
+			// If present, encode the Auth Data (3.1.2.11.11)
 			if(authData != null){
-			outputStream.write(AUTH_DATA_IDENTIFIER);
+			outputStream.write(MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER);
 			outputStream.writeShort(authData.length);
 			outputStream.write(authData);
 			}
@@ -298,25 +295,27 @@ public class MqttConnect extends MqttWireMessage {
 				// Get the first byte (Identifier)
 				byte identifier = inputStream.readByte();
 				
-				if(identifier ==  SESSION_EXPIRY_INTERVAL_IDENTIFIER){
+				if(identifier ==  MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER){
 					sessionExpiryInterval = inputStream.readInt();
-				} else if(identifier ==  WILL_DELAY_INTERVAL_IDENTIFIER){
+				} else if(identifier ==  MqttPropertyIdentifiers.WILL_DELAY_INTERVAL_IDENTIFIER){
 					willDelayInterval = inputStream.readInt();
-				} else if(identifier ==  RECEIVE_MAXIMUM_IDENTIFIER){
+				} else if(identifier ==  MqttPropertyIdentifiers.RECEIVE_MAXIMUM_IDENTIFIER){
 					receiveMaximum = (int) inputStream.readShort();
-				} else if(identifier ==  TOPIC_ALIAS_MAXIMUM_IDENTIFIER){
+				} else if(identifier ==  MqttPropertyIdentifiers.MAXIMUM_PACKET_SIZE_IDENTIFIER){
+					maximumPacketSize =  inputStream.readInt();
+				} else if(identifier ==  MqttPropertyIdentifiers.TOPIC_ALIAS_MAXIMUM_IDENTIFIER){
 					topicAliasMaximum = (int) inputStream.readShort();
-				} else if(identifier ==  REQUEST_REPLY_INFO_IDENTIFIER){
-					requestReplyInfo = inputStream.read() !=0;
-				} else if(identifier ==  REQUEST_PROBLEM_INFO_IDENTIFIER){
+				} else if(identifier ==  MqttPropertyIdentifiers.REQUEST_RESPONSE_INFO_IDENTIFIER){
+					requestResponseInfo = inputStream.read() !=0;
+				} else if(identifier ==  MqttPropertyIdentifiers.REQUEST_PROBLEM_INFO_IDENTIFIER){
 					requestProblemInfo = inputStream.read() != 0;
-				} else if(identifier ==  USER_DEFINED_PAIR_IDENTIFIER){
+				} else if(identifier ==  MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
 					userDefinedPairs.put(key, value);
-				} else if(identifier ==  AUTH_METHOD_IDENTIFIER){
+				} else if(identifier ==  MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER){
 					authMethod = decodeUTF8(inputStream);
-				} else if(identifier ==  AUTH_DATA_IDENTIFIER){
+				} else if(identifier ==  MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER){
 					int authDataLength = inputStream.readShort();
 					authData = new byte[authDataLength];
 					inputStream.read(authData, 0, authDataLength);
@@ -395,13 +394,17 @@ public class MqttConnect extends MqttWireMessage {
 	public void setReceiveMaximum(int receiveMaximum) {
 		this.receiveMaximum = receiveMaximum;
 	}
+	
+	public void setMaximumPacketSize(int maximumPacketSize) {
+		this.maximumPacketSize = maximumPacketSize;
+	}
 
 	public void setTopicAliasMaximum(int topicAliasMaximum) {
 		this.topicAliasMaximum = topicAliasMaximum;
 	}
 
 	public void setRequestReplyInfo(boolean requestReplyInfo) {
-		this.requestReplyInfo = requestReplyInfo;
+		this.requestResponseInfo = requestReplyInfo;
 	}
 
 	public void setRequestProblemInfo(boolean requestProblemInfo) {
@@ -464,13 +467,17 @@ public class MqttConnect extends MqttWireMessage {
 	public int getReceiveMaximum() {
 		return receiveMaximum;
 	}
+	
+	public int getMaximumPacketSize() {
+		return maximumPacketSize;
+	}
 
 	public int getTopicAliasMaximum() {
 		return topicAliasMaximum;
 	}
 
 	public Boolean getRequestReplyInfo() {
-		return requestReplyInfo;
+		return requestResponseInfo;
 	}
 
 	public Boolean getRequestProblemInfo() {
@@ -491,14 +498,15 @@ public class MqttConnect extends MqttWireMessage {
 
 	@Override
 	public String toString() {
-		return "MqttConnect [info=" + info + ", clientId=" + clientId + ", cleanSession=" + cleanSession
-				+ ", willMessage=" + willMessage + ", userName=" + userName + ", password=" + Arrays.toString(password)
-				+ ", keepAliveInterval=" + keepAliveInterval + ", willDestination=" + willDestination + ", mqttVersion="
-				+ mqttVersion + ", sessionExpiryInterval=" + sessionExpiryInterval + ", willDelayInterval="
-				+ willDelayInterval + ", receiveMaximum=" + receiveMaximum + ", topicAliasMaximum=" + topicAliasMaximum
-				+ ", requestReplyInfo=" + requestReplyInfo + ", requestProblemInfo=" + requestProblemInfo
-				+ ", userDefinedPairs=" + userDefinedPairs + ", authMethod=" + authMethod + ", authData="
-				+ Arrays.toString(authData) + "]";
+		return "MqttConnect [info=" + info + ", clientId=" + clientId + ", reservedByte=" + reservedByte
+				+ ", cleanSession=" + cleanSession + ", willMessage=" + willMessage + ", userName=" + userName
+				+ ", password=" + Arrays.toString(password) + ", keepAliveInterval=" + keepAliveInterval
+				+ ", willDestination=" + willDestination + ", mqttVersion=" + mqttVersion + ", sessionExpiryInterval="
+				+ sessionExpiryInterval + ", willDelayInterval=" + willDelayInterval + ", receiveMaximum="
+				+ receiveMaximum + ", maximumPacketSize=" + maximumPacketSize + ", topicAliasMaximum="
+				+ topicAliasMaximum + ", requestResponseInfo=" + requestResponseInfo + ", requestProblemInfo="
+				+ requestProblemInfo + ", userDefinedPairs=" + userDefinedPairs + ", authMethod=" + authMethod
+				+ ", authData=" + Arrays.toString(authData) + "]";
 	}
 
 	public boolean isReservedByte() {

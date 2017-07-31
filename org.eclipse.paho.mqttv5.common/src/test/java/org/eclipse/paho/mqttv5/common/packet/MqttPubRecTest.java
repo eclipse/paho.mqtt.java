@@ -18,6 +18,8 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
@@ -28,6 +30,12 @@ import org.junit.Test;
 public class MqttPubRecTest {
 	private static final int returnCode = MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR;
 	private static final String reasonString = "Reason String 123.";
+	private static final String userKey1 = "userKey1";
+	private static final String userKey2 = "userKey2";
+	private static final String userKey3 = "userKey3";
+	private static final String userValue1 = "userValue1";
+	private static final String userValue2 = "userValue2";
+	private static final String userValue3 = "userValue3";
 	
 	@Test
 	public void testEncodingMqttPubRec() throws MqttException {
@@ -50,6 +58,10 @@ public class MqttPubRecTest {
 		
 		Assert.assertEquals(returnCode, decodedPubRecPacket.getReturnCode());
 		Assert.assertEquals(reasonString, decodedPubRecPacket.getReasonString());
+		Assert.assertEquals(3, decodedPubRecPacket.getUserDefinedPairs().size());
+		Assert.assertEquals(userValue1, decodedPubRecPacket.getUserDefinedPairs().get(userKey1));
+		Assert.assertEquals(userValue2, decodedPubRecPacket.getUserDefinedPairs().get(userKey2));
+		Assert.assertEquals(userValue3, decodedPubRecPacket.getUserDefinedPairs().get(userKey3));
 		
 		
 	}
@@ -57,6 +69,11 @@ public class MqttPubRecTest {
 	public MqttPubRec generateMqttPubRecPacket() throws MqttException{
 		MqttPubRec mqttPubRecPacket = new MqttPubRec(returnCode);
 		mqttPubRecPacket.setReasonString(reasonString);
+		Map<String, String> userDefinedPairs = new HashMap<String,String>();
+		userDefinedPairs.put(userKey1, userValue1);
+		userDefinedPairs.put(userKey2, userValue2);
+		userDefinedPairs.put(userKey3, userValue3);
+		mqttPubRecPacket.setUserDefinedPairs(userDefinedPairs);
 		
 		return mqttPubRecPacket;
 	}

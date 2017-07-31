@@ -21,12 +21,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
 public class MqttPubAck extends MqttAck{
-	
-
 	
 	private static final int[] validReturnCodes = {
 			MqttReturnCode.RETURN_CODE_SUCCESS,
@@ -38,24 +38,11 @@ public class MqttPubAck extends MqttAck{
 			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
 			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID
 	};
-	
-	private static final int[] validReturnCodes = {
-			RETURN_CODE_SUCCESS,
-			RETURN_CODE_NO_MATCHING_SUBSCRIBERS,
-			RETURN_CODE_UNSPECIFIED_ERROR,
-			RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
-			RETURN_CODE_NOT_AUTHORIZED,
-			RETURN_CODE_TOPIC_INVALID,
-			RETURN_CODE_PACKET_TOO_LARGE,
-			RETURN_CODE_QOS_LEVEL_NOT_SUPPORTED
-	};
-	
-	// Identifier / Value Identifiers
-	private static final byte REASON_STRING_IDENTIFIER 					= 0x1F;
-	
+
 	// Fields
 	private int returnCode;
 	private String reasonString;
+	private Map<String, String> userDefinedPairs = new HashMap<>();
 
 	public MqttPubAck(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
@@ -103,10 +90,19 @@ public class MqttPubAck extends MqttAck{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 			
-			// If Present, encode the Reason String (3.4.2.3)
+			// If Present, encode the Reason String (3.4.2.2.2)
 			if(reasonString != null){
-				outputStream.write(REASON_STRING_IDENTIFIER);
+				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
+			}
+			
+			// If Present, encode the User Properties (3.4.2.2.3)
+			if (userDefinedPairs.size() != 0) {
+				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, entry.getKey());
+					encodeUTF8(outputStream, entry.getValue());
+				}
 			}
 			
 			outputStream.flush();
@@ -128,8 +124,12 @@ public class MqttPubAck extends MqttAck{
 			while(inputStream.available() > 0){
 				// Get the first Byte
 				byte identifier = inputStream.readByte();
-				if(identifier == REASON_STRING_IDENTIFIER){
+				if(identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER){
 					reasonString = decodeUTF8(inputStream);
+				} else if ( identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
+					String key = decodeUTF8(inputStream);
+					String value = decodeUTF8(inputStream);
+					userDefinedPairs.put(key, value);
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
@@ -148,6 +148,14 @@ public class MqttPubAck extends MqttAck{
 
 	public void setReasonString(String reasonString) {
 		this.reasonString = reasonString;
+	}
+
+	public Map<String, String> getUserDefinedPairs() {
+		return userDefinedPairs;
+	}
+
+	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
+		this.userDefinedPairs = userDefinedPairs;
 	}
 
 }
