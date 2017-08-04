@@ -298,5 +298,6 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 		for (int i=0; i<files.length; i++) {
 			files[i].delete();
 		}
+		clientDir.delete();
 	}
 }

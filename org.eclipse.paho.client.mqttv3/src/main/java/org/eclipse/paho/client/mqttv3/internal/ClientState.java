@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2017 IBM Corp and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@
  *    James Sutton - Ping Callback (bug 473928)
  *    Ian Craggs - fix for NPE bug 470718
  *    James Sutton - Automatic Reconnect & Offline Buffering
+ *    Jens Reimann - Fix issue #370
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -46,6 +47,9 @@ import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubAck;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -480,7 +484,18 @@ public class ClientState {
 	public void send(MqttWireMessage message, MqttToken token) throws MqttException {
 		final String methodName = "send";
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
-			message.setMessageId(getNextMessageId());
+				if(message instanceof MqttPublish  && (((MqttPublish) message).getMessage().getQos() != 0)){
+						message.setMessageId(getNextMessageId());
+				}else if(message instanceof MqttPubAck ||
+						message instanceof MqttPubRec ||
+						message instanceof MqttPubRel ||
+						message instanceof MqttPubComp ||
+						message instanceof MqttSubscribe ||
+						message instanceof MqttSuback ||
+						message instanceof MqttUnsubscribe || 
+						message instanceof MqttUnsubAck){
+					message.setMessageId(getNextMessageId());
+				}
 		}
 		if (token != null ) {
 			try {
@@ -1340,7 +1355,9 @@ public class ClientState {
 	 */
 	protected void close() {
 		inUseMsgIds.clear();
-		pendingMessages.clear();
+		if (pendingMessages != null) {
+			pendingMessages.clear();
+		}
 		pendingFlows.clear();
 		outboundQoS2.clear();
 		outboundQoS1.clear();

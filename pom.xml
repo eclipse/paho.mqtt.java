@@ -4,13 +4,13 @@
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.1.1</version>
+	<version>1.2.0</version>
 
 	<properties>
 		<!-- source & target java version for MQTT Client -->
-		<mqttclient.java.version>1.4</mqttclient.java.version>
+		<mqttclient.java.version>1.7</mqttclient.java.version>
 		<!-- source & target java version for others modules -->
-		<java.version>1.6</java.version>
+		<java.version>1.7</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<build.level>${maven.build.timestamp}</build.level>
 		<tycho.version>0.20.0</tycho.version>
@@ -171,6 +171,11 @@
 					<artifactId>tycho-pack200b-plugin</artifactId>
 					<version>${tycho.version}</version>
 				</plugin>
+				<plugin>
+			    <groupId>org.eluder.coveralls</groupId>
+			    <artifactId>coveralls-maven-plugin</artifactId>
+			    <version>4.3.0</version>
+			</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>

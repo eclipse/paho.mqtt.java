@@ -22,6 +22,8 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.BufferedMessage;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -80,22 +82,26 @@ public class ClientComms {
 	private boolean	closePending = false;
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
-	
+
+	private ExecutorService executorService;
+
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle
 	 * the network calls.
 	 * @param client The {@link IMqttAsyncClient}
 	 * @param persistence the {@link MqttClientPersistence} layer.
 	 * @param pingSender the {@link MqttPingSender}
+	 * @param executorService the {@link ExecutorService}
 	 * @throws MqttException if an exception occurs whilst communicating with the server
 	 */
-	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender) throws MqttException {
+	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client 	= client;
 		this.persistence = persistence;
 		this.pingSender = pingSender;
 		this.pingSender.init(this);
-		
+		this.executorService = executorService;
+
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback 	= new CommsCallback(this);
 		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender);
@@ -106,6 +112,22 @@ public class ClientComms {
 
 	CommsReceiver getReceiver() {
 		return receiver;
+	}
+
+	private void shutdownExecutorService() {
+		String methodName = "shutdownExecutorService";
+		executorService.shutdown();
+		try {
+			if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+				executorService.shutdownNow();
+				if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+					log.fine(CLASS_NAME, methodName, "executorService did not terminate");
+				}
+			}
+		} catch (InterruptedException ie) {
+			executorService.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	/**
@@ -164,8 +186,8 @@ public class ClientComms {
 			} else {
 				this.internalSend(message, token);
 			}
-		} else if(disconnectedMessageBuffer != null && isResting()){
-			//@TRACE 508=Client Resting, Offline Buffer available. Adding message to buffer. message={0}
+		} else if(disconnectedMessageBuffer != null) {
+			//@TRACE 508=Offline Buffer available. Adding message to buffer. message={0}
 			log.fine(CLASS_NAME, methodName, "508", new Object[] {message.getKey()});
 			if(disconnectedMessageBuffer.isPersistBuffer()){
 				this.clientState.persistBufferedMessage(message);
@@ -185,12 +207,12 @@ public class ClientComms {
 	 * store which normally survives a disconnect.
 	 * @throws MqttException  if not disconnected
 	 */
-	public void close() throws MqttException {
+	public void close(boolean force) throws MqttException {
 		final String methodName = "close";
 		synchronized (conLock) {
 			if (!isClosed()) {
-				// Must be disconnected before close can take place
-				if (!isDisconnected()) {
+				// Must be disconnected before close can take place or if we are being forced
+				if (!isDisconnected() || force) {
 					//@TRACE 224=failed: not disconnected
 					log.fine(CLASS_NAME, methodName, "224");
 
@@ -205,7 +227,7 @@ public class ClientComms {
 				}
 
 				conState = CLOSED;
-
+				shutdownExecutorService();
 				// ShutdownConnection has already cleaned most things
 				clientState.close();
 				clientState = null;
@@ -254,7 +276,7 @@ public class ClientComms {
                 this.clientState.setMaxInflight(conOptions.getMaxInflight());
 
 				tokenStore.open();
-				ConnectBG conbg = new ConnectBG(this, token, connect);
+				ConnectBG conbg = new ConnectBG(this, token, connect, executorService);
 				conbg.start();
 			}
 			else {
@@ -405,7 +427,7 @@ public class ClientComms {
 		synchronized(conLock) {
 			if (closePending) {
 				try {
-					close();
+					close(true);
 				} catch (Exception e) { // ignore any errors as closing
 				}
 			}
@@ -479,7 +501,7 @@ public class ClientComms {
 			//@TRACE 218=state=DISCONNECTING
 			log.fine(CLASS_NAME,methodName,"218");
 			conState = DISCONNECTING;
-			DisconnectBG discbg = new DisconnectBG(disconnect,quiesceTimeout,token);
+			DisconnectBG discbg = new DisconnectBG(disconnect,quiesceTimeout,token, executorService);
 			discbg.start();
 		}
 	}
@@ -497,7 +519,9 @@ public class ClientComms {
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
 		// Allow current inbound and outbound work to complete
-		clientState.quiesce(quiesceTimeout);
+		if (clientState != null) {
+			clientState.quiesce(quiesceTimeout);
+		}
 		MqttToken token = new MqttToken(client.getClientId());
 		try {
 			// Send disconnect packet
@@ -636,22 +660,23 @@ public class ClientComms {
 	// the socket could take time to create.
 	private class ConnectBG implements Runnable {
 		ClientComms 	clientComms = null;
-		Thread 			cBg = null;
 		MqttToken 		conToken;
 		MqttConnect 	conPacket;
+		private String threadName;
 
-		ConnectBG(ClientComms cc, MqttToken cToken, MqttConnect cPacket) {
+		ConnectBG(ClientComms cc, MqttToken cToken, MqttConnect cPacket, ExecutorService executorService) {
 			clientComms = cc;
 			conToken 	= cToken;
 			conPacket 	= cPacket;
-			cBg = new Thread(this, "MQTT Con: "+getClient().getClientId());
+			threadName = "MQTT Con: "+getClient().getClientId();
 		}
 
 		void start() {
-			cBg.start();
+			executorService.execute(this);
 		}
 
 		public void run() {
+			Thread.currentThread().setName(threadName);
 			final String methodName = "connectBG:run";
 			MqttException mqttEx = null;
 			//@TRACE 220=>
@@ -675,10 +700,10 @@ public class ClientComms {
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
 				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream());
-				receiver.start("MQTT Rec: "+getClient().getClientId());
+				receiver.start("MQTT Rec: "+getClient().getClientId(), executorService);
 				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream());
-				sender.start("MQTT Snd: "+getClient().getClientId());
-				callback.start("MQTT Call: "+getClient().getClientId());				
+				sender.start("MQTT Snd: "+getClient().getClientId(), executorService);
+				callback.start("MQTT Call: "+getClient().getClientId(), executorService);
 				internalSend(conPacket, conToken);
 			} catch (MqttException ex) {
 				//@TRACE 212=connect failed: unexpected exception
@@ -699,23 +724,24 @@ public class ClientComms {
 	// Kick off the disconnect processing in the background so that it does not block. For instance
 	// the quiesce
 	private class DisconnectBG implements Runnable {
-		Thread dBg = null;
 		MqttDisconnect disconnect;
 		long quiesceTimeout;
 		MqttToken token;
+		private String threadName;
 
-		DisconnectBG(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token ) {
+		DisconnectBG(MqttDisconnect disconnect, long quiesceTimeout, MqttToken token, ExecutorService executorService) {
 			this.disconnect = disconnect;
 			this.quiesceTimeout = quiesceTimeout;
 			this.token = token;
 		}
 
 		void start() {
-			dBg = new Thread(this, "MQTT Disc: "+getClient().getClientId());
-			dBg.start();
+			threadName = "MQTT Disc: "+getClient().getClientId();
+			executorService.execute(this);
 		}
-		
+
 		public void run() {
+			Thread.currentThread().setName(threadName);
 			final String methodName = "disconnectBG:run";
 			//@TRACE 221=>
 			log.fine(CLASS_NAME, methodName, "221");
@@ -806,37 +832,50 @@ public class ClientComms {
 	
 
 	/**
-	 * When the client automatically reconnects, we want to send all messages from the
+	 * When the client connects, we want to send all messages from the
 	 * buffer first before allowing the user to send any messages
 	 */
-	public void notifyReconnect() {
-		final String methodName = "notifyReconnect";
+	public void notifyConnect() {
+		final String methodName = "notifyConnect";
 		if(disconnectedMessageBuffer != null){
-			//@TRACE 509=Client Reconnected, Offline Buffer Available. Sending Buffered Messages.
+			//@TRACE 509=Client Connected, Offline Buffer Available. Sending Buffered Messages.
 			log.fine(CLASS_NAME, methodName, "509");
-			disconnectedMessageBuffer.setPublishCallback(new IDisconnectedBufferCallback() {
-				
-				public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
-					if (isConnected()) {
-						while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-1)){
-							// We need to Yield to the other threads to allow the in flight messages to clear
-							Thread.yield();
-							
-						}
-						//@TRACE 510=Publising Buffered message message={0}
-						log.fine(CLASS_NAME, methodName, "510", new Object[] {bufferedMessage.getMessage().getKey()});
-						internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());
-						// Delete from persistence if in there
-						clientState.unPersistBufferedMessage(bufferedMessage.getMessage());
-					} else {
-						//@TRACE 208=failed: not connected
-						log.fine(CLASS_NAME, methodName, "208");
-						throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
-					}	
-				}
-			});
-			new Thread(disconnectedMessageBuffer).start();
+
+			disconnectedMessageBuffer.setPublishCallback(new ReconnectDisconnectedBufferCallback(methodName));
+			executorService.execute(disconnectedMessageBuffer);
 		}
+	}
+	
+	class ReconnectDisconnectedBufferCallback implements IDisconnectedBufferCallback{
+		
+		final String methodName;
+		
+		ReconnectDisconnectedBufferCallback(String methodName) {
+			this.methodName = methodName;
+		}
+		
+		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
+			if (isConnected()) {
+				while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-1)){
+					// We need to Yield to the other threads to allow the in flight messages to clear
+					Thread.yield();
+					
+				}
+				//@TRACE 510=Publising Buffered message message={0}
+				log.fine(CLASS_NAME, methodName, "510", new Object[] {bufferedMessage.getMessage().getKey()});
+				internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());
+				// Delete from persistence if in there
+				clientState.unPersistBufferedMessage(bufferedMessage.getMessage());
+			} else {
+				//@TRACE 208=failed: not connected
+				log.fine(CLASS_NAME, methodName, "208");
+				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
+			}	
+		}
+	}
+
+	public int getActualInFlight() {
+		return this.clientState.getActualInFlight();
 	}
 
 }

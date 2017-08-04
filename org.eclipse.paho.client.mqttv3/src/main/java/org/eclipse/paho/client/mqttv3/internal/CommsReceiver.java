@@ -17,6 +17,9 @@ package org.eclipse.paho.client.mqttv3.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
@@ -44,6 +47,10 @@ public class CommsReceiver implements Runnable {
 	private CommsTokenStore tokenStore = null;
 	private Thread recThread = null;
 	private volatile boolean receiving;
+	private final Semaphore runningSemaphore = new Semaphore(1);
+	private String threadName;
+	private Future receiverFuture;
+
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
 		this.in = new MqttInputStream(clientState, in);
@@ -55,17 +62,18 @@ public class CommsReceiver implements Runnable {
 
 	/**
 	 * Starts up the Receiver's thread.
-	 * @param threadName The name of the thread
+	 * @param threadName the thread name.
+	 * @param executorService used to execute the thread
 	 */
-	public void start(String threadName) {
+	public void start(String threadName, ExecutorService executorService) {
+		this.threadName = threadName;
 		final String methodName = "start";
 		//@TRACE 855=starting
 		log.fine(CLASS_NAME,methodName, "855");
 		synchronized (lifecycle) {
 			if (!running) {
 				running = true;
-				recThread = new Thread(this, threadName);
-				recThread.start();
+				receiverFuture = executorService.submit(this);
 			}
 		}
 	}
@@ -76,6 +84,9 @@ public class CommsReceiver implements Runnable {
 	public void stop() {
 		final String methodName = "stop";
 		synchronized (lifecycle) {
+			if (receiverFuture != null) {
+				receiverFuture.cancel(true);
+			}
 			//@TRACE 850=stopping
 			log.fine(CLASS_NAME,methodName, "850");
 			if (running) {
@@ -84,14 +95,11 @@ public class CommsReceiver implements Runnable {
 				if (!Thread.currentThread().equals(recThread)) {
 					try {
 						// Wait for the thread to finish.
-						// It is always a good idea to set a timeout.
-						// WARNING: the timeout must be correlated with the
-						// socket read timeout.
-						// Unfortunately we cannot access the socket here to
-						// get its read timeout.
-						recThread.join(1500);
+						runningSemaphore.acquire();
 					}
 					catch (InterruptedException ex) {
+					} finally {
+						runningSemaphore.release();
 					}
 				}
 			}
@@ -105,8 +113,17 @@ public class CommsReceiver implements Runnable {
 	 * Run loop to receive messages from the server.
 	 */
 	public void run() {
+		recThread = Thread.currentThread();
+		recThread.setName(threadName);
 		final String methodName = "run";
 		MqttToken token = null;
+
+		try {
+			runningSemaphore.acquire();
+		} catch (InterruptedException e) {
+			running = false;
+			return;
+		}
 
 		while (running && (in != null)) {
 			try {
@@ -166,6 +183,7 @@ public class CommsReceiver implements Runnable {
 			}
 			finally {
 				receiving = false;
+				runningSemaphore.release();
 			}
 		}
 

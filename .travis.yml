@@ -1,1 +1,23 @@
+sudo: true
 language: java
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+#    - os: osx
+
+sudo: required
+
+before_install:
+  - ./travis-install.sh
+
+script: mvn --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test -Dtest.server_ssl_port=18885 -Dtest.server_uri=tcp://localhost:1883 -Dtest.server_websocket_uri=ws://localhost:8080 -B
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
+    packages:
+      - mosquitto

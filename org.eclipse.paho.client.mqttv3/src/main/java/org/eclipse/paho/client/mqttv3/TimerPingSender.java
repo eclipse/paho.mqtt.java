@@ -50,8 +50,7 @@ public class TimerPingSender implements MqttPingSender {
 		//@Trace 659=start timer for client:{0}
 		log.fine(CLASS_NAME, methodName, "659", new Object[]{clientid});
 				
-		//timer = new Timer("MQTT Ping: " + clientid);  // Cannot use for Java 1.4.2
-		timer = new Timer();
+		timer = new Timer("MQTT Ping: " + clientid);
 		//Check ping after first keep alive interval.
 		timer.schedule(new PingTask(), comms.getKeepAlive());
 	}
