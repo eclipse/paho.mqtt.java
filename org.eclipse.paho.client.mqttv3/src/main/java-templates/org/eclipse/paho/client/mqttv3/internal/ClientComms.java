@@ -29,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.BufferedMessage;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
@@ -198,6 +199,17 @@ public class ClientComms {
 			log.fine(CLASS_NAME, methodName, "208");
 			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
 		}
+	}
+
+	/**
+	 * Removes the message corresponding to the token from the outbound queue and persistence.
+	 * @param token The {@link IMqttDeliveryMqttToken} to remove
+	 * @return if the message is removed, then true, otherwise false
+	 * @throws MqttException if an error occurs sending the message
+	 */
+	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException {
+		final String methodName = "removeMessage";
+		return this.clientState.removeMessage(token);
 	}
 
 	/**
