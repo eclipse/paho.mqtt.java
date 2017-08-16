@@ -25,8 +25,8 @@ import java.io.InputStream;
 
 import org.eclipse.paho.mqttv5.common.ExceptionHelper;
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttPersistable;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
-import org.eclipse.paho.mqttv5.common.packet.util.MqttPersistable;
 import org.eclipse.paho.mqttv5.common.packet.util.MultiByteArrayInputStream;
 import org.eclipse.paho.mqttv5.common.packet.util.VariableByteInteger;
 
@@ -277,7 +277,7 @@ public abstract class MqttWireMessage {
 	 
 
 	 
-	 protected static byte[] encodeVariableByteInteger(int number){
+	 public static byte[] encodeVariableByteInteger(int number){
 		 int numBytes = 0;
 		 long no = number;
 		 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -299,7 +299,7 @@ public abstract class MqttWireMessage {
 	 /**
 	  * Decodes an MQTT Multi-Byte Integer from the given stream
 	  */
-	 protected static VariableByteInteger readVariableByteInteger(DataInputStream in) throws IOException {
+	 public static VariableByteInteger readVariableByteInteger(DataInputStream in) throws IOException {
 		 byte digit;
 		 int msgLength = 0;
 		 int multiplier = 1;

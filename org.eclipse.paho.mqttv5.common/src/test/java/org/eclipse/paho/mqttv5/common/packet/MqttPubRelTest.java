@@ -68,7 +68,7 @@ public class MqttPubRelTest {
 	}
 	
 	public MqttPubRel generateMqttPubRelPacket() throws MqttException{
-		MqttPubRel mqttPubRelPacket = new MqttPubRel(returnCode);
+		MqttPubRel mqttPubRelPacket = new MqttPubRel(returnCode, 1);
 		mqttPubRelPacket.setReasonString(reasonString);
 		Map<String, String> userDefinedPairs = new HashMap<String,String>();
 		userDefinedPairs.put(userKey1, userValue1);

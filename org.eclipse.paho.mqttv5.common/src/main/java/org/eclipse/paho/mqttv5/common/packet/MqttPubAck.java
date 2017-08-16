@@ -55,9 +55,10 @@ public class MqttPubAck extends MqttAck{
 		dis.close();
 	}
 	
-	public MqttPubAck(int returnCode) throws MqttException{
+	public MqttPubAck(int returnCode, int msgId) throws MqttException{
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
 		this.returnCode = returnCode;
+		this.msgId = msgId;
 		validateReturnCode(returnCode, validReturnCodes);
 	}
 

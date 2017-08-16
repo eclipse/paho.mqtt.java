@@ -47,10 +47,11 @@ public class MqttPubComp extends MqttAck {
 		dis.close();
 	}
 
-	public MqttPubComp(int returnCode) throws MqttException {
+	public MqttPubComp(int returnCode, int msgId) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBCOMP);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
+		this.msgId = msgId;
 	}
 
 	@Override

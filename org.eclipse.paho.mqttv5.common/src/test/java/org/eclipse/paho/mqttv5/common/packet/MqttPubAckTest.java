@@ -67,7 +67,7 @@ public class MqttPubAckTest {
 	}
 	
 	public MqttPubAck generateMqttPubackPacket() throws MqttException{
-		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode);
+		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode,1);
 		mqttPubackPacket.setReasonString(reasonString);
 		Map<String, String> userDefinedPairs = new HashMap<String,String>();
 		userDefinedPairs.put(userKey1, userValue1);

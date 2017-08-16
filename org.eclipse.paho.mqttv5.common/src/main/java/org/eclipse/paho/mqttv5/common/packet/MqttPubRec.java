@@ -50,10 +50,11 @@ public class MqttPubRec extends MqttAck {
 		dis.close();
 	}
 
-	public MqttPubRec(int returnCode) throws MqttException {
+	public MqttPubRec(int returnCode, int msgId) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREC);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
+		this.msgId = msgId;
 	}
 
 	@Override

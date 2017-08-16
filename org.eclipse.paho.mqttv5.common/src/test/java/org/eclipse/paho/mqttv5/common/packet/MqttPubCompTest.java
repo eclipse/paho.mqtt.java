@@ -68,7 +68,7 @@ public class MqttPubCompTest {
 	}
 	
 	public MqttPubComp generateMqttPubCompPacket() throws MqttException{
-		MqttPubComp mqttPubCompPacket = new MqttPubComp(returnCode);
+		MqttPubComp mqttPubCompPacket = new MqttPubComp(returnCode,1);
 		mqttPubCompPacket.setReasonString(reasonString);
 		Map<String, String> userDefinedPairs = new HashMap<String,String>();
 		userDefinedPairs.put(userKey1, userValue1);

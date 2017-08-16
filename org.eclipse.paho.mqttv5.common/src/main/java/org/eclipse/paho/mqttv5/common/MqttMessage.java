@@ -197,7 +197,7 @@ public class MqttMessage {
 	 * @param mutable <code>true</code> if the values can be changed,
 	 * <code>false</code> to prevent them from being changed.
 	 */
-	protected void setMutable(boolean mutable) {
+	public void setMutable(boolean mutable) {
 		this.mutable = mutable;
 	}
 
