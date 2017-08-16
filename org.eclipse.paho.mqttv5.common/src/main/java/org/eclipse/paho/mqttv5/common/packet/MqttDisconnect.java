@@ -28,6 +28,8 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttDisconnect extends MqttWireMessage {
+	
+	public static final String KEY = "Disc";
 
 
 	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,

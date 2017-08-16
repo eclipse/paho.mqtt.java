@@ -33,7 +33,7 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 /**
  * An on-the-wire representation of an MQTT Publish message.
  */
-public class MqttPublish extends MqttWireMessage {
+public class MqttPublish extends MqttPersistableWireMessage{
 
 	// Payload format identifiers
 	public static final byte PAYLOAD_FORMAT_UNSPECIFIED = 0x00;

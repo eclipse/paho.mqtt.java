@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
-public class MqttPubRel extends MqttAck {
+public class MqttPubRel extends MqttPersistableWireMessage {
 
 
 	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
@@ -48,10 +48,11 @@ public class MqttPubRel extends MqttAck {
 		dis.close();
 	}
 
-	public MqttPubRel(int returnCode) throws MqttException {
+	public MqttPubRel(int returnCode, int msgId) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREL);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
+		this.msgId = msgId;
 	}
 
 	@Override

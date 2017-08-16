@@ -134,6 +134,24 @@ public class MqttException extends Exception{
 	 * manually. 
 	 */
 	public static final short REASON_CODE_DISCONNECTED_BUFFER_FULL	= 32203;
+	
+	// CONNACK return codes
+		/** The protocol version requested is not supported by the server. */
+		public static final short REASON_CODE_INVALID_PROTOCOL_VERSION		= 0x01;
+		/** The server has rejected the supplied client ID */
+		public static final short REASON_CODE_INVALID_CLIENT_ID      		= 0x02;
+		/** The broker was not available to handle the request. */
+		public static final short REASON_CODE_BROKER_UNAVAILABLE             = 0x03;
+		/** Authentication with the server has failed, due to a bad user name or password. */
+		public static final short REASON_CODE_FAILED_AUTHENTICATION			= 0x04; 
+		/** Not authorized to perform the requested operation */
+		public static final short REASON_CODE_NOT_AUTHORIZED				= 0x05;
+	
+	/** An unexpected error has occurred. */
+	public static final short REASON_CODE_UNEXPECTED_ERROR				= 0x06;
+	
+	/** Error from subscribe - returned from the server. */
+	public static final short REASON_CODE_SUBSCRIBE_FAILED				= 0x80;
 
 	private int reasonCode;
 	private Throwable cause;
