@@ -35,7 +35,7 @@ public class MqttPubRec extends MqttAck {
 			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED, MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID };
 
 	// Fields
-	private int returnCode;
+	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private String reasonString;
 	private Map<String, String> userDefinedPairs = new HashMap<>();
 
@@ -44,9 +44,11 @@ public class MqttPubRec extends MqttAck {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
-		returnCode = dis.readUnsignedByte();
-		validateReturnCode(returnCode, validReturnCodes);
-		parseIdentifierValueFields(dis);
+		if (data.length > 2) {
+			returnCode = dis.readUnsignedByte();
+			validateReturnCode(returnCode, validReturnCodes);
+			parseIdentifierValueFields(dis);
+		}
 		dis.close();
 	}
 
@@ -65,14 +67,20 @@ public class MqttPubRec extends MqttAck {
 
 			// Encode the Message ID
 			outputStream.writeShort(msgId);
-
-			// Encode the Return Code
-			outputStream.write((byte) returnCode);
-
-			// Write Identifier / Value Fields
+			
+			// TODO - implement shortening for PUB ack messages if rc is 0 and no IVs
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-			outputStream.write(identifierValueFieldsByteArray);
+			
+			if (returnCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
+				// Encode the Return Code
+				outputStream.write((byte) returnCode);
+
+				// Write Identifier / Value Fields
+				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+				outputStream.write(identifierValueFieldsByteArray);
+			}
+
+			
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {
@@ -90,7 +98,7 @@ public class MqttPubRec extends MqttAck {
 				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
 			}
-			
+
 			// If Present, encode the User Properties (3.5.2.2.3)
 			if (userDefinedPairs.size() != 0) {
 				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
