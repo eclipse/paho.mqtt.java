@@ -26,18 +26,13 @@ import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
-public class MqttPubAck extends MqttAck{
-	
-	private static final int[] validReturnCodes = {
-			MqttReturnCode.RETURN_CODE_SUCCESS,
-			MqttReturnCode.RETURN_CODE_NO_MATCHING_SUBSCRIBERS,
-			MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
-			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR,
-			MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
-			MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID,
-			MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
-			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID
-	};
+public class MqttPubAck extends MqttAck {
+
+	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
+			MqttReturnCode.RETURN_CODE_NO_MATCHING_SUBSCRIBERS, MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
+			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR, MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
+			MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID, MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
+			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID };
 
 	// Fields
 	private int returnCode;
@@ -49,54 +44,60 @@ public class MqttPubAck extends MqttAck{
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
-		returnCode = dis.readUnsignedByte();
-		validateReturnCode(returnCode, validReturnCodes);
-		parseIdentifierValueFields(dis);
+		if (data.length > 2) {
+			returnCode = dis.readUnsignedByte();
+			validateReturnCode(returnCode, validReturnCodes);
+			parseIdentifierValueFields(dis);
+		}
 		dis.close();
 	}
-	
-	public MqttPubAck(int returnCode, int msgId) throws MqttException{
+
+	public MqttPubAck(int returnCode, int msgId) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
 		this.returnCode = returnCode;
 		this.msgId = msgId;
 		validateReturnCode(returnCode, validReturnCodes);
 	}
 
-	
 	@Override
 	protected byte[] getVariableHeader() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
-			
+
 			// Encode the Message ID
 			outputStream.writeShort(msgId);
-			
-			// Encode the Return Code
-			outputStream.write( (byte) returnCode);
-			
-			// Write Identifier / Value Fields
+
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-			outputStream.write(identifierValueFieldsByteArray);
+
+			if (returnCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
+
+				// Encode the Return Code
+				outputStream.write((byte) returnCode);
+
+				// Write Identifier / Value Fields
+				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+				outputStream.write(identifierValueFieldsByteArray);
+			}
+
 			outputStream.flush();
-			return baos.toByteArray();	
-		} catch (IOException ioe){
+			return baos.toByteArray();
+		} catch (IOException ioe) {
 			throw new MqttException(ioe);
 		}
 	}
-	
+
 	private byte[] getIdentifierValueFields() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
-			
+
 			// If Present, encode the Reason String (3.4.2.2.2)
-			if(reasonString != null){
+			if (reasonString != null) {
 				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
 			}
-			
+
 			// If Present, encode the User Properties (3.4.2.2.3)
 			if (userDefinedPairs.size() != 0) {
 				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
@@ -105,29 +106,28 @@ public class MqttPubAck extends MqttAck{
 					encodeUTF8(outputStream, entry.getValue());
 				}
 			}
-			
+
 			outputStream.flush();
 			return baos.toByteArray();
-		} catch (IOException ioe){
+		} catch (IOException ioe) {
 			throw new MqttException(ioe);
 		}
 	}
-	
-	
+
 	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
 		// First get the length of the IV fields
 		int length = readVariableByteInteger(dis).getValue();
-		if(length > 0){
+		if (length > 0) {
 			byte[] identifierValueByteArray = new byte[length];
 			dis.read(identifierValueByteArray, 0, length);
-			ByteArrayInputStream bais =  new ByteArrayInputStream(identifierValueByteArray);
+			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
 			DataInputStream inputStream = new DataInputStream(bais);
-			while(inputStream.available() > 0){
+			while (inputStream.available() > 0) {
 				// Get the first Byte
 				byte identifier = inputStream.readByte();
-				if(identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER){
+				if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
-				} else if ( identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
 					userDefinedPairs.put(key, value);

@@ -32,7 +32,7 @@ public class MqttPubComp extends MqttAck {
 			MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND };
 
 	// Fields
-	private int returnCode;
+	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private String reasonString;
 	private Map<String, String> userDefinedPairs = new HashMap<>();
 
@@ -41,9 +41,11 @@ public class MqttPubComp extends MqttAck {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
-		returnCode = dis.readUnsignedByte();
-		validateReturnCode(returnCode, validReturnCodes);
-		parseIdentifierValueFields(dis);
+		if (data.length > 2) {
+			returnCode = dis.readUnsignedByte();
+			validateReturnCode(returnCode, validReturnCodes);
+			parseIdentifierValueFields(dis);
+		}
 		dis.close();
 	}
 
@@ -63,13 +65,17 @@ public class MqttPubComp extends MqttAck {
 			// Encode the Message ID
 			outputStream.writeShort(msgId);
 
-			// Encode the Return Code
-			outputStream.write((byte) returnCode);
-
-			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-			outputStream.write(identifierValueFieldsByteArray);
+
+			if (returnCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
+				// Encode the Return Code
+				outputStream.write((byte) returnCode);
+
+				// Write Identifier / Value Fields
+				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+				outputStream.write(identifierValueFieldsByteArray);
+			}
+
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {
@@ -117,7 +123,7 @@ public class MqttPubComp extends MqttAck {
 				byte identifier = inputStream.readByte();
 				if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
-				} else if ( identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
 					userDefinedPairs.put(key, value);
@@ -144,7 +150,7 @@ public class MqttPubComp extends MqttAck {
 	public void setReasonString(String reasonString) {
 		this.reasonString = reasonString;
 	}
-	
+
 	public Map<String, String> getUserDefinedPairs() {
 		return userDefinedPairs;
 	}
