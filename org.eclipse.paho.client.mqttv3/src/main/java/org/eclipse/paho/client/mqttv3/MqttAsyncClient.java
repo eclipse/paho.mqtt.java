@@ -1240,6 +1240,15 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see IMqttAsyncClient#removeMessage(IMqttDeliveryToken)
+	 */
+	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException {
+		return comms.removeMessage(token);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IMqttAsyncClient#setCallback(MqttCallback)
 	 */
 	public void setCallback(MqttCallback callback) {

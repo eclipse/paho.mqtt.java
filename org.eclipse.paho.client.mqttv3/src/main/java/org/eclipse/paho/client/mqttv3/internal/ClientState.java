@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -189,6 +190,10 @@ public class ClientState {
 	
 	private String getSendPersistenceKey(MqttWireMessage message) {
 		return PERSISTENCE_SENT_PREFIX + message.getMessageId();
+	}
+	
+	private String getSendPersistenceKey(int messageId) {
+		return PERSISTENCE_SENT_PREFIX + messageId;
 	}
 	
 	private String getSendConfirmPersistenceKey(MqttWireMessage message) {
@@ -642,6 +647,39 @@ public class ClientState {
 	}
 	
 	/**
+	 * This removes the MqttSend message from the outbound queue and persistence.
+	 * @param message The {@link MqttPublish} message to remove
+	 * @return if the message is removed, then true, otherwise false
+	 * @throws MqttException if an exception occurs whilst removing the message
+	 */
+	protected boolean removeMessage(IMqttDeliveryToken token) throws MqttException {
+		final String methodName = "removeMessage";
+		MqttMessage message = token.getMessage();
+		int messageId = token.getMessageId();
+		boolean result = false;
+		synchronized (queueLock) {
+			if (message.getQos() == 1) {
+				if (outboundQoS1.remove(new Integer(messageId)) != null) {
+					result = true;
+				}
+			}
+			if (message.getQos() == 2) {
+				if (outboundQoS2.remove(new Integer(messageId)) != null) {
+					result = true;
+				}
+			}
+			if (pendingMessages.removeElement(message)) {
+				result = true;
+			}
+			persistence.remove(getSendPersistenceKey(messageId));
+			String key = new Integer(messageId).toString();
+			tokenStore.removeToken(key);
+			releaseMessageId(messageId);
+		}
+		return result;
+	}
+	
+	/**
 	 * Check and send a ping if needed and check for ping timeout.
 	 * Need to send a ping if nothing has been sent or received  
 	 * in the last keepalive interval. It is important to check for 
@@ -861,6 +899,7 @@ public class ClientState {
 		log.fine(CLASS_NAME,methodName,"625",new Object[]{message.getKey()});
 		
 		MqttToken token = tokenStore.getToken(message);
+		if (token == null) return;
 		token.internalTok.notifySent();
         if (message instanceof MqttPingReq) {
             synchronized (pingOutstandingLock) {
