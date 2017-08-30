@@ -17,12 +17,12 @@
  */
 package org.eclipse.paho.mqttv5.client.internal;
 
-import org.eclipse.paho.mqttv5.client.IMqttActionListener;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
-import org.eclipse.paho.mqttv5.client.MqttConnectOptions;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
@@ -36,15 +36,15 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
  * <p>If a connection fails then another URL in the list is attempted, otherwise the users token is notified 
  * and the users onFailure callback is called</p>
  */
-public class ConnectActionListener implements IMqttActionListener {
+public class ConnectActionListener implements MqttActionListener {
 
   private MqttClientPersistence persistence;
   private MqttAsyncClient client;
   private ClientComms comms;
-  private MqttConnectOptions options;
+  private MqttConnectionOptions options;
   private MqttToken userToken;
   private Object userContext;
-  private IMqttActionListener userCallback;
+  private MqttActionListener userCallback;
   private int originalMqttVersion;
   private MqttCallbackExtended mqttCallbackExtended;
   private boolean reconnect;
@@ -53,20 +53,20 @@ public class ConnectActionListener implements IMqttActionListener {
    * @param persistence The {@link MqttClientPersistence} layer
    * @param client the {@link MqttAsyncClient}
    * @param comms {@link ClientComms}
-   * @param options the {@link MqttConnectOptions}
+   * @param options the {@link MqttConnectionOptions}
    * @param userToken  the {@link MqttToken}
    * @param userContext the User Context Object
-   * @param userCallback the {@link IMqttActionListener} as the callback for the user
+   * @param userCallback the {@link MqttActionListener} as the callback for the user
    * @param reconnect If true, this is a reconnect attempt
    */
   public ConnectActionListener(
       MqttAsyncClient client,
       MqttClientPersistence persistence,
       ClientComms comms,
-      MqttConnectOptions options,
+      MqttConnectionOptions options,
       MqttToken userToken,
       Object userContext,
-      IMqttActionListener userCallback,
+      MqttActionListener userCallback,
       boolean reconnect) {
     this.persistence = persistence;
     this.client = client;
@@ -159,7 +159,7 @@ public class ConnectActionListener implements IMqttActionListener {
     token.setActionCallback(this);
     token.setUserContext(this);
 
-    persistence.open(client.getClientId(), client.getServerURI());
+    persistence.open(client.getClientId());
 
     if (options.isCleanSession()) {
       persistence.clear();

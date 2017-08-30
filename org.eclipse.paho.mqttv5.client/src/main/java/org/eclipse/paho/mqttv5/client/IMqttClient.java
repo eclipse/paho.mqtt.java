@@ -23,6 +23,7 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
+import org.eclipse.paho.mqttv5.common.MqttSubscription;
 
 /**
  * Enables an application to communicate with an MQTT server using blocking methods.
@@ -67,13 +68,13 @@ import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 public interface IMqttClient { //extends IMqttAsyncClient {
 	/**
 	 * Connects to an MQTT server using the default options.
-	 * <p>The default options are specified in {@link MqttConnectOptions} class.
+	 * <p>The default options are specified in {@link MqttConnectionOptions} class.
 	 * </p>
 	 *
 	 * @throws MqttSecurityException when the server rejects the connect for security
 	 * reasons
 	 * @throws MqttException  for non security related problems
-	 * @see #connect(MqttConnectOptions)
+	 * @see #connect(MqttConnectionOptions)
 	 */
   public void connect() throws MqttSecurityException, MqttException;
 
@@ -91,7 +92,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-  public void connect(MqttConnectOptions options) throws MqttSecurityException, MqttException;
+  public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
   
 	/**
 	 * Connects to an MQTT server using the specified options.
@@ -108,7 +109,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-public IMqttToken connectWithResult(MqttConnectOptions options) throws MqttSecurityException, MqttException;
+public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -463,73 +464,6 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	public IMqttToken subscribeWithResponse(String topicFilter) throws MqttException;
 	
 	/**
-	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
-	 *
-	 * @see #subscribeWithResponse(String[], int[])
-	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param messageListener a callback to handle incoming messages
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-	public IMqttToken subscribeWithResponse(String topicFilter, IMqttMessageListener messageListener) throws MqttException;
-
-	
-	/**
-	 * Subscribe to a topic, which may include wildcards.
-	 *
-	 * @see #subscribeWithResponse(String[], int[])
-	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-	public IMqttToken subscribeWithResponse(String topicFilter, int qos) throws MqttException;
-	
-	/**
-	 * Subscribe to a topic, which may include wildcards.
-	 *
-	 * @see #subscribeWithResponse(String[], int[])
-	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
-	 * @param messageListener a callback to handle incoming messages
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-	public IMqttToken subscribeWithResponse(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
-	
-	/**
-	 * Subscribes to a one or more topics, which may include wildcards using a QoS of 1.
-	 *
-	 * @see #subscribeWithResponse(String[], int[])
-	 *
-	 * @param topicFilters the topic to subscribe to, which can include wildcards.
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-	public IMqttToken subscribeWithResponse(String[] topicFilters) throws MqttException;
-	
-	/**
-	 * Subscribes to a one or more topics, which may include wildcards using a QoS of 1.
-	 *
-	 * @see #subscribeWithResponse(String[], int[])
-	 *
-	 * @param topicFilters the topic to subscribe to, which can include wildcards.
-	 * @param messageListeners one or more callbacks to handle incoming messages
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-	public IMqttToken subscribeWithResponse(String[] topicFilters, IMqttMessageListener[] messageListeners) throws MqttException;
-	
-	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * <p>The {@link #setCallback(MqttCallback)} method
 	 * should be called before this method, otherwise any received messages
@@ -624,7 +558,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @return token used to track the subscribe after it has completed.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public IMqttToken subscribeWithResponse(String[] topicFilters, int[] qos) throws MqttException;
+	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -724,7 +658,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @return token used to track the subscribe after it has completed.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public IMqttToken subscribeWithResponse(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
+	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException;
 	
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -860,7 +794,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * Get a topic object which can be used to publish messages.
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:</p>
 	 * <ul>
-	 * <li>{@link MqttClient#publish(String, MqttMessage)} to publish a message in a blocking manner
+	 * <li>{@link MqttLegacyBlockingClient#publish(String, MqttMessage)} to publish a message in a blocking manner
 	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, IMqttActionListener)}
 	 * </ul>
 	 * <p>When building an application,

@@ -39,6 +39,7 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#close()
 	 */
 	public void close() throws MqttPersistenceException {
+		checkIsOpen();
 		data.clear();
 	}
 
@@ -46,6 +47,7 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#keys()
 	 */
 	public Enumeration keys() throws MqttPersistenceException {
+		checkIsOpen();
 		return data.keys();
 	}
 
@@ -53,13 +55,14 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#get(java.lang.String)
 	 */
 	public MqttPersistable get(String key) throws MqttPersistenceException {
+		checkIsOpen();
 		return (MqttPersistable)data.get(key);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#open(java.lang.String, java.lang.String)
 	 */
-	public void open(String clientId, String serverURI) throws MqttPersistenceException {
+	public void open(String clientId) throws MqttPersistenceException {
 		this.data = new Hashtable();
 	}
 
@@ -67,6 +70,7 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#put(java.lang.String, org.eclipse.paho.client.mqttv3.MqttPersistable)
 	 */
 	public void put(String key, MqttPersistable persistable) throws MqttPersistenceException {
+		checkIsOpen();
 		data.put(key, persistable);
 	}
 
@@ -74,6 +78,7 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#remove(java.lang.String)
 	 */
 	public void remove(String key) throws MqttPersistenceException {
+		checkIsOpen();
 		data.remove(key);
 	}
 
@@ -81,6 +86,7 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#clear()
 	 */
 	public void clear() throws MqttPersistenceException {
+		checkIsOpen();
 		data.clear();
 	}
 
@@ -88,6 +94,17 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#containsKey(java.lang.String)
 	 */
 	public boolean containsKey(String key) throws MqttPersistenceException {
+		checkIsOpen();
 		return data.containsKey(key);
+	}
+	
+	/**
+	 * Checks whether the persistence has been opened.
+	 * @throws MqttPersistenceException if the persistence has not been opened.
+	 */
+	private void checkIsOpen() throws MqttPersistenceException {
+		if (data == null) {
+			throw new MqttPersistenceException();
+		}
 	}
 }

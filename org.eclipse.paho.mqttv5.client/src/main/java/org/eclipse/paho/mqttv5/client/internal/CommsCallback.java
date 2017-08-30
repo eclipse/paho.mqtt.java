@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
-import org.eclipse.paho.mqttv5.client.IMqttActionListener;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
@@ -263,7 +263,7 @@ public class CommsCallback implements Runnable {
 			
 			// Set notified so we don't tell the user again about this action.
  			if ( token.isComplete() ){
- 			   if ( token instanceof MqttDeliveryToken || token.getActionCallback() instanceof IMqttActionListener ) {
+ 			   if ( token instanceof MqttDeliveryToken || token.getActionCallback() instanceof MqttActionListener ) {
  	                token.internalTok.setNotified(true);
  	            }
  			}
@@ -313,7 +313,7 @@ public class CommsCallback implements Runnable {
 		final String methodName = "fireActionEvent";
 
 		if (token != null) {
-			IMqttActionListener asyncCB = token.getActionCallback();
+			MqttActionListener asyncCB = token.getActionCallback();
 			if (asyncCB != null) {
 				if (token.getException() == null) {
 					// @TRACE 716=call onSuccess key={0}

@@ -16,8 +16,8 @@
 
 package org.eclipse.paho.mqttv5.client.internal;
 
-import org.eclipse.paho.mqttv5.client.IMqttActionListener;
-import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
+import org.eclipse.paho.mqttv5.client.MqttClientInterface;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -45,8 +45,8 @@ public class Token {
 	
 	private String key;
 	
-	private IMqttAsyncClient client = null;
-	private IMqttActionListener callback = null;
+	private MqttClientInterface client = null;
+	private MqttActionListener callback = null;
 	
 	private Object userContext = null;
 	
@@ -88,11 +88,11 @@ public class Token {
 		return (getClient() != null && !isComplete());
 	}
 
-	public void setActionCallback(IMqttActionListener listener) {
+	public void setActionCallback(MqttActionListener listener) {
 		this.callback  = listener;
 
 	}
-	public IMqttActionListener getActionCallback() {
+	public MqttActionListener getActionCallback() {
 		return callback;
 	}
 
@@ -277,11 +277,11 @@ public class Token {
 		}
 	}
 	
-	public IMqttAsyncClient getClient() {
+	public MqttClientInterface getClient() {
 		return client;
 	}
 	
-	protected void setClient(IMqttAsyncClient client) {
+	protected void setClient(MqttClientInterface client) {
 		this.client = client;
 	}
 

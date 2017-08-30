@@ -27,11 +27,11 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.eclipse.paho.mqttv5.client.IMqttActionListener;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
-import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
+import org.eclipse.paho.mqttv5.client.PingSender;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -144,10 +144,10 @@ public class ClientState implements MqttState {
 	private Hashtable outboundQoS0 = null;
 	private Hashtable inboundQoS2 = null;
 	
-	private MqttPingSender pingSender = null;
+	private PingSender pingSender = null;
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, 
-			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender) throws MqttException {
+			CommsCallback callback, ClientComms clientComms, PingSender pingSender) throws MqttException {
 		
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "" );
@@ -579,7 +579,7 @@ public class ClientState implements MqttState {
 			} catch (MqttPersistenceException mpe){
 				//@TRACE 515=Could not Persist, attempting to Re-Open Persistence Store
 				log.fine(CLASS_NAME,methodName, "515");
-				persistence.open(this.clientComms.getClient().getClientId(), this.clientComms.getClient().getServerURI());
+				persistence.open(this.clientComms.getClient().getClientId());
 				persistence.put(key, (MqttPublish) message);
 			}
 			//@TRACE 513=Persisted Buffered Message key={0}
@@ -641,7 +641,7 @@ public class ClientState implements MqttState {
 	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#checkForActivity(org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
 	@Override
-	public MqttToken checkForActivity(IMqttActionListener pingCallback) throws MqttException {
+	public MqttToken checkForActivity(MqttActionListener pingCallback) throws MqttException {
 		final String methodName = "checkForActivity";
 		//@TRACE 616=checkForActivity entered
 		log.fine(CLASS_NAME,methodName,"616", new Object[]{});

@@ -52,11 +52,11 @@ public class MqttToken implements IMqttToken {
 		return internalTok.isComplete();
 	}
 
-	public void setActionCallback(IMqttActionListener listener) {
+	public void setActionCallback(MqttActionListener listener) {
 		internalTok.setActionCallback(listener);
 
 	}
-	public IMqttActionListener getActionCallback() {
+	public MqttActionListener getActionCallback() {
 		return internalTok.getActionCallback();
 	}
 
@@ -68,7 +68,7 @@ public class MqttToken implements IMqttToken {
 		internalTok.waitForCompletion(timeout);
 	}
 	
-	public IMqttAsyncClient getClient() {
+	public MqttClientInterface getClient() {
 		return internalTok.getClient();
 	}
 	
