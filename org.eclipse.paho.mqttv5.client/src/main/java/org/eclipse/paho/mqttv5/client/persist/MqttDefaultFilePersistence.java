@@ -72,7 +72,7 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 		dataDir = new File(directory);
 	}
 	
-	public void open(String clientId, String theConnection) throws MqttPersistenceException {
+	public void open(String clientId) throws MqttPersistenceException {
 		
 		if (dataDir.exists() && !dataDir.isDirectory()) {
 			throw new MqttPersistenceException();
@@ -89,13 +89,6 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 		StringBuffer keyBuffer = new StringBuffer();
 		for (int i=0;i<clientId.length();i++) {
 			char c = clientId.charAt(i);
-			if (isSafeChar(c)) {
-				keyBuffer.append(c);
-			}
-		}
-		keyBuffer.append("-");
-		for (int i=0;i<theConnection.length();i++) {
-			char c = theConnection.charAt(i);
 			if (isSafeChar(c)) {
 				keyBuffer.append(c);
 			}

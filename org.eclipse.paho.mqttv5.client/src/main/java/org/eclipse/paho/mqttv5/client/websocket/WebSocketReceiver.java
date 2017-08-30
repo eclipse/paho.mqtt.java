@@ -78,7 +78,7 @@ public class WebSocketReceiver implements Runnable{
 
 			}
 		}
-		if(closed && !Thread.currentThread().equals(receiverThread)) {
+		if(closed && !Thread.currentThread().equals(receiverThread) && (receiverThread != null)) {
 			try {
 				// Wait for the thread to finish
 		        //This must not happen in the synchronized block, otherwise we can deadlock ourselves!

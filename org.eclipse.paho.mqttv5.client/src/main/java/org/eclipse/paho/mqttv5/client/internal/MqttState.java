@@ -19,7 +19,7 @@ package org.eclipse.paho.mqttv5.client.internal;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.eclipse.paho.mqttv5.client.IMqttActionListener;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
@@ -60,11 +60,11 @@ public interface MqttState {
 	 * 
 	 * If a ping has been sent but no data has been received in the 
 	 * last keepalive interval then the connection is deamed to be broken. 
-	 * @param pingCallback The {@link IMqttActionListener} to be called
+	 * @param pingCallback The {@link MqttActionListener} to be called
 	 * @return token of ping command, null if no ping command has been sent.
 	 * @throws MqttException if an exception occurs during the Ping
 	 */
-	MqttToken checkForActivity(IMqttActionListener pingCallback) throws MqttException;
+	MqttToken checkForActivity(MqttActionListener pingCallback) throws MqttException;
 
 	void setKeepAliveInterval(long interval);
 

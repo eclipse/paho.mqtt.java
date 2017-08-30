@@ -10,7 +10,7 @@ package org.eclipse.paho.mqttv5.client;
  * otherwise the operation of the MQTT client will be stalled.
  * </p>  
  */
-public interface IMqttActionListener {
+public interface MqttActionListener {
 	/**
 	 * This method is invoked when an action has completed successfully.  
 	 * @param asyncActionToken associated with the action that has completed

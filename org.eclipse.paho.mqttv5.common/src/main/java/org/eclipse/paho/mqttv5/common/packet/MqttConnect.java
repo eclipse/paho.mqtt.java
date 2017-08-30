@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,8 @@ public class MqttConnect extends MqttWireMessage {
 	private Integer topicAliasMaximum;
 	private Boolean requestResponseInfo;
 	private Boolean requestProblemInfo;
-	private Map<String, String> userDefinedPairs = new HashMap<>();
+	
+	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 	private String authMethod;
 	private byte[] authData;
 	
@@ -192,6 +194,7 @@ public class MqttConnect extends MqttWireMessage {
 			dos.write(connectFlags);
 			dos.writeShort(keepAliveInterval);
 			
+			
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
 			dos.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
@@ -253,11 +256,11 @@ public class MqttConnect extends MqttWireMessage {
 			}
 			
 			// If present, encode the User Defined Name-Value Pairs (3.1.2.11.9)
-			if(userDefinedPairs.size() != 0){
-				for(Map.Entry<String, String> entry : userDefinedPairs.entrySet()){
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, entry.getKey());
-					encodeUTF8(outputStream, entry.getValue());
+			if(userDefinedProperties.size() != 0){
+				for(UserProperty property : userDefinedProperties) {
+					outputStream.writeDouble(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, property.getKey());
+					encodeUTF8(outputStream, property.getValue());
 				}
 			}
 			
@@ -312,7 +315,7 @@ public class MqttConnect extends MqttWireMessage {
 				} else if(identifier ==  MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
-					userDefinedPairs.put(key, value);
+					userDefinedProperties.add(new UserProperty(key,  value));
 				} else if(identifier ==  MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER){
 					authMethod = decodeUTF8(inputStream);
 				} else if(identifier ==  MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER){
@@ -411,8 +414,8 @@ public class MqttConnect extends MqttWireMessage {
 		this.requestProblemInfo = requestProblemInfo;
 	}
 
-	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
-		this.userDefinedPairs = userDefinedPairs;
+	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+		this.userDefinedProperties = userDefinedProperties;
 	}
 	
 	
@@ -484,8 +487,8 @@ public class MqttConnect extends MqttWireMessage {
 		return requestProblemInfo;
 	}
 
-	public Map<String, String> getUserDefinedPairs() {
-		return userDefinedPairs;
+	public ArrayList<UserProperty> getUserDefinedProperties() {
+		return userDefinedProperties;
 	}
 
 	public String getAuthMethod() {
@@ -505,7 +508,7 @@ public class MqttConnect extends MqttWireMessage {
 				+ sessionExpiryInterval + ", willDelayInterval=" + willDelayInterval + ", receiveMaximum="
 				+ receiveMaximum + ", maximumPacketSize=" + maximumPacketSize + ", topicAliasMaximum="
 				+ topicAliasMaximum + ", requestResponseInfo=" + requestResponseInfo + ", requestProblemInfo="
-				+ requestProblemInfo + ", userDefinedPairs=" + userDefinedPairs + ", authMethod=" + authMethod
+				+ requestProblemInfo + ", userDefinedProperties=" + userDefinedProperties + ", authMethod=" + authMethod
 				+ ", authData=" + Arrays.toString(authData) + "]";
 	}
 

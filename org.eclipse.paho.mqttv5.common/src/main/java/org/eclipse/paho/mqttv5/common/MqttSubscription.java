@@ -45,6 +45,11 @@ public class MqttSubscription {
 		setTopic(topic);
 	}
 	
+	public MqttSubscription(String topic, int qos) {
+		setTopic(topic);
+		setQos(qos);
+	}
+	
 	/**
 	 * Utility method to validate the supplied QoS value.
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
