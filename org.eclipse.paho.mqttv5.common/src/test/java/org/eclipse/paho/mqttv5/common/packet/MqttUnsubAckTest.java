@@ -18,12 +18,9 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttUnsubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -65,10 +62,10 @@ public class MqttUnsubAckTest {
 				.createWireMessage(outputStream.toByteArray());
 
 		Assert.assertEquals(reasonString, decodedUnsubAckPacket.getReasonString());
-		Assert.assertEquals(3, decodedUnsubAckPacket.getUserDefinedPairs().size());
-		Assert.assertEquals(userValue1, decodedUnsubAckPacket.getUserDefinedPairs().get(userKey1));
-		Assert.assertEquals(userValue2, decodedUnsubAckPacket.getUserDefinedPairs().get(userKey2));
-		Assert.assertEquals(userValue3, decodedUnsubAckPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedUnsubAckPacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedUnsubAckPacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedUnsubAckPacket.getUserDefinedProperties().get(2)));
+
 		Assert.assertArrayEquals(returnCodes, decodedUnsubAckPacket.getReturnCodes());
 
 	}
@@ -76,11 +73,11 @@ public class MqttUnsubAckTest {
 	private MqttUnsubAck generateMqttUnsubAckPacket() throws MqttException {
 		MqttUnsubAck mqttUnsubAckPacket = new MqttUnsubAck(returnCodes);
 		mqttUnsubAckPacket.setReasonString(reasonString);
-		Map<String, String> userDefinedPairs = new HashMap<String, String>();
-		userDefinedPairs.put(userKey1, userValue1);
-		userDefinedPairs.put(userKey2, userValue2);
-		userDefinedPairs.put(userKey3, userValue3);
-		mqttUnsubAckPacket.setUserDefinedPairs(userDefinedPairs);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttUnsubAckPacket.setUserDefinedProperties(userDefinedProperties);
 
 		return mqttUnsubAckPacket;
 	}

@@ -18,12 +18,9 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -58,10 +55,10 @@ public class MqttPubAckTest {
 		
 		Assert.assertEquals(returnCode, decodedPubackPacket.getReturnCode());
 		Assert.assertEquals(reasonString, decodedPubackPacket.getReasonString());
-		Assert.assertEquals(3, decodedPubackPacket.getUserDefinedPairs().size());
-		Assert.assertEquals(userValue1, decodedPubackPacket.getUserDefinedPairs().get(userKey1));
-		Assert.assertEquals(userValue2, decodedPubackPacket.getUserDefinedPairs().get(userKey2));
-		Assert.assertEquals(userValue3, decodedPubackPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedPubackPacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedPubackPacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedPubackPacket.getUserDefinedProperties().get(2)));
+
 		
 		
 	}
@@ -69,11 +66,11 @@ public class MqttPubAckTest {
 	public MqttPubAck generateMqttPubackPacket() throws MqttException{
 		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode,1);
 		mqttPubackPacket.setReasonString(reasonString);
-		Map<String, String> userDefinedPairs = new HashMap<String,String>();
-		userDefinedPairs.put(userKey1, userValue1);
-		userDefinedPairs.put(userKey2, userValue2);
-		userDefinedPairs.put(userKey3, userValue3);
-		mqttPubackPacket.setUserDefinedPairs(userDefinedPairs);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttPubackPacket.setUserDefinedProperties(userDefinedProperties);
 		
 		return mqttPubackPacket;
 	}

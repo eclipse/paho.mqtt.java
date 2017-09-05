@@ -19,12 +19,9 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -59,22 +56,21 @@ public class MqttPubCompTest {
 		
 		Assert.assertEquals(returnCode, decodedPubCompPacket.getReturnCode());
 		Assert.assertEquals(reasonString, decodedPubCompPacket.getReasonString());
-		Assert.assertEquals(3, decodedPubCompPacket.getUserDefinedPairs().size());
-		Assert.assertEquals(userValue1, decodedPubCompPacket.getUserDefinedPairs().get(userKey1));
-		Assert.assertEquals(userValue2, decodedPubCompPacket.getUserDefinedPairs().get(userKey2));
-		Assert.assertEquals(userValue3, decodedPubCompPacket.getUserDefinedPairs().get(userKey3));
-		
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedPubCompPacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedPubCompPacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedPubCompPacket.getUserDefinedProperties().get(2)));
+
 		
 	}
 	
 	public MqttPubComp generateMqttPubCompPacket() throws MqttException{
 		MqttPubComp mqttPubCompPacket = new MqttPubComp(returnCode,1);
 		mqttPubCompPacket.setReasonString(reasonString);
-		Map<String, String> userDefinedPairs = new HashMap<String,String>();
-		userDefinedPairs.put(userKey1, userValue1);
-		userDefinedPairs.put(userKey2, userValue2);
-		userDefinedPairs.put(userKey3, userValue3);
-		mqttPubCompPacket.setUserDefinedPairs(userDefinedPairs);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttPubCompPacket.setUserDefinedProperties(userDefinedProperties);
 		
 		return mqttPubCompPacket;
 	}

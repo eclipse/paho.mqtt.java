@@ -18,12 +18,9 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttAuth;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -62,12 +59,11 @@ public class MqttAuthTest {
 		Assert.assertEquals(authMethod, decodedAuthPacket.getAuthMethod());
 		Assert.assertArrayEquals(authData, decodedAuthPacket.getAuthData());
 		Assert.assertEquals(reasonString, decodedAuthPacket.getReasonString());
-		Assert.assertEquals(3, decodedAuthPacket.getUserDefinedPairs().size());
-		Assert.assertEquals(userValue1, decodedAuthPacket.getUserDefinedPairs().get(userKey1));
-		Assert.assertEquals(userValue2, decodedAuthPacket.getUserDefinedPairs().get(userKey2));
-		Assert.assertEquals(userValue3, decodedAuthPacket.getUserDefinedPairs().get(userKey3));
-		
-		
+		Assert.assertEquals(3, decodedAuthPacket.getUserDefinedProperties().size());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedAuthPacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedAuthPacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedAuthPacket.getUserDefinedProperties().get(2)));
+
 	}
 	
 	public MqttAuth generateMqttAuthPacket() throws MqttException{
@@ -75,12 +71,11 @@ public class MqttAuthTest {
 		mqttAuthPacket.setAuthMethod(authMethod);
 		mqttAuthPacket.setAuthData(authData);
 		mqttAuthPacket.setReasonString(reasonString);
-		Map<String, String> userDefinedPairs = new HashMap<String,String>();
-		userDefinedPairs.put(userKey1, userValue1);
-		userDefinedPairs.put(userKey2, userValue2);
-		userDefinedPairs.put(userKey3, userValue3);
-		mqttAuthPacket.setUserDefinedPairs(userDefinedPairs);
-		
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttAuthPacket.setUserDefinedProperties(userDefinedProperties);
 		return mqttAuthPacket;
 	}
 
