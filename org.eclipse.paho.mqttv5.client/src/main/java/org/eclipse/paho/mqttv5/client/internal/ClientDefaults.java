@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corp.
+ * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,10 @@
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- * 	  Dave Locke   - Original MQTTv3 implementation
- *    James Sutton - Initial MQTTv5 implementation
+ *    Dave Locke - initial API and implementation and/or initial documentation
  */
-package org.eclipse.paho.mqttv5.common;
+package org.eclipse.paho.mqttv5.client.internal;
 
-public interface MqttState {
-
-	void notifySentBytes(int length);
-
+public class ClientDefaults {
+	public static final int MAX_MSG_SIZE = 1024 * 1024 * 256; // 256 MB
 }

@@ -19,12 +19,9 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -91,15 +88,14 @@ public class MqttConnAckTest {
 		Assert.assertEquals(assignedClientIdentifier, decodedConnAckPacket.getAssignedClientIdentifier());
 		Assert.assertEquals(topicAliasMaximum, decodedConnAckPacket.getTopicAliasMaximum());
 		Assert.assertEquals(reasonString, decodedConnAckPacket.getReasonString());
-		Assert.assertEquals(3, decodedConnAckPacket.getUserDefinedPairs().size());
-		Assert.assertEquals(userValue1, decodedConnAckPacket.getUserDefinedPairs().get(userKey1));
-		Assert.assertEquals(userValue2, decodedConnAckPacket.getUserDefinedPairs().get(userKey2));
-		Assert.assertEquals(userValue3, decodedConnAckPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedConnAckPacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedConnAckPacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedConnAckPacket.getUserDefinedProperties().get(2)));
 		Assert.assertEquals(wildcardSubscriptionsAvailable, decodedConnAckPacket.isWildcardSubscriptionsAvailable());
 		Assert.assertEquals(subscriptionIdentifiersAvailable, decodedConnAckPacket.isSubscriptionIdentifiersAvailable());
 		Assert.assertEquals(sharedSubscriptionAvailable, decodedConnAckPacket.isSharedSubscriptionAvailable());
 		Assert.assertEquals(serverKeepAlive, decodedConnAckPacket.getServerKeepAlive());
-		Assert.assertEquals(responseInfo, decodedConnAckPacket.getReplyInfo());
+		Assert.assertEquals(responseInfo, decodedConnAckPacket.getResponseInfo());
 		Assert.assertEquals(serverReference, decodedConnAckPacket.getServerReference());
 		Assert.assertEquals(authMethod, decodedConnAckPacket.getAuthMethod());
 		Assert.assertArrayEquals(authData, decodedConnAckPacket.getAuthData());
@@ -130,11 +126,11 @@ public class MqttConnAckTest {
 		mqttConnAckPacket.setAssignedClientIdentifier(assignedClientIdentifier);
 		mqttConnAckPacket.setTopicAliasMaximum(topicAliasMaximum);
 		mqttConnAckPacket.setReasonString(reasonString);
-		Map<String, String> userDefinedPairs = new HashMap<String,String>();
-		userDefinedPairs.put(userKey1, userValue1);
-		userDefinedPairs.put(userKey2, userValue2);
-		userDefinedPairs.put(userKey3, userValue3);
-		mqttConnAckPacket.setUserDefinedPairs(userDefinedPairs);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttConnAckPacket.setUserDefinedProperties(userDefinedProperties);
 		mqttConnAckPacket.setWildcardSubscriptionsAvailable(wildcardSubscriptionsAvailable);
 		mqttConnAckPacket.setSubscriptionIdentifiersAvailable(subscriptionIdentifiersAvailable);
 		mqttConnAckPacket.setSharedSubscriptionAvailable(sharedSubscriptionAvailable);

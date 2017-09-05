@@ -22,9 +22,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -33,7 +32,7 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 /**
  * An on-the-wire representation of an MQTT Publish message.
  */
-public class MqttPublish extends MqttWireMessage {
+public class MqttPublish extends MqttPersistableWireMessage{
 
 	// Payload format identifiers
 	public static final byte PAYLOAD_FORMAT_UNSPECIFIED = 0x00;
@@ -46,7 +45,7 @@ public class MqttPublish extends MqttWireMessage {
 	private Integer publicationExpiryInterval;
 	private Integer topicAlias;
 	private byte[] correlationData;
-	private Map<String, String> userDefinedPairs = new HashMap<>();
+	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 	private Integer subscriptionIdentifier;
 	private String contentType;
 	private String responseTopic;
@@ -135,7 +134,7 @@ public class MqttPublish extends MqttWireMessage {
 				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
-					userDefinedPairs.put(key, value);
+					userDefinedProperties.add(new UserProperty(key, value));
 				} else if (identifier == MqttPropertyIdentifiers.CONTENT_TYPE_IDENTIFIER) {
 					contentType = decodeUTF8(inputStream);
 				} else if (identifier == MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER) {
@@ -187,11 +186,11 @@ public class MqttPublish extends MqttWireMessage {
 			}
 
 			// If Present, encode the User Defined Name-Value Pairs (3.3.2.9)
-			if (userDefinedPairs.size() != 0) {
-				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
+			if (userDefinedProperties.size() != 0) {
+				for (UserProperty property : userDefinedProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, entry.getKey());
-					encodeUTF8(outputStream, entry.getValue());
+					encodeUTF8(outputStream, property.getKey());
+					encodeUTF8(outputStream, property.getValue());
 				}
 			}
 			
@@ -308,12 +307,12 @@ public class MqttPublish extends MqttWireMessage {
 		this.correlationData = correlationData;
 	}
 
-	public Map<String, String> getUserDefinedPairs() {
-		return userDefinedPairs;
+	public ArrayList<UserProperty> getUserDefinedProperties() {
+		return userDefinedProperties;
 	}
 
-	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
-		this.userDefinedPairs = userDefinedPairs;
+	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+		this.userDefinedProperties = userDefinedProperties;
 	}
 
 	public MqttMessage getMessage() {
@@ -389,7 +388,7 @@ public class MqttPublish extends MqttWireMessage {
 		sb.append(", publicationExpiryInterval=").append(publicationExpiryInterval);
 		sb.append(", topicAlias=").append(topicAlias);
 		sb.append(", correlationData=").append(Arrays.toString(correlationData));
-		sb.append(", userDefinedPairs=").append(userDefinedPairs);
+		sb.append(", userDefinedProperties=").append(userDefinedProperties);
 
 		return sb.toString();
 	}

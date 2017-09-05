@@ -21,8 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -32,25 +31,28 @@ public class MqttPubComp extends MqttAck {
 			MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND };
 
 	// Fields
-	private int returnCode;
+	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private String reasonString;
-	private Map<String, String> userDefinedPairs = new HashMap<>();
+	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 
 	public MqttPubComp(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBCOMP);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream dis = new DataInputStream(bais);
 		msgId = dis.readUnsignedShort();
-		returnCode = dis.readUnsignedByte();
-		validateReturnCode(returnCode, validReturnCodes);
-		parseIdentifierValueFields(dis);
+		if (data.length > 2) {
+			returnCode = dis.readUnsignedByte();
+			validateReturnCode(returnCode, validReturnCodes);
+			parseIdentifierValueFields(dis);
+		}
 		dis.close();
 	}
 
-	public MqttPubComp(int returnCode) throws MqttException {
+	public MqttPubComp(int returnCode, int msgId) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBCOMP);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
+		this.msgId = msgId;
 	}
 
 	@Override
@@ -62,13 +64,17 @@ public class MqttPubComp extends MqttAck {
 			// Encode the Message ID
 			outputStream.writeShort(msgId);
 
-			// Encode the Return Code
-			outputStream.write((byte) returnCode);
-
-			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-			outputStream.write(identifierValueFieldsByteArray);
+
+			if (returnCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
+				// Encode the Return Code
+				outputStream.write((byte) returnCode);
+
+				// Write Identifier / Value Fields
+				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+				outputStream.write(identifierValueFieldsByteArray);
+			}
+
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {
@@ -88,11 +94,11 @@ public class MqttPubComp extends MqttAck {
 			}
 
 			// If Present, encode the User Properties (3.7.2.2.3)
-			if (userDefinedPairs.size() != 0) {
-				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
+			if (userDefinedProperties.size() != 0) {
+				for (UserProperty property : userDefinedProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, entry.getKey());
-					encodeUTF8(outputStream, entry.getValue());
+					encodeUTF8(outputStream, property.getKey());
+					encodeUTF8(outputStream, property.getValue());
 				}
 			}
 
@@ -116,10 +122,10 @@ public class MqttPubComp extends MqttAck {
 				byte identifier = inputStream.readByte();
 				if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
-				} else if ( identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
-					userDefinedPairs.put(key, value);
+					userDefinedProperties.add(new UserProperty(key, value));
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
@@ -143,12 +149,12 @@ public class MqttPubComp extends MqttAck {
 	public void setReasonString(String reasonString) {
 		this.reasonString = reasonString;
 	}
-	
-	public Map<String, String> getUserDefinedPairs() {
-		return userDefinedPairs;
+
+	public ArrayList<UserProperty> getUserDefinedProperties() {
+		return userDefinedProperties;
 	}
 
-	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
-		this.userDefinedPairs = userDefinedPairs;
+	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+		this.userDefinedProperties = userDefinedProperties;
 	}
 }

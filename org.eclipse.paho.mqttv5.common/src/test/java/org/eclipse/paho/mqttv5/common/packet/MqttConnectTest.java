@@ -17,13 +17,10 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -98,10 +95,10 @@ public class MqttConnectTest{
 		Assert.assertEquals(topicAliasMax, decodedConnectPacket.getTopicAliasMaximum());
 		Assert.assertEquals(requestReplyInfo, decodedConnectPacket.getRequestReplyInfo());
 		Assert.assertEquals(requestPropblemInfo, decodedConnectPacket.getRequestProblemInfo());
-		Assert.assertEquals(3, decodedConnectPacket.getUserDefinedPairs().size());
-		Assert.assertEquals(userValue1, decodedConnectPacket.getUserDefinedPairs().get(userKey1));
-		Assert.assertEquals(userValue2, decodedConnectPacket.getUserDefinedPairs().get(userKey2));
-		Assert.assertEquals(userValue3, decodedConnectPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedConnectPacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedConnectPacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedConnectPacket.getUserDefinedProperties().get(2)));
+
 		Assert.assertEquals(authMethod, decodedConnectPacket.getAuthMethod());
 		Assert.assertArrayEquals(authData, decodedConnectPacket.getAuthData());
 		}
@@ -126,11 +123,11 @@ public class MqttConnectTest{
 		mqttConnectPacket.setAuthMethod(authMethod);
 		mqttConnectPacket.setAuthData(authData);
 		
-		Map<String, String> userDefinedPairs = new HashMap<String,String>();
-		userDefinedPairs.put(userKey1, userValue1);
-		userDefinedPairs.put(userKey2, userValue2);
-		userDefinedPairs.put(userKey3, userValue3);
-		mqttConnectPacket.setUserDefinedPairs(userDefinedPairs);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttConnectPacket.setUserDefinedProperties(userDefinedProperties);
 		return mqttConnectPacket;
 	}
 }
