@@ -247,7 +247,7 @@ public class MqttConnect extends MqttWireMessage {
 			// If present, encode the User Defined Name-Value Pairs (3.1.2.11.9)
 			if (userDefinedProperties.size() != 0) {
 				for (UserProperty property : userDefinedProperties) {
-					outputStream.writeDouble(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
 					encodeUTF8(outputStream, property.getValue());
 				}
