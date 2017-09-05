@@ -112,7 +112,7 @@ public class MqttDisconnect extends MqttWireMessage {
 			// If Present, encode the User Defined Name-Value Pairs (3.14.2.2.4)
 			if (userDefinedProperties.size() != 0) {
 				for (UserProperty property : userDefinedProperties) {
-					outputStream.writeDouble(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
 					encodeUTF8(outputStream, property.getValue());
 				}

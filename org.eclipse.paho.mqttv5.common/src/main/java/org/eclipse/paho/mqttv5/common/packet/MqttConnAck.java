@@ -162,7 +162,7 @@ public class MqttConnAck extends MqttAck {
 			// If present, encode the User Defined Name-Value Pairs (3.2.2.3.9)
 			if(userDefinedProperties.size() != 0){
 				for(UserProperty property : userDefinedProperties) {
-					outputStream.writeDouble(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
 					encodeUTF8(outputStream, property.getValue());
 				}
