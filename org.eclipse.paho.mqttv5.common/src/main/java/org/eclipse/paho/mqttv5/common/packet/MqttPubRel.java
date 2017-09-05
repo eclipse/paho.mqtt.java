@@ -21,8 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -34,7 +33,7 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 	// Fields
 	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private String reasonString;
-	private Map<String, String> userDefinedPairs = new HashMap<>();
+	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 
 	public MqttPubRel(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREL);
@@ -94,11 +93,11 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 			}
 
 			// If Present, encode the User Properties (3.6.2.2.3)
-			if (userDefinedPairs.size() != 0) {
-				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, entry.getKey());
-					encodeUTF8(outputStream, entry.getValue());
+			if (userDefinedProperties.size() != 0) {
+				for (UserProperty property : userDefinedProperties) {
+					outputStream.writeDouble(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, property.getKey());
+					encodeUTF8(outputStream, property.getValue());
 				}
 			}
 
@@ -125,7 +124,7 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
-					userDefinedPairs.put(key, value);
+					userDefinedProperties.add(new UserProperty(key, value));
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
@@ -155,11 +154,11 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 		this.reasonString = reasonString;
 	}
 
-	public Map<String, String> getUserDefinedPairs() {
-		return userDefinedPairs;
+	public ArrayList<UserProperty> getUserDefinedProperties() {
+		return userDefinedProperties;
 	}
 
-	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
-		this.userDefinedPairs = userDefinedPairs;
+	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+		this.userDefinedProperties = userDefinedProperties;
 	}
 }

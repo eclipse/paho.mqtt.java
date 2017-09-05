@@ -24,12 +24,17 @@ public class UserProperty {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof UserProperty)) {
+		if (o instanceof UserProperty) {
 			UserProperty property = (UserProperty) o;
 			return this.key.equals(property.getKey()) && this.value.equals(property.getValue());
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "UserProperty [key=" + key + ", value=" + value + "]";
 	}
 
 }

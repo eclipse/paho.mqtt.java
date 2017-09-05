@@ -18,12 +18,9 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -67,10 +64,10 @@ public class MqttSubAckTest {
 		MqttSubAck decodedSubAckPacket = (MqttSubAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
 		Assert.assertEquals(reasonString, decodedSubAckPacket.getReasonString());
-		Assert.assertEquals(3, decodedSubAckPacket.getUserDefinedPairs().size());
-		Assert.assertEquals(userValue1, decodedSubAckPacket.getUserDefinedPairs().get(userKey1));
-		Assert.assertEquals(userValue2, decodedSubAckPacket.getUserDefinedPairs().get(userKey2));
-		Assert.assertEquals(userValue3, decodedSubAckPacket.getUserDefinedPairs().get(userKey3));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedSubAckPacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedSubAckPacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedSubAckPacket.getUserDefinedProperties().get(2)));
+
 		Assert.assertArrayEquals(returnCodes, decodedSubAckPacket.getReturnCodes());
 		
 		
@@ -79,11 +76,11 @@ public class MqttSubAckTest {
 	private MqttSubAck generatemqttSubAckPacket() throws MqttException{
 		MqttSubAck mqttSubAckPacket = new MqttSubAck(returnCodes);
 		mqttSubAckPacket.setReasonString(reasonString);
-		Map<String, String> userDefinedPairs = new HashMap<String,String>();
-		userDefinedPairs.put(userKey1, userValue1);
-		userDefinedPairs.put(userKey2, userValue2);
-		userDefinedPairs.put(userKey3, userValue3);
-		mqttSubAckPacket.setUserDefinedPairs(userDefinedPairs);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttSubAckPacket.setUserDefinedProperties(userDefinedProperties);
 		
 		return mqttSubAckPacket;
 	}

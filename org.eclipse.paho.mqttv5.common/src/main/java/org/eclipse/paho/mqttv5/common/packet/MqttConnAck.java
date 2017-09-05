@@ -21,9 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -54,11 +53,11 @@ public class MqttConnAck extends MqttAck {
 	private Integer topicAliasMaximum;
 	private String reasonString;
 	private Integer serverKeepAlive;
-	private String replyInfo;
+	private String responseInfo;
 	private String serverReference;
 	private String authMethod;
 	private byte[] authData;
-	private Map<String, String> userDefinedPairs = new HashMap<>();
+	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 	private boolean wildcardSubscriptionsAvailable = false;
 	private boolean subscriptionIdentifiersAvailable = false;
 	private boolean sharedSubscriptionAvailable = false;
@@ -160,11 +159,11 @@ public class MqttConnAck extends MqttAck {
 			}
 
 			// If present, encode the User Defined Name-Value Pairs (3.2.2.3.9)
-			if (userDefinedPairs.size() != 0) {
-				for (Map.Entry<String, String> entry : userDefinedPairs.entrySet()) {
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, entry.getKey());
-					encodeUTF8(outputStream, entry.getValue());
+			if(userDefinedProperties.size() != 0){
+				for(UserProperty property : userDefinedProperties) {
+					outputStream.writeDouble(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, property.getKey());
+					encodeUTF8(outputStream, property.getValue());
 				}
 			}
 
@@ -193,9 +192,9 @@ public class MqttConnAck extends MqttAck {
 			}
 
 			// If present, encode the Response Info (3.2.2.3.14)
-			if (replyInfo != null) {
+			if (responseInfo != null) {
 				outputStream.write(MqttPropertyIdentifiers.RESPONSE_INFO_IDENTIFIER);
-				encodeUTF8(outputStream, replyInfo);
+				encodeUTF8(outputStream, responseInfo);
 			}
 
 			// If present, encode the Server Reference (3.2.2.3.15)
@@ -252,7 +251,7 @@ public class MqttConnAck extends MqttAck {
 				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
-					userDefinedPairs.put(key, value);
+					userDefinedProperties.add(new UserProperty(key,  value));
 				} else if (identifier == MqttPropertyIdentifiers.WILDCARD_SUB_AVAILABLE_IDENTIFIER) {
 					wildcardSubscriptionsAvailable = true;
 				} else if (identifier == MqttPropertyIdentifiers.SUBSCRIPTION_AVAILABLE_IDENTIFIER) {
@@ -262,7 +261,7 @@ public class MqttConnAck extends MqttAck {
 				} else if (identifier == MqttPropertyIdentifiers.SERVER_KEEP_ALIVE_IDENTIFIER) {
 					serverKeepAlive = (int) inputStream.readShort();
 				} else if (identifier == MqttPropertyIdentifiers.RESPONSE_INFO_IDENTIFIER) {
-					replyInfo = decodeUTF8(inputStream);
+					responseInfo = decodeUTF8(inputStream);
 				} else if (identifier == MqttPropertyIdentifiers.SERVER_REFERENCE_IDENTIFIER) {
 					serverReference = decodeUTF8(inputStream);
 				} else if (identifier == MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER) {
@@ -356,12 +355,12 @@ public class MqttConnAck extends MqttAck {
 		this.serverKeepAlive = serverKeepAlive;
 	}
 
-	public String getReplyInfo() {
-		return replyInfo;
+	public String getResponseInfo() {
+		return responseInfo;
 	}
 
 	public void setResponseInfo(String replyInfo) {
-		this.replyInfo = replyInfo;
+		this.responseInfo = replyInfo;
 	}
 
 	public String getServerReference() {
@@ -395,12 +394,12 @@ public class MqttConnAck extends MqttAck {
 		this.authData = authData;
 	}
 
-	public Map<String, String> getUserDefinedPairs() {
-		return userDefinedPairs;
+	public ArrayList<UserProperty> getUserDefinedProperties() {
+		return userDefinedProperties;
 	}
 
-	public void setUserDefinedPairs(Map<String, String> userDefinedPairs) {
-		this.userDefinedPairs = userDefinedPairs;
+	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+		this.userDefinedProperties = userDefinedProperties;
 	}
 
 	public boolean isWildcardSubscriptionsAvailable() {
@@ -464,9 +463,9 @@ public class MqttConnAck extends MqttAck {
 		return "MqttConnAck [receiveMaximum=" + receiveMaximum + ", maximumQoS=" + maximumQoS + ", maximumPacketSize="
 				+ maximumPacketSize + ", retainAvailableAdvertisement=" + retainAvailableAdvertisement
 				+ ", assignedClientIdentifier=" + assignedClientIdentifier + ", topicAliasMaximum=" + topicAliasMaximum
-				+ ", reasonString=" + reasonString + ", serverKeepAlive=" + serverKeepAlive + ", replyInfo=" + replyInfo
+				+ ", reasonString=" + reasonString + ", serverKeepAlive=" + serverKeepAlive + ", replyInfo=" + responseInfo
 				+ ", serverReference=" + serverReference + ", authMethod=" + authMethod + ", authData="
-				+ Arrays.toString(authData) + ", userDefinedPairs=" + userDefinedPairs
+				+ Arrays.toString(authData) + ", userDefinedProperties=" + userDefinedProperties
 				+ ", wildcardSubscriptionsAvailable=" + wildcardSubscriptionsAvailable
 				+ ", subscriptionIdentifiersAvailable=" + subscriptionIdentifiersAvailable
 				+ ", sharedSubscriptionAvailable=" + sharedSubscriptionAvailable + ", returnCode=" + returnCode
