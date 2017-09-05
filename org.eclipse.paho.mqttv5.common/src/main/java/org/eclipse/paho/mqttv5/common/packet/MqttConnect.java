@@ -388,10 +388,6 @@ public class MqttConnect extends MqttWireMessage {
 		this.receiveMaximum = receiveMaximum;
 	}
 
-	public void setMaximumPacketSize(int maximumPacketSize) {
-		this.maximumPacketSize = maximumPacketSize;
-	}
-
 	public void setTopicAliasMaximum(int topicAliasMaximum) {
 		this.topicAliasMaximum = topicAliasMaximum;
 	}
@@ -460,9 +456,6 @@ public class MqttConnect extends MqttWireMessage {
 		return receiveMaximum;
 	}
 
-	public int getMaximumPacketSize() {
-		return maximumPacketSize;
-	}
 
 	public int getTopicAliasMaximum() {
 		return topicAliasMaximum;
