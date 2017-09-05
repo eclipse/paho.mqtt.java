@@ -115,6 +115,9 @@ public class MqttPublishTest {
 		mqttPublish.setContentType(contentType);
 		mqttPublish.setSubscriptionIdentifier(subscriptionIdentifier);
 		
+		mqttPublish.setContentType(contentType);
+		mqttPublish.setSubscriptionIdentifier(subscriptionIdentifier);
+		
 		return mqttPublish;
 	}
 }
