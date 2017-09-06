@@ -106,7 +106,7 @@ import org.osgi.util.promise.Promise;
  *
  * @see IMqttAsyncClient
  */
-public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
+public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	private static final String CLASS_NAME = MqttAsyncClient.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
@@ -470,7 +470,8 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
 
 		this.persistence.open(clientId);
-		this.comms = new ClientComms(this, this.persistence, new PingSender(this.executorService), this.executorService);
+		this.comms = new ClientComms(this, this.persistence, new PingSender(this.executorService),
+				this.executorService);
 		this.persistence.close();
 		this.topics = new Hashtable();
 
@@ -766,21 +767,23 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 
 		return userToken;
 	}
-	
+
 	/**
 	 * Promise Based Version of Connect
 	 */
-	public Promise<IMqttToken> connectWithPromise(MqttConnectionOptions mqttConnectOptions){
-		Deferred<IMqttToken> deferredConnect = new Deferred<IMqttToken>();
+	public Promise<MqttToken> connectWithPromise(MqttConnectionOptions mqttConnectOptions) {
+		Deferred<MqttToken> deferredConnect = new Deferred<MqttToken>();
 		try {
 			this.connect(mqttConnectOptions, new MqttActionListener() {
-				
+
 				@Override
 				public void onSuccess(IMqttToken asyncActionToken) {
-					deferredConnect.resolve(asyncActionToken);
-					
+					// We could do an instanceof check here, but as we are in control of the API,
+					// this is certainly going to be an MqttToken
+					deferredConnect.resolve((MqttToken) asyncActionToken);
+
 				}
-				
+
 				@Override
 				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 					deferredConnect.fail(exception);
@@ -1025,8 +1028,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 
 		return token;
 	}
-	
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1155,6 +1157,35 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 		}
 
 		return token;
+	}
+	
+
+	/**
+	 * Promise Based Version of Connect
+	 */
+	public Promise<MqttToken> subscribeWithPromise(MqttSubscription subscription, IMqttMessageListener callback) {
+		Deferred<MqttToken> deferredSubscribe = new Deferred<MqttToken>();
+		try {
+			this.subscribe(subscription, null, new MqttActionListener() {
+				
+				@Override
+				public void onSuccess(IMqttToken asyncActionToken) {
+					// TODO Auto-generated method stub
+					deferredSubscribe.resolve((MqttToken) asyncActionToken);
+					
+				}
+				
+				@Override
+				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+					deferredSubscribe.fail(exception);
+					
+				}
+			}, callback);
+	
+		} catch (MqttException e) {
+			deferredSubscribe.fail(e);
+		}
+		return deferredSubscribe.getPromise();
 	}
 
 	/*
