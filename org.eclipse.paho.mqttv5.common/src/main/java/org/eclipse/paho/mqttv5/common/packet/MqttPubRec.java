@@ -97,7 +97,6 @@ public class MqttPubRec extends MqttAck {
 				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
 			}
-			
 
 			// If Present, encode the User Properties (3.5.2.2.3)
 			if(userDefinedProperties.size() != 0){

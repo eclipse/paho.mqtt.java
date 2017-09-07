@@ -23,8 +23,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -84,6 +82,7 @@ public class MqttConnAck extends MqttAck {
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 		validateReturnCode(returnCode, validReturnCodes);
+		this.returnCode = returnCode;
 	}
 
 	@Override
@@ -310,6 +309,9 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public int getReceiveMaximum() {
+		if(receiveMaximum == null) {
+			return 65535;
+		}
 		return receiveMaximum;
 	}
 
@@ -334,7 +336,11 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public int getTopicAliasMaximum() {
+		if(topicAliasMaximum == null) {
+			return 0;
+		}
 		return topicAliasMaximum;
+		
 	}
 
 	public void setTopicAliasMaximum(Integer topicAliasMaximum) {
@@ -350,6 +356,9 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public int getServerKeepAlive() {
+		if(serverKeepAlive == null) {
+			return -1;
+		}
 		return serverKeepAlive;
 	}
 
@@ -370,7 +379,8 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public void setServerReference(String serverReference) {
-		if((returnCode == MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER) || (returnCode == MqttReturnCode.RETURN_CODE_SERVER_MOVED)){
+		if ((returnCode == MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER)
+				|| (returnCode == MqttReturnCode.RETURN_CODE_SERVER_MOVED)) {
 			this.serverReference = serverReference;
 		} else {
 			// FIXME
@@ -429,6 +439,9 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public int getMaximumQoS() {
+		if(maximumQoS == null) {
+			return 2;
+		}
 		return maximumQoS;
 	}
 
@@ -437,6 +450,9 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public int getMaximumPacketSize() {
+		if(maximumPacketSize == null) {
+			return -1;
+		}
 		return maximumPacketSize;
 	}
 
@@ -456,9 +472,6 @@ public class MqttConnAck extends MqttAck {
 		return validReturnCodes;
 	}
 
-	public void setServerKeepAlive(Integer serverKeepAlive) {
-		this.serverKeepAlive = serverKeepAlive;
-	}
 
 	@Override
 	public String toString() {

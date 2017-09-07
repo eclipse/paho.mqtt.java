@@ -78,7 +78,7 @@ public class MqttConnect extends MqttWireMessage {
 		if (mqttVersion != DEFAULT_PROTOCOL_VERSION) {
 			throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_UNSUPPORTED_PROTOCOL_VERSION);
 		}
-
+    
 		byte connectFlags = dis.readByte();
 		reservedByte = (connectFlags & 0x01) != 0;
 		cleanSession = (connectFlags & 0x02) != 0;
@@ -384,10 +384,6 @@ public class MqttConnect extends MqttWireMessage {
 	public void setReceiveMaximum(int receiveMaximum) {
 		this.receiveMaximum = receiveMaximum;
 	}
-	
-	public void setMaximumPacketSize(int maximumPacketSize) {
-		this.maximumPacketSize = maximumPacketSize;
-	}
 
 	public void setTopicAliasMaximum(int topicAliasMaximum) {
 		this.topicAliasMaximum = topicAliasMaximum;
@@ -456,10 +452,7 @@ public class MqttConnect extends MqttWireMessage {
 	public int getReceiveMaximum() {
 		return receiveMaximum;
 	}
-	
-	public int getMaximumPacketSize() {
-		return maximumPacketSize;
-	}
+
 
 
 	public int getTopicAliasMaximum() {
@@ -485,6 +478,14 @@ public class MqttConnect extends MqttWireMessage {
 	public byte[] getAuthData() {
 		return authData;
 	}
+	
+	public int getMaximumPacketSize() {
+		return maximumPacketSize;
+	}
+
+	public void setMaximumPacketSize(Integer maximumPacketSize) {
+		this.maximumPacketSize = maximumPacketSize;
+	}
 
 	@Override
 	public String toString() {
@@ -498,9 +499,4 @@ public class MqttConnect extends MqttWireMessage {
 				+ requestProblemInfo + ", userDefinedProperties=" + userDefinedProperties + ", authMethod=" + authMethod
 				+ ", authData=" + Arrays.toString(authData) + "]";
 	}
-
-	public boolean isReservedByte() {
-		return reservedByte;
-	}
-
 }
