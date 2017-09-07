@@ -480,6 +480,14 @@ public class MqttConnect extends MqttWireMessage {
 	public byte[] getAuthData() {
 		return authData;
 	}
+	
+	public int getMaximumPacketSize() {
+		return maximumPacketSize;
+	}
+
+	public void setMaximumPacketSize(Integer maximumPacketSize) {
+		this.maximumPacketSize = maximumPacketSize;
+	}
 
 	@Override
 	public String toString() {
@@ -493,14 +501,5 @@ public class MqttConnect extends MqttWireMessage {
 				+ requestProblemInfo + ", userDefinedProperties=" + userDefinedProperties + ", authMethod=" + authMethod
 				+ ", authData=" + Arrays.toString(authData) + "]";
 	}
-
-	public boolean isReservedByte() {
-		return reservedByte;
-	}
-
-	public boolean isReservedByte() {
-		return reservedByte;
-	}
-
 
 }

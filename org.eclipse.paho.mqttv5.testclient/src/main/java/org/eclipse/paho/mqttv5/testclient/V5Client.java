@@ -1,4 +1,5 @@
-package org.org.eclipse.paho.mqttv5.testclient;
+package org.eclipse.paho.mqttv5.testclient;
+
 
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
