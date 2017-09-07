@@ -106,7 +106,7 @@ import org.osgi.util.promise.Promise;
  *
  * @see IMqttAsyncClient
  */
-public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
+public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 	private static final String CLASS_NAME = MqttAsyncClient.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
@@ -1028,7 +1028,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 
 		return token;
 	}
-
+  
 	/*
 	 * (non-Javadoc)
 	 * 

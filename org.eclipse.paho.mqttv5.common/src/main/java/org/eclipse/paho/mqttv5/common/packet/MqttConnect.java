@@ -78,10 +78,7 @@ public class MqttConnect extends MqttWireMessage {
 		if (mqttVersion != DEFAULT_PROTOCOL_VERSION) {
 			throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_UNSUPPORTED_PROTOCOL_VERSION);
 		}
-		
-		
-		
-		
+    
 		byte connectFlags = dis.readByte();
 		reservedByte = (connectFlags & 0x01) != 0;
 		cleanSession = (connectFlags & 0x02) != 0;
@@ -457,6 +454,7 @@ public class MqttConnect extends MqttWireMessage {
 	}
 
 
+
 	public int getTopicAliasMaximum() {
 		return topicAliasMaximum;
 	}
@@ -501,5 +499,4 @@ public class MqttConnect extends MqttWireMessage {
 				+ requestProblemInfo + ", userDefinedProperties=" + userDefinedProperties + ", authMethod=" + authMethod
 				+ ", authData=" + Arrays.toString(authData) + "]";
 	}
-
 }
