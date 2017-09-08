@@ -129,6 +129,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	private static Object clientLock = new Object(); // Simple lock
 
 	private ScheduledExecutorService executorService;
+	private MqttPingSender pingSender;
 
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT server.
@@ -321,7 +322,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 *             if any other problem was encountered
 	 */
 	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence) throws MqttException {
-		this(serverURI, clientId, persistence, null);
+		this(serverURI, clientId, persistence, null, null);
 	}
 
 	/**
@@ -431,7 +432,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @throws MqttException
 	 *             if any other problem was encountered
 	 */
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence,
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender,
 			ScheduledExecutorService executorService) throws MqttException {
 		final String methodName = "MqttAsyncClient";
 
@@ -465,12 +466,17 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 		if (this.executorService == null) {
 			this.executorService = Executors.newScheduledThreadPool(10);
 		}
+		
+		this.pingSender = pingSender;
+		if(this.pingSender == null) {
+			this.pingSender = new TimerPingSender(this.executorService);
+		}
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
 
 		this.persistence.open(clientId);
-		this.comms = new ClientComms(this, this.persistence, new PingSender(this.executorService),
+		this.comms = new ClientComms(this, this.persistence, this.pingSender,
 				this.executorService);
 		this.persistence.close();
 		this.topics = new Hashtable();

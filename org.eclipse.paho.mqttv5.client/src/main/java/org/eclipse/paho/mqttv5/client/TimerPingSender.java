@@ -31,8 +31,8 @@ import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
  *
  * @see MqttPingSender
  */
-public class PingSender {
-	private static final String CLASS_NAME = PingSender.class.getName();
+public class TimerPingSender implements MqttPingSender{
+	private static final String CLASS_NAME = TimerPingSender.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private ClientComms comms;
@@ -40,7 +40,7 @@ public class PingSender {
 	private ScheduledFuture scheduledFuture;
 	private String clientid;
 
-	public PingSender(ScheduledExecutorService executorService) {
+	public TimerPingSender(ScheduledExecutorService executorService) {
 		if (executorService == null) {
 			throw new IllegalArgumentException("ExecutorService cannot be null.");
 		}

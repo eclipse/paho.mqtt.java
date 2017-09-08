@@ -35,9 +35,10 @@ import org.eclipse.paho.mqttv5.client.MqttClientInterface;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
-import org.eclipse.paho.mqttv5.client.PingSender;
+import org.eclipse.paho.mqttv5.client.TimerPingSender;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -75,7 +76,7 @@ public class ClientComms {
 	private ClientState clientState;
 	private MqttConnectionOptions conOptions;
 	private MqttClientPersistence persistence;
-	private PingSender pingSender;
+	private MqttPingSender pingSender;
 	private CommsTokenStore tokenStore;
 	private boolean stoppingComms = false;
 
@@ -102,7 +103,7 @@ public class ClientComms {
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
 	 */
-	public ClientComms(MqttClientInterface client, MqttClientPersistence persistence, PingSender pingSender,
+	public ClientComms(MqttClientInterface client, MqttClientPersistence persistence, MqttPingSender pingSender,
 			ExecutorService executorService) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client = client;

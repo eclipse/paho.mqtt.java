@@ -323,7 +323,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttLegacyBlockingClient(String serverURI, String clientId, MqttClientPersistence persistence, ScheduledExecutorService executorService) throws MqttException {
-		aClient = new MqttAsyncClient(serverURI, clientId, persistence, executorService);
+		aClient = new MqttAsyncClient(serverURI, clientId, persistence, null, executorService);
 	}
 
 	/*

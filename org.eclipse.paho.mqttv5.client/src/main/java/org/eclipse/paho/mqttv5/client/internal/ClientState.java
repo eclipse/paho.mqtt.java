@@ -30,8 +30,8 @@ import java.util.Vector;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
-import org.eclipse.paho.mqttv5.client.PingSender;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -144,10 +144,10 @@ public class ClientState implements MqttState {
 	private Hashtable outboundQoS0 = null;
 	private Hashtable inboundQoS2 = null;
 	
-	private PingSender pingSender = null;
+	private MqttPingSender pingSender = null;
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, 
-			CommsCallback callback, ClientComms clientComms, PingSender pingSender) throws MqttException {
+			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender) throws MqttException {
 		
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "" );
