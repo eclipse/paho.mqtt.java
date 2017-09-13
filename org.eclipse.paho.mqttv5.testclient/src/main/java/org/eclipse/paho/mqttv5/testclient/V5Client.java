@@ -20,10 +20,10 @@ public class V5Client implements MqttCallback {
 	private String topic = "MQTT Examples";
 	private String content = "Message from MqttPublishSample";
 	private String willContent = "I've Disconnected, sorry!";
-	private int qos = 2;
+	private int qos = 0;
 
 	boolean running = true;
-
+	int x = 0;
 	public V5Client() throws InterruptedException {
 
 		try {
@@ -32,21 +32,21 @@ public class V5Client implements MqttCallback {
 
 			// Lets build our Connection Options:
 			MqttConnectionOptionsBuilder conOptsBuilder = new MqttConnectionOptionsBuilder();
-			MqttConnectionOptions conOpts = conOptsBuilder.serverURI(broker).cleanSession(false)
+			MqttConnectionOptions conOpts = conOptsBuilder.serverURI(broker).cleanSession(true)
 					.sessionExpiryInterval(120).automaticReconnect(true)
-					.will(topic, new MqttMessage(willContent.getBytes(), qos, false)).build();
+					.will(topic, new MqttMessage(willContent.getBytes(), qos, false)).topicAliasMaximum(1000).build();
 			asyncClient.setCallback(this);
+			
 
 			System.out.println("Connecting to broker: " + broker);
 
-			asyncClient.connect(conOpts, new MqttActionListener() {
+			asyncClient.connect(conOpts, null, new MqttActionListener() {
 
 				@Override
 				public void onSuccess(IMqttToken asyncActionToken) {
 					System.out.println("Connected");
 
 					printConnectDetails((MqttToken) asyncActionToken);
-					// MqttSubscription sub = new MqttSubscription(topic, 1);
 					try {
 						IMqttToken subToken = asyncClient.subscribe(topic, qos);
 						subToken.waitForCompletion();
@@ -73,11 +73,17 @@ public class V5Client implements MqttCallback {
 				// asyncClient.publish(topic, new MqttMessage(content.getBytes(), 2, false));
 				Thread.sleep(1000);
 				System.out.println("Sending Message");
-				asyncClient.publish(topic, new MqttMessage(content.getBytes(), 2, false));
+				String message = content + " " + x;
+				if(x == 10) {
+					message = "FINISH";
+				}
+				asyncClient.publish(topic, new MqttMessage(message.getBytes(), 2, false));
+				x++;
 
 			}
 			asyncClient.disconnect();
 			System.out.println("Disconnected");
+			asyncClient.close();
 
 		} catch (MqttException e) {
 			System.err.println("Exception Occured whilst connecting the client: ");
@@ -120,7 +126,11 @@ public class V5Client implements MqttCallback {
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		System.out.println("Incoming Message: " + new String(message.getPayload()));
+		String incomingMessage = new String(message.getPayload());
+		System.out.println("Incoming Message: " +incomingMessage);
+		if(incomingMessage.contains("FINISH")) {
+			this.running = false;
+		}
 
 	}
 

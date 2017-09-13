@@ -219,8 +219,15 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
+			
+			// If we are using a Topic Alias, then the topic should be empty
+			if(topicName != null) {
+				encodeUTF8(dos, topicName);
+			} else {
+				encodeUTF8(dos, "");
+			}
 
-			encodeUTF8(dos, topicName);
+			
 			if (message.getQos() > 0) {
 				dos.writeShort(msgId);
 			}
@@ -318,9 +325,17 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	public MqttMessage getMessage() {
 		return message;
 	}
+	
+	public void setMessage(MqttMessage message) {
+		this.message = message;
+	}
 
 	public String getTopicName() {
 		return topicName;
+	}
+	
+	public void setTopicName(String topicName) {
+		this.topicName = topicName;
 	}
 
 	public int getSubscriptionIdentifier() {

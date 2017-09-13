@@ -24,6 +24,7 @@ package org.eclipse.paho.mqttv5.client;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Timer;
@@ -59,6 +60,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
 import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
 
@@ -127,6 +129,10 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 												// second
 	private boolean reconnecting = false;
 	private static Object clientLock = new Object(); // Simple lock
+	
+	
+	
+	
 
 	private ScheduledExecutorService executorService;
 	private MqttPingSender pingSender;
@@ -432,8 +438,8 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @throws MqttException
 	 *             if any other problem was encountered
 	 */
-	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence, MqttPingSender pingSender,
-			ScheduledExecutorService executorService) throws MqttException {
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence,
+			MqttPingSender pingSender, ScheduledExecutorService executorService) throws MqttException {
 		final String methodName = "MqttAsyncClient";
 
 		log.setResourceName(clientId);
@@ -466,9 +472,9 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 		if (this.executorService == null) {
 			this.executorService = Executors.newScheduledThreadPool(10);
 		}
-		
+
 		this.pingSender = pingSender;
-		if(this.pingSender == null) {
+		if (this.pingSender == null) {
 			this.pingSender = new TimerPingSender(this.executorService);
 		}
 
@@ -476,8 +482,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
 
 		this.persistence.open(clientId);
-		this.comms = new ClientComms(this, this.persistence, this.pingSender,
-				this.executorService);
+		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService);
 		this.persistence.close();
 		this.topics = new Hashtable();
 
@@ -808,7 +813,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
 	public IMqttToken disconnect(Object userContext, MqttActionListener callback) throws MqttException {
-		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback);
+		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback, null, null, null);
 	}
 
 	/*
@@ -826,7 +831,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnect(long)
 	 */
 	public IMqttToken disconnect(long quiesceTimeout) throws MqttException {
-		return this.disconnect(quiesceTimeout, null, null);
+		return this.disconnect(quiesceTimeout, null, null, null, null, null);
 	}
 
 	/*
@@ -835,7 +840,8 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnect(long,
 	 * java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
-	public IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback)
+	public IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback,
+			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
 			throws MqttException {
 		final String methodName = "disconnect";
 		// @TRACE 104=> quiesceTimeout={0} userContext={1} callback={2}
@@ -846,6 +852,19 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 		token.setUserContext(userContext);
 
 		MqttDisconnect disconnect = new MqttDisconnect(MqttReturnCode.RETURN_CODE_SUCCESS);
+
+		if (sessionExpiryInterval != null) {
+			disconnect.setSessionExpiryInterval(sessionExpiryInterval);
+		}
+
+		if (reasonString != null) {
+			disconnect.setReasonString(reasonString);
+		}
+
+		if (userDefinedProperties != null) {
+			disconnect.setUserDefinedProperties(userDefinedProperties);
+		}
+
 		try {
 			comms.disconnect(disconnect, quiesceTimeout, token);
 		} catch (MqttException ex) {
@@ -1164,7 +1183,6 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 
 		return token;
 	}
-	
 
 	/**
 	 * Promise Based Version of Connect
@@ -1173,21 +1191,21 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 		Deferred<MqttToken> deferredSubscribe = new Deferred<MqttToken>();
 		try {
 			this.subscribe(subscription, null, new MqttActionListener() {
-				
+
 				@Override
 				public void onSuccess(IMqttToken asyncActionToken) {
 					// TODO Auto-generated method stub
 					deferredSubscribe.resolve((MqttToken) asyncActionToken);
-					
+
 				}
-				
+
 				@Override
 				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 					deferredSubscribe.fail(exception);
-					
+
 				}
 			}, callback);
-	
+
 		} catch (MqttException e) {
 			deferredSubscribe.fail(e);
 		}
@@ -1594,6 +1612,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	public int getInFlightMessageCount() {
 		return this.comms.getActualInFlight();
 	}
+
 
 	/*
 	 * (non-Javadoc)

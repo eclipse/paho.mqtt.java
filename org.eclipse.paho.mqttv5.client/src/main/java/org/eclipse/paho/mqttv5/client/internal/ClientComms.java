@@ -52,7 +52,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
- * Handles client communications with the server. Sends and receives MQTT V3
+ * Handles client communications with the server. Sends and receives MQTT V5
  * messages.
  */
 public class ClientComms {
@@ -85,8 +85,17 @@ public class ClientComms {
 	private boolean closePending = false;
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
-
 	private ExecutorService executorService;
+
+	// ******* Connection properties ******//
+	private int receiveMaximum = 65535;
+	private int maximumQoS = 2;
+	private boolean retainAvailable = true;
+	private int maximumPacketSize = -1;
+	private int topicAliasMaximum = 0;
+	private boolean wildcardSubscriptionsAvailable = true;
+	private boolean subscriptionIdentifiersAvailable = true;
+	private boolean sharedSubscriptionsAvailable = true;
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
@@ -199,6 +208,23 @@ public class ClientComms {
 				}
 				disconnectedMessageBuffer.putMessage(message, token);
 			} else {
+
+				if (message instanceof MqttPublish) {
+					// Override the QoS if the server has set a maximum
+					if (((MqttPublish) message).getMessage().getQos() > this.maximumQoS) {
+						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
+						mqttMessage.setQos(this.maximumQoS);
+						((MqttPublish) message).setMessage(mqttMessage);
+					}
+
+					// Override the Retain flag if the server has disabled it
+					if (((MqttPublish) message).getMessage().isRetained() && (this.retainAvailable == false)) {
+						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
+						mqttMessage.setRetained(false);
+						((MqttPublish) message).setMessage(mqttMessage);
+					}
+
+				}
 				this.internalSend(message, token);
 			}
 		} else if (disconnectedMessageBuffer != null && isResting()) {
@@ -295,7 +321,7 @@ public class ClientComms {
 				if (conOptions.getWillMessage() != null) {
 					connect.setWillMessage(conOptions.getWillMessage());
 				}
-				
+
 				if (conOptions.getUserName() != null) {
 					connect.setUserName(conOptions.getUserName());
 				}
@@ -968,6 +994,70 @@ public class ClientComms {
 
 	public int getActualInFlight() {
 		return this.clientState.getActualInFlight();
+	}
+
+	public int getReceiveMaximum() {
+		return receiveMaximum;
+	}
+
+	public void setReceiveMaximum(int receiveMaximum) {
+		this.receiveMaximum = receiveMaximum;
+	}
+
+	public int getMaximumQoS() {
+		return maximumQoS;
+	}
+
+	public void setMaximumQoS(int maximumQoS) {
+		this.maximumQoS = maximumQoS;
+	}
+
+	public boolean isRetainAvailable() {
+		return retainAvailable;
+	}
+
+	public void setRetainAvailable(boolean retainAvailable) {
+		this.retainAvailable = retainAvailable;
+	}
+
+	public int getMaximumPacketSize() {
+		return maximumPacketSize;
+	}
+
+	public void setMaximumPacketSize(int maximumPacketSize) {
+		this.maximumPacketSize = maximumPacketSize;
+	}
+
+	public int getTopicAliasMaximum() {
+		return topicAliasMaximum;
+	}
+
+	public void setTopicAliasMaximum(int topicAliasMaximum) {
+		this.topicAliasMaximum = topicAliasMaximum;
+	}
+
+	public boolean isWildcardSubscriptionsAvailable() {
+		return wildcardSubscriptionsAvailable;
+	}
+
+	public void setWildcardSubscriptionsAvailable(boolean wildcardSubscriptionsAvailable) {
+		this.wildcardSubscriptionsAvailable = wildcardSubscriptionsAvailable;
+	}
+
+	public boolean isSubscriptionIdentifiersAvailable() {
+		return subscriptionIdentifiersAvailable;
+	}
+
+	public void setSubscriptionIdentifiersAvailable(boolean subscriptionIdentifiersAvailable) {
+		this.subscriptionIdentifiersAvailable = subscriptionIdentifiersAvailable;
+	}
+
+	public boolean isSharedSubscriptionsAvailable() {
+		return sharedSubscriptionsAvailable;
+	}
+
+	public void setSharedSubscriptionsAvailable(boolean sharedSubscriptionsAvailable) {
+		this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
 	}
 
 }

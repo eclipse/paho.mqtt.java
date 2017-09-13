@@ -360,7 +360,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	 * @see IMqttClient#disconnect(long)
 	 */
 	public void disconnect(long quiesceTimeout) throws MqttException {
-		aClient.disconnect(quiesceTimeout, null, null).waitForCompletion();
+		aClient.disconnect(quiesceTimeout, null, null, null, null, null).waitForCompletion();
 	}
 
 	/*
