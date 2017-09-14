@@ -28,9 +28,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-import javax.swing.text.DefaultEditorKit.InsertTabAction;
-
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttPingSender;
@@ -544,7 +543,7 @@ public class ClientState implements MqttState {
 					// @TRACE 613= sending {0} msgs at max inflight window
 					log.fine(CLASS_NAME, methodName, "613", new Object[] { new Integer(actualInFlight) });
 
-					throw new MqttException(MqttException.REASON_CODE_MAX_INFLIGHT);
+					throw new MqttException(MqttClientException.REASON_CODE_MAX_INFLIGHT);
 				}
 
 				MqttMessage innerMessage = ((MqttPublish) message).getMessage();
@@ -734,7 +733,7 @@ public class ClientState implements MqttState {
 
 					// A ping has already been sent. At this point, assume that the
 					// broker has hung and the TCP layer hasn't noticed.
-					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_TIMEOUT);
 				}
 
 				// Is the broker connection lost because I could not get any successful write
@@ -751,7 +750,7 @@ public class ClientState implements MqttState {
 					// operation.
 					// At this point, assume that the broker has hung and the TCP layer hasn't
 					// noticed.
-					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_WRITE_TIMEOUT);
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_WRITE_TIMEOUT);
 				}
 
 				// 1. Is a ping required by the client to verify whether the broker is down?
@@ -1121,7 +1120,7 @@ public class ClientState implements MqttState {
 						log.severe(CLASS_NAME, methodName, "653",
 								new Object[] { new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
 										new Integer(send.getTopicAlias()) });
-						throw new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS);
+						throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
 					}
 				} else if (send.getTopicName() == null && send.getTopicAlias() != 0) {
 					// We've been sent an existing topic alias
@@ -1135,7 +1134,7 @@ public class ClientState implements MqttState {
 					log.severe(CLASS_NAME, methodName, "653",
 							new Object[] { new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
 									new Integer(send.getTopicAlias()) });
-					throw new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS);
+					throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
 				}
 
 				switch (send.getMessage().getQos()) {
@@ -1278,7 +1277,7 @@ public class ClientState implements MqttState {
 		// token.
 		MqttException shutReason = reason;
 		if (reason == null) {
-			shutReason = new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+			shutReason = new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
 		}
 
 		// Set the token up so it is ready to be notified after disconnect
@@ -1364,7 +1363,7 @@ public class ClientState implements MqttState {
 			if (nextMsgId == startingMessageId) {
 				loopCount++;
 				if (loopCount == 2) {
-					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_NO_MESSAGE_IDS_AVAILABLE);
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_NO_MESSAGE_IDS_AVAILABLE);
 				}
 			}
 		} while (inUseMsgIds.containsKey(new Integer(nextMsgId)));

@@ -35,6 +35,7 @@ public class MqttMessage {
 	 * 
 	 * @throws IllegalArgumentException
 	 *             if value of QoS is not 0, 1 or 2.
+	 * @param qos The Quality Of Service Level to validate
 	 */
 	public static void validateQos(int qos) {
 		if ((qos < 0) || (qos > 2)) {
@@ -59,6 +60,7 @@ public class MqttMessage {
 	/**
 	 * Constructs a message with the specified byte array as a payload, and all
 	 * other values set to defaults.
+	 * @param payload the payload
 	 */
 	public MqttMessage(byte[] payload) {
 		setPayload(payload);
@@ -67,9 +69,9 @@ public class MqttMessage {
 	/**
 	 * Contructs an message with the specified payload, qos and retained flag.
 	 * 
-	 * @param payload
-	 * @param qos
-	 * @param retained
+	 * @param payload The Message Payload.
+	 * @param qos The Message QoS.
+	 * @param retained If the message is retained.
 	 */
 	public MqttMessage(byte[] payload, int qos, boolean retained) {
 		setPayload(payload);
@@ -163,7 +165,7 @@ public class MqttMessage {
 	 * will not be acknowledged across the network. This QoS is the fastest, but
 	 * should only be used for messages which are not valuable - note that if the
 	 * server cannot process the message (for example, there is an authorization
-	 * problem), then an {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)}.
+	 * problem).
 	 * Also known as "fire and forget".</li>
 	 *
 	 * <li>Quality of Service 1 - indicates that a message should be delivered at
@@ -181,6 +183,7 @@ public class MqttMessage {
 	 * using <code>MqttConnectOptions</code>. If a persistence mechanism is not
 	 * specified, the message will not be delivered in the event of a client
 	 * failure.</li>
+	 * </ul>
 	 *
 	 * If persistence is not configured, QoS 1 and 2 messages will still be
 	 * delivered in the event of a network or server problem as the client will hold
@@ -248,7 +251,7 @@ public class MqttMessage {
 	 * This is only to be used internally to provide the MQTT id of a message
 	 * received from the server. Has no effect when publishing messages.
 	 * 
-	 * @param messageId
+	 * @param messageId the Message Identifier
 	 */
 	public void setId(int messageId) {
 		this.messageId = messageId;

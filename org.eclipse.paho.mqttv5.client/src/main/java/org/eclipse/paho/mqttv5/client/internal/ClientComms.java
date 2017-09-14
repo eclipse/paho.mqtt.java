@@ -31,6 +31,7 @@ import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientInterface;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -170,7 +171,7 @@ public class ClientComms {
 			// @TRACE 213=fail: token in use: key={0} message={1} token={2}
 			log.fine(CLASS_NAME, methodName, "213", new Object[] { message.getKey(), message, token });
 
-			throw new MqttException(MqttException.REASON_CODE_TOKEN_INUSE);
+			throw new MqttException(MqttClientException.REASON_CODE_TOKEN_INUSE);
 		}
 
 		try {
@@ -238,7 +239,7 @@ public class ClientComms {
 		} else {
 			// @TRACE 208=failed: not connected
 			log.fine(CLASS_NAME, methodName, "208");
-			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
+			throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_NOT_CONNECTED);
 		}
 	}
 
@@ -261,9 +262,9 @@ public class ClientComms {
 					log.fine(CLASS_NAME, methodName, "224");
 
 					if (isConnecting()) {
-						throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
+						throw new MqttException(MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS);
 					} else if (isConnected()) {
-						throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
+						throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CONNECTED);
 					} else if (isDisconnecting()) {
 						closePending = true;
 						return;
@@ -385,13 +386,13 @@ public class ClientComms {
 				// @TRACE 207=connect failed: not disconnected {0}
 				log.fine(CLASS_NAME, methodName, "207", new Object[] { new Byte(conState) });
 				if (isClosed() || closePending) {
-					throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
+					throw new MqttException(MqttClientException.REASON_CODE_CLIENT_CLOSED);
 				} else if (isConnecting()) {
-					throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
+					throw new MqttException(MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS);
 				} else if (isDisconnecting()) {
-					throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+					throw new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
 				} else {
-					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CONNECTED);
 				}
 			}
 		}
@@ -478,7 +479,7 @@ public class ClientComms {
 		}
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
-		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
+		tokenStore.quiesce(new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING));
 
 		// Notify any outstanding tokens with the exception of
 		// con or discon which may be returned and will be notified at
@@ -593,20 +594,20 @@ public class ClientComms {
 			if (isClosed()) {
 				// @TRACE 223=failed: in closed state
 				log.fine(CLASS_NAME, methodName, "223");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CLOSED);
 			} else if (isDisconnected()) {
 				// @TRACE 211=failed: already disconnected
 				log.fine(CLASS_NAME, methodName, "211");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED);
 			} else if (isDisconnecting()) {
 				// @TRACE 219=failed: already disconnecting
 				log.fine(CLASS_NAME, methodName, "219");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
 			} else if (Thread.currentThread() == callback.getThread()) {
 				// @TRACE 210=failed: called on callback thread
 				log.fine(CLASS_NAME, methodName, "210");
 				// Not allowed to call disconnect() from the callback, as it will deadlock.
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECT_PROHIBITED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECT_PROHIBITED);
 			}
 
 			// @TRACE 218=state=DISCONNECTING
@@ -911,7 +912,7 @@ public class ClientComms {
 		log.fine(CLASS_NAME, methodName, "804", null, ex);
 		MqttException mex;
 		if (!(ex instanceof MqttException)) {
-			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);
+			mex = new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ex);
 		} else {
 			mex = (MqttException) ex;
 		}
@@ -987,7 +988,7 @@ public class ClientComms {
 			} else {
 				// @TRACE 208=failed: not connected
 				log.fine(CLASS_NAME, methodName, "208");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_NOT_CONNECTED);
 			}
 		}
 	}

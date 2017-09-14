@@ -442,7 +442,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 			subscriptions[i].setQos(grantedQos[i]);;
 		}
 		if (grantedQos.length == 1 && subscriptions[0].getQos() == 0x80) {
-			throw new MqttException(MqttException.REASON_CODE_SUBSCRIBE_FAILED);
+			throw new MqttException(MqttClientException.REASON_CODE_SUBSCRIBE_FAILED);
 		}
 	}
 

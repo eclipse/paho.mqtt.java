@@ -592,7 +592,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 			if (factory == null) {
 				factory = SocketFactory.getDefault();
 			} else if (factory instanceof SSLSocketFactory) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
 			netModule = new TCPNetworkModule(factory, host, port, clientId);
 			((TCPNetworkModule) netModule).setConnectTimeout(options.getConnectionTimeout());
@@ -614,7 +614,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 				// throw ExceptionHelper.createMqttException(ex.getCause());
 				// }
 			} else if ((factory instanceof SSLSocketFactory) == false) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
 
 			// Create the network module...
@@ -636,7 +636,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 			if (factory == null) {
 				factory = SocketFactory.getDefault();
 			} else if (factory instanceof SSLSocketFactory) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
 			netModule = new WebSocketNetworkModule(factory, address, host, port, clientId);
 			((WebSocketNetworkModule) netModule).setConnectTimeout(options.getConnectionTimeout());
@@ -654,7 +654,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 				factory = wSSFactoryFactory.createSocketFactory(null);
 
 			} else if ((factory instanceof SSLSocketFactory) == false) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
 
 			// Create the network module...
@@ -731,16 +731,16 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 			throws MqttException, MqttSecurityException {
 		final String methodName = "connect";
 		if (comms.isConnected()) {
-			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
+			throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CONNECTED);
 		}
 		if (comms.isConnecting()) {
-			throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
+			throw new MqttException(MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS);
 		}
 		if (comms.isDisconnecting()) {
-			throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
 		}
 		if (comms.isClosed()) {
-			throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
+			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_CLOSED);
 		}
 		if (options == null) {
 			options = new MqttConnectionOptions();
@@ -1412,16 +1412,16 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 		// Some checks to make sure that we're not attempting to reconnect an
 		// already connected client
 		if (comms.isConnected()) {
-			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
+			throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CONNECTED);
 		}
 		if (comms.isConnecting()) {
-			throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
+			throw new MqttException(MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS);
 		}
 		if (comms.isDisconnecting()) {
-			throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
 		}
 		if (comms.isClosed()) {
-			throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
+			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_CLOSED);
 		}
 		// We don't want to spam the server
 		stopReconnectCycle();

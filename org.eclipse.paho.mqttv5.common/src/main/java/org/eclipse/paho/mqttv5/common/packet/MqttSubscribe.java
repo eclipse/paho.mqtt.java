@@ -37,9 +37,13 @@ public class MqttSubscribe extends MqttWireMessage {
 	 * Constructor for an on the Wire MQTT Subscribe message
 	 * 
 	 * @param info
+	 *            - Info Byte
 	 * @param data
+	 *            - The variable header and payload bytes.
 	 * @throws IOException
+	 *             - if an exception occurs when decoding an input stream
 	 * @throws MqttException
+	 *             - If an exception occurs decoding this packet
 	 */
 	public MqttSubscribe(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
@@ -76,7 +80,7 @@ public class MqttSubscribe extends MqttWireMessage {
 	/**
 	 * Constructor for an on the Wire MQTT Subscribe message
 	 * 
-	 * @param subscriptions
+	 * @param subscription
 	 *            - An {@link MqttSubscription}
 	 */
 	public MqttSubscribe(MqttSubscription subscription) {

@@ -26,6 +26,7 @@ import java.net.SocketAddress;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -90,7 +91,7 @@ public class TCPNetworkModule implements NetworkModule {
 		catch (ConnectException ex) {
 			//@TRACE 250=Failed to create TCP socket
 			log.fine(CLASS_NAME,methodName,"250",null,ex);
-			throw new MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR, ex);
+			throw new MqttException(MqttClientException.REASON_CODE_SERVER_CONNECT_ERROR, ex);
 		}
 	}
 

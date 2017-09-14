@@ -68,11 +68,13 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	 * Constructs a new MqttPublish message from a byte array
 	 * 
 	 * @param info
-	 *            - The message info byte.
+	 *            - Info Byte
 	 * @param data
 	 *            - The variable header and payload bytes.
-	 * @throws MqttException
 	 * @throws IOException
+	 *             - if an exception occurs when decoding an input stream
+	 * @throws MqttException
+	 *             - If an exception occurs decoding this packet
 	 */
 	public MqttPublish(byte info, byte[] data) throws MqttException, IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBLISH);

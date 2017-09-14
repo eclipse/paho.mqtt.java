@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.client.BufferedMessage;
 import org.eclipse.paho.mqttv5.client.DisconnectedBufferOptions;
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
@@ -58,7 +59,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 				buffer.remove(0);
 				buffer.add(bufferedMessage);
 			}else {
-				throw new MqttException(MqttException.REASON_CODE_DISCONNECTED_BUFFER_FULL);
+				throw new MqttException(MqttClientException.REASON_CODE_DISCONNECTED_BUFFER_FULL);
 			}
 		}
 	}

@@ -39,7 +39,7 @@ public class MqttSubscription {
 	 * 	<li>Messages received by this subscription will keep the retain flag (if it is set).</li>
 	 * 	<li>Retained messages on this topic will be delivered once the subscription has been made.</li>
 	 * </ul>
-	 * @param topic
+	 * @param topic The Topic
 	 */
 	public MqttSubscription(String topic){
 		setTopic(topic);
@@ -53,6 +53,7 @@ public class MqttSubscription {
 	/**
 	 * Utility method to validate the supplied QoS value.
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
+	 * @param qos The QoS level to validate.
 	 */
 	public static void validateQos(int qos) {
 		if ((qos < 0) || (qos > 2)) {
@@ -63,6 +64,7 @@ public class MqttSubscription {
 	/**
 	 * Utility method to validate the supplied Retain handling value.
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
+	 * @param retainHandling the retain value to validate.
 	 */
 	public static void validateRetainHandling(int retainHandling) {
 		if ((retainHandling < 0) || (retainHandling > 2)) {
@@ -145,7 +147,7 @@ public class MqttSubscription {
 	/**
 	 * This is only to be used internally to provide the MQTT id of a message
 	 * received from the server.  Has no effect when publishing messages.
-	 * @param messageId
+	 * @param messageId The Message Identifier
 	 */
 	public void setId(int messageId) {
 		this.messageId = messageId;

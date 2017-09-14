@@ -50,7 +50,9 @@ public class MqttAuth extends MqttWireMessage {
 	 * @param data
 	 *            - The Data
 	 * @throws IOException
+	 *             - if an exception occurs when decoding an input stream
 	 * @throws MqttException
+	 *             - If an exception occurs decoding this packet
 	 */
 	public MqttAuth(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
@@ -68,6 +70,7 @@ public class MqttAuth extends MqttWireMessage {
 	 * @param returnCode
 	 *            - The Auth Return Code
 	 * @throws MqttException
+	 *             - If an exception occurs encoding this packet
 	 */
 	public MqttAuth(int returnCode) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);

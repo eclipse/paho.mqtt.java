@@ -512,7 +512,7 @@ public interface IMqttAsyncClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(String[], int[], Object, MqttActionListener) throws MqttException
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages

@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
@@ -153,7 +154,7 @@ public class CommsReceiver implements Runnable {
 					} else {
 						// It its an ack and there is no token then something is not right.
 						// An ack should always have a token assoicated with it.
-						throw new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
+						throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
 					}
 				} else {
 					if (message != null) {
@@ -178,7 +179,7 @@ public class CommsReceiver implements Runnable {
 				// DISCONNECT and ends the socket before we complete. As such,
 				// only shutdown the connection if we're not already shutting down.
 				if (!clientComms.isDisconnecting()) {
-					clientComms.shutdownConnection(token, new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
+					clientComms.shutdownConnection(token, new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ioe));
 				}
 			}
 			finally {
