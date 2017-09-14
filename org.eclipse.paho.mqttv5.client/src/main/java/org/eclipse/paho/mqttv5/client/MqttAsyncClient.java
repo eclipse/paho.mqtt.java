@@ -1213,34 +1213,6 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface{
 		return deferredSubscribe.getPromise();
 	}
 
-	/**
-	 * Promise Based Version of Connect
-	 */
-	public Promise<MqttToken> subscribeWithPromise(MqttSubscription subscription, IMqttMessageListener callback) {
-		Deferred<MqttToken> deferredSubscribe = new Deferred<MqttToken>();
-		try {
-			this.subscribe(subscription, null, new MqttActionListener() {
-
-				@Override
-				public void onSuccess(IMqttToken asyncActionToken) {
-					// TODO Auto-generated method stub
-					deferredSubscribe.resolve((MqttToken) asyncActionToken);
-
-				}
-
-				@Override
-				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-					deferredSubscribe.fail(exception);
-
-				}
-			}, callback);
-
-		} catch (MqttException e) {
-			deferredSubscribe.fail(e);
-		}
-		return deferredSubscribe.getPromise();
-	}
-
 	/*
 	 * (non-Javadoc)
 	 *
