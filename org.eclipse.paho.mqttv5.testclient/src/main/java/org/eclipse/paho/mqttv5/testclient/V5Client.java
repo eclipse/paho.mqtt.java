@@ -127,7 +127,7 @@ public class V5Client implements MqttCallback {
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		String incomingMessage = new String(message.getPayload());
-		System.out.println("Incoming Message: " +incomingMessage);
+		System.out.println("Incoming Message: [" +incomingMessage + "], topic:[" + topic + "]");
 		if(incomingMessage.contains("FINISH")) {
 			this.running = false;
 		}

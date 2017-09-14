@@ -1112,24 +1112,30 @@ public class ClientState implements MqttState {
 					// Do we have space for this alias? / Are aliases enabled?
 					if (incomingTopicAliases.size() < clientComms.getConOptions().getTopicAliasMaximum()
 							&& clientComms.getConOptions().getTopicAliasMaximum() > 0) {
-						// @TRACE 652=Incoming Topic Alias alias={0}, topicName={1}
-						log.fine(CLASS_NAME, methodName, "652", new Object[] {new Integer(send.getTopicAlias()), send.getTopicName()});
+						// @TRACE 652=Setting Incoming New Topic Alias alias={0}, topicName={1}
+						log.fine(CLASS_NAME, methodName, "652",
+								new Object[] { new Integer(send.getTopicAlias()), send.getTopicName() });
 						incomingTopicAliases.put(send.getTopicAlias(), send.getTopicName());
 					} else {
-						// @TRACE 653=received key={0}, message={1}, topicAliasMax={2},
-						// publishTopicAlias={3}
-						log.warning(CLASS_NAME, methodName, "653",
-								new Object[] { new Integer(message.getMessageId()), message,
-										new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
+						// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
+						log.severe(CLASS_NAME, methodName, "653",
+								new Object[] { new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
 										new Integer(send.getTopicAlias()) });
+						throw new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS);
 					}
 				} else if (send.getTopicName() == null && send.getTopicAlias() != 0) {
 					// We've been sent an existing topic alias
 					if (incomingTopicAliases.get(send.getTopicAlias()) != null) {
 						send.setTopicName(incomingTopicAliases.get(send.getTopicAlias()));
 					}
-				} else {
-					// TODO - No Alias, might want to log?
+				} else if (send.getTopicName() == null && (send.getTopicAlias() == 0
+						|| send.getTopicAlias() > clientComms.getConOptions().getTopicAliasMaximum())) {
+					// No Topic String provided, topic alias is invalid
+					// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
+					log.severe(CLASS_NAME, methodName, "653",
+							new Object[] { new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
+									new Integer(send.getTopicAlias()) });
+					throw new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS);
 				}
 
 				switch (send.getMessage().getQos()) {
