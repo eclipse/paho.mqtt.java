@@ -15,6 +15,7 @@
  */
 package org.eclipse.paho.mqttv5.client.internal;
 
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 
@@ -23,8 +24,8 @@ import org.eclipse.paho.mqttv5.common.MqttSecurityException;
  */
 public class ExceptionHelper {
 	public static MqttException createMqttException(int reasonCode) {
-		if ((reasonCode == MqttException.REASON_CODE_FAILED_AUTHENTICATION) || 
-			(reasonCode == MqttException.REASON_CODE_NOT_AUTHORIZED)) {
+		if ((reasonCode == MqttClientException.REASON_CODE_FAILED_AUTHENTICATION) || 
+			(reasonCode == MqttClientException.REASON_CODE_NOT_AUTHORIZED)) {
 			return new MqttSecurityException(reasonCode);
 		}
 		

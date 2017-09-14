@@ -17,6 +17,7 @@
 package org.eclipse.paho.mqttv5.client.internal;
 
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientInterface;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
@@ -109,7 +110,7 @@ public class Token {
 		if (resp == null && !completed) {
 			//@TRACE 406=key={0} timed out token={1}
 			log.fine(CLASS_NAME,methodName, "406",new Object[]{getKey(), this});
-			exception = new MqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT);
+			exception = new MqttException(MqttClientException.REASON_CODE_CLIENT_TIMEOUT);
 			throw exception;
 		}
 		checkResult();
@@ -252,7 +253,7 @@ public class Token {
 			
 			while (!sent) {
 				if (this.exception == null) {
-					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
 				}
 				throw this.exception;
 			}
@@ -289,7 +290,7 @@ public class Token {
 		final String methodName = "reset";
 		if (isInUse() ) {
 			// Token is already in use - cannot reset 
-			throw new MqttException(MqttException.REASON_CODE_TOKEN_INUSE);
+			throw new MqttException(MqttClientException.REASON_CODE_TOKEN_INUSE);
 		}
 		//@TRACE 410=> key={0}
 		log.fine(CLASS_NAME, methodName, "410",new Object[]{getKey()});

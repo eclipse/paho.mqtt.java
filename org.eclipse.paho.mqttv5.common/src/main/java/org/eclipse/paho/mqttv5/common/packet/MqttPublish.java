@@ -68,11 +68,13 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	 * Constructs a new MqttPublish message from a byte array
 	 * 
 	 * @param info
-	 *            - The message info byte.
+	 *            - Info Byte
 	 * @param data
 	 *            - The variable header and payload bytes.
-	 * @throws MqttException
 	 * @throws IOException
+	 *             - if an exception occurs when decoding an input stream
+	 * @throws MqttException
+	 *             - If an exception occurs decoding this packet
 	 */
 	public MqttPublish(byte info, byte[] data) throws MqttException, IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBLISH);
@@ -219,8 +221,15 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
+			
+			// If we are using a Topic Alias, then the topic should be empty
+			if(topicName != null) {
+				encodeUTF8(dos, topicName);
+			} else {
+				encodeUTF8(dos, "");
+			}
 
-			encodeUTF8(dos, topicName);
+			
 			if (message.getQos() > 0) {
 				dos.writeShort(msgId);
 			}
@@ -318,9 +327,17 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	public MqttMessage getMessage() {
 		return message;
 	}
+	
+	public void setMessage(MqttMessage message) {
+		this.message = message;
+	}
 
 	public String getTopicName() {
 		return topicName;
+	}
+	
+	public void setTopicName(String topicName) {
+		this.topicName = topicName;
 	}
 
 	public int getSubscriptionIdentifier() {

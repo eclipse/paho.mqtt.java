@@ -24,8 +24,9 @@ public class CountingInputStream extends InputStream{
 	private int counter;
 	
 	
-	/** Constructs a new <code>CountingInputStream</code> wrapping the supplied
+	/**Constructs a new <code>CountingInputStream</code> wrapping the supplied
 	 * input stream.
+	 * @param inputStream The inputStream to count and provide
 	 */
 	public CountingInputStream(InputStream inputStream){
 		this.inputStream = inputStream;
@@ -42,6 +43,7 @@ public class CountingInputStream extends InputStream{
 	
 	/**
 	 * Returns the number of bytes read since last reset
+	 * @return the counter
 	 */
 	public int getCounter() {
 		return counter;

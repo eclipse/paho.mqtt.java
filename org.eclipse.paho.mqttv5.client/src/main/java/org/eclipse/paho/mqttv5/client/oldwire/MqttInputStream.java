@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.internal.MqttState;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
@@ -97,7 +98,7 @@ public class MqttInputStream extends InputStream {
 				if ((type < MqttWireMessage.MESSAGE_TYPE_CONNECT) ||
 						(type > MqttWireMessage.MESSAGE_TYPE_DISCONNECT)) {
 					// Invalid MQTT message type...
-					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_INVALID_MESSAGE);
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_INVALID_MESSAGE);
 				}
 				remLen = MqttWireMessage.readVariableByteInteger(in).getValue();
 				bais.write(first);

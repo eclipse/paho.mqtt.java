@@ -19,11 +19,14 @@
 
 package org.eclipse.paho.mqttv5.client;
 
+import java.util.ArrayList;
+
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Enables an application to communicate with an MQTT server using non-blocking methods.
@@ -206,7 +209,7 @@ public interface IMqttAsyncClient {
 	 * @return token used to track and wait for disconnect to complete. The token
 	 * will be passed to any callback that has been set.
 	 * @throws MqttException for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, MqttActionListener)
+	 * @see #disconnect(long, Object, MqttActionListener, Integer, String, ArrayList)
 	 */
 	public IMqttToken disconnect( ) throws MqttException;
 
@@ -223,7 +226,7 @@ public interface IMqttAsyncClient {
 	 * @return token used to track and wait for disconnect to complete. The token
 	 * will be passed to the callback methods if a callback is set.
 	 * @throws MqttException for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, MqttActionListener)
+	 * @see #disconnect(long, Object, MqttActionListener, Integer, String, ArrayList)
 	 */
 	public IMqttToken disconnect(long quiesceTimeout) throws MqttException;
 
@@ -242,7 +245,8 @@ public interface IMqttAsyncClient {
 	 * @return token used to track and wait for the disconnect to complete. The token
 	 * will be passed to any callback that has been set.
 	 * @throws MqttException for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, MqttActionListener)
+	 * @see #disconnect(long, Object, MqttActionListener, Integer, String, ArrayList)
+
 	 */
 	public IMqttToken disconnect( Object userContext, MqttActionListener callback) throws MqttException;
 
@@ -275,11 +279,14 @@ public interface IMqttAsyncClient {
 	 * null if not required.
 	 * @param callback optional listener that will be notified when the disconnect completes. Use
 	 * null if not required.
+	 * @param sessionExpiryInterval optional property to be sent in the disconnect packet to the server. Use null if not required.
+	 * @param reasonString optional property to be sent in the disconnect packet to the server. Use null if not required.
+	 * @param userDefinedProperties {@link ArrayList} of {@link UserProperty} to be sent to the server. Use null if not required.
 	 * @return token used to track and wait for the connect to complete. The token
 	 * will be passed to any callback that has been set.
 	 * @throws MqttException for problems encountered while disconnecting
 	 */
-	public IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback) throws MqttException;
+	public IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback, Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -505,7 +512,7 @@ public interface IMqttAsyncClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(String[], int[], Object, MqttActionListener) throws MqttException
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages

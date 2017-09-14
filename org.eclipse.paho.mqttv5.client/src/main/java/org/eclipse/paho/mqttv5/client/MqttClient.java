@@ -7,13 +7,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.eclipse.paho.mqttv5.client.internal.ClientComms;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.osgi.util.promise.Deferred;
-import org.osgi.util.promise.Promise;
 
 public class MqttClient implements MqttClientInterface {
 
 	private MqttClientPersistence persistence;
 	private ScheduledExecutorService executorService;
+	private MqttPingSender pingSender;
 
 	private ClientComms comms;
 	private Hashtable topics;
@@ -26,10 +25,10 @@ public class MqttClient implements MqttClientInterface {
 	ConnectionLostCallback connectionLostCallback; // Callback that is called when the connection is lost.
 
 	public MqttClient() throws MqttException {
-		this(null, null, null);
+		this(null, null, null, null);
 	}
 
-	public MqttClient(String clientId, MqttClientPersistence persistence, ScheduledExecutorService executorService)
+	public MqttClient(String clientId, MqttClientPersistence persistence, MqttPingSender pingSender, ScheduledExecutorService executorService) 
 			throws MqttException {
 		final String methodName = "MqttClient";
 
@@ -44,13 +43,18 @@ public class MqttClient implements MqttClientInterface {
 			this.executorService = Executors.newScheduledThreadPool(10);
 		}
 		
+		this.pingSender = pingSender;
+		if(this.pingSender == null) {
+			this.pingSender = new TimerPingSender(executorService);
+		}
+		
 		
 		this.clientId = clientId;
 		if(this.clientId == null) {
 			generateAndSetClientId();
 		}
 		this.persistence.open(clientId);
-		this.comms = new ClientComms(this, this.persistence, new PingSender(this.executorService), this.executorService);
+		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService);
 		this.persistence.close();
 		this.topics = new Hashtable();
 

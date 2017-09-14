@@ -323,7 +323,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	 * @throws MqttException if any other problem was encountered
 	 */
 	public MqttLegacyBlockingClient(String serverURI, String clientId, MqttClientPersistence persistence, ScheduledExecutorService executorService) throws MqttException {
-		aClient = new MqttAsyncClient(serverURI, clientId, persistence, executorService);
+		aClient = new MqttAsyncClient(serverURI, clientId, persistence, null, executorService);
 	}
 
 	/*
@@ -360,7 +360,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	 * @see IMqttClient#disconnect(long)
 	 */
 	public void disconnect(long quiesceTimeout) throws MqttException {
-		aClient.disconnect(quiesceTimeout, null, null).waitForCompletion();
+		aClient.disconnect(quiesceTimeout, null, null, null, null, null).waitForCompletion();
 	}
 
 	/*
@@ -442,7 +442,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 			subscriptions[i].setQos(grantedQos[i]);;
 		}
 		if (grantedQos.length == 1 && subscriptions[0].getQos() == 0x80) {
-			throw new MqttException(MqttException.REASON_CODE_SUBSCRIBE_FAILED);
+			throw new MqttException(MqttClientException.REASON_CODE_SUBSCRIBE_FAILED);
 		}
 	}
 

@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
@@ -179,7 +180,7 @@ public class CommsSender implements Runnable {
 		log.fine(CLASS_NAME,methodName,"804",null, ex);
 		MqttException mex;
 		if ( !(ex instanceof MqttException)) {
-			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);
+			mex = new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ex);
 		} else {
 			mex = (MqttException)ex;
 		}

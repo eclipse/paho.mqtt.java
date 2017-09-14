@@ -31,13 +31,15 @@ import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientInterface;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
-import org.eclipse.paho.mqttv5.client.PingSender;
+import org.eclipse.paho.mqttv5.client.TimerPingSender;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -51,7 +53,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
- * Handles client communications with the server. Sends and receives MQTT V3
+ * Handles client communications with the server. Sends and receives MQTT V5
  * messages.
  */
 public class ClientComms {
@@ -75,7 +77,7 @@ public class ClientComms {
 	private ClientState clientState;
 	private MqttConnectionOptions conOptions;
 	private MqttClientPersistence persistence;
-	private PingSender pingSender;
+	private MqttPingSender pingSender;
 	private CommsTokenStore tokenStore;
 	private boolean stoppingComms = false;
 
@@ -84,8 +86,17 @@ public class ClientComms {
 	private boolean closePending = false;
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
-
 	private ExecutorService executorService;
+
+	// ******* Connection properties ******//
+	private int receiveMaximum = 65535;
+	private int maximumQoS = 2;
+	private boolean retainAvailable = true;
+	private int maximumPacketSize = -1;
+	private int topicAliasMaximum = 0;
+	private boolean wildcardSubscriptionsAvailable = true;
+	private boolean subscriptionIdentifiersAvailable = true;
+	private boolean sharedSubscriptionsAvailable = true;
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
@@ -102,7 +113,7 @@ public class ClientComms {
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
 	 */
-	public ClientComms(MqttClientInterface client, MqttClientPersistence persistence, PingSender pingSender,
+	public ClientComms(MqttClientInterface client, MqttClientPersistence persistence, MqttPingSender pingSender,
 			ExecutorService executorService) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client = client;
@@ -160,7 +171,7 @@ public class ClientComms {
 			// @TRACE 213=fail: token in use: key={0} message={1} token={2}
 			log.fine(CLASS_NAME, methodName, "213", new Object[] { message.getKey(), message, token });
 
-			throw new MqttException(MqttException.REASON_CODE_TOKEN_INUSE);
+			throw new MqttException(MqttClientException.REASON_CODE_TOKEN_INUSE);
 		}
 
 		try {
@@ -198,6 +209,23 @@ public class ClientComms {
 				}
 				disconnectedMessageBuffer.putMessage(message, token);
 			} else {
+
+				if (message instanceof MqttPublish) {
+					// Override the QoS if the server has set a maximum
+					if (((MqttPublish) message).getMessage().getQos() > this.maximumQoS) {
+						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
+						mqttMessage.setQos(this.maximumQoS);
+						((MqttPublish) message).setMessage(mqttMessage);
+					}
+
+					// Override the Retain flag if the server has disabled it
+					if (((MqttPublish) message).getMessage().isRetained() && (this.retainAvailable == false)) {
+						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
+						mqttMessage.setRetained(false);
+						((MqttPublish) message).setMessage(mqttMessage);
+					}
+
+				}
 				this.internalSend(message, token);
 			}
 		} else if (disconnectedMessageBuffer != null && isResting()) {
@@ -211,7 +239,7 @@ public class ClientComms {
 		} else {
 			// @TRACE 208=failed: not connected
 			log.fine(CLASS_NAME, methodName, "208");
-			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
+			throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_NOT_CONNECTED);
 		}
 	}
 
@@ -234,9 +262,9 @@ public class ClientComms {
 					log.fine(CLASS_NAME, methodName, "224");
 
 					if (isConnecting()) {
-						throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
+						throw new MqttException(MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS);
 					} else if (isConnected()) {
-						throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
+						throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CONNECTED);
 					} else if (isDisconnecting()) {
 						closePending = true;
 						return;
@@ -294,7 +322,7 @@ public class ClientComms {
 				if (conOptions.getWillMessage() != null) {
 					connect.setWillMessage(conOptions.getWillMessage());
 				}
-				
+
 				if (conOptions.getUserName() != null) {
 					connect.setUserName(conOptions.getUserName());
 				}
@@ -358,13 +386,13 @@ public class ClientComms {
 				// @TRACE 207=connect failed: not disconnected {0}
 				log.fine(CLASS_NAME, methodName, "207", new Object[] { new Byte(conState) });
 				if (isClosed() || closePending) {
-					throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
+					throw new MqttException(MqttClientException.REASON_CODE_CLIENT_CLOSED);
 				} else if (isConnecting()) {
-					throw new MqttException(MqttException.REASON_CODE_CONNECT_IN_PROGRESS);
+					throw new MqttException(MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS);
 				} else if (isDisconnecting()) {
-					throw new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+					throw new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
 				} else {
-					throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CONNECTED);
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CONNECTED);
 				}
 			}
 		}
@@ -451,7 +479,7 @@ public class ClientComms {
 		}
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
-		tokenStore.quiesce(new MqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING));
+		tokenStore.quiesce(new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING));
 
 		// Notify any outstanding tokens with the exception of
 		// con or discon which may be returned and will be notified at
@@ -566,20 +594,20 @@ public class ClientComms {
 			if (isClosed()) {
 				// @TRACE 223=failed: in closed state
 				log.fine(CLASS_NAME, methodName, "223");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CLOSED);
 			} else if (isDisconnected()) {
 				// @TRACE 211=failed: already disconnected
 				log.fine(CLASS_NAME, methodName, "211");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_ALREADY_DISCONNECTED);
 			} else if (isDisconnecting()) {
 				// @TRACE 219=failed: already disconnecting
 				log.fine(CLASS_NAME, methodName, "219");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECTING);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
 			} else if (Thread.currentThread() == callback.getThread()) {
 				// @TRACE 210=failed: called on callback thread
 				log.fine(CLASS_NAME, methodName, "210");
 				// Not allowed to call disconnect() from the callback, as it will deadlock.
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_DISCONNECT_PROHIBITED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECT_PROHIBITED);
 			}
 
 			// @TRACE 218=state=DISCONNECTING
@@ -884,7 +912,7 @@ public class ClientComms {
 		log.fine(CLASS_NAME, methodName, "804", null, ex);
 		MqttException mex;
 		if (!(ex instanceof MqttException)) {
-			mex = new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ex);
+			mex = new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ex);
 		} else {
 			mex = (MqttException) ex;
 		}
@@ -960,13 +988,77 @@ public class ClientComms {
 			} else {
 				// @TRACE 208=failed: not connected
 				log.fine(CLASS_NAME, methodName, "208");
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED);
+				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_NOT_CONNECTED);
 			}
 		}
 	}
 
 	public int getActualInFlight() {
 		return this.clientState.getActualInFlight();
+	}
+
+	public int getReceiveMaximum() {
+		return receiveMaximum;
+	}
+
+	public void setReceiveMaximum(int receiveMaximum) {
+		this.receiveMaximum = receiveMaximum;
+	}
+
+	public int getMaximumQoS() {
+		return maximumQoS;
+	}
+
+	public void setMaximumQoS(int maximumQoS) {
+		this.maximumQoS = maximumQoS;
+	}
+
+	public boolean isRetainAvailable() {
+		return retainAvailable;
+	}
+
+	public void setRetainAvailable(boolean retainAvailable) {
+		this.retainAvailable = retainAvailable;
+	}
+
+	public int getMaximumPacketSize() {
+		return maximumPacketSize;
+	}
+
+	public void setMaximumPacketSize(int maximumPacketSize) {
+		this.maximumPacketSize = maximumPacketSize;
+	}
+
+	public int getTopicAliasMaximum() {
+		return topicAliasMaximum;
+	}
+
+	public void setTopicAliasMaximum(int topicAliasMaximum) {
+		this.topicAliasMaximum = topicAliasMaximum;
+	}
+
+	public boolean isWildcardSubscriptionsAvailable() {
+		return wildcardSubscriptionsAvailable;
+	}
+
+	public void setWildcardSubscriptionsAvailable(boolean wildcardSubscriptionsAvailable) {
+		this.wildcardSubscriptionsAvailable = wildcardSubscriptionsAvailable;
+	}
+
+	public boolean isSubscriptionIdentifiersAvailable() {
+		return subscriptionIdentifiersAvailable;
+	}
+
+	public void setSubscriptionIdentifiersAvailable(boolean subscriptionIdentifiersAvailable) {
+		this.subscriptionIdentifiersAvailable = subscriptionIdentifiersAvailable;
+	}
+
+	public boolean isSharedSubscriptionsAvailable() {
+		return sharedSubscriptionsAvailable;
+	}
+
+	public void setSharedSubscriptionsAvailable(boolean sharedSubscriptionsAvailable) {
+		this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
 	}
 
 }
