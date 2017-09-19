@@ -27,13 +27,13 @@ public abstract class MessageCatalog {
 				try {
 					// Hide this class reference behind reflection so that the class does not need to
 					// be present when compiled on midp
-					INSTANCE = (MessageCatalog)Class.forName("org.eclipse.paho.client.mqttv3.internal.ResourceBundleCatalog").newInstance();
+					INSTANCE = (MessageCatalog)Class.forName("org.eclipse.paho.mqttv5.client.internal.ResourceBundleCatalog").newInstance();
 				} catch (Exception e) {
 					return "";
 				}
-			} else if (ExceptionHelper.isClassAvailable("org.eclipse.paho.client.mqttv3.internal.MIDPCatalog")){
+			} else if (ExceptionHelper.isClassAvailable("org.eclipse.paho.mqttv5.client.internal.MIDPCatalog")){
 				try {
-					INSTANCE = (MessageCatalog)Class.forName("org.eclipse.paho.client.mqttv3.internal.MIDPCatalog").newInstance();
+					INSTANCE = (MessageCatalog)Class.forName("org.eclipse.paho.mqttv5.client.internal.MIDPCatalog").newInstance();
 				} catch (Exception e) {
 					return "";
 				}

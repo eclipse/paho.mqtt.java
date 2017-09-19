@@ -23,7 +23,7 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 /**
  * Represents a persistent data store, used to store outbound and inbound messages while they
  * are in flight, enabling delivery to the QoS specified. You can specify an implementation
- * of this interface using {@link MqttLegacyBlockingClient#MqttClient(String, String, MqttClientPersistence)},
+ * of this interface using {@link MqttLegacyBlockingClient#MqttLegacyBlockingClient(String, String, MqttClientPersistence)},
  * which the {@link MqttLegacyBlockingClient} will use to persist QoS 1 and 2 messages.
  * <p>
  * If the methods defined throw the MqttPersistenceException then the state of the data persisted
@@ -86,7 +86,7 @@ public interface MqttClientPersistence {
 	 * @return an enumeration of {@link String} objects.
 	 * @throws MqttPersistenceException if there was a problem getting they keys
 	 */
-	public Enumeration keys() throws MqttPersistenceException;
+	public Enumeration<String> keys() throws MqttPersistenceException;
 	
 	/**
 	 * Clears persistence, so that it no longer contains any persisted data.

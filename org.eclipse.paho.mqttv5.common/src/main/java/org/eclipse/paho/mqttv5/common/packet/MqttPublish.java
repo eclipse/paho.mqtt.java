@@ -301,6 +301,9 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	}
 
 	public int getTopicAlias() {
+		if(topicAlias == null) {
+			return 0;
+		}
 		return topicAlias;
 	}
 

@@ -132,7 +132,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	 *
 	 * <p>An instance of the default persistence mechanism {@link MqttDefaultFilePersistence}
 	 * is used by the client. To specify a different persistence mechanism or to turn
-	 * off persistence, use the {@link #MqttClient(String, String, MqttClientPersistence)}
+	 * off persistence, use the {@link #MqttLegacyBlockingClient(String, String, MqttClientPersistence)}
 	 * constructor.
 	 *
 	 * @param serverURI the address of the server to connect to, specified as a URI. Can be overridden using
@@ -366,7 +366,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly()
+	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly()
 	 */
 	public void disconnectForcibly() throws MqttException {
 		aClient.disconnectForcibly();
@@ -375,7 +375,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly(long)
 	 */
 	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
 		aClient.disconnectForcibly(disconnectTimeout);
@@ -384,7 +384,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly(long, long)
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
 		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout);
@@ -447,14 +447,14 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.mqttv5.client.IMqttActionListener)
 	 */
 	public void subscribe(String topicFilter, IMqttMessageListener messageListener) throws MqttException {
 		this.subscribe(new String[] {topicFilter}, new int[] {1}, new IMqttMessageListener[] {messageListener});
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.client.mqttv3.IMqttActionListener)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#subscribe(java.lang.String, int, java.lang.Object, org.eclipse.paho.mqttv5.client.IMqttActionListener)
 	 */
 	public void subscribe(String[] topicFilters, IMqttMessageListener[] messageListeners) throws MqttException {
 		int[] qos = new int[topicFilters.length];
@@ -465,7 +465,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#subscribe(java.lang.String, int)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#subscribe(java.lang.String, int)
 	 */
 	public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
 		this.subscribe(new String[] {topicFilter}, new int[] {qos}, new IMqttMessageListener[] {messageListener});
@@ -582,14 +582,14 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#close()
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#close()
 	 */
 	public void close() throws MqttException {
 		aClient.close(false);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#close()
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#close()
 	 */
 	public void close(boolean force) throws MqttException {
 		aClient.close(force);
@@ -598,21 +598,21 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getClientId()
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#getClientId()
 	 */
 	public String getClientId() {
 		return aClient.getClientId();
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getPendingDeliveryTokens()
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#getPendingDeliveryTokens()
 	 */
 	public IMqttDeliveryToken[] getPendingDeliveryTokens() {
 		return aClient.getPendingDeliveryTokens();
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getServerURI()
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#getServerURI()
 	 */
 	public String getServerURI() {
 		return aClient.getServerURI();
@@ -634,28 +634,28 @@ public class MqttLegacyBlockingClient implements IMqttClient { //), DestinationP
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getTopic(java.lang.String)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#getTopic(java.lang.String)
 	 */
 	public MqttTopic getTopic(String topic) {
 		return aClient.getTopic(topic);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#isConnected()
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#isConnected()
 	 */
 	public boolean isConnected() {
 		return aClient.isConnected();
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#setCallback(org.eclipse.paho.client.mqttv3.MqttCallback)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#setCallback(org.eclipse.paho.mqttv5.client.MqttCallback)
 	 */
 	public void setCallback(MqttCallback callback) {
 		aClient.setCallback(callback);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#setCallback(org.eclipse.paho.client.mqttv3.MqttCallback)
+	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#setCallback(org.eclipse.paho.mqttv5.client.MqttCallback)
 	 */
 	public void setManualAcks(boolean manualAcks) {
 		aClient.setManualAcks(manualAcks);

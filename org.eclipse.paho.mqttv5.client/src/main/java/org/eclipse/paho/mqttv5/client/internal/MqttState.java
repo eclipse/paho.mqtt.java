@@ -86,7 +86,7 @@ public interface MqttState {
 	 * @param reason The root cause of the disconnection, or null if it is a clean disconnect
 	 * @return {@link Vector} 
 	 */
-	Vector resolveOldTokens(MqttException reason);
+	Vector<MqttToken> resolveOldTokens(MqttException reason);
 
 	/**
 	 * Called when the client has been disconnected from the broker.

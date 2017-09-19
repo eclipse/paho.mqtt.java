@@ -29,7 +29,7 @@ import java.util.logging.MemoryHandler;
  * how to run with a memory based trace facility that runs with minimal performance 
  * overhead. The memory buffer can be dumped when a log/trace record is written matching 
  * the MemoryHandlers trigger level or when the push method is invoked on the MemoryHandler. 
- * {@link org.eclipse.paho.client.mqttv3.util.Debug Debug} provides method to make it easy
+ * {@link org.eclipse.paho.mqttv5.client.util.Debug Debug} provides method to make it easy
  * to dump the memory buffer as well as other useful debug info. 
  */
 public class JSR47Logger implements Logger {
@@ -43,13 +43,13 @@ public class JSR47Logger implements Logger {
 	/**
 	 * 
 	 * @param logMsgCatalog  The resource bundle associated with this logger
-	 * @param loggerID			The suffix for the loggerName (will be appeneded to org.eclipse.paho.client.mqttv3
+	 * @param loggerID			The suffix for the loggerName (will be appeneded to org.eclipse.paho.mqttv5.client
 	 * @param resourceContext	A context for the logger e.g. clientID or appName...
 	 */
 	public void initialise(ResourceBundle logMsgCatalog, String loggerID, String resourceContext ) { 
 		this.traceMessageCatalog = logMessageCatalog;
 		this.resourceName = resourceContext;
-//		loggerName = "org.eclipse.paho.client.mqttv3." + ((null == loggerID || 0 == loggerID.length()) ? "internal" : loggerID);
+//		loggerName = "org.eclipse.paho.mqttv5.client." + ((null == loggerID || 0 == loggerID.length()) ? "internal" : loggerID);
 		loggerName = loggerID;
 		this.julLogger = java.util.logging.Logger.getLogger(loggerName);
 		this.logMessageCatalog = logMsgCatalog;

@@ -27,6 +27,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
@@ -111,10 +112,10 @@ public class ClientState implements MqttState {
 	private static final int MIN_MSG_ID = 1; // Lowest possible MQTT message ID to use
 	private static final int MAX_MSG_ID = 65535; // Highest possible MQTT message ID to use
 	private int nextMsgId = MIN_MSG_ID - 1; // The next available message ID to use
-	private Hashtable inUseMsgIds; // Used to store a set of in-use message IDs
+	private ConcurrentHashMap<Integer, Integer> inUseMsgIds; // Used to store a set of in-use message IDs
 
-	volatile private Vector pendingMessages;
-	volatile private Vector pendingFlows;
+	volatile private Vector<MqttWireMessage> pendingMessages;
+	volatile private Vector<MqttWireMessage> pendingFlows;
 
 	private CommsTokenStore tokenStore;
 	private ClientComms clientComms = null;
@@ -140,10 +141,10 @@ public class ClientState implements MqttState {
 
 	private boolean connected = false;
 
-	private Hashtable outboundQoS2 = null;
-	private Hashtable outboundQoS1 = null;
-	private Hashtable outboundQoS0 = null;
-	private Hashtable inboundQoS2 = null;
+	private ConcurrentHashMap<Integer, MqttWireMessage> outboundQoS2 = null;
+	private ConcurrentHashMap<Integer, MqttWireMessage> outboundQoS1 = null;
+	private ConcurrentHashMap<Integer, MqttWireMessage> outboundQoS0 = null;
+	private ConcurrentHashMap<Integer, MqttWireMessage> inboundQoS2 = null;
 
 	private MqttPingSender pingSender = null;
 
@@ -158,12 +159,12 @@ public class ClientState implements MqttState {
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "");
 
-		inUseMsgIds = new Hashtable();
-		pendingFlows = new Vector();
-		outboundQoS2 = new Hashtable();
-		outboundQoS1 = new Hashtable();
-		outboundQoS0 = new Hashtable();
-		inboundQoS2 = new Hashtable();
+		inUseMsgIds = new ConcurrentHashMap<>();
+		pendingFlows = new Vector<MqttWireMessage>();
+		outboundQoS2 = new ConcurrentHashMap<>();
+		outboundQoS1 = new ConcurrentHashMap<>();
+		outboundQoS0 = new ConcurrentHashMap<>();
+		inboundQoS2 = new ConcurrentHashMap<>();
 		pingCommand = new MqttPingReq();
 		inFlightPubRels = 0;
 		actualInFlight = 0;
@@ -181,7 +182,7 @@ public class ClientState implements MqttState {
 
 	protected void setMaxInflight(int maxInflight) {
 		this.maxInflight = maxInflight;
-		pendingMessages = new Vector(this.maxInflight);
+		pendingMessages = new Vector<MqttWireMessage>(this.maxInflight);
 	}
 
 	protected void setKeepAliveSecs(long keepAliveSecs) {
@@ -268,7 +269,7 @@ public class ClientState implements MqttState {
 	 * @param newMsg
 	 *            the message to insert into the list
 	 */
-	private void insertInOrder(Vector list, MqttWireMessage newMsg) {
+	private void insertInOrder(Vector<MqttWireMessage> list, MqttWireMessage newMsg) {
 		int newMsgId = newMsg.getMessageId();
 		for (int i = 0; i < list.size(); i++) {
 			MqttWireMessage otherMsg = (MqttWireMessage) list.elementAt(i);
@@ -291,10 +292,10 @@ public class ClientState implements MqttState {
 	 *            this method
 	 * @return a new reordered list
 	 */
-	private Vector reOrder(Vector list) {
+	private Vector<MqttWireMessage> reOrder(Vector<MqttWireMessage> list) {
 
 		// here up the new list
-		Vector newList = new Vector();
+		Vector<MqttWireMessage> newList = new Vector<MqttWireMessage>();
 
 		if (list.size() == 0) {
 			return newList; // nothing to reorder
@@ -341,11 +342,11 @@ public class ClientState implements MqttState {
 	 */
 	protected void restoreState() throws MqttException {
 		final String methodName = "restoreState";
-		Enumeration messageKeys = persistence.keys();
+		Enumeration<String> messageKeys = persistence.keys();
 		MqttPersistable persistable;
 		String key;
 		int highestMsgId = nextMsgId;
-		Vector orphanedPubRels = new Vector();
+		Vector<String> orphanedPubRels = new Vector<String>();
 		// @TRACE 600=>
 		log.fine(CLASS_NAME, methodName, "600");
 
@@ -450,12 +451,12 @@ public class ClientState implements MqttState {
 
 	private void restoreInflightMessages() {
 		final String methodName = "restoreInflightMessages";
-		pendingMessages = new Vector(this.maxInflight);
-		pendingFlows = new Vector();
+		pendingMessages = new Vector<MqttWireMessage>(this.maxInflight);
+		pendingFlows = new Vector<MqttWireMessage>();
 
-		Enumeration keys = outboundQoS2.keys();
+		Enumeration<Integer> keys = outboundQoS2.keys();
 		while (keys.hasMoreElements()) {
-			Object key = keys.nextElement();
+			Integer key = keys.nextElement();
 			MqttWireMessage msg = (MqttWireMessage) outboundQoS2.get(key);
 			if (msg instanceof MqttPublish) {
 				// @TRACE 610=QoS 2 publish key={0}
@@ -497,9 +498,9 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#send(org.eclipse.paho.
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#send(org.eclipse.paho.
 	 * client.mqttv3.internal.wire.MqttWireMessage,
-	 * org.eclipse.paho.client.mqttv3.MqttToken)
+	 * org.eclipse.paho.mqttv5.client.MqttToken)
 	 */
 	@Override
 	public void send(MqttWireMessage message, MqttToken token) throws MqttException {
@@ -602,7 +603,7 @@ public class ClientState implements MqttState {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.eclipse.paho.client.mqttv3.internal.MqttState#persistBufferedMessage(org.
+	 * org.eclipse.paho.mqttv5.client.internal.MqttState#persistBufferedMessage(org.
 	 * eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage)
 	 */
 	@Override
@@ -635,8 +636,8 @@ public class ClientState implements MqttState {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.eclipse.paho.client.mqttv3.internal.MqttState#unPersistBufferedMessage(
-	 * org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage)
+	 * org.eclipse.paho.mqttv5.client.internal.MqttState#unPersistBufferedMessage(
+	 * org.eclipse.paho.mqttv5.client.internal.wire.MqttWireMessage)
 	 */
 	@Override
 	public void unPersistBufferedMessage(MqttWireMessage message) {
@@ -689,7 +690,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#checkForActivity(org.
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#checkForActivity(org.
 	 * eclipse.paho.client.mqttv3.IMqttActionListener)
 	 */
 	@Override
@@ -894,7 +895,7 @@ public class ClientState implements MqttState {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.eclipse.paho.client.mqttv3.internal.MqttState#setKeepAliveInterval(long)
+	 * org.eclipse.paho.mqttv5.client.internal.MqttState#setKeepAliveInterval(long)
 	 */
 	@Override
 	public void setKeepAliveInterval(long interval) {
@@ -904,7 +905,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#notifySentBytes(int)
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#notifySentBytes(int)
 	 */
 	@Override
 	public void notifySentBytes(int sentBytesCount) {
@@ -992,7 +993,7 @@ public class ClientState implements MqttState {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.eclipse.paho.client.mqttv3.internal.MqttState#notifyReceivedBytes(int)
+	 * org.eclipse.paho.mqttv5.client.internal.MqttState#notifyReceivedBytes(int)
 	 */
 	@Override
 	public void notifyReceivedBytes(int receivedBytesCount) {
@@ -1023,9 +1024,11 @@ public class ClientState implements MqttState {
 		MqttException mex = null;
 
 		if (token == null) {
+
 			// @TRACE 662=no message found for ack id={0}
 			log.fine(CLASS_NAME, methodName, "662", new Object[] { new Integer(ack.getMessageId()) });
 		} else if (ack instanceof MqttPubRec) {
+
 			// Complete the QoS 2 flow. Unlike all other
 			// flows, QoS is a 2 phase flow. The second phase sends a
 			// PUBREL - the operation is not complete until a PUBCOMP
@@ -1033,12 +1036,14 @@ public class ClientState implements MqttState {
 			MqttPubRel rel = new MqttPubRel(MqttReturnCode.RETURN_CODE_SUCCESS, ack.getMessageId());
 			this.send(rel, token);
 		} else if (ack instanceof MqttPubAck || ack instanceof MqttPubComp) {
+
 			// QoS 1 & 2 notify users of result before removing from
 			// persistence
 			notifyResult(ack, token, mex);
 			// Do not remove publish / delivery token at this stage
 			// do this when the persistence is removed later
 		} else if (ack instanceof MqttPingResp) {
+
 			synchronized (pingOutstandingLock) {
 				pingOutstanding = Math.max(0, pingOutstanding - 1);
 				notifyResult(ack, token, mex);
@@ -1049,6 +1054,7 @@ public class ClientState implements MqttState {
 			// @TRACE 636=ping response received. pingOutstanding: {0}
 			log.fine(CLASS_NAME, methodName, "636", new Object[] { new Integer(pingOutstanding) });
 		} else if (ack instanceof MqttConnAck) {
+
 			int rc = ((MqttConnAck) ack).getReturnCode();
 			if (rc == 0) {
 				synchronized (queueLock) {
@@ -1064,6 +1070,7 @@ public class ClientState implements MqttState {
 					connected();
 				}
 			} else {
+
 				mex = ExceptionHelper.createMqttException(rc);
 				throw mex;
 			}
@@ -1136,7 +1143,6 @@ public class ClientState implements MqttState {
 									new Integer(send.getTopicAlias()) });
 					throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
 				}
-
 				switch (send.getMessage().getQos()) {
 				case 0:
 				case 1:
@@ -1248,7 +1254,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#connected()
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#connected()
 	 */
 	@Override
 	public void connected() {
@@ -1263,11 +1269,11 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#resolveOldTokens(org.
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#resolveOldTokens(org.
 	 * eclipse.paho.client.mqttv3.MqttException)
 	 */
 	@Override
-	public Vector resolveOldTokens(MqttException reason) {
+	public Vector<MqttToken> resolveOldTokens(MqttException reason) {
 		final String methodName = "resolveOldTokens";
 		// @TRACE 632=reason {0}
 		log.fine(CLASS_NAME, methodName, "632", new Object[] { reason });
@@ -1284,8 +1290,8 @@ public class ClientState implements MqttState {
 		// processing has completed. Do not
 		// remove the token from the store if it is a delivery token, it is
 		// valid after a reconnect.
-		Vector outT = tokenStore.getOutstandingTokens();
-		Enumeration outTE = outT.elements();
+		Vector<MqttToken> outT = tokenStore.getOutstandingTokens();
+		Enumeration<MqttToken> outTE = outT.elements();
 		while (outTE.hasMoreElements()) {
 			MqttToken tok = (MqttToken) outTE.nextElement();
 			synchronized (tok) {
@@ -1306,7 +1312,7 @@ public class ClientState implements MqttState {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.eclipse.paho.client.mqttv3.internal.MqttState#disconnected(org.eclipse.
+	 * org.eclipse.paho.mqttv5.client.internal.MqttState#disconnected(org.eclipse.
 	 * paho.client.mqttv3.MqttException)
 	 */
 	@Override
@@ -1375,7 +1381,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#quiesce(long)
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#quiesce(long)
 	 */
 	@Override
 	public void quiesce(long timeout) {
@@ -1428,7 +1434,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#notifyQueueLock()
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#notifyQueueLock()
 	 */
 	@Override
 	public void notifyQueueLock() {
@@ -1463,7 +1469,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#getActualInFlight()
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#getActualInFlight()
 	 */
 	@Override
 	public int getActualInFlight() {
@@ -1473,7 +1479,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#getMaxInFlight()
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#getMaxInFlight()
 	 */
 	@Override
 	public int getMaxInFlight() {
@@ -1512,7 +1518,7 @@ public class ClientState implements MqttState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.MqttState#getDebug()
+	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#getDebug()
 	 */
 	@Override
 	public Properties getDebug() {

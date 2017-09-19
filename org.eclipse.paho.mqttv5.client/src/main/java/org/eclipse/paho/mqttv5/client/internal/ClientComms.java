@@ -249,8 +249,8 @@ public class ClientComms {
 	 * Call each main class and let it tidy up e.g. releasing the token store which
 	 * normally survives a disconnect.
 	 * 
-	 * @throws MqttException
-	 *             if not disconnected
+	 * @param force force disconnection
+	 * @throws MqttException if not disconnected
 	 */
 	public void close(boolean force) throws MqttException {
 		final String methodName = "close";
@@ -566,8 +566,8 @@ public class ClientComms {
 				}
 			}
 
-			Vector toksToNot = clientState.resolveOldTokens(reason);
-			Enumeration toksToNotE = toksToNot.elements();
+			Vector<MqttToken> toksToNot = clientState.resolveOldTokens(reason);
+			Enumeration<MqttToken> toksToNotE = toksToNot.elements();
 			while (toksToNotE.hasMoreElements()) {
 				MqttToken tok = (MqttToken) toksToNotE.nextElement();
 

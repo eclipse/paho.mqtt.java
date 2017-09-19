@@ -62,7 +62,6 @@ public class ConnectActionListener implements MqttActionListener {
 	private MqttToken userToken;
 	private Object userContext;
 	private MqttActionListener userCallback;
-	private int originalMqttVersion;
 	private MqttCallbackExtended mqttCallbackExtended;
 	private boolean reconnect;
 
@@ -94,7 +93,6 @@ public class ConnectActionListener implements MqttActionListener {
 		this.userToken = userToken;
 		this.userContext = userContext;
 		this.userCallback = userCallback;
-		this.originalMqttVersion = options.getMqttVersion();
 		this.reconnect = reconnect;
 		
 	}

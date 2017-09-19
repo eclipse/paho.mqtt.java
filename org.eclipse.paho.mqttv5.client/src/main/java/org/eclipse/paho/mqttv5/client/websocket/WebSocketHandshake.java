@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 /**
  * Helper class to execute a WebSocket Handshake.
  */
@@ -53,8 +54,7 @@ public class WebSocketHandshake {
 	String host;
 	int port;
 
-
-	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port){
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port) {
 		this.input = input;
 		this.output = output;
 		this.uri = uri;
@@ -62,11 +62,12 @@ public class WebSocketHandshake {
 		this.port = port;
 	}
 
-
 	/**
-	 * Executes a Websocket Handshake.
-	 * Will throw an IOException if the handshake fails
-	 * @throws IOException thrown if an exception occurs during the handshake
+	 * Executes a Websocket Handshake. Will throw an IOException if the handshake
+	 * fails
+	 * 
+	 * @throws IOException
+	 *             thrown if an exception occurs during the handshake
 	 */
 	public void execute() throws IOException {
 		byte[] key = new byte[16];
@@ -77,18 +78,19 @@ public class WebSocketHandshake {
 	}
 
 	/**
-	 * Builds and sends the HTTP Header GET Request
-	 * for the socket.
-	 * @param key Base64 encoded key
+	 * Builds and sends the HTTP Header GET Request for the socket.
+	 * 
+	 * @param key
+	 *            Base64 encoded key
 	 * @throws IOException
 	 */
-	private void sendHandshakeRequest(String key) throws IOException{
+	private void sendHandshakeRequest(String key) throws IOException {
 		try {
 			String path = "/mqtt";
 			URI srvUri = new URI(uri);
-			if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) { 
+			if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) {
 				path = srvUri.getRawPath();
-				if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) { 
+				if (srvUri.getRawQuery() != null && !srvUri.getRawQuery().isEmpty()) {
 					path += "?" + srvUri.getRawQuery();
 				}
 			}
@@ -97,8 +99,7 @@ public class WebSocketHandshake {
 			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
 			if (port != 80 && port != 443) {
 				pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
-			}
-			else {
+			} else {
 				pw.print("Host: " + host + LINE_SEPARATOR);
 			}
 
@@ -109,7 +110,7 @@ public class WebSocketHandshake {
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
 
 			String userInfo = srvUri.getUserInfo();
-			if(userInfo != null) {
+			if (userInfo != null) {
 				pw.print("Authorization: Basic " + Base64.encode(userInfo) + LINE_SEPARATOR);
 			}
 
@@ -122,21 +123,24 @@ public class WebSocketHandshake {
 
 	/**
 	 * Receives the Handshake response and verifies that it is valid.
-	 * @param key Base64 encoded key
+	 * 
+	 * @param key
+	 *            Base64 encoded key
 	 * @throws IOException
 	 */
 	private void receiveHandshakeResponse(String key) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(input));
-		ArrayList responseLines = new ArrayList();
+		ArrayList<String> responseLines = new ArrayList<String>();
 		String line = in.readLine();
-		if(line == null){
-			throw new IOException("WebSocket Response header: Invalid response from Server, It may not support WebSockets.");
+		if (line == null) {
+			throw new IOException(
+					"WebSocket Response header: Invalid response from Server, It may not support WebSockets.");
 		}
-		while(!line.equals(EMPTY) ) {
+		while (!line.equals(EMPTY)) {
 			responseLines.add(line);
 			line = in.readLine();
 		}
-		Map headerMap = getHeaders(responseLines);
+		Map<String, String> headerMap = getHeaders(responseLines);
 
 		String connectionHeader = (String) headerMap.get(HTTP_HEADER_CONNECTION);
 		if (connectionHeader == null || connectionHeader.equalsIgnoreCase(HTTP_HEADER_CONNECTION_VALUE)) {
@@ -144,7 +148,7 @@ public class WebSocketHandshake {
 		}
 
 		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
-		if(upgradeHeader == null || !upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)){
+		if (upgradeHeader == null || !upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)) {
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
 
@@ -153,12 +157,12 @@ public class WebSocketHandshake {
 			throw new IOException("WebSocket Response header: empty sec-websocket-protocol");
 		}
 
-		if(!headerMap.containsKey(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT)){
+		if (!headerMap.containsKey(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT)) {
 			throw new IOException("WebSocket Response header: Missing Sec-WebSocket-Accept");
 		}
 
 		try {
-			verifyWebSocketKey(key, (String)headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT));
+			verifyWebSocketKey(key, (String) headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_ACCEPT));
 		} catch (NoSuchAlgorithmException e) {
 			throw new IOException(e.getMessage());
 		} catch (HandshakeFailedException e) {
@@ -169,39 +173,44 @@ public class WebSocketHandshake {
 
 	/**
 	 * Returns a Hashmap of HTTP headers
-	 * @param ArrayList<String> of headers
+	 * 
+	 * @param ArrayList<String>
+	 *            of headers
 	 * @return A Hashmap<String, String> of the headers
 	 */
-	private Map getHeaders(ArrayList headers){
-		Map headerMap = new HashMap();
-		for(int i = 1; i < headers.size(); i++){
+	private Map<String, String> getHeaders(ArrayList<String> headers) {
+		Map<String, String> headerMap = new HashMap<String, String>();
+		for (int i = 1; i < headers.size(); i++) {
 			String headerPre = (String) headers.get(i);
-			String[] header =  headerPre.split(":");
+			String[] header = headerPre.split(":");
 			headerMap.put(header[0].toLowerCase(), header[1]);
 		}
 		return headerMap;
 	}
 
 	/**
-	 * Verifies that the Accept key provided is correctly built from the
-	 * original key sent.
+	 * Verifies that the Accept key provided is correctly built from the original
+	 * key sent.
+	 * 
 	 * @param key
 	 * @param accept
 	 * @throws NoSuchAlgorithmException
 	 * @throws HandshakeFailedException
 	 */
-	private void verifyWebSocketKey(String key, String accept) throws NoSuchAlgorithmException, HandshakeFailedException{
+	private void verifyWebSocketKey(String key, String accept)
+			throws NoSuchAlgorithmException, HandshakeFailedException {
 		// We build up the accept in the same way the server should
 		// then we check that the response is the same.
 		byte[] sha1Bytes = sha1(key + ACCEPT_SALT);
 		String encodedSha1Bytes = Base64.encodeBytes(sha1Bytes).trim();
-		if(!encodedSha1Bytes.equals(accept.trim())){
+		if (!encodedSha1Bytes.equals(accept.trim())) {
 			throw new HandshakeFailedException();
 		}
 	}
 
 	/**
 	 * Returns the sha1 byte array of the provided string.
+	 * 
 	 * @param input
 	 * @return
 	 * @throws NoSuchAlgorithmException

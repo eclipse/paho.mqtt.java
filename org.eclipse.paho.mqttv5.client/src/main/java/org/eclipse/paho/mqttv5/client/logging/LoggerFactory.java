@@ -34,8 +34,8 @@ import java.util.ResourceBundle;
  * The default log and trace facility uses Java's build in log facility:-
  * java.util.logging.  For systems where this is not available or where
  * an alternative logging framework is required the logging facility can be 
- * replaced using {@link org.eclipse.paho.client.mqttv3.logging.LoggerFactory#setLogger(String)}
- * which takes an implementation of the {@link org.eclipse.paho.client.mqttv3.logging.Logger}
+ * replaced using {@link org.eclipse.paho.mqttv5.client.logging.LoggerFactory#setLogger(String)}
+ * which takes an implementation of the {@link org.eclipse.paho.mqttv5.client.logging.Logger}
  * interface.
  */
 public class LoggerFactory {

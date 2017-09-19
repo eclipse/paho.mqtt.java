@@ -7,9 +7,7 @@
     <artifactId>java-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>org.eclipse.paho</groupId>
   <artifactId>org.eclipse.paho.mqttv5.testclient</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <name>org.eclipse.paho.mqttv5.testclient</name>
   <url>http://maven.apache.org</url>
   <properties>

@@ -98,7 +98,6 @@ public class MqttConnectionOptions {
 	/**
 	 * Returns the MQTT version.
 	 * 
-	 * @see #setMqttVersion(int)
 	 * @return the MQTT version.
 	 */
 	public int getMqttVersion() {
@@ -152,7 +151,7 @@ public class MqttConnectionOptions {
 	 * Returns the topic to be used for last will and testament (LWT).
 	 * 
 	 * @return the MqttTopic to use, or <code>null</code> if LWT is not set.
-	 * @see #setWill(MqttTopic, byte[], int, boolean)
+	 * @see #setWill(String, MqttMessage)
 	 */
 	public String getWillDestination() {
 		return willDestination;
@@ -511,7 +510,7 @@ public class MqttConnectionOptions {
 	 * The Server delays publishing the Client's Will Message until the Will Delay
 	 * Interval has passed or the Session ends, whichever happens first.
 	 * 
-	 * @param willDelayInterval
+	 * @param willDelayInterval The will delay interval
 	 */
 	public void setWillDelayInterval(Integer willDelayInterval) {
 		this.willDelayInterval = willDelayInterval;
@@ -568,7 +567,7 @@ public class MqttConnectionOptions {
 	 * <li>The maximum value for this property is 2,684,354,656.</li>
 	 * </ul>
 	 * 
-	 * @param maximumPacketSize
+	 * @param maximumPacketSize The Maximum packet size.
 	 */
 	public void setMaximumPacketSize(Integer maximumPacketSize) {
 		this.maximumPacketSize = maximumPacketSize;
@@ -652,7 +651,7 @@ public class MqttConnectionOptions {
 	 * on any packet where it is allowed.</li>
 	 * </ul>
 	 * 
-	 * @param requestProblemInfo
+	 * @param requestProblemInfo The Flag to request problem information.
 	 */
 	public void setRequestProblemInfo(boolean requestProblemInfo) {
 		this.requestProblemInfo = requestProblemInfo;
@@ -671,7 +670,7 @@ public class MqttConnectionOptions {
 	 * Sets the User Properties. A User Property is a UTF-8 String Pair, the same
 	 * name is allowed to appear more than once.
 	 * 
-	 * @param userProperties
+	 * @param userProperties User Properties
 	 */
 	public void setUserProperties(ArrayList<UserProperty> userProperties) {
 		this.userProperties = userProperties;

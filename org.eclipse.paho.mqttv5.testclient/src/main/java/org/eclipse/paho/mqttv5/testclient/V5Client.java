@@ -8,6 +8,7 @@ import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptionsBuilder;
+import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -16,12 +17,13 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 public class V5Client implements MqttCallback {
 
 	private String broker = "tcp://localhost:1883";
+	//private String broker = "tcp://9.20.87.69:1883";
 	private String clientId = "TestV5Client";
 	private String topic = "MQTT Examples";
 	private String content = "Message from MqttPublishSample";
 	private String willContent = "I've Disconnected, sorry!";
-	private int qos = 0;
-
+	private int qos = 1;
+	Object runningLock;
 	boolean running = true;
 	int x = 0;
 	public V5Client() throws InterruptedException {
@@ -67,23 +69,27 @@ public class V5Client implements MqttCallback {
 
 				}
 			});
+			
+			
 
 			while (running) {
 
 				// asyncClient.publish(topic, new MqttMessage(content.getBytes(), 2, false));
 				Thread.sleep(1000);
-				System.out.println("Sending Message");
+				System.out.println("Sending Message: " + x);
 				String message = content + " " + x;
-				if(x == 10) {
+				if(x == 5) {
 					message = "FINISH";
+					running = false;
 				}
 				asyncClient.publish(topic, new MqttMessage(message.getBytes(), 2, false));
 				x++;
 
 			}
-			asyncClient.disconnect();
+			asyncClient.disconnect(5000);
 			System.out.println("Disconnected");
 			asyncClient.close();
+			System.exit(0);
 
 		} catch (MqttException e) {
 			System.err.println("Exception Occured whilst connecting the client: ");
@@ -117,27 +123,26 @@ public class V5Client implements MqttCallback {
 				+ ", sharedSubscriptionAvailable=" + token.isSharedSubscriptionAvailable() + "]");
 	}
 
-	@Override
-	public void connectionLost(Throwable cause) {
-		System.out.println("Connection Lost: " + cause.getMessage());
-		cause.printStackTrace();
-
-	}
+	
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		String incomingMessage = new String(message.getPayload());
 		System.out.println("Incoming Message: [" +incomingMessage + "], topic:[" + topic + "]");
-		if(incomingMessage.contains("FINISH")) {
-			this.running = false;
-		}
-
 	}
 
 	@Override
 	public void deliveryComplete(IMqttDeliveryToken token) {
 		System.out.println("Delivery Complete: " + token.getMessageId());
 
+	}
+
+	
+
+	@Override
+	public void disconnected(MqttDisconnectResponse disconnectResponse) {
+		System.out.println("Disconnection Complete!");
+		
 	}
 
 }

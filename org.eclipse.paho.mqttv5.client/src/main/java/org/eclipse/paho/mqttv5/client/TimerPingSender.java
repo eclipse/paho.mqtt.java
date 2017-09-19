@@ -25,7 +25,7 @@ import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 /**
  * Default ping sender implementation
  *
- * <p>This class implements the {@link IMqttPingSender} pinger interface
+ * <p>This class implements the {@link MqttPingSender} pinger interface
  * allowing applications to send ping packet to server every keep alive interval.
  * </p>
  *
@@ -37,7 +37,7 @@ public class TimerPingSender implements MqttPingSender{
 
 	private ClientComms comms;
 	private ScheduledExecutorService executorService;
-	private ScheduledFuture scheduledFuture;
+	private ScheduledFuture<?> scheduledFuture;
 	private String clientid;
 
 	public TimerPingSender(ScheduledExecutorService executorService) {

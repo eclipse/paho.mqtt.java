@@ -100,7 +100,7 @@ import org.eclipse.paho.mqttv5.common.MqttSecurityException;
  * </ul>
  */
 public class SSLSocketFactoryFactory {
-	private static final String CLASS_NAME = "org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory";
+	private static final String CLASS_NAME = "org.eclipse.paho.mqttv5.client.internal.security.SSLSocketFactoryFactory";
 	/**
 	 * Property keys specific to the client).
 	 */
@@ -139,7 +139,7 @@ public class SSLSocketFactoryFactory {
 			TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER, 
 			TRUSTSTOREMGR, CIPHERSUITES, CLIENTAUTH};
 
-	private Hashtable configs; // a hashtable that maps configIDs to properties.
+	private Hashtable<String, Properties> configs; // a hashtable that maps configIDs to properties.
 
 	private Properties defaultProperties;
 
@@ -179,7 +179,7 @@ public class SSLSocketFactoryFactory {
 	 * Constructor used by clients.
 	 */
 	public SSLSocketFactoryFactory() {
-		configs = new Hashtable();
+		configs = new Hashtable<String, Properties>();
 	}
 	
 	/**
@@ -219,8 +219,8 @@ public class SSLSocketFactoryFactory {
 	 */
 	private void checkPropertyKeys(Properties properties)
 			throws IllegalArgumentException {
-		Set keys = properties.keySet();
-		Iterator i = keys.iterator();
+		Set<Object> keys = properties.keySet();
+		Iterator<Object> i = keys.iterator();
 		while (i.hasNext()) {
 			String k = (String) i.next();
 			if (!keyValid(k)) {
@@ -271,7 +271,7 @@ public class SSLSocketFactoryFactory {
 	 * This should not be used for cryptographical purpose, it's a simple
 	 * scrambler to obfuscate clear-text passwords.
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#deObfuscate
+	 * @see org.eclipse.paho.mqttv5.client.security.SSLSocketFactoryFactory#deObfuscate
 	 * 
 	 * @param password
 	 *            The password to be encrypted, as a char[] array.
@@ -293,7 +293,7 @@ public class SSLSocketFactoryFactory {
 	 * The inverse operation of obfuscate: returns a cleartext password that was
 	 * previously obfuscated using the XOR scrambler.
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#obfuscate
+	 * @see org.eclipse.paho.mqttv5.client.security.SSLSocketFactoryFactory#obfuscate
 	 * 
 	 * @param ePassword
 	 *            An obfuscated password.
@@ -349,7 +349,7 @@ public class SSLSocketFactoryFactory {
 	public static String[] unpackCipherSuites(String ciphers) {
 		// can't use split as split is not available on all java platforms.
 		if(ciphers==null) return null;
-		Vector c=new Vector();
+		Vector<String> c=new Vector<String>();
 		int i=ciphers.indexOf(',');
 		int j=0;
 		// handle all commas.
@@ -369,7 +369,7 @@ public class SSLSocketFactoryFactory {
 	/**
 	 * Obfuscate any key & trust store passwords within the given properties.
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#obfuscate
+	 * @see org.eclipse.paho.mqttv5.client.internal.security.SSLSocketFactoryFactory#obfuscate
 	 * 
 	 * @param p
 	 *            properties
@@ -590,7 +590,7 @@ public class SSLSocketFactoryFactory {
 	 * provided in plain text, but it will be stored internally in a scrambled
 	 * XOR format.
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#obfuscate
+	 * @see org.eclipse.paho.mqttv5.client.internal.security.SSLSocketFactoryFactory#obfuscate
 	 * 
 	 * @param configID
 	 *            The configuration identifier for selecting a configuration or
@@ -677,7 +677,7 @@ public class SSLSocketFactoryFactory {
 	 * provided in plain text, but it will be stored internally in a scrambled
 	 * XOR format.
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#obfuscate
+	 * @see org.eclipse.paho.mqttv5.client.internal.security.SSLSocketFactoryFactory#obfuscate
 	 * 
 	 * @param configID
 	 *            The configuration identifier for selecting a configuration or
@@ -1100,7 +1100,7 @@ public class SSLSocketFactoryFactory {
 	 * Initializes key- and truststore. Returns an SSL context factory. If no
 	 * SSLProtocol is already set, uses DEFAULT_PROTOCOL
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
+	 * @see org.eclipse.paho.mqttv5.client.internal.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
 	 * 
 	 * @param configID
 	 *            The configuration ID
@@ -1306,7 +1306,7 @@ public class SSLSocketFactoryFactory {
 //	 * IllegalArgumentException if the server socket factory could not be
 //	 * created due to underlying configuration problems.
 //	 * 
-//	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
+//	 * @see org.eclipse.paho.mqttv5.client.internal.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
 //	 * 
 //	 * @param configID
 //	 *            The configuration identifier for selecting a configuration.
@@ -1336,7 +1336,7 @@ public class SSLSocketFactoryFactory {
 	 * IllegalArgumentException if the socket factory could not be created due
 	 * to underlying configuration problems.
 	 * 
-	 * @see org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
+	 * @see org.eclipse.paho.mqttv5.client.security.SSLSocketFactoryFactory#DEFAULT_PROTOCOL
 	 * @param configID
 	 *            The configuration identifier for selecting a configuration.
 	 * @return An SSLSocketFactory

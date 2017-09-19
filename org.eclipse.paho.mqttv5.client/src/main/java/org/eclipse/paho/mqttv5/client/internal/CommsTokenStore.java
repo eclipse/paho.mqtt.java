@@ -48,7 +48,7 @@ public class CommsTokenStore {
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	// Maps message-specific data (usually message IDs) to tokens
-	private Hashtable tokens;
+	private Hashtable<String, MqttToken> tokens;
 	private String logContext;
 	private MqttException closedResponse = null;
 
@@ -56,7 +56,7 @@ public class CommsTokenStore {
 		final String methodName = "<Init>";
 
 		log.setResourceName(logContext);
-		this.tokens = new Hashtable();
+		this.tokens = new Hashtable<String, MqttToken>();
 		this.logContext = logContext;
 		//@TRACE 308=<>
 		log.fine(CLASS_NAME,methodName,"308");//,new Object[]{message});
@@ -183,8 +183,8 @@ public class CommsTokenStore {
 			//@TRACE 311=>
 			log.fine(CLASS_NAME,methodName,"311");
 
-			Vector list = new Vector();
-			Enumeration enumeration = tokens.elements();
+			Vector<MqttToken> list = new Vector<MqttToken>();
+			Enumeration<MqttToken> enumeration = tokens.elements();
 			MqttToken token;
 			while(enumeration.hasMoreElements()) {
 				token = (MqttToken)enumeration.nextElement();
@@ -201,15 +201,15 @@ public class CommsTokenStore {
 		}
 	}
 	
-	public Vector getOutstandingTokens() {
+	public Vector<MqttToken> getOutstandingTokens() {
 		final String methodName = "getOutstandingTokens";
 
 		synchronized(tokens) {
 			//@TRACE 312=>
 			log.fine(CLASS_NAME,methodName,"312");
 
-			Vector list = new Vector();
-			Enumeration enumeration = tokens.elements();
+			Vector<MqttToken> list = new Vector<MqttToken>();
+			Enumeration<MqttToken> enumeration = tokens.elements();
 			MqttToken token;
 			while(enumeration.hasMoreElements()) {
 				token = (MqttToken)enumeration.nextElement();
@@ -242,7 +242,7 @@ public class CommsTokenStore {
 		String lineSep = System.getProperty("line.separator","\n");
 		StringBuffer toks = new StringBuffer();
 		synchronized(tokens) {
-			Enumeration enumeration = tokens.elements();
+			Enumeration<MqttToken> enumeration = tokens.elements();
 			MqttToken token;
 			while(enumeration.hasMoreElements()) {
 				token = (MqttToken)enumeration.nextElement();

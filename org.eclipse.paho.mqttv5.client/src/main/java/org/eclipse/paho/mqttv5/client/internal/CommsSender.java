@@ -48,7 +48,7 @@ public class CommsSender implements Runnable {
 
 	private String threadName;
 	private final Semaphore runningSemaphore = new Semaphore(1);
-	private Future senderFuture;
+	private Future<?> senderFuture;
 
 	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out) {
 		this.out = new MqttOutputStream(clientState, out);

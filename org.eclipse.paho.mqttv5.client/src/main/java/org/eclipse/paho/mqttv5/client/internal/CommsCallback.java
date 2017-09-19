@@ -30,6 +30,7 @@ import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
@@ -53,10 +54,10 @@ public class CommsCallback implements Runnable {
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
 	private MqttCallbackExtended reconnectInternalCallback;
-	private Hashtable callbacks; // topicFilter -> messageHandler
+	private Hashtable<String, IMqttMessageListener> callbacks; // topicFilter -> messageHandler
 	private ClientComms clientComms;
-	private Vector messageQueue;
-	private Vector completeQueue;
+	private Vector<MqttPublish> messageQueue;
+	private Vector<MqttToken> completeQueue;
 	public boolean running = false;
 	private boolean quiescing = false;
 	private Object lifecycle = new Object();
@@ -67,13 +68,13 @@ public class CommsCallback implements Runnable {
 	private boolean manualAcks = false;
 	private String threadName;
 	private final Semaphore runningSemaphore = new Semaphore(1);
-	private Future callbackFuture;
+	private Future<?> callbackFuture;
 
 	CommsCallback(ClientComms clientComms) {
 		this.clientComms = clientComms;
-		this.messageQueue = new Vector(INBOUND_QUEUE_SIZE);
-		this.completeQueue = new Vector(INBOUND_QUEUE_SIZE);
-		this.callbacks = new Hashtable();
+		this.messageQueue = new Vector<MqttPublish>(INBOUND_QUEUE_SIZE);
+		this.completeQueue = new Vector<MqttToken>(INBOUND_QUEUE_SIZE);
+		this.callbacks = new Hashtable<String, IMqttMessageListener>();
 		log.setResourceName(clientComms.getClient().getClientId());
 	}
 
@@ -183,7 +184,7 @@ public class CommsCallback implements Runnable {
 					synchronized (completeQueue) {
 					    if (!completeQueue.isEmpty()) {
 						    // First call the delivery arrived callback if needed
-						    token = (MqttToken) completeQueue.elementAt(0);
+						    token = completeQueue.elementAt(0);
 						    completeQueue.removeElementAt(0);
 					    }
 					}
@@ -198,8 +199,7 @@ public class CommsCallback implements Runnable {
 						    // Note, there is a window on connect where a publish
 						    // could arrive before we've
 						    // finished the connect logic.
-							message = (MqttPublish) messageQueue.elementAt(0);
-
+							message = messageQueue.elementAt(0);
 							messageQueue.removeElementAt(0);
 					    }
 					}
@@ -290,10 +290,13 @@ public class CommsCallback implements Runnable {
 			if (mqttCallback != null && cause != null) {
 				// @TRACE 708=call connectionLost
 				log.fine(CLASS_NAME, methodName, "708", new Object[] { cause });
-				mqttCallback.connectionLost(cause);
+				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(cause);
+				mqttCallback.disconnected(disconnectResponse);
 			}
 			if(reconnectInternalCallback != null && cause != null){
-				reconnectInternalCallback.connectionLost(cause);
+				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(cause);
+
+				reconnectInternalCallback.disconnected(disconnectResponse);
 			}
 		} catch (java.lang.Throwable t) {
 			// Just log the fact that a throwable has caught connection lost 
@@ -484,12 +487,12 @@ public class CommsCallback implements Runnable {
 	{		
 		boolean delivered = false;
 		
-		Enumeration keys = callbacks.keys();
+		Enumeration<String> keys = callbacks.keys();
 		while (keys.hasMoreElements()) {
-			String topicFilter = (String)keys.nextElement();
+			String topicFilter = keys.nextElement();
 			if (MqttTopic.isMatched(topicFilter, topicName)) {
 				aMessage.setId(messageId);
-				((IMqttMessageListener)(callbacks.get(topicFilter))).messageArrived(topicName, aMessage);
+				(callbacks.get(topicFilter)).messageArrived(topicName, aMessage);
 				delivered = true;
 			}
 		}

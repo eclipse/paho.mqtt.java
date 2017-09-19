@@ -1,5 +1,6 @@
 package org.eclipse.paho.mqttv5.client;
 
+import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 public class MqttClientException {
@@ -43,10 +44,10 @@ public class MqttClientException {
 	public static final short REASON_CODE_SERVER_CONNECT_ERROR = 32103;
 
 	/**
-	 * The client is not connected to the server. The {@link MqttClient#connect()}
-	 * or {@link MqttClient#connect(MqttConnectOptions)} method must be called
+	 * The client is not connected to the server. The {@link IMqttClient#connect()}
+	 * or {@link IMqttClient#connect(MqttConnectionOptions)} method must be called
 	 * first. It is also possible that the connection was lost - see
-	 * {@link MqttClient#setCallback(MqttCallback)} for a way to track lost
+	 * {@link IMqttClient#setCallback(MqttCallback)} for a way to track lost
 	 * connections.
 	 */
 	public static final short REASON_CODE_CLIENT_NOT_CONNECTED = 32104;
@@ -65,7 +66,7 @@ public class MqttClientException {
 	public static final short REASON_CODE_SSL_CONFIG_ERROR = 32106;
 
 	/**
-	 * Thrown when an attempt to call {@link MqttClient#disconnect()} has been made
+	 * Thrown when an attempt to call {@link IMqttClient#disconnect()} has been made
 	 * from within a method on {@link MqttCallback}. These methods are invoked by
 	 * the client's thread, and must not be used to control disconnection.
 	 * 
@@ -82,7 +83,7 @@ public class MqttClientException {
 
 	/**
 	 * The client has been unexpectedly disconnected from the server. The
-	 * {@link #getCause() cause} will provide more details.
+	 * {@link MqttException#getCause() cause} will provide more details.
 	 */
 	public static final short REASON_CODE_CONNECTION_LOST = 32109;
 

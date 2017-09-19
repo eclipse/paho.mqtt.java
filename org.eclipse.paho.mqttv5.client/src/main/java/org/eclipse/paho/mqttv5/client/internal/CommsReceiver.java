@@ -50,7 +50,7 @@ public class CommsReceiver implements Runnable {
 	private volatile boolean receiving;
 	private final Semaphore runningSemaphore = new Semaphore(1);
 	private String threadName;
-	private Future receiverFuture;
+	private Future<?> receiverFuture;
 
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {

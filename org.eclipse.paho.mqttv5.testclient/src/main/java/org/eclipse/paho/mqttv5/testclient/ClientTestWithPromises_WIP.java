@@ -1,14 +1,18 @@
 package org.eclipse.paho.mqttv5.testclient;
 
+import java.util.ArrayList;
+
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 import org.osgi.util.promise.Promise;
 
 public class ClientTestWithPromises_WIP {
@@ -50,10 +54,9 @@ public class ClientTestWithPromises_WIP {
 			}
 
 			@Override
-			public void connectionLost(Throwable cause) {
-				System.out.println("Connection Lost: " + cause.getMessage());
-				cause.printStackTrace();
-
+			public void disconnected(MqttDisconnectResponse disconnectResponse) {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 

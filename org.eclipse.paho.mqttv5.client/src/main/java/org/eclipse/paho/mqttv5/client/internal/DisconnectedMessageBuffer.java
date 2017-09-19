@@ -31,13 +31,13 @@ public class DisconnectedMessageBuffer implements Runnable {
 	private static final String CLASS_NAME = "DisconnectedMessageBuffer";
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	private DisconnectedBufferOptions bufferOpts;
-	private ArrayList buffer;
+	private ArrayList<BufferedMessage> buffer;
 	private Object	bufLock = new Object();  	// Used to synchronise the buffer
 	private IDisconnectedBufferCallback callback;
 	
 	public DisconnectedMessageBuffer(DisconnectedBufferOptions options){
 		this.bufferOpts = options;
-		buffer = new ArrayList();
+		buffer = new ArrayList<BufferedMessage>();
 	}
 	
 	/**

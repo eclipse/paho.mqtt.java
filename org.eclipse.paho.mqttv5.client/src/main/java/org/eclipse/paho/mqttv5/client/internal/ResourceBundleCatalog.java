@@ -24,7 +24,7 @@ public class ResourceBundleCatalog extends MessageCatalog {
 	
 	public ResourceBundleCatalog() {
 		//MAY throws MissingResourceException
-		bundle = ResourceBundle.getBundle("org.eclipse.paho.client.mqttv3.internal.nls.messages");
+		bundle = ResourceBundle.getBundle("org.eclipse.paho.mqttv5.client.internal.nls.messages");
 	}
 
 	protected String getLocalizedMessage(int id) {
