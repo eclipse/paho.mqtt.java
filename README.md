@@ -27,12 +27,14 @@ Of course, those who just want the client without having to worry about lower le
 As this is being developed from scratch, it will be written using Java version 8. This will allow us to take advantage of many of the new and improved APIs that are available.
 
 
-### Best practices
 
-All Modules must contain:
-* Junit tests
-* Documentation
+## Help, something doesn't work! / This looks terrible! / What about x!
 
+This client is under active development and as such may be incomplete / broken a lot of the time right now. However, the more feedback and help we get on it, the better it will get! If you have any issues, please raise a bug against the client [here](https://github.com/eclipse/paho.mqtt.java/issues), but **please** prefix it with 'MQTTv5' so we know that it's not an issue with the current v3.1.1 client.
+
+If you have any ideas about how the API should be designed going forward, then please chip in on [this](https://github.com/eclipse/paho.mqtt.java/issues/389) issue.
+
+And of course, if you think of an amazing new feature for the v5 client, have a go at implementing it and submit a pr against the mqttv5-new branch!
 
 
 
