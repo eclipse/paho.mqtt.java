@@ -271,7 +271,7 @@ public class SSLSocketFactoryFactory {
 	 * This should not be used for cryptographical purpose, it's a simple
 	 * scrambler to obfuscate clear-text passwords.
 	 * 
-	 * @see org.eclipse.paho.mqttv5.client.security.SSLSocketFactoryFactory#deObfuscate
+	 * @see org.eclipse.paho.mqttv5.client.security.SSLSocketFactoryFactory#deObfuscate(String)
 	 * 
 	 * @param password
 	 *            The password to be encrypted, as a char[] array.
@@ -293,7 +293,7 @@ public class SSLSocketFactoryFactory {
 	 * The inverse operation of obfuscate: returns a cleartext password that was
 	 * previously obfuscated using the XOR scrambler.
 	 * 
-	 * @see org.eclipse.paho.mqttv5.client.security.SSLSocketFactoryFactory#obfuscate
+	 * @see org.eclipse.paho.mqttv5.client.security.SSLSocketFactoryFactory#obfuscate(char[])
 	 * 
 	 * @param ePassword
 	 *            An obfuscated password.

@@ -174,7 +174,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * required.
 	 * <p>
 	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link #generateClientId()}. As the client identifier
+	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client
 	 * must use the same identifier between connections if durable subscriptions or
 	 * reliable delivery of messages is required.
@@ -265,7 +265,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * required.
 	 * <p>
 	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link #generateClientId()}. As the client identifier
+	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client
 	 * must use the same identifier between connections if durable subscriptions or
 	 * reliable delivery of messages is required.
@@ -368,7 +368,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * required.
 	 * <p>
 	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link #generateClientId()}. As the client identifier
+	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client
 	 * must use the same identifier between connections if durable subscriptions or
 	 * reliable delivery of messages is required.
@@ -423,6 +423,9 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @param persistence
 	 *            the persistence class to use to store in-flight message. If null
 	 *            then the default persistence mechanism is used
+	 * @param pingSender
+	 *            the {@link MqttPingSender} Implementation to handle timing and
+	 *            sending Ping messages to the server.
 	 * @param executorService
 	 *            used for managing threads. If null then a newFixedThreadPool is
 	 *            used.
@@ -776,7 +779,9 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	}
 
 	/**
-	 * Promise Based Version of Connect
+	 * Promise Based Version of Connect (Experimental)
+	 * @param mqttConnectOptions The connect options to connect with.
+	 * @return a Promise for the connection
 	 */
 	public Promise<MqttToken> connectWithPromise(MqttConnectionOptions mqttConnectOptions) {
 		Deferred<MqttToken> deferredConnect = new Deferred<MqttToken>();
@@ -1179,9 +1184,12 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 
 		return token;
 	}
-
+	
 	/**
-	 * Promise Based Version of Connect
+	 * Promise Based Version of Connect (Experimental)
+	 * @param subscription The Subscription
+	 * @param callback The callback to return incoming message to
+	 * @return A Promise for Said Subscription
 	 */
 	public Promise<MqttToken> subscribeWithPromise(MqttSubscription subscription, IMqttMessageListener callback) {
 		Deferred<MqttToken> deferredSubscribe = new Deferred<MqttToken>();

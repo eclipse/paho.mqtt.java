@@ -174,7 +174,7 @@ public class WebSocketHandshake {
 	/**
 	 * Returns a Hashmap of HTTP headers
 	 * 
-	 * @param ArrayList<String>
+	 * @param headers ArrayList<String>
 	 *            of headers
 	 * @return A Hashmap<String, String> of the headers
 	 */

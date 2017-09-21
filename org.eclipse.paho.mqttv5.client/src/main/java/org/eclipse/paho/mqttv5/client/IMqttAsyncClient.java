@@ -496,7 +496,7 @@ public interface IMqttAsyncClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(MqttSubscription[], Object, MqttActionListener)
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages
@@ -512,7 +512,7 @@ public interface IMqttAsyncClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener) throws MqttException
+	 * @see #subscribe(MqttSubscription[], Object, MqttActionListener) throws MqttException
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages
@@ -536,13 +536,9 @@ public interface IMqttAsyncClient {
 	 * <p>Provides an optimized way to subscribe to multiple topics compared to
 	 * subscribing to each one individually.</p>
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(MqttSubscription[], Object, MqttActionListener)
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	* @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
@@ -643,11 +639,7 @@ public interface IMqttAsyncClient {
 	 * <li>Passing in a callback {@link MqttActionListener} to this method</li>
 	 * </ul>
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
-	 * @param qos the maximum quality of service to subscribe each topic at.Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	* @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
 	 * @param callback optional listener that will be notified when subscribe
@@ -663,13 +655,9 @@ public interface IMqttAsyncClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(MqttSubscription[], Object, MqttActionListener)
 	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param subscription a {@link MqttSubscription} defining the subscription to be made.
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
 	 * @param callback optional listener that will be notified when subscribe
@@ -685,13 +673,9 @@ public interface IMqttAsyncClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(MqttSubscription[], Object, MqttActionListener)
 	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param subscription a  {@link MqttSubscription} defining the subscription to be made.
 	 * @param messageListener a callback to handle incoming messages
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
@@ -706,13 +690,9 @@ public interface IMqttAsyncClient {
 	 * <p>Provides an optimized way to subscribe to multiple topics compared to
 	 * subscribing to each one individually.</p>
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(MqttSubscription[], Object, MqttActionListener)
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 ** @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
 	 * @param messageListeners one or more callbacks to handle incoming messages
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
@@ -727,13 +707,9 @@ public interface IMqttAsyncClient {
 	 * <p>Provides an optimized way to subscribe to multiple topics compared to
 	 * subscribing to each one individually.</p>
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener)
+	 * @see #subscribe(MqttSubscription[], Object, MqttActionListener)
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
 	 * @param callback optional listener that will be notified when subscribe

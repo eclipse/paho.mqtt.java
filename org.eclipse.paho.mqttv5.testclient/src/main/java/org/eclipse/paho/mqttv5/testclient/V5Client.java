@@ -137,8 +137,6 @@ public class V5Client implements MqttCallback {
 
 	}
 
-	
-
 	@Override
 	public void disconnected(MqttDisconnectResponse disconnectResponse) {
 		System.out.println("Disconnection Complete!");

@@ -1,7 +1,5 @@
 package org.eclipse.paho.mqttv5.testclient;
 
-import java.util.ArrayList;
-
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
@@ -12,7 +10,6 @@ import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 import org.osgi.util.promise.Promise;
 
 public class ClientTestWithPromises_WIP {

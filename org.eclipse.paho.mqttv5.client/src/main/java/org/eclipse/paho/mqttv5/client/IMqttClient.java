@@ -455,7 +455,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	/**
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
 	 *
-	 * @see #subscribeWithResponse(String[], int[])
+	 * @see #subscribeWithResponse(MqttSubscription[], IMqttMessageListener[])
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @return token used to track the subscribe after it has completed.
@@ -549,11 +549,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 *
 	 * <p>This is a blocking method that returns once subscribe completes</p>
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service to subscribe each topic at.Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @return token used to track the subscribe after it has completed.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
@@ -648,11 +644,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 *
 	 * <p>This is a blocking method that returns once subscribe completes</p>
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service to subscribe each topic at.Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
 	 * @param messageListeners one or more callbacks to handle incoming messages
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @return token used to track the subscribe after it has completed.
@@ -795,7 +787,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:</p>
 	 * <ul>
 	 * <li>{@link MqttLegacyBlockingClient#publish(String, MqttMessage)} to publish a message in a blocking manner
-	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, IMqttActionListener)}
+	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener)}
 	 * </ul>
 	 * <p>When building an application,
 	 * the design of the topic tree should take into account the following principles
