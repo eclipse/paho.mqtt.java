@@ -5,7 +5,10 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 public class MqttClientException {
 	
-	public static final int REASON_CODE_INVALID_TOPIC_ALAS = 50004; // An invalid topic alias combination was recieved.
+	/**
+	 * The Server sent a publish message with an invalid topic alias.
+	 */
+	public static final short REASON_CODE_INVALID_TOPIC_ALAS = 32301;
 	
 	/**
 	 * Client timed out while waiting for a response from the server. The server is

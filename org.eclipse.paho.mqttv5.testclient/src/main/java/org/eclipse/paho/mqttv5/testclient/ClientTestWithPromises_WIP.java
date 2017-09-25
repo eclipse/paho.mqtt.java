@@ -55,6 +55,12 @@ public class ClientTestWithPromises_WIP {
 				// TODO Auto-generated method stub
 				
 			}
+
+			@Override
+			public void mqttErrorOccured(MqttException exception) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 
 		MqttSubscription sub = new MqttSubscription(topic, 1);

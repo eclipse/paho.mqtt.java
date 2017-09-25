@@ -174,10 +174,10 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * required.
 	 * <p>
 	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As the client identifier
-	 * is used by the server to identify a client when it reconnects, the client
-	 * must use the same identifier between connections if durable subscriptions or
-	 * reliable delivery of messages is required.
+	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As
+	 * the client identifier is used by the server to identify a client when it
+	 * reconnects, the client must use the same identifier between connections if
+	 * durable subscriptions or reliable delivery of messages is required.
 	 * </p>
 	 * <p>
 	 * In Java SE, SSL can be configured in one of several ways, which the client
@@ -265,10 +265,10 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * required.
 	 * <p>
 	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As the client identifier
-	 * is used by the server to identify a client when it reconnects, the client
-	 * must use the same identifier between connections if durable subscriptions or
-	 * reliable delivery of messages is required.
+	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As
+	 * the client identifier is used by the server to identify a client when it
+	 * reconnects, the client must use the same identifier between connections if
+	 * durable subscriptions or reliable delivery of messages is required.
 	 * </p>
 	 * <p>
 	 * In Java SE, SSL can be configured in one of several ways, which the client
@@ -368,10 +368,10 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * required.
 	 * <p>
 	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As the client identifier
-	 * is used by the server to identify a client when it reconnects, the client
-	 * must use the same identifier between connections if durable subscriptions or
-	 * reliable delivery of messages is required.
+	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As
+	 * the client identifier is used by the server to identify a client when it
+	 * reconnects, the client must use the same identifier between connections if
+	 * durable subscriptions or reliable delivery of messages is required.
 	 * </p>
 	 * <p>
 	 * In Java SE, SSL can be configured in one of several ways, which the client
@@ -780,7 +780,9 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 
 	/**
 	 * Promise Based Version of Connect (Experimental)
-	 * @param mqttConnectOptions The connect options to connect with.
+	 * 
+	 * @param mqttConnectOptions
+	 *            The connect options to connect with.
 	 * @return a Promise for the connection
 	 */
 	public Promise<MqttToken> connectWithPromise(MqttConnectionOptions mqttConnectOptions) {
@@ -814,7 +816,8 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * Object, org.eclipse.paho.mqttv5.client.IMqttActionListener)
 	 */
 	public IMqttToken disconnect(Object userContext, MqttActionListener callback) throws MqttException {
-		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback, null, null, null);
+		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback, MqttReturnCode.RETURN_CODE_SUCCESS, null, null,
+				null);
 	}
 
 	/*
@@ -832,7 +835,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnect(long)
 	 */
 	public IMqttToken disconnect(long quiesceTimeout) throws MqttException {
-		return this.disconnect(quiesceTimeout, null, null, null, null, null);
+		return this.disconnect(quiesceTimeout, null, null, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
 	}
 
 	/*
@@ -841,7 +844,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnect(long,
 	 * java.lang.Object, org.eclipse.paho.mqttv5.client.IMqttActionListener)
 	 */
-	public IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback,
+	public IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback, int reasonCode,
 			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
 			throws MqttException {
 		final String methodName = "disconnect";
@@ -852,7 +855,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 		token.setActionCallback(callback);
 		token.setUserContext(userContext);
 
-		MqttDisconnect disconnect = new MqttDisconnect(MqttReturnCode.RETURN_CODE_SUCCESS);
+		MqttDisconnect disconnect = new MqttDisconnect(reasonCode);
 
 		if (sessionExpiryInterval != null) {
 			disconnect.setSessionExpiryInterval(sessionExpiryInterval);
@@ -885,7 +888,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly()
 	 */
 	public void disconnectForcibly() throws MqttException {
-		disconnectForcibly(QUIESCE_TIMEOUT, DISCONNECT_TIMEOUT);
+		disconnectForcibly(QUIESCE_TIMEOUT, DISCONNECT_TIMEOUT, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
 	}
 
 	/*
@@ -894,7 +897,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly(long)
 	 */
 	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
-		disconnectForcibly(QUIESCE_TIMEOUT, disconnectTimeout);
+		disconnectForcibly(QUIESCE_TIMEOUT, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
 	}
 
 	/*
@@ -903,8 +906,11 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly(long,
 	 * long)
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
-		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout);
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
+			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
+			throws MqttException {
+		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, reasonCode, sessionExpiryInterval, reasonString,
+				userDefinedProperties);
 	}
 
 	/**
@@ -928,7 +934,7 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket)
 			throws MqttException {
-		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
+		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
 	}
 
 	/*
@@ -1184,11 +1190,14 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 
 		return token;
 	}
-	
+
 	/**
 	 * Promise Based Version of Connect (Experimental)
-	 * @param subscription The Subscription
-	 * @param callback The callback to return incoming message to
+	 * 
+	 * @param subscription
+	 *            The Subscription
+	 * @param callback
+	 *            The callback to return incoming message to
 	 * @return A Promise for Said Subscription
 	 */
 	public Promise<MqttToken> subscribeWithPromise(MqttSubscription subscription, IMqttMessageListener callback) {
@@ -1517,6 +1526,10 @@ public class MqttAsyncClient implements IMqttAsyncClient, MqttClientInterface {
 				reconnecting = true;
 				startReconnectCycle();
 			}
+		}
+
+		@Override
+		public void mqttErrorOccured(MqttException exception) {
 		}
 
 	}

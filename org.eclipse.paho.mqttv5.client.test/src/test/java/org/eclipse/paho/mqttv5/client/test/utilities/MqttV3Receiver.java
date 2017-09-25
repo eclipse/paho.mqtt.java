@@ -427,4 +427,10 @@ public class MqttV3Receiver implements MqttCallback {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void mqttErrorOccured(MqttException exception) {
+		// TODO Auto-generated method stub
+		
+	}
 }

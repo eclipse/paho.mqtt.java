@@ -15,6 +15,7 @@
  */
 package org.eclipse.paho.mqttv5.client;
 
+import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 /**
@@ -35,6 +36,20 @@ public interface MqttCallback {
 	 *            related to the cause of the disconnection.
 	 */
 	public void disconnected(MqttDisconnectResponse disconnectResponse);
+	
+	/**
+	 * This method is called when an exception is thrown within the MQTT client.
+	 * The reasons for this may vary, from malformed packets, to protocol errors
+	 * or even bugs within the MQTT client itself. This callback surfaces those
+	 * errors to the application so that it may decide how best to deal with them.
+	 * 
+	 * For example, The MQTT server may have sent a publish message with an invalid
+	 * topic alias, the MQTTv5 specification suggests that the client should disconnect
+	 * from the broker with the appropriate return code, however this is completely up to
+	 * the application itself.
+	 * @param exception
+	 */
+	public void mqttErrorOccured(MqttException exception);
 
 	/**
 	 * This method is called when a message arrives from the server.

@@ -143,4 +143,10 @@ public class V5Client implements MqttCallback {
 		
 	}
 
+	@Override
+	public void mqttErrorOccured(MqttException exception) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

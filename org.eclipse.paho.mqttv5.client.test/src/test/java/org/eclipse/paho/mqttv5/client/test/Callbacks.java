@@ -7,6 +7,7 @@ import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
+import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 public class Callbacks implements MqttCallback, IMqttMessageListener{
@@ -73,6 +74,12 @@ public class Callbacks implements MqttCallback, IMqttMessageListener{
 
 	public ArrayList<MqttDisconnectResponse> getDisconnects() {
 		return disconnects;
+	}
+
+	@Override
+	public void mqttErrorOccured(MqttException exception) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

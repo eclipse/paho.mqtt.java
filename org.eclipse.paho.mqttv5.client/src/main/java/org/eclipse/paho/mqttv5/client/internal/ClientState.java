@@ -1134,14 +1134,16 @@ public class ClientState implements MqttState {
 					if (incomingTopicAliases.get(send.getTopicAlias()) != null) {
 						send.setTopicName(incomingTopicAliases.get(send.getTopicAlias()));
 					}
-				} else if (send.getTopicName() == null && (send.getTopicAlias() == 0
+				} else if ((send.getTopicName() == null || send.getTopicName().length() == 0) && (send.getTopicAlias() == 0
 						|| send.getTopicAlias() > clientComms.getConOptions().getTopicAliasMaximum())) {
 					// No Topic String provided, topic alias is invalid
 					// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
-					log.severe(CLASS_NAME, methodName, "653",
+					log.fine(CLASS_NAME, methodName, "653",
 							new Object[] { new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
 									new Integer(send.getTopicAlias()) });
-					throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
+					if (callback != null) {
+						callback.mqttErrorOccured(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
+					}
 				}
 				switch (send.getMessage().getQos()) {
 				case 0:

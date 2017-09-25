@@ -1,5 +1,6 @@
 package org.eclipse.paho.mqttv5.client.internal;
 
+import java.util.ArrayList;
 /*******************************************************************************
  * Copyright (c) 2009, 2016 IBM Corp.
  *
@@ -51,6 +52,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Handles client communications with the server. Sends and receives MQTT V5
@@ -431,6 +433,7 @@ public class ClientComms {
 	 */
 	public void shutdownConnection(MqttToken token, MqttException reason) {
 		final String methodName = "shutdownConnection";
+		
 		boolean wasConnected;
 		MqttToken endToken = null; // Token to notify after disconnect completes
 
@@ -618,8 +621,9 @@ public class ClientComms {
 		}
 	}
 
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
-		disconnectForcibly(quiesceTimeout, disconnectTimeout, true);
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
+			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties) throws MqttException {
+		disconnectForcibly(quiesceTimeout, disconnectTimeout, true, reasonCode, sessionExpiryInterval, reasonString, userDefinedProperties);
 	}
 
 	/**
@@ -631,10 +635,22 @@ public class ClientComms {
 	 *            How long to wait whilst disconnecting
 	 * @param sendDisconnectPacket
 	 *            If true, will send a disconnect packet
+	 * @param reasonCode
+	 *            the disconnection reason code.
+	 * @param sessionExpiryInterval
+	 *            optional property to be sent in the disconnect packet to the
+	 *            server. Use null if not required.
+	 * @param reasonString
+	 *            optional property to be sent in the disconnect packet to the
+	 *            server. Use null if not required.
+	 * @param userDefinedProperties
+	 *            {@link ArrayList} of {@link UserProperty} to be sent to the
+	 *            server. Use null if not required.
 	 * @throws MqttException
 	 *             if an error occurs whilst disconnecting
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket)
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket, int reasonCode,
+			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
 			throws MqttException {
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
