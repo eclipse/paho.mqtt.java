@@ -52,7 +52,7 @@ public class MqttReturnCode {
 	public static final int RETURN_CODE_PACKET_ID_IN_USE				= 0x91;	// 145
 	public static final int RETURN_CODE_PACKET_ID_NOT_FOUND 			= 0x92;	// 146
 	public static final int RETURN_CODE_RECEIVE_MAXIMUM_EXCEEDED		= 0x93;	// 147
-	public static final int RETURN_CODE_ALIAS_NOT_ACCEPTED				= 0x94;	// 148
+	public static final int RETURN_CODE_TOPIC_ALIAS_NOT_ACCEPTED				= 0x94;	// 148
 	public static final int RETURN_CODE_PACKET_TOO_LARGE				= 0x95;	// 149
 	public static final int RETURN_CODE_MESSAGE_RATE_TOO_HIGH			= 0x96;	// 150
 	public static final int RETURN_CODE_QUOTA_EXCEEDED					= 0x97;	// 151
