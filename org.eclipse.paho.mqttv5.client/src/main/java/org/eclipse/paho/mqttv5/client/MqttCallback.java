@@ -47,7 +47,7 @@ public interface MqttCallback {
 	 * topic alias, the MQTTv5 specification suggests that the client should disconnect
 	 * from the broker with the appropriate return code, however this is completely up to
 	 * the application itself.
-	 * @param exception
+	 * @param exception - The exception thrown causing the error.
 	 */
 	public void mqttErrorOccured(MqttException exception);
 

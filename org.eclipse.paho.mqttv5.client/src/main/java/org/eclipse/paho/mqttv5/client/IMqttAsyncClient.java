@@ -258,7 +258,7 @@ public interface IMqttAsyncClient {
 	 *         will be passed to any callback that has been set.
 	 * @throws MqttException
 	 *             for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, MqttActionListener, Integer, String,
+	 * @see #disconnect(long, Object, MqttActionListener, int, Integer, String,
 	 *      ArrayList)
 	 */
 	public IMqttToken disconnect() throws MqttException;
@@ -280,7 +280,7 @@ public interface IMqttAsyncClient {
 	 *         will be passed to the callback methods if a callback is set.
 	 * @throws MqttException
 	 *             for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, MqttActionListener, Integer, String,
+	 * @see #disconnect(long, Object, MqttActionListener, int, Integer, String,
 	 *      ArrayList)
 	 */
 	public IMqttToken disconnect(long quiesceTimeout) throws MqttException;
@@ -304,7 +304,7 @@ public interface IMqttAsyncClient {
 	 *         token will be passed to any callback that has been set.
 	 * @throws MqttException
 	 *             for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, MqttActionListener, Integer, String,
+	 * @see #disconnect(long, Object, MqttActionListener, int, Integer, String,
 	 *      ArrayList)
 	 * 
 	 */
@@ -429,7 +429,8 @@ public interface IMqttAsyncClient {
 	 * @since 0.4.1
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties) throws MqttException;
+			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
+			throws MqttException;
 
 	/**
 	 * Determines if this client is currently connected to the server.

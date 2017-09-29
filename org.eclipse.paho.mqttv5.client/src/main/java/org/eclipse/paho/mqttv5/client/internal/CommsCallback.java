@@ -25,8 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
-import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
@@ -37,6 +37,7 @@ import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
@@ -304,6 +305,25 @@ public class CommsCallback implements Runnable {
 	}
 
 	/**
+	 * This method is called when the server sends a disconnect packet to the
+	 * client. Once this packet is received, the client will automatically close
+	 * down the connection as if the connection was lost.
+	 * 
+	 * @param disconnectPacket
+	 *            The {@link MqttDisconnect} packet sent by the server.
+	 */
+	public void disconnectReceived(MqttDisconnect disconnectPacket) {
+		final String methodName = "disconnectReceived";
+		// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
+
+		log.fine(CLASS_NAME, methodName, "722", new Object[] { disconnectPacket.toString() });
+		MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(disconnectPacket.getReturnCode(),
+				disconnectPacket.getReasonString(), disconnectPacket.getUserDefinedProperties(),
+				disconnectPacket.getServerReference());
+		mqttCallback.disconnected(disconnectResponse);
+	}
+
+	/**
 	 * An action has completed - if a completion listener has been set on the token
 	 * then invoke it with the outcome of the action.
 	 * 
@@ -370,10 +390,12 @@ public class CommsCallback implements Runnable {
 	 * client that the application should choose how to deal with.
 	 * 
 	 * @param exception
+	 *            The exception that was thrown containing the cause for
+	 *            disconnection.
 	 */
 	public void mqttErrorOccured(MqttException exception) {
 		final String methodName = "mqttErrorOccured";
-		log.warning(CLASS_NAME, methodName, "721", new Object[] {exception.getMessage()});
+		log.warning(CLASS_NAME, methodName, "721", new Object[] { exception.getMessage() });
 		if (mqttCallback != null) {
 			mqttCallback.mqttErrorOccured(exception);
 		}

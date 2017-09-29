@@ -28,6 +28,7 @@ import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.client.oldwire.MqttInputStream;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttAck;
+import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
@@ -52,8 +53,7 @@ public class CommsReceiver implements Runnable {
 	private String threadName;
 	private Future<?> receiverFuture;
 
-
-	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
+	public CommsReceiver(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, InputStream in) {
 		this.in = new MqttInputStream(clientState, in);
 		this.clientComms = clientComms;
 		this.clientState = clientState;
@@ -63,14 +63,17 @@ public class CommsReceiver implements Runnable {
 
 	/**
 	 * Starts up the Receiver's thread.
-	 * @param threadName the thread name.
-	 * @param executorService used to execute the thread
+	 * 
+	 * @param threadName
+	 *            the thread name.
+	 * @param executorService
+	 *            used to execute the thread
 	 */
 	public void start(String threadName, ExecutorService executorService) {
 		this.threadName = threadName;
 		final String methodName = "start";
-		//@TRACE 855=starting
-		log.fine(CLASS_NAME,methodName, "855");
+		// @TRACE 855=starting
+		log.fine(CLASS_NAME, methodName, "855");
 		synchronized (lifecycle) {
 			if (!running) {
 				running = true;
@@ -80,7 +83,7 @@ public class CommsReceiver implements Runnable {
 	}
 
 	/**
-	 * Stops the Receiver's thread.  This call will block.
+	 * Stops the Receiver's thread. This call will block.
 	 */
 	public void stop() {
 		final String methodName = "stop";
@@ -88,8 +91,8 @@ public class CommsReceiver implements Runnable {
 			if (receiverFuture != null) {
 				receiverFuture.cancel(true);
 			}
-			//@TRACE 850=stopping
-			log.fine(CLASS_NAME,methodName, "850");
+			// @TRACE 850=stopping
+			log.fine(CLASS_NAME, methodName, "850");
 			if (running) {
 				running = false;
 				receiving = false;
@@ -97,8 +100,7 @@ public class CommsReceiver implements Runnable {
 					try {
 						// Wait for the thread to finish.
 						runningSemaphore.acquire();
-					}
-					catch (InterruptedException ex) {
+					} catch (InterruptedException ex) {
 					} finally {
 						runningSemaphore.release();
 					}
@@ -106,8 +108,8 @@ public class CommsReceiver implements Runnable {
 			}
 		}
 		recThread = null;
-		//@TRACE 851=stopped
-		log.fine(CLASS_NAME,methodName,"851");
+		// @TRACE 851=stopped
+		log.fine(CLASS_NAME, methodName, "851");
 	}
 
 	/**
@@ -128,8 +130,8 @@ public class CommsReceiver implements Runnable {
 
 		while (running && (in != null)) {
 			try {
-				//@TRACE 852=network read message
-				log.fine(CLASS_NAME,methodName,"852");
+				// @TRACE 852=network read message
+				log.fine(CLASS_NAME, methodName, "852");
 				receiving = in.available() > 0;
 				MqttWireMessage message = in.readMqttWireMessage();
 				receiving = false;
@@ -137,24 +139,31 @@ public class CommsReceiver implements Runnable {
 				// instanceof checks if message is null
 				if (message instanceof MqttAck) {
 					token = tokenStore.getToken(message);
-					if (token!=null) {
+					if (token != null) {
 						synchronized (token) {
 							// Ensure the notify processing is done under a lock on the token
-							// This ensures that the send processing can complete  before the
+							// This ensures that the send processing can complete before the
 							// receive processing starts! ( request and ack and ack processing
 							// can occur before request processing is complete if not!
-							clientState.notifyReceivedAck((MqttAck)message);
+							clientState.notifyReceivedAck((MqttAck) message);
 						}
-					} else if(message instanceof MqttPubRec || message instanceof MqttPubComp || message instanceof MqttPubAck) {
-						//This is an ack for a message we no longer have a ticket for.
-						//This probably means we already received this message and it's being send again
-						//because of timeouts, crashes, disconnects, restarts etc.
-						//It should be safe to ignore these unexpected messages.
+					} else if (message instanceof MqttPubRec || message instanceof MqttPubComp
+							|| message instanceof MqttPubAck) {
+						// This is an ack for a message we no longer have a ticket for.
+						// This probably means we already received this message and it's being send
+						// again
+						// because of timeouts, crashes, disconnects, restarts etc.
+						// It should be safe to ignore these unexpected messages.
 						log.fine(CLASS_NAME, methodName, "857");
 					} else {
 						// It its an ack and there is no token then something is not right.
 						// An ack should always have a token assoicated with it.
 						throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
+					}
+				} else if (message instanceof MqttDisconnect) {
+					// This is a Disconnect Message
+					if (message != null) {
+						clientState.notifyReceivedDisconnect((MqttDisconnect) message);
 					}
 				} else {
 					if (message != null) {
@@ -162,34 +171,32 @@ public class CommsReceiver implements Runnable {
 						clientState.notifyReceivedMsg(message);
 					}
 				}
-			}
-			catch (MqttException ex) {
-				//@TRACE 856=Stopping, MQttException
-				log.fine(CLASS_NAME,methodName,"856",null,ex);
+			} catch (MqttException ex) {
+				// @TRACE 856=Stopping, MQttException
+				log.fine(CLASS_NAME, methodName, "856", null, ex);
 				running = false;
 				// Token maybe null but that is handled in shutdown
 				clientComms.shutdownConnection(token, ex);
-			}
-			catch (IOException ioe) {
-				//@TRACE 853=Stopping due to IOException
-				log.fine(CLASS_NAME,methodName,"853");
+			} catch (IOException ioe) {
+				// @TRACE 853=Stopping due to IOException
+				log.fine(CLASS_NAME, methodName, "853");
 
 				running = false;
 				// An EOFException could be raised if the broker processes the
 				// DISCONNECT and ends the socket before we complete. As such,
 				// only shutdown the connection if we're not already shutting down.
 				if (!clientComms.isDisconnecting()) {
-					clientComms.shutdownConnection(token, new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ioe));
+					clientComms.shutdownConnection(token,
+							new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ioe));
 				}
-			}
-			finally {
+			} finally {
 				receiving = false;
 				runningSemaphore.release();
 			}
 		}
 
-		//@TRACE 854=<
-		log.fine(CLASS_NAME,methodName,"854");
+		// @TRACE 854=<
+		log.fine(CLASS_NAME, methodName, "854");
 	}
 
 	public boolean isRunning() {
