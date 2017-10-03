@@ -27,9 +27,8 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttDisconnect extends MqttWireMessage {
-	
-	public static final String KEY = "Disc";
 
+	public static final String KEY = "Disc";
 
 	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
 			MqttReturnCode.RETURN_CODE_DISCONNECT_WITH_WILL_MESSAGE, MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR,
@@ -45,10 +44,11 @@ public class MqttDisconnect extends MqttWireMessage {
 			MqttReturnCode.RETURN_CODE_QOS_NOT_SUPPORTED, MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER,
 			MqttReturnCode.RETURN_CODE_SERVER_MOVED, MqttReturnCode.RETURN_CODE_SHARED_SUB_NOT_SUPPORTED,
 			MqttReturnCode.RETURN_CODE_CONNECTION_RATE_EXCEEDED, MqttReturnCode.RETURN_CODE_MAXIMUM_CONNECT_TIME,
-			MqttReturnCode.RETURN_CODE_SUB_IDENTIFIERS_NOT_SUPPORTED, MqttReturnCode.RETURN_CODE_WILDCARD_SUB_NOT_SUPPORTED };
+			MqttReturnCode.RETURN_CODE_SUB_IDENTIFIERS_NOT_SUPPORTED,
+			MqttReturnCode.RETURN_CODE_WILDCARD_SUB_NOT_SUPPORTED };
 
 	// Fields
-	private int returnCode;
+	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private Integer sessionExpiryInterval;
 	private String reasonString;
 	private String serverReference;
@@ -59,9 +59,15 @@ public class MqttDisconnect extends MqttWireMessage {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream inputStream = new DataInputStream(counter);
-		returnCode = inputStream.readUnsignedByte();
-		validateReturnCode(returnCode, validReturnCodes);
-		parseIdentifierValueFields(inputStream);
+		if(data.length - counter.getCounter() >= 1) {
+			returnCode = inputStream.readUnsignedByte();
+			validateReturnCode(returnCode, validReturnCodes);
+		}
+		
+		long remainder = data.length - counter.getCounter();
+		if (remainder >= 2) {
+			parseIdentifierValueFields(inputStream);
+		}
 
 		inputStream.close();
 	}
@@ -83,9 +89,11 @@ public class MqttDisconnect extends MqttWireMessage {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-			outputStream.write(identifierValueFieldsByteArray);
-			outputStream.flush();
+			if (identifierValueFieldsByteArray.length != 0) {
+				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+				outputStream.write(identifierValueFieldsByteArray);
+				outputStream.flush();
+			}
 			return baos.toByteArray();
 		} catch (IOException ioe) {
 			throw new MqttException(ioe);

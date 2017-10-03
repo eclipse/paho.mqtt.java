@@ -68,6 +68,26 @@ public class MqttDisconnectTest {
 		
 	}
 	
+	@Test
+	public void testDecodingMqttDisconnectWithNoProperties() throws MqttException, IOException {
+		MqttDisconnect mqttDisconnectPacket = new MqttDisconnect(returnCode);
+		byte[] header = mqttDisconnectPacket.getHeader();
+		byte[] payload = mqttDisconnectPacket.getPayload();
+		
+		
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(header);
+		outputStream.write(payload);
+		//printByteArray(outputStream.toByteArray());
+		
+		MqttDisconnect decodedDisconnectPacket = (MqttDisconnect) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		
+		Assert.assertEquals(returnCode, decodedDisconnectPacket.getReturnCode());
+		
+
+		
+	}
+	
 	private MqttDisconnect generatemqttDisconnectPacket() throws MqttException{
 		MqttDisconnect mqttDisconnectPacket = new MqttDisconnect(returnCode);
 		mqttDisconnectPacket.setReasonString(reasonString);

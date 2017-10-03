@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttPubRec extends MqttAck {
 
@@ -41,11 +42,15 @@ public class MqttPubRec extends MqttAck {
 	public MqttPubRec(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREC);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
-		DataInputStream dis = new DataInputStream(bais);
+		CountingInputStream counter = new CountingInputStream(bais);
+		DataInputStream dis = new DataInputStream(counter);
 		msgId = dis.readUnsignedShort();
-		if (data.length > 2) {
+		long remainder = data.length - counter.getCounter();
+		if (remainder > 2) {
 			returnCode = dis.readUnsignedByte();
 			validateReturnCode(returnCode, validReturnCodes);
+		}
+		if(remainder >= 4) {
 			parseIdentifierValueFields(dis);
 		}
 		dis.close();

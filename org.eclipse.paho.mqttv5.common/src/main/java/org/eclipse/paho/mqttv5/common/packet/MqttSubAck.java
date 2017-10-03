@@ -45,8 +45,11 @@ public class MqttSubAck extends MqttAck {
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream inputStream = new DataInputStream(counter);
 		msgId = inputStream.readUnsignedShort();
+		long remainder = data.length - counter.getCounter();
+		if(remainder >= 3) {
+			parseIdentifierValueFields(inputStream);
+		}
 
-		parseIdentifierValueFields(inputStream);
 		int remainingLength = data.length - counter.getCounter();
 		returnCodes = new int[remainingLength];
 
@@ -79,8 +82,11 @@ public class MqttSubAck extends MqttAck {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-			outputStream.write(identifierValueFieldsByteArray);
+			if (identifierValueFieldsByteArray.length != 0) {
+				// Write Identifier / Value Fields
+				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+				outputStream.write(identifierValueFieldsByteArray);
+			}
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {

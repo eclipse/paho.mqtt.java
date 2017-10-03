@@ -46,7 +46,11 @@ public class MqttUnsubAck extends MqttAck {
 
 		msgId = inputStream.readUnsignedShort();
 
-		parseIdentifierValueFields(inputStream);
+		long remainder = data.length - counter.getCounter();
+		if (remainder >= 3) {
+			parseIdentifierValueFields(inputStream);
+		}
+
 		int remainingLengh = data.length - counter.getCounter();
 		returnCodes = new int[remainingLengh];
 
@@ -77,8 +81,11 @@ public class MqttUnsubAck extends MqttAck {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-			outputStream.write(identifierValueFieldsByteArray);
+			if (identifierValueFieldsByteArray.length != 0) {
+				// Write Identifier / Value Fields
+				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+				outputStream.write(identifierValueFieldsByteArray);
+			}
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {
@@ -103,7 +110,7 @@ public class MqttUnsubAck extends MqttAck {
 		}
 
 	}
-	
+
 	private byte[] getIdentifierValueFields() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -144,7 +151,7 @@ public class MqttUnsubAck extends MqttAck {
 				byte identifier = inputStream.readByte();
 				if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
-				}  else if ( identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
 					userDefinedProperties.add(new UserProperty(key, value));

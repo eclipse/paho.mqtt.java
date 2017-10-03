@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttPubAck extends MqttAck {
 
@@ -34,20 +35,24 @@ public class MqttPubAck extends MqttAck {
 			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID };
 
 	// Fields
-	private int returnCode;
+	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private String reasonString;
 	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 
 	public MqttPubAck(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
-		DataInputStream dis = new DataInputStream(bais);
+		CountingInputStream counter = new CountingInputStream(bais);
+		DataInputStream dis = new DataInputStream(counter);
 		msgId = dis.readUnsignedShort();
-		if (data.length > 2) {
+		long remainder = data.length - counter.getCounter();
+		if (remainder > 2) {
 			returnCode = dis.readUnsignedByte();
 			validateReturnCode(returnCode, validReturnCodes);
-			parseIdentifierValueFields(dis);
 		}
+		 if( remainder >= 4) {
+			 parseIdentifierValueFields(dis);
+		 }
 		dis.close();
 	}
 

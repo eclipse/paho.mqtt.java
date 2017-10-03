@@ -52,7 +52,6 @@ public class MqttSubscribe extends MqttWireMessage {
 		DataInputStream inputStream = new DataInputStream(counter);
 		msgId = inputStream.readUnsignedShort();
 		
-		
 		parseIdentifierValueFields(inputStream);
 
 		ArrayList<MqttSubscription> subscriptionList = new ArrayList<>();
