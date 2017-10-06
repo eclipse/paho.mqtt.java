@@ -31,22 +31,27 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class SSLNetworkModule extends TCPNetworkModule {
 	private static final String CLASS_NAME = SSLNetworkModule.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
 	private HostnameVerifier hostnameVerifier;
-	
+
 	private String host;
 	private int port;
+
 	/**
-	 * Constructs a new SSLNetworkModule using the specified host and
-	 * port.  The supplied SSLSocketFactory is used to supply the network
-	 * socket.
-	 * @param factory the {@link SSLSocketFactory} to be used in this SSLNetworkModule
-	 * @param host the Hostname of the Server
-	 * @param port the Port of the Server
-	 * @param resourceContext Resource Context
+	 * Constructs a new SSLNetworkModule using the specified host and port. The
+	 * supplied SSLSocketFactory is used to supply the network socket.
+	 * 
+	 * @param factory
+	 *            the {@link SSLSocketFactory} to be used in this SSLNetworkModule
+	 * @param host
+	 *            the Hostname of the Server
+	 * @param port
+	 *            the Port of the Server
+	 * @param resourceContext
+	 *            Resource Context
 	 */
 	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext) {
 		super(factory, host, port, resourceContext);
@@ -57,6 +62,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 
 	/**
 	 * Returns the enabled cipher suites.
+	 * 
 	 * @return a string array of enabled Cipher suites
 	 */
 	public String[] getEnabledCiphers() {
@@ -65,38 +71,42 @@ public class SSLNetworkModule extends TCPNetworkModule {
 
 	/**
 	 * Sets the enabled cipher suites on the underlying network socket.
-	 * @param enabledCiphers a String array of cipher suites to enable
+	 * 
+	 * @param enabledCiphers
+	 *            a String array of cipher suites to enable
 	 */
 	public void setEnabledCiphers(String[] enabledCiphers) {
 		final String methodName = "setEnabledCiphers";
-		this.enabledCiphers = enabledCiphers;
-		if ((socket != null) && (enabledCiphers != null)) {
+		if (enabledCiphers != null) {
+			this.enabledCiphers = enabledCiphers.clone();
+		}
+		if ((socket != null) && (this.enabledCiphers != null)) {
 			if (log.isLoggable(Logger.FINE)) {
 				String ciphers = "";
-				for (int i=0;i<enabledCiphers.length;i++) {
-					if (i>0) {
-						ciphers+=",";
+				for (int i = 0; i < this.enabledCiphers.length; i++) {
+					if (i > 0) {
+						ciphers += ",";
 					}
-					ciphers+=enabledCiphers[i];
+					ciphers += this.enabledCiphers[i];
 				}
-				//@TRACE 260=setEnabledCiphers ciphers={0}
-				log.fine(CLASS_NAME,methodName,"260",new Object[]{ciphers});
+				// @TRACE 260=setEnabledCiphers ciphers={0}
+				log.fine(CLASS_NAME, methodName, "260", new Object[] { ciphers });
 			}
-			((SSLSocket) socket).setEnabledCipherSuites(enabledCiphers);
+			((SSLSocket) socket).setEnabledCipherSuites(this.enabledCiphers);
 		}
 	}
-	
+
 	public void setSSLhandshakeTimeout(int timeout) {
 		super.setConnectTimeout(timeout);
 		this.handshakeTimeoutSecs = timeout;
 	}
-	
+
 	public HostnameVerifier getSSLHostnameVerifier() {
-	    return hostnameVerifier;
+		return hostnameVerifier;
 	}
 
 	public void setSSLHostnameVerifier(HostnameVerifier hostnameVerifier) {
-	    this.hostnameVerifier = hostnameVerifier;
+		this.hostnameVerifier = hostnameVerifier;
 	}
 
 	public void start() throws IOException, MqttException {
@@ -104,16 +114,16 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		setEnabledCiphers(enabledCiphers);
 		int soTimeout = socket.getSoTimeout();
 		// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
-		socket.setSoTimeout(this.handshakeTimeoutSecs*1000);
-		((SSLSocket)socket).startHandshake();
+		socket.setSoTimeout(this.handshakeTimeoutSecs * 1000);
+		((SSLSocket) socket).startHandshake();
 		if (hostnameVerifier != null) {
-		    SSLSession session = ((SSLSocket)socket).getSession();
-		    hostnameVerifier.verify(host, session);
+			SSLSession session = ((SSLSocket) socket).getSession();
+			hostnameVerifier.verify(host, session);
 		}
 		// reset timeout to default value
-		socket.setSoTimeout(soTimeout);   
+		socket.setSoTimeout(soTimeout);
 	}
-	
+
 	public String getServerURI() {
 		return "ssl://" + host + ":" + port;
 	}

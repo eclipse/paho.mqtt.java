@@ -262,7 +262,7 @@ public class CommsCallback implements Runnable {
 			
 			// Set notified so we don't tell the user again about this action.
  			if ( token.isComplete() ){
- 			   if ( token instanceof MqttDeliveryToken || token.getActionCallback() instanceof IMqttActionListener ) {
+ 			   if ( token instanceof MqttDeliveryToken) {
  	                token.internalTok.setNotified(true);
  	            }
  			}
@@ -398,7 +398,7 @@ public class CommsCallback implements Runnable {
 
 		// @TRACE 713=call messageArrived key={0} topic={1}
 		log.fine(CLASS_NAME, methodName, "713", new Object[] {
-				new Integer(publishMessage.getMessageId()), destName });
+				Integer.valueOf(publishMessage.getMessageId()), destName });
 		deliverMessage(destName, publishMessage.getMessageId(),
 				publishMessage.getMessage());
 

@@ -95,7 +95,7 @@ public class MqttMessage {
 		if (payload == null) {
 			throw new NullPointerException();
 		}
-		this.payload = payload;
+		this.payload = payload.clone();
 	}
 
 	/**

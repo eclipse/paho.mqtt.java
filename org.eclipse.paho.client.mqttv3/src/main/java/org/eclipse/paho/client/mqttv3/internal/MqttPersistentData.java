@@ -57,10 +57,10 @@ public class MqttPersistentData implements MqttPersistable {
 			int    pOffset,
 			int    pLength) {
 		this.key     = key;
-		this.header  = header;
+		this.header  = header.clone();
 		this.hOffset = hOffset;
 		this.hLength = hLength;
-		this.payload = payload;
+		this.payload = payload.clone();
 		this.pOffset = pOffset;
 		this.pLength = pLength;
 	}

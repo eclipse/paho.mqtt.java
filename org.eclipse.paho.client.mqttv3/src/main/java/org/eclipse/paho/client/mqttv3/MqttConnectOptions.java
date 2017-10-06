@@ -78,7 +78,7 @@ public class MqttConnectOptions {
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	private String[] serverURIs = null;
-	private int MqttVersion = MQTT_VERSION_DEFAULT;
+	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
 
 	/**
@@ -97,6 +97,7 @@ public class MqttConnectOptions {
 	 * More information about these values can be found in the setter methods.
 	 */
 	public MqttConnectOptions() {
+		// Initialise Base MqttConnectOptions Object
 	}
 
 	/**
@@ -112,7 +113,7 @@ public class MqttConnectOptions {
 	 * @param password A Char Array of the password
 	 */
 	public void setPassword(char[] password) {
-		this.password = password;
+		this.password = password.clone();
 	}
 
 	/**
@@ -213,7 +214,7 @@ public class MqttConnectOptions {
 	 * @return the MQTT version.
 	 */
 	public int getMqttVersion() {
-		return MqttVersion;
+		return mqttVersion;
 	}
 
 	/**
@@ -515,7 +516,7 @@ public class MqttConnectOptions {
 		for (int i = 0; i < array.length; i++) {
 			validateURI(array[i]);
 		}
-		this.serverURIs = array;
+		this.serverURIs = array.clone();
 	}
 
 	/**
@@ -563,16 +564,16 @@ public class MqttConnectOptions {
 	 * Version 3.1.1 or 3.1 can be selected specifically, with no fall back,
 	 * by using the MQTT_VERSION_3_1_1 or MQTT_VERSION_3_1 options respectively.
 	 *
-	 * @param MqttVersion the version of the MQTT protocol.
+	 * @param mqttVersion the version of the MQTT protocol.
 	 * @throws IllegalArgumentException If the MqttVersion supplied is invalid
 	 */
-	public void setMqttVersion(int MqttVersion)throws IllegalArgumentException {
-		if (MqttVersion != MQTT_VERSION_DEFAULT && 
-			MqttVersion != MQTT_VERSION_3_1 && 
-			MqttVersion != MQTT_VERSION_3_1_1) {
+	public void setMqttVersion(int mqttVersion)throws IllegalArgumentException {
+		if (mqttVersion != MQTT_VERSION_DEFAULT && 
+			mqttVersion != MQTT_VERSION_3_1 && 
+			mqttVersion != MQTT_VERSION_3_1_1) {
 			throw new IllegalArgumentException();
 		}
-		this.MqttVersion = MqttVersion;
+		this.mqttVersion = mqttVersion;
 	}
 
 	/**
@@ -608,10 +609,10 @@ public class MqttConnectOptions {
 	public Properties getDebug() {
 		final String strNull="null";
 		Properties p = new Properties();
-		p.put("MqttVersion", new Integer(getMqttVersion()));
+		p.put("MqttVersion", Integer.valueOf(getMqttVersion()));
 		p.put("CleanSession", Boolean.valueOf(isCleanSession()));
-		p.put("ConTimeout", new Integer(getConnectionTimeout()));
-		p.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
+		p.put("ConTimeout", Integer.valueOf(getConnectionTimeout()));
+		p.put("KeepAliveInterval", Integer.valueOf(getKeepAliveInterval()));
 		p.put("UserName", (getUserName() == null) ? strNull : getUserName());
 		p.put("WillDestination", (getWillDestination() == null) ? strNull : getWillDestination());
 		if (getSocketFactory()==null) {

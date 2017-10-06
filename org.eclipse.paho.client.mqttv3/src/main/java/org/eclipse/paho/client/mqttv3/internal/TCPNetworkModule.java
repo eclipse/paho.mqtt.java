@@ -69,10 +69,8 @@ public class TCPNetworkModule implements NetworkModule {
 	public void start() throws IOException, MqttException {
 		final String methodName = "start";
 		try {
-//			InetAddress localAddr = InetAddress.getLocalHost();
-//			socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
-			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
+			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, Integer.valueOf(port), Long.valueOf(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
 			if (factory instanceof SSLSocketFactory) {
 				// SNI support
@@ -83,10 +81,6 @@ public class TCPNetworkModule implements NetworkModule {
 				socket = factory.createSocket();
 				socket.connect(sockaddr, conTimeout*1000);
 			}
-		
-			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm.
-			// This should not be required.
-//			socket.setTcpNoDelay(true);	// TCP_NODELAY on, which means we do not use Nagle's algorithm
 		}
 		catch (ConnectException ex) {
 			//@TRACE 250=Failed to create TCP socket

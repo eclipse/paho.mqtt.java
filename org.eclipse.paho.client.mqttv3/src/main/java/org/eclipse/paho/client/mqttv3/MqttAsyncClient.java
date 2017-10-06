@@ -750,7 +750,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		// userName={3} password={4} will={5} userContext={6} callback={7}
 		log.fine(CLASS_NAME, methodName, "103",
 				new Object[] { Boolean.valueOf(options.isCleanSession()), new Integer(options.getConnectionTimeout()),
-						new Integer(options.getKeepAliveInterval()), options.getUserName(),
+						Integer.valueOf(options.getKeepAliveInterval()), options.getUserName(),
 						((null == options.getPassword()) ? "[null]" : "[notnull]"),
 						((null == options.getWillMessage()) ? "[null]" : "[notnull]"), userContext, callback });
 		comms.setNetworkModules(createNetworkModules(serverURI, options));
@@ -815,7 +815,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			throws MqttException {
 		final String methodName = "disconnect";
 		// @TRACE 104=> quiesceTimeout={0} userContext={1} callback={2}
-		log.fine(CLASS_NAME, methodName, "104", new Object[] { new Long(quiesceTimeout), userContext, callback });
+		log.fine(CLASS_NAME, methodName, "104", new Object[] { Long.valueOf(quiesceTimeout), userContext, callback });
 
 		MqttToken token = new MqttToken(getClientId());
 		token.setActionCallback(callback);
@@ -1427,7 +1427,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	private void startReconnectCycle() {
 		String methodName = "startReconnectCycle";
 		// @Trace 503=Start reconnect timer for client: {0}, delay: {1}
-		log.fine(CLASS_NAME, methodName, "503", new Object[] { this.clientId, new Long(reconnectDelay) });
+		log.fine(CLASS_NAME, methodName, "503", new Object[] { this.clientId, Long.valueOf(reconnectDelay) });
 		reconnectTimer = new Timer("MQTT Reconnect: " + clientId);
 		reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
 	}
