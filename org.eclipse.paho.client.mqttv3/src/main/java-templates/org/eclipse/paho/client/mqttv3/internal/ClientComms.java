@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2017 IBM Corp and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@
  *    Ian Craggs - ack control (bug 472172)
  *    James Sutton - checkForActivity Token (bug 473928)
  *    James Sutton - Automatic Reconnect & Offline Buffering.
+ *    Jens Reimann - Fix hang on disconnect (issue #330)
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -152,6 +153,22 @@ public class ClientComms {
 			log.fine(CLASS_NAME, methodName, "213", new Object[]{message.getKey(), message, token});
 
 			throw new MqttException(MqttException.REASON_CODE_TOKEN_INUSE);
+		}
+		
+		if ( message instanceof MqttDisconnect && token != null ) {
+			// we have a token
+			boolean earlyRelease = false;
+			synchronized ( conLock ) {
+				if ( isDisconnecting() || isDisconnected() ){
+					earlyRelease = true;	
+				}
+			}
+			if ( earlyRelease ) {
+				if ( callback != null ) {
+					callback.asyncOperationComplete(token);
+				}
+				return;
+			}
 		}
 
 		try {
