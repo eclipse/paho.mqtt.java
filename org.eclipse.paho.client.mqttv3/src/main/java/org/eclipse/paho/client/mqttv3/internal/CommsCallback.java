@@ -262,7 +262,7 @@ public class CommsCallback implements Runnable {
 			
 			// Set notified so we don't tell the user again about this action.
  			if ( token.isComplete() ){
- 			   if ( token instanceof MqttDeliveryToken || token.getActionCallback() instanceof IMqttActionListener ) {
+ 			   if ( token instanceof MqttDeliveryToken) {
  	                token.internalTok.setNotified(true);
  	            }
  			}

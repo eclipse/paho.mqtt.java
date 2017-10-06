@@ -69,20 +69,20 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	 */
 	public void setEnabledCiphers(String[] enabledCiphers) {
 		final String methodName = "setEnabledCiphers";
-		this.enabledCiphers = enabledCiphers;
-		if ((socket != null) && (enabledCiphers != null)) {
+		this.enabledCiphers = enabledCiphers.clone();
+		if ((socket != null) && (this.enabledCiphers != null)) {
 			if (log.isLoggable(Logger.FINE)) {
 				String ciphers = "";
-				for (int i=0;i<enabledCiphers.length;i++) {
+				for (int i=0;i<this.enabledCiphers.length;i++) {
 					if (i>0) {
 						ciphers+=",";
 					}
-					ciphers+=enabledCiphers[i];
+					ciphers+=this.enabledCiphers[i];
 				}
 				//@TRACE 260=setEnabledCiphers ciphers={0}
 				log.fine(CLASS_NAME,methodName,"260",new Object[]{ciphers});
 			}
-			((SSLSocket) socket).setEnabledCipherSuites(enabledCiphers);
+			((SSLSocket) socket).setEnabledCipherSuites(this.enabledCiphers);
 		}
 	}
 	

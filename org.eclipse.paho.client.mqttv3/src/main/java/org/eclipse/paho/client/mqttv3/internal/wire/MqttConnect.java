@@ -39,7 +39,7 @@ public class MqttConnect extends MqttWireMessage {
 	private char[] password;
 	private int keepAliveInterval;
 	private String willDestination;
-	private int MqttVersion;
+	private int mqttVersion;
 	
 	/**
 	 * Constructor for an on the wire MQTT connect message
@@ -62,16 +62,16 @@ public class MqttConnect extends MqttWireMessage {
 		dis.close();
 	}
 
-	public MqttConnect(String clientId, int MqttVersion, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
+	public MqttConnect(String clientId, int mqttVersion, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.cleanSession = cleanSession;
 		this.keepAliveInterval = keepAliveInterval;
 		this.userName = userName;
-		this.password = password;
+		this.password = password.clone();
 		this.willMessage = willMessage;
 		this.willDestination = willDestination;
-		this.MqttVersion = MqttVersion;
+		this.mqttVersion = mqttVersion;
 	}
 
 	public String toString() {
@@ -93,13 +93,13 @@ public class MqttConnect extends MqttWireMessage {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			
-			if (MqttVersion == 3) {
+			if (mqttVersion == 3) {
 				encodeUTF8(dos,"MQIsdp");			
 			}
-			else if (MqttVersion == 4) {
+			else if (mqttVersion == 4) {
 				encodeUTF8(dos,"MQTT");			
 			}
-			dos.write(MqttVersion);
+			dos.write(mqttVersion);
 
 			byte connectFlags = 0;
 			

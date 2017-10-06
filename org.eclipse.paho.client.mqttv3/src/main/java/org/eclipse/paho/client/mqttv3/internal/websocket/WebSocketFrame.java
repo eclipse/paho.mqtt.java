@@ -55,7 +55,7 @@ public class WebSocketFrame {
 	public WebSocketFrame(byte opcode, boolean fin, byte[] payload){
 		this.opcode = opcode;
 		this.fin = fin;
-		this.payload = payload;
+		this.payload = payload.clone();
 	}
 	
 	

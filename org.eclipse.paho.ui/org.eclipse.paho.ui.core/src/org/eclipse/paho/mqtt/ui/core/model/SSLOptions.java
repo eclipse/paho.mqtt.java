@@ -50,7 +50,7 @@ public final class SSLOptions extends Bindable {
 	}
 
 	public void setKeyStorePassword(char[] keyStorePassword) {
-		this.keyStorePassword = keyStorePassword;
+		this.keyStorePassword = keyStorePassword.clone();
 	}
 
 	public String getTrustStoreLocation() {
@@ -66,7 +66,7 @@ public final class SSLOptions extends Bindable {
 	}
 
 	public void setTrustStorePassword(char[] trustStorePassword) {
-		this.trustStorePassword = trustStorePassword;
+		this.trustStorePassword = trustStorePassword.clone();
 	}
 
 	/**

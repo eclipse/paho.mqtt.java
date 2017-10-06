@@ -39,7 +39,7 @@ public class Login extends Bindable {
 	}
 
 	public void setPassword(char[] password) {
-		this.password = password;
+		this.password = password.clone();
 	}
 
 	@Override

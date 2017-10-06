@@ -113,7 +113,7 @@ public class MqttConnectOptions {
 	 * @param password A Char Array of the password
 	 */
 	public void setPassword(char[] password) {
-		this.password = password;
+		this.password = password.clone();
 	}
 
 	/**
@@ -516,7 +516,7 @@ public class MqttConnectOptions {
 		for (int i = 0; i < array.length; i++) {
 			validateURI(array[i]);
 		}
-		this.serverURIs = array;
+		this.serverURIs = array.clone();
 	}
 
 	/**

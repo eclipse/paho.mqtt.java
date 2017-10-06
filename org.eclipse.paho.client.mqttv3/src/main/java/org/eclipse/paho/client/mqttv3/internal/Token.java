@@ -320,7 +320,7 @@ public class Token {
 	}
 	
 	public void setTopics(String[] topics) {
-		this.topics = topics;
+		this.topics = topics.clone();
 	}
 	
 	public Object getUserContext() {

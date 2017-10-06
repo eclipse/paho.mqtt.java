@@ -68,8 +68,8 @@ public class MqttSubscribe extends MqttWireMessage {
 	 */
 	public MqttSubscribe(String[] names, int[] qos) {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
-		this.names = names;
-		this.qos = qos;
+		this.names = names.clone();
+		this.qos = qos.clone();
 		
 		if (names.length != qos.length) {
 		throw new IllegalArgumentException();

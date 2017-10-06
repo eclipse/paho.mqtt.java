@@ -298,7 +298,7 @@ public class SubPanel implements ActionListener {
      	
      	// Store the data content in a buffer incase in needs to be written to a file
      	// If the data is binary reading it back from the receivedData field is not good enough
-     	fileContent = data;
+     	fileContent = data.clone();
      	
      	
      	// If the display was originally in hex then switch back to hex

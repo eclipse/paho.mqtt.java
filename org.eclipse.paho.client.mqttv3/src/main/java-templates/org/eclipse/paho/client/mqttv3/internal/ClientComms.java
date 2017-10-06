@@ -208,7 +208,6 @@ public class ClientComms {
 	 * @throws MqttException if an error occurs sending the message
 	 */
 	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException {
-		final String methodName = "removeMessage";
 		return this.clientState.removeMessage(token);
 	}
 
@@ -427,7 +426,7 @@ public class ClientComms {
 		// it now. This is done at the end to allow a new connect
 		// to be processed and now throw a currently disconnecting error.
 		// any outstanding tokens and unblock any waiters
-		if (endToken != null & callback != null) {
+		if (endToken != null && callback != null) {
 			callback.asyncOperationComplete(endToken);
 		}
 
@@ -628,7 +627,7 @@ public class ClientComms {
 		return networkModules;
 	}
 	public void setNetworkModules(NetworkModule[] networkModules) {
-		this.networkModules = networkModules;
+		this.networkModules = networkModules.clone();
 	}
 	public MqttDeliveryToken[] getPendingDeliveryTokens() {
 		return tokenStore.getOutstandingDelTokens();

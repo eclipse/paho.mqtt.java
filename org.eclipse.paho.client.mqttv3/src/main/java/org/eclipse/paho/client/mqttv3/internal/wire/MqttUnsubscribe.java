@@ -37,7 +37,7 @@ public class MqttUnsubscribe extends MqttWireMessage {
 	 */
 	public MqttUnsubscribe(String[] names) {
 		super(MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE);
-		this.names = names;
+		this.names = names.clone();
 	}
 	
 	/**
