@@ -648,7 +648,7 @@ public class ClientState {
 	
 	/**
 	 * This removes the MqttSend message from the outbound queue and persistence.
-	 * @param message The {@link MqttPublish} message to remove
+	 * @param token The {@link IMqttDeliveryToken} for the message to remove
 	 * @return if the message is removed, then true, otherwise false
 	 * @throws MqttException if an exception occurs whilst removing the message
 	 */

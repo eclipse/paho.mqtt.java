@@ -203,7 +203,7 @@ public class ClientComms {
 
 	/**
 	 * Removes the message corresponding to the token from the outbound queue and persistence.
-	 * @param token The {@link IMqttDeliveryMqttToken} to remove
+	 * @param token The {@link IMqttDeliveryToken} to remove
 	 * @return if the message is removed, then true, otherwise false
 	 * @throws MqttException if an error occurs sending the message
 	 */
@@ -217,6 +217,7 @@ public class ClientComms {
 	 *
 	 * Call each main class and let it tidy up e.g. releasing the token
 	 * store which normally survives a disconnect.
+	 * @param force - whether to force the connection to close.
 	 * @throws MqttException  if not disconnected
 	 */
 	public void close(boolean force) throws MqttException {
