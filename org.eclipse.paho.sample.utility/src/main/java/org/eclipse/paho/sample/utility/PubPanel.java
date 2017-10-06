@@ -58,7 +58,7 @@ import javax.swing.event.DocumentListener;
 public class PubPanel implements ActionListener, DocumentListener {
 	private JPanel pubPanel;
 	private JComboBox topic;
-	private Integer[]  qos = { new Integer(0), new Integer(1), new Integer(2) };
+	private Integer[]  qos = { Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(2) };
 	private JComboBox qosList;
 	private JButton pubButton;
     private JButton fileButton;

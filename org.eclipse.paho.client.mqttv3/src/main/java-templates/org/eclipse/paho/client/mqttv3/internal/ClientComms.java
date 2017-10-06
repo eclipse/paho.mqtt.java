@@ -294,7 +294,7 @@ public class ClientComms {
 			}
 			else {
 				// @TRACE 207=connect failed: not disconnected {0}
-				log.fine(CLASS_NAME,methodName,"207", new Object[] {new Byte(conState)});
+				log.fine(CLASS_NAME,methodName,"207", new Object[] {Byte.valueOf(conState)});
 				if (isClosed() || closePending) {
 					throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
 				} else if (isConnecting()) {
@@ -323,7 +323,7 @@ public class ClientComms {
 		}
 
 		// @TRACE 204=connect failed: rc={0}
-		log.fine(CLASS_NAME,methodName,"204", new Object[]{new Integer(rc)});
+		log.fine(CLASS_NAME,methodName,"204", new Object[]{Integer.valueOf(rc)});
 		throw mex;
 	}
 
@@ -660,7 +660,7 @@ public class ClientComms {
 
 	public Properties getDebug() {
 		Properties props = new Properties();
-		props.put("conState", new Integer(conState));
+		props.put("conState", Integer.valueOf(conState));
 		props.put("serverURI", getClient().getServerURI());
 		props.put("callback", callback);
 		props.put("stoppingComms", new Boolean(stoppingComms));

@@ -84,7 +84,7 @@ public class ScheduledExecutorPingSender implements MqttPingSender {
 			String originalThreadName = Thread.currentThread().getName();
 			Thread.currentThread().setName("MQTT Ping: " + clientid);
 			//@Trace 660=Check schedule at {0}
-			log.fine(CLASS_NAME, methodName, "660", new Object[]{ new Long(System.currentTimeMillis()) });
+			log.fine(CLASS_NAME, methodName, "660", new Object[]{ Long.valueOf(System.currentTimeMillis()) });
 			comms.checkForActivity();
 			Thread.currentThread().setName(originalThreadName);
 		}
