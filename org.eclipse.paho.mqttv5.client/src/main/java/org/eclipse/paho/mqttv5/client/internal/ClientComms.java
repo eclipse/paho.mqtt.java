@@ -251,8 +251,10 @@ public class ClientComms {
 	 * Call each main class and let it tidy up e.g. releasing the token store which
 	 * normally survives a disconnect.
 	 * 
-	 * @param force force disconnection
-	 * @throws MqttException if not disconnected
+	 * @param force
+	 *            force disconnection
+	 * @throws MqttException
+	 *             if not disconnected
 	 */
 	public void close(boolean force) throws MqttException {
 		final String methodName = "close";
@@ -430,10 +432,13 @@ public class ClientComms {
 	 * @param reason
 	 *            the {@link MqttException} thrown requiring the connection to be
 	 *            shut down.
+	 * @param message
+	 *            the {@link MqttDisconnect} that triggered the connection to be
+	 *            shut down.
 	 */
-	public void shutdownConnection(MqttToken token, MqttException reason) {
+	public void shutdownConnection(MqttToken token, MqttException reason, MqttDisconnect message) {
 		final String methodName = "shutdownConnection";
-		
+
 		boolean wasConnected;
 		MqttToken endToken = null; // Token to notify after disconnect completes
 
@@ -532,10 +537,9 @@ public class ClientComms {
 		if (endToken != null & callback != null) {
 			callback.asyncOperationComplete(endToken);
 		}
-
 		if (wasConnected && callback != null) {
-			// Let the user know client has disconnected either normally or abnormally
-			callback.connectionLost(reason);
+				// Let the user know client has disconnected either normally or abnormally
+				callback.connectionLost(reason, message);
 		}
 
 		// While disconnecting, close may have been requested - try it now
@@ -622,8 +626,10 @@ public class ClientComms {
 	}
 
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties) throws MqttException {
-		disconnectForcibly(quiesceTimeout, disconnectTimeout, true, reasonCode, sessionExpiryInterval, reasonString, userDefinedProperties);
+			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
+			throws MqttException {
+		disconnectForcibly(quiesceTimeout, disconnectTimeout, true, reasonCode, sessionExpiryInterval, reasonString,
+				userDefinedProperties);
 	}
 
 	/**
@@ -649,9 +655,9 @@ public class ClientComms {
 	 * @throws MqttException
 	 *             if an error occurs whilst disconnecting
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket, int reasonCode,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
-			throws MqttException {
+	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket,
+			int reasonCode, Integer sessionExpiryInterval, String reasonString,
+			ArrayList<UserProperty> userDefinedProperties) throws MqttException {
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
 			clientState.quiesce(quiesceTimeout);
@@ -670,7 +676,7 @@ public class ClientComms {
 			// ignore, probably means we failed to send the disconnect packet.
 		} finally {
 			token.internalTok.markComplete(null, null);
-			shutdownConnection(token, null);
+			shutdownConnection(token, null, null);
 		}
 	}
 
@@ -852,7 +858,7 @@ public class ClientComms {
 			}
 
 			if (mqttEx != null) {
-				shutdownConnection(conToken, mqttEx);
+				shutdownConnection(conToken, mqttEx, null);
 			}
 		}
 	}
@@ -891,7 +897,7 @@ public class ClientComms {
 			} catch (MqttException ex) {
 			} finally {
 				token.internalTok.markComplete(null, null);
-				shutdownConnection(token, null);
+				shutdownConnection(token, null, null);
 			}
 		}
 	}
@@ -933,7 +939,7 @@ public class ClientComms {
 			mex = (MqttException) ex;
 		}
 
-		shutdownConnection(null, mex);
+		shutdownConnection(null, mex, null);
 	}
 
 	/**

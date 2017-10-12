@@ -48,7 +48,7 @@ public class MqttAuth extends MqttWireMessage {
 	 * @param info
 	 *            - Info Byte
 	 * @param data
-	 *            - The Data
+	 *            - The variable header and payload bytes.
 	 * @throws IOException
 	 *             - if an exception occurs when decoding an input stream
 	 * @throws MqttException

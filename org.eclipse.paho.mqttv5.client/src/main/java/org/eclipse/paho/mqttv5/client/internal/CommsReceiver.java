@@ -160,11 +160,9 @@ public class CommsReceiver implements Runnable {
 						// An ack should always have a token assoicated with it.
 						throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
 					}
-				} else if (message instanceof MqttDisconnect) {
+				} else if (message != null && message instanceof MqttDisconnect) {
 					// This is a Disconnect Message
-					if (message != null) {
-						clientState.notifyReceivedDisconnect((MqttDisconnect) message);
-					}
+						clientComms.shutdownConnection(null, new MqttException(MqttClientException.REASON_CODE_SERVER_DISCONNECTED), (MqttDisconnect) message);
 				} else {
 					if (message != null) {
 						// A new message has arrived
@@ -176,7 +174,7 @@ public class CommsReceiver implements Runnable {
 				log.fine(CLASS_NAME, methodName, "856", null, ex);
 				running = false;
 				// Token maybe null but that is handled in shutdown
-				clientComms.shutdownConnection(token, ex);
+				clientComms.shutdownConnection(token, ex, null);
 			} catch (IOException ioe) {
 				// @TRACE 853=Stopping due to IOException
 				log.fine(CLASS_NAME, methodName, "853");
@@ -187,7 +185,7 @@ public class CommsReceiver implements Runnable {
 				// only shutdown the connection if we're not already shutting down.
 				if (!clientComms.isDisconnecting()) {
 					clientComms.shutdownConnection(token,
-							new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ioe));
+							new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ioe), null);
 				}
 			} finally {
 				receiving = false;

@@ -124,6 +124,8 @@ public class MqttClientException {
 	 * message manually.
 	 */
 	public static final short REASON_CODE_DISCONNECTED_BUFFER_FULL = 32203;
+	
+	public static final short REASON_CODE_SERVER_DISCONNECTED = 32204;
 
 	// CONNACK return codes
 	/** The protocol version requested is not supported by the server. */

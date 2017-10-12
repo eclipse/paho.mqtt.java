@@ -44,7 +44,6 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.packet.MqttAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
-import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingReq;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingResp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
@@ -1178,19 +1177,6 @@ public class ClientState implements MqttState {
 		}
 	}
 
-	/**
-	 * Called by the CommsReceiver when a disconnect message has been received.
-	 * 
-	 * @param disconnectMessage
-	 *            The {@link MqttDisconnect} that has been received
-	 */
-	protected void notifyReceivedDisconnect(MqttDisconnect disconnectMessage) {
-		final String methodName = "notifyReceivedDisconnect";
-		// @TRACE 663=Disconnect message received from Server. Details={0}
-		log.fine(CLASS_NAME, methodName, "663", new Object[] { disconnectMessage.toString() });
-		System.err.println("Disconnect Message Received: " + disconnectMessage.toString());
-		callback.disconnectReceived(disconnectMessage);
-	}
 
 	/**
 	 * Called when waiters and callbacks have processed the message. For messages
