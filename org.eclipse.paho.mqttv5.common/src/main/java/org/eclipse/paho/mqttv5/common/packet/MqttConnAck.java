@@ -23,6 +23,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -57,7 +60,7 @@ public class MqttConnAck extends MqttAck {
 	private String serverReference;
 	private String authMethod;
 	private byte[] authData;
-	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+	private List<UserProperty> userDefinedProperties = new ArrayList<>();
 	private boolean wildcardSubscriptionsAvailable = false;
 	private boolean subscriptionIdentifiersAvailable = false;
 	private boolean sharedSubscriptionAvailable = false;
@@ -65,7 +68,7 @@ public class MqttConnAck extends MqttAck {
 	private int returnCode;
 	private boolean sessionPresent;
 
-	public MqttConnAck(byte info, byte[] variableHeader) throws IOException, MqttException {
+	public MqttConnAck(byte[] variableHeader) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
 		ByteArrayInputStream bais = new ByteArrayInputStream(variableHeader);
 		DataInputStream dis = new DataInputStream(bais);
@@ -160,7 +163,7 @@ public class MqttConnAck extends MqttAck {
 			}
 
 			// If present, encode the User Defined Name-Value Pairs (3.2.2.3.9)
-			if(userDefinedProperties.size() != 0){
+			if(!userDefinedProperties.isEmpty()){
 				for(UserProperty property : userDefinedProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
@@ -406,11 +409,11 @@ public class MqttConnAck extends MqttAck {
 		this.authData = authData;
 	}
 
-	public ArrayList<UserProperty> getUserDefinedProperties() {
+	public List<UserProperty> getUserDefinedProperties() {
 		return userDefinedProperties;
 	}
 
-	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
 		this.userDefinedProperties = userDefinedProperties;
 	}
 

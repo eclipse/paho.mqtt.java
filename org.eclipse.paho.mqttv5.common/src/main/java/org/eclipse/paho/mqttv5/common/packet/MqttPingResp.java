@@ -18,21 +18,17 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
-public class MqttPingResp  extends MqttAck {
-	
-public static final String KEY = "Ping";
-	
-	public MqttPingResp(){
+public class MqttPingResp extends MqttAck {
+
+	public static final String KEY = "Ping";
+
+	public MqttPingResp() {
 		super(MqttWireMessage.MESSAGE_TYPE_PINGRESP);
 	}
-	
-	public MqttPingResp(byte info, byte[] variableHeader) {
-		super(MqttWireMessage.MESSAGE_TYPE_PINGRESP);
-	}
-	
+
 	/**
-	 * Returns <code>false</code> as message IDs are not required for MQTT
-	 * PINGREQ messages.
+	 * Returns <code>false</code> as message IDs are not required for MQTT PINGREQ
+	 * messages.
 	 */
 	@Override
 	public boolean isMessageIdRequired() {
@@ -43,12 +39,12 @@ public static final String KEY = "Ping";
 	protected byte[] getVariableHeader() throws MqttException {
 		return new byte[0];
 	}
-	
+
 	@Override
 	protected byte getMessageInfo() {
 		return 0;
 	}
-	
+
 	@Override
 	public String getKey() {
 		return KEY;

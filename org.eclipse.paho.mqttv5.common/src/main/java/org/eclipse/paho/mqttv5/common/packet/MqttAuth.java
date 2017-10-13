@@ -22,6 +22,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -40,7 +41,7 @@ public class MqttAuth extends MqttWireMessage {
 	private String authMethod;
 	private byte[] authData;
 	private String reasonString;
-	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+	private List<UserProperty> userDefinedProperties = new ArrayList<>();
 
 	/**
 	 * Constructs an Auth message from a raw byte array
@@ -54,7 +55,7 @@ public class MqttAuth extends MqttWireMessage {
 	 * @throws MqttException
 	 *             - If an exception occurs decoding this packet
 	 */
-	public MqttAuth(byte info, byte[] data) throws IOException, MqttException {
+	public MqttAuth(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream inputStream = new DataInputStream(bais);
@@ -123,7 +124,7 @@ public class MqttAuth extends MqttWireMessage {
 			}
 
 			// If Present, encode the User Properties (3.15.2.2.4)
-			if (userDefinedProperties.size() != 0) {
+			if (!userDefinedProperties.isEmpty()) {
 				for (UserProperty property : userDefinedProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
@@ -202,11 +203,11 @@ public class MqttAuth extends MqttWireMessage {
 		this.reasonString = reasonString;
 	}
 
-	public ArrayList<UserProperty> getUserDefinedProperties() {
+	public List<UserProperty> getUserDefinedProperties() {
 		return userDefinedProperties;
 	}
 
-	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
 		this.userDefinedProperties = userDefinedProperties;
 	}
 

@@ -23,6 +23,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -51,7 +52,7 @@ public class MqttConnect extends MqttWireMessage {
 	private Boolean requestResponseInfo;
 	private Boolean requestProblemInfo;
 
-	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+	private List<UserProperty> userDefinedProperties = new ArrayList<>();
 	private String authMethod;
 	private byte[] authData;
 
@@ -249,7 +250,7 @@ public class MqttConnect extends MqttWireMessage {
 			}
 
 			// If present, encode the User Defined Name-Value Pairs (3.1.2.11.9)
-			if (userDefinedProperties.size() != 0) {
+			if (!userDefinedProperties.isEmpty()) {
 				for (UserProperty property : userDefinedProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
@@ -401,7 +402,7 @@ public class MqttConnect extends MqttWireMessage {
 		this.requestProblemInfo = requestProblemInfo;
 	}
 
-	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
 		this.userDefinedProperties = userDefinedProperties;
 	}
 
@@ -471,7 +472,7 @@ public class MqttConnect extends MqttWireMessage {
 		return requestProblemInfo;
 	}
 
-	public ArrayList<UserProperty> getUserDefinedProperties() {
+	public List<UserProperty> getUserDefinedProperties() {
 		return userDefinedProperties;
 	}
 

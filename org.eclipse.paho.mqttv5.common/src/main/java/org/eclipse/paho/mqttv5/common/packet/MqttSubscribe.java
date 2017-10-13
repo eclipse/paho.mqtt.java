@@ -45,7 +45,7 @@ public class MqttSubscribe extends MqttWireMessage {
 	 * @throws MqttException
 	 *             - If an exception occurs decoding this packet
 	 */
-	public MqttSubscribe(byte info, byte[] data) throws IOException, MqttException {
+	public MqttSubscribe(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);

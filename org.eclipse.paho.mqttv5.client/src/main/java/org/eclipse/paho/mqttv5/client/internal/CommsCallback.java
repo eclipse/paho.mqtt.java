@@ -18,6 +18,7 @@
  */
 package org.eclipse.paho.mqttv5.client.internal;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -42,6 +43,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Bridge between Receiver and the external API. This class gets called by
@@ -292,7 +294,7 @@ public class CommsCallback implements Runnable {
 				// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
 				log.fine(CLASS_NAME, methodName, "722", new Object[] { message.toString() });
 				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(message.getReturnCode(),
-						message.getReasonString(), message.getUserDefinedProperties(),
+						message.getReasonString(), (ArrayList<UserProperty>) message.getUserDefinedProperties(),
 						message.getServerReference());
 				mqttCallback.disconnected(disconnectResponse);
 			} else if (mqttCallback != null && cause != null) {
