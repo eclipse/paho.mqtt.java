@@ -3,11 +3,11 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -56,7 +56,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 
 	/**
 	 * Constructs a new MqttPublish message
-	 * 
+	 *
 	 * @param topic
 	 *            - The Destination Topic.
 	 * @param message
@@ -80,7 +80,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 
 	/**
 	 * Constructs a new MqttPublish message from a byte array
-	 * 
+	 *
 	 * @param info
 	 *            - Info Byte
 	 * @param data
@@ -118,7 +118,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	/**
 	 * Parses the Variable Header for Identifier Value fields and populates the
 	 * relevant fields in this MqttPublish message.
-	 * 
+	 *
 	 * @param dis
 	 * @throws IOException
 	 * @throws MqttException
@@ -207,14 +207,14 @@ public class MqttPublish extends MqttPersistableWireMessage{
 					encodeUTF8(outputStream, property.getValue());
 				}
 			}
-			
+
 			// If Present, encode the Subscription Identifier (3.3.2.3.8)
 			if (subscriptionIdentifier != null){
 				outputStream.write(MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER);
 				outputStream.write(encodeVariableByteInteger(subscriptionIdentifier));
 			}
-			
-		
+
+
 			// If Present, encode the Content Type (3.3.2.3.9)
 			if (contentType != null) {
 				outputStream.write(MqttPropertyIdentifiers.CONTENT_TYPE_IDENTIFIER);
@@ -233,7 +233,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			
+
 			// If we are using a Topic Alias, then the topic should be empty
 			if(topicName != null) {
 				encodeUTF8(dos, topicName);
@@ -241,7 +241,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 				encodeUTF8(dos, "");
 			}
 
-			
+
 			if (this.qos > 0) {
 				dos.writeShort(msgId);
 			}
@@ -344,7 +344,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		message.setContentType(contentType);
 		return message;
 	}
-	
+
 	public void setMessage(MqttMessage message) {
 		this.payload = message.getPayload();
 		this.qos = message.getQos();
@@ -362,7 +362,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	public String getTopicName() {
 		return topicName;
 	}
-	
+
 	public void setTopicName(String topicName) {
 		this.topicName = topicName;
 	}
