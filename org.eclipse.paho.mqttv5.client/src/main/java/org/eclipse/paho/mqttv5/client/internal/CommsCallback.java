@@ -18,6 +18,7 @@
  */
 package org.eclipse.paho.mqttv5.client.internal;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -42,6 +43,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Bridge between Receiver and the external API. This class gets called by
@@ -220,7 +222,7 @@ public class CommsCallback implements Runnable {
 				// @TRACE 714=callback threw exception
 				log.fine(CLASS_NAME, methodName, "714", null, ex);
 				running = false;
-				clientComms.shutdownConnection(null, new MqttException(ex));
+				clientComms.shutdownConnection(null, new MqttException(ex), null);
 			} finally {
 				runningSemaphore.release();
 				synchronized (spaceAvailable) {
@@ -279,13 +281,23 @@ public class CommsCallback implements Runnable {
 	 * 
 	 * @param cause
 	 *            the reason behind the loss of connection.
+	 * @param message
+	 *            The {@link MqttDisconnect} packet sent by the server
 	 */
-	public void connectionLost(MqttException cause) {
+	public void connectionLost(MqttException cause, MqttDisconnect message) {
 		final String methodName = "connectionLost";
 		// If there was a problem and a client callback has been set inform
 		// the connection lost listener of the problem.
 		try {
-			if (mqttCallback != null && cause != null) {
+			if(mqttCallback != null && message != null) {
+
+				// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
+				log.fine(CLASS_NAME, methodName, "722", new Object[] { message.toString() });
+				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(message.getReturnCode(),
+						message.getReasonString(), (ArrayList<UserProperty>) message.getUserDefinedProperties(),
+						message.getServerReference());
+				mqttCallback.disconnected(disconnectResponse);
+			} else if (mqttCallback != null && cause != null) {
 				// @TRACE 708=call connectionLost
 				log.fine(CLASS_NAME, methodName, "708", new Object[] { cause });
 				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(cause);
@@ -304,24 +316,6 @@ public class CommsCallback implements Runnable {
 		}
 	}
 
-	/**
-	 * This method is called when the server sends a disconnect packet to the
-	 * client. Once this packet is received, the client will automatically close
-	 * down the connection as if the connection was lost.
-	 * 
-	 * @param disconnectPacket
-	 *            The {@link MqttDisconnect} packet sent by the server.
-	 */
-	public void disconnectReceived(MqttDisconnect disconnectPacket) {
-		final String methodName = "disconnectReceived";
-		// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
-
-		log.fine(CLASS_NAME, methodName, "722", new Object[] { disconnectPacket.toString() });
-		MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(disconnectPacket.getReturnCode(),
-				disconnectPacket.getReasonString(), disconnectPacket.getUserDefinedProperties(),
-				disconnectPacket.getServerReference());
-		mqttCallback.disconnected(disconnectResponse);
-	}
 
 	/**
 	 * An action has completed - if a completion listener has been set on the token
@@ -481,7 +475,7 @@ public class CommsCallback implements Runnable {
 				log.fine(CLASS_NAME, methodName, "719", null, ex);
 
 				// Shutdown likely already in progress but no harm to confirm
-				clientComms.shutdownConnection(null, new MqttException(ex));
+				clientComms.shutdownConnection(null, new MqttException(ex), null);
 			}
 
 		}

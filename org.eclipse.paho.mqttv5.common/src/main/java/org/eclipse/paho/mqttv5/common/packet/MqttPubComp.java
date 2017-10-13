@@ -22,6 +22,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
@@ -34,15 +35,15 @@ public class MqttPubComp extends MqttAck {
 	// Fields
 	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private String reasonString;
-	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+	private List<UserProperty> userDefinedProperties = new ArrayList<>();
 
-	public MqttPubComp(byte info, byte[] data) throws IOException, MqttException {
+	public MqttPubComp(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBCOMP);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream dis = new DataInputStream(counter);
 		msgId = dis.readUnsignedShort();
-		long remainder = data.length - counter.getCounter();
+		long remainder = (long) data.length - counter.getCounter();
 		if (remainder > 2) {
 			returnCode = dis.readUnsignedByte();
 			validateReturnCode(returnCode, validReturnCodes);
@@ -100,7 +101,7 @@ public class MqttPubComp extends MqttAck {
 			}
 
 			// If Present, encode the User Properties (3.7.2.2.3)
-			if (userDefinedProperties.size() != 0) {
+			if (!userDefinedProperties.isEmpty()) {
 				for (UserProperty property : userDefinedProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
@@ -156,11 +157,11 @@ public class MqttPubComp extends MqttAck {
 		this.reasonString = reasonString;
 	}
 
-	public ArrayList<UserProperty> getUserDefinedProperties() {
+	public List<UserProperty> getUserDefinedProperties() {
 		return userDefinedProperties;
 	}
 
-	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
 		this.userDefinedProperties = userDefinedProperties;
 	}
 }

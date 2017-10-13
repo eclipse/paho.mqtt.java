@@ -186,6 +186,6 @@ public class CommsSender implements Runnable {
 		}
 
 		running = false;
-		clientComms.shutdownConnection(null, mex);
+		clientComms.shutdownConnection(null, mex, null);
 	}
 }

@@ -35,7 +35,7 @@ public class MqttUnsubscribe extends MqttWireMessage{
 	private String[] topics;
 	private String reasonString;
 	
-	public  MqttUnsubscribe(byte info, byte[] data) throws IOException, MqttException {
+	public  MqttUnsubscribe(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);

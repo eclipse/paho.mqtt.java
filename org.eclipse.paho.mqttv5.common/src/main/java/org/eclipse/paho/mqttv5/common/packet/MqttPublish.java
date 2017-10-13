@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -45,7 +46,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	private Integer publicationExpiryInterval;
 	private Integer topicAlias;
 	private byte[] correlationData;
-	private ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+	private List<UserProperty> userDefinedProperties = new ArrayList<>();
 	private Integer subscriptionIdentifier;
 	private String contentType;
 	private String responseTopic;
@@ -188,7 +189,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 			}
 
 			// If Present, encode the User Defined Name-Value Pairs (3.3.2.9)
-			if (userDefinedProperties.size() != 0) {
+			if (!userDefinedProperties.isEmpty()) {
 				for (UserProperty property : userDefinedProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
@@ -261,6 +262,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		return message.getPayload();
 	}
 
+	@Override
 	public int getPayloadLength() {
 		if (message.getPayload() != null) {
 			return message.getPayload().length;
@@ -319,11 +321,11 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		this.correlationData = correlationData;
 	}
 
-	public ArrayList<UserProperty> getUserDefinedProperties() {
+	public List<UserProperty> getUserDefinedProperties() {
 		return userDefinedProperties;
 	}
 
-	public void setUserDefinedProperties(ArrayList<UserProperty> userDefinedProperties) {
+	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
 		this.userDefinedProperties = userDefinedProperties;
 	}
 

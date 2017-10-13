@@ -43,7 +43,6 @@ public class WebSocketHandshake {
 	private static final String HTTP_HEADER_UPGRADE_WEBSOCKET = "websocket";
 	private static final String EMPTY = "";
 	private static final String LINE_SEPARATOR = "\r\n";
-
 	private static final String HTTP_HEADER_CONNECTION = "connection";
 	private static final String HTTP_HEADER_CONNECTION_VALUE = "upgrade";
 	private static final String HTTP_HEADER_SEC_WEBSOCKET_PROTOCOL = "sec-websocket-protocol";
@@ -84,7 +83,7 @@ public class WebSocketHandshake {
 	 *            Base64 encoded key
 	 * @throws IOException
 	 */
-	private void sendHandshakeRequest(String key) throws IOException {
+	private void sendHandshakeRequest(String key) {
 		try {
 			String path = "/mqtt";
 			URI srvUri = new URI(uri);
@@ -130,7 +129,7 @@ public class WebSocketHandshake {
 	 */
 	private void receiveHandshakeResponse(String key) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(input));
-		ArrayList<String> responseLines = new ArrayList<String>();
+		ArrayList<String> responseLines = new ArrayList<>();
 		String line = in.readLine();
 		if (line == null) {
 			throw new IOException(
@@ -142,17 +141,17 @@ public class WebSocketHandshake {
 		}
 		Map<String, String> headerMap = getHeaders(responseLines);
 
-		String connectionHeader = (String) headerMap.get(HTTP_HEADER_CONNECTION);
+		String connectionHeader = headerMap.get(HTTP_HEADER_CONNECTION);
 		if (connectionHeader == null || connectionHeader.equalsIgnoreCase(HTTP_HEADER_CONNECTION_VALUE)) {
 			throw new IOException("WebSocket Response header: Incorrect connection header");
 		}
 
-		String upgradeHeader = (String) headerMap.get(HTTP_HEADER_UPGRADE);
+		String upgradeHeader = headerMap.get(HTTP_HEADER_UPGRADE);
 		if (upgradeHeader == null || !upgradeHeader.toLowerCase().contains(HTTP_HEADER_UPGRADE_WEBSOCKET)) {
 			throw new IOException("WebSocket Response header: Incorrect upgrade.");
 		}
 
-		String secWebsocketProtocolHeader = (String) headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_PROTOCOL);
+		String secWebsocketProtocolHeader = headerMap.get(HTTP_HEADER_SEC_WEBSOCKET_PROTOCOL);
 		if (secWebsocketProtocolHeader == null) {
 			throw new IOException("WebSocket Response header: empty sec-websocket-protocol");
 		}
@@ -174,14 +173,14 @@ public class WebSocketHandshake {
 	/**
 	 * Returns a Hashmap of HTTP headers
 	 * 
-	 * @param headers ArrayList<String>
-	 *            of headers
+	 * @param headers
+	 *            ArrayList<String> of headers
 	 * @return A Hashmap<String, String> of the headers
 	 */
 	private Map<String, String> getHeaders(ArrayList<String> headers) {
-		Map<String, String> headerMap = new HashMap<String, String>();
+		Map<String, String> headerMap = new HashMap<>();
 		for (int i = 1; i < headers.size(); i++) {
-			String headerPre = (String) headers.get(i);
+			String headerPre = headers.get(i);
 			String[] header = headerPre.split(":");
 			headerMap.put(header[0].toLowerCase(), header[1]);
 		}
@@ -217,8 +216,7 @@ public class WebSocketHandshake {
 	 */
 	private byte[] sha1(String input) throws NoSuchAlgorithmException {
 		MessageDigest mDigest = MessageDigest.getInstance(SHA1_PROTOCOL);
-		byte[] result = mDigest.digest(input.getBytes());
-		return result;
+		return mDigest.digest(input.getBytes());
 	}
 
 }

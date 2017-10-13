@@ -90,7 +90,7 @@ public abstract class MqttWireMessage {
 	 * @throws MqttException
 	 *             if an exception occurs whilst getting the payload.
 	 */
-	public byte[] getPayload() throws MqttException {
+	public byte[] getPayload() throws MqttException{
 		return new byte[0];
 	}
 
@@ -218,46 +218,46 @@ public abstract class MqttWireMessage {
 				result = new MqttConnect(info, data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_CONNACK:
-				result = new MqttConnAck(info, data);
+				result = new MqttConnAck(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_PUBLISH:
 				result = new MqttPublish(info, data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_PUBACK:
-				result = new MqttPubAck(info, data);
+				result = new MqttPubAck(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_PUBREC:
-				result = new MqttPubRec(info, data);
+				result = new MqttPubRec(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_PUBREL:
-				result = new MqttPubRel(info, data);
+				result = new MqttPubRel(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_PUBCOMP:
-				result = new MqttPubComp(info, data);
+				result = new MqttPubComp(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE:
-				result = new MqttSubscribe(info, data);
+				result = new MqttSubscribe( data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_SUBACK:
-				result = new MqttSubAck(info, data);
+				result = new MqttSubAck(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE:
-				result = new MqttUnsubscribe(info, data);
+				result = new MqttUnsubscribe(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_UNSUBACK:
-				result = new MqttUnsubAck(info, data);
+				result = new MqttUnsubAck(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_PINGREQ:
-				result = new MqttPingReq(info, data);
+				result = new MqttPingReq();
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_PINGRESP:
-				result = new MqttPingResp(info, data);
+				result = new MqttPingResp();
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_DISCONNECT:
-				result = new MqttDisconnect(info, data);
+				result = new MqttDisconnect(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_AUTH:
-				result = new MqttAuth(info, data);
+				result = new MqttAuth(data);
 				break;
 			default:
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_MALFORMED_PACKET);

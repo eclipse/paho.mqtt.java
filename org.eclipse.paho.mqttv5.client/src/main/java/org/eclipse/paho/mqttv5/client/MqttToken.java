@@ -17,6 +17,7 @@
 package org.eclipse.paho.mqttv5.client;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.client.internal.Token;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -204,7 +205,7 @@ public class MqttToken implements IMqttToken {
 		return true;
 	}
 
-	public ArrayList<UserProperty> getUserDefinedProperties() {
+	public List<UserProperty> getUserDefinedProperties() {
 		if (internalTok.getWireMessage() instanceof MqttConnAck) {
 			return ((MqttConnAck) internalTok.getWireMessage()).getUserDefinedProperties();
 		} else if (internalTok.getWireMessage() instanceof MqttPubAck) {
@@ -220,7 +221,7 @@ public class MqttToken implements IMqttToken {
 		} else if (internalTok.getWireMessage() instanceof MqttAuth) {
 			return ((MqttAuth) internalTok.getWireMessage()).getUserDefinedProperties();
 		}
-		return new ArrayList<UserProperty>();
+		return new ArrayList<>();
 	}
 
 	public int getMaximumPacketSize() {

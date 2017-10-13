@@ -16,8 +16,6 @@
  */
 package org.eclipse.paho.mqttv5.common.packet;
 
-import java.io.IOException;
-
 import org.eclipse.paho.mqttv5.common.MqttException;
 
 public class MqttPingReq extends MqttWireMessage{
@@ -25,10 +23,6 @@ public class MqttPingReq extends MqttWireMessage{
 	public static final String KEY = "Ping";
 	
 	public MqttPingReq(){
-		super(MqttWireMessage.MESSAGE_TYPE_PINGREQ);
-	}
-	
-	public MqttPingReq(byte info, byte[] variableHeader) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_PINGREQ);
 	}
 	
