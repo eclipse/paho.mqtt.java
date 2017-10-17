@@ -16,6 +16,12 @@
  */
 package org.eclipse.paho.mqttv5.common;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
+
 /**
  * An MQTT message holds the application payload and options specifying how the
  * message is to be delivered The message includes a "payload" (the body of the
@@ -29,13 +35,37 @@ public class MqttMessage {
 	private boolean retained = false;
 	private boolean dup = false;
 	private int messageId;
+	private boolean isUTF8 = false; // Payload format indicator
+	private Integer expiryInterval;
+	private String responseTopic;
+	private byte[] correlationData;
+	private List<UserProperty> userProperties = new ArrayList<>();
+	private Integer subscriptionIdentifier;
+	private String contentType;
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public Integer getSubscriptionIdentifier() {
+		return subscriptionIdentifier;
+	}
+
+	public void setSubscriptionIdentifier(Integer subscriptionIdentifier) {
+		this.subscriptionIdentifier = subscriptionIdentifier;
+	}
 
 	/**
 	 * Utility method to validate the supplied QoS value.
 	 * 
 	 * @throws IllegalArgumentException
 	 *             if value of QoS is not 0, 1 or 2.
-	 * @param qos The Quality Of Service Level to validate
+	 * @param qos
+	 *            The Quality Of Service Level to validate
 	 */
 	public static void validateQos(int qos) {
 		if ((qos < 0) || (qos > 2)) {
@@ -60,7 +90,9 @@ public class MqttMessage {
 	/**
 	 * Constructs a message with the specified byte array as a payload, and all
 	 * other values set to defaults.
-	 * @param payload the payload
+	 * 
+	 * @param payload
+	 *            the payload
 	 */
 	public MqttMessage(byte[] payload) {
 		setPayload(payload);
@@ -69,9 +101,12 @@ public class MqttMessage {
 	/**
 	 * Contructs an message with the specified payload, qos and retained flag.
 	 * 
-	 * @param payload The Message Payload.
-	 * @param qos The Message QoS.
-	 * @param retained If the message is retained.
+	 * @param payload
+	 *            The Message Payload.
+	 * @param qos
+	 *            The Message QoS.
+	 * @param retained
+	 *            If the message is retained.
 	 */
 	public MqttMessage(byte[] payload, int qos, boolean retained) {
 		setPayload(payload);
@@ -165,8 +200,7 @@ public class MqttMessage {
 	 * will not be acknowledged across the network. This QoS is the fastest, but
 	 * should only be used for messages which are not valuable - note that if the
 	 * server cannot process the message (for example, there is an authorization
-	 * problem).
-	 * Also known as "fire and forget".</li>
+	 * problem). Also known as "fire and forget".</li>
 	 *
 	 * <li>Quality of Service 1 - indicates that a message should be delivered at
 	 * least once (one or more times). The message can only be delivered safely if
@@ -205,17 +239,6 @@ public class MqttMessage {
 	}
 
 	/**
-	 * Returns a string representation of this message's payload. Makes an attempt
-	 * to return the payload as a string. As the MQTT client has no control over the
-	 * content of the payload it may fail.
-	 * 
-	 * @return a string representation of this message.
-	 */
-	public String toString() {
-		return new String(payload);
-	}
-
-	/**
 	 * Sets the mutability of this object (whether or not its values can be changed.
 	 * 
 	 * @param mutable
@@ -251,7 +274,8 @@ public class MqttMessage {
 	 * This is only to be used internally to provide the MQTT id of a message
 	 * received from the server. Has no effect when publishing messages.
 	 * 
-	 * @param messageId the Message Identifier
+	 * @param messageId
+	 *            the Message Identifier
 	 */
 	public void setId(int messageId) {
 		this.messageId = messageId;
@@ -265,6 +289,65 @@ public class MqttMessage {
 	 */
 	public int getId() {
 		return this.messageId;
+	}
+
+	public boolean isUTF8() {
+		return isUTF8;
+	}
+
+	public void setUTF8(boolean isUTF8) {
+		this.isUTF8 = isUTF8;
+	}
+
+	public Integer getExpiryInterval() {
+		return expiryInterval;
+	}
+
+	public void setExpiryInterval(Integer expiryInterval) {
+		this.expiryInterval = expiryInterval;
+	}
+
+	public String getResponseTopic() {
+		return responseTopic;
+	}
+
+	public void setResponseTopic(String responseTopic) {
+		this.responseTopic = responseTopic;
+	}
+
+	public byte[] getCorrelationData() {
+		return correlationData;
+	}
+
+	public void setCorrelationData(byte[] correlationData) {
+		this.correlationData = correlationData;
+	}
+
+	public List<UserProperty> getUserProperties() {
+		return userProperties;
+	}
+
+	public void setUserProperties(List<UserProperty> userProperties) {
+		this.userProperties = userProperties;
+	}
+
+	/**
+	 * Returns a string representation of this message's payload. Makes an attempt
+	 * to return the payload as a string. As the MQTT client has no control over the
+	 * content of the payload it may fail.
+	 * 
+	 * @return a string representation of this message.
+	 */
+	public String toString() {
+		return new String(payload);
+	}
+
+	public String toDebugString() {
+		return "MqttMessage [mutable=" + mutable + ", payload=" + new String(payload) + ", qos=" + qos + ", retained="
+				+ retained + ", dup=" + dup + ", messageId=" + messageId + ", isUTF8=" + isUTF8 + ", expiryInterval="
+				+ expiryInterval + ", responseTopic=" + responseTopic + ", correlationData="
+				+ Arrays.toString(correlationData) + ", userProperties=" + userProperties + ", subscriptionIdentifier="
+				+ subscriptionIdentifier + ", contentType=" + contentType + "]";
 	}
 
 }

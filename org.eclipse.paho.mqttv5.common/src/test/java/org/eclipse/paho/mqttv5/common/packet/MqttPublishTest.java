@@ -33,7 +33,7 @@ public class MqttPublishTest {
 	private static final String payloadMessage = "Hello World";
 	private static final int qos = 1;
 	private static final boolean retained = true;
-	private static final int payloadFormat = MqttPublish.PAYLOAD_FORMAT_UTF8;
+	private static final boolean isUTF8 = true;
 	private static final int publicationExpiryInterval = 60;
 	private static final int topicAlias = 1;
 	private static final String responseTopic = "replyTopic";
@@ -74,14 +74,14 @@ public class MqttPublishTest {
 		Assert.assertEquals(qos, decodedPublishPacket.getMessage().getQos());
 		Assert.assertArrayEquals(payloadMessage.getBytes(), decodedPublishPacket.getMessage().getPayload());
 		Assert.assertEquals(retained, decodedPublishPacket.getMessage().isRetained());
-		Assert.assertEquals(payloadFormat, decodedPublishPacket.getPayloadFormat());
+		Assert.assertEquals(isUTF8, decodedPublishPacket.isUTF8());
 		Assert.assertEquals(publicationExpiryInterval, decodedPublishPacket.getPublicationExpiryInterval());
 		Assert.assertEquals(topicAlias, decodedPublishPacket.getTopicAlias());
 		Assert.assertEquals(responseTopic, decodedPublishPacket.getResponseTopic());
 		Assert.assertArrayEquals(correlationData, decodedPublishPacket.getCorrelationData());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedPublishPacket.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedPublishPacket.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedPublishPacket.getUserDefinedProperties().get(2)));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedPublishPacket.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedPublishPacket.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedPublishPacket.getUserProperties().get(2)));
 
 		Assert.assertEquals(contentType, decodedPublishPacket.getContentType());
 		Assert.assertEquals(subscriptionIdentifier, decodedPublishPacket.getSubscriptionIdentifier());
@@ -96,24 +96,23 @@ public class MqttPublishTest {
 		MqttMessage message = new MqttMessage(payloadMessage.getBytes());
 		message.setQos(qos);
 		message.setRetained(retained);
-		MqttPublish mqttPublish = new MqttPublish(topic, message);
-		mqttPublish.setMessageId(messageId);
-		mqttPublish.setDuplicate(duplicate);
-		
-		mqttPublish.setPayloadFormat(payloadFormat);
-		mqttPublish.setPublicationExpiryInterval(publicationExpiryInterval);
-		mqttPublish.setTopicAlias(topicAlias);
-		mqttPublish.setResponseTopic(responseTopic);
-		mqttPublish.setCorrelationData(correlationData);
-		
+				
+		message.setUTF8(isUTF8);
+		message.setExpiryInterval(publicationExpiryInterval);
+		message.setResponseTopic(responseTopic);
+		message.setCorrelationData(correlationData);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		mqttPublish.setUserDefinedProperties(userDefinedProperties);
+		message.setUserProperties(userDefinedProperties);
+		message.setContentType(contentType);
+		message.setSubscriptionIdentifier(subscriptionIdentifier);
 		
-		mqttPublish.setContentType(contentType);
-		mqttPublish.setSubscriptionIdentifier(subscriptionIdentifier);
+		MqttPublish mqttPublish = new MqttPublish(topic, message);
+		mqttPublish.setMessageId(messageId);
+		mqttPublish.setDuplicate(duplicate);
+		mqttPublish.setTopicAlias(topicAlias);
 		
 		return mqttPublish;
 	}

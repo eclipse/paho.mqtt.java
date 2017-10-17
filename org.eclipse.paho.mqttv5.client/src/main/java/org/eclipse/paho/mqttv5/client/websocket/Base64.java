@@ -25,14 +25,12 @@ public class Base64 {
 	
 	public static String encode (String s){
 		encoder.putByteArray("akey", s.getBytes());
-		String result = encoder.getBase64String();
-		return result;
+		return encoder.getBase64String();
 	}
 	
 	public static String encodeBytes (byte[] b){
 		encoder.putByteArray("aKey", b);
-		String result = encoder.getBase64String();
-		return result;
+		return encoder.getBase64String();
 		
 	}
 	

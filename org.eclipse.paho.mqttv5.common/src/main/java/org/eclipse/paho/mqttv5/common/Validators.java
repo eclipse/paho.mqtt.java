@@ -10,11 +10,8 @@ public class Validators {
 				i++;
 			}
 			clientIdLength++;
-		}
-		if (clientIdLength > 65535) {
-			return false;
-		}
-		return true;
+		}	
+		return clientIdLength < 65535;
 	}
 
 	/**
