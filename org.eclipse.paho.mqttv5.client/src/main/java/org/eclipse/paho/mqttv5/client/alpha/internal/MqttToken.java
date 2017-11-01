@@ -1,13 +1,11 @@
 package org.eclipse.paho.mqttv5.client.alpha.internal;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.eclipse.paho.mqttv5.client.alpha.IMqttCommonClient;
 import org.eclipse.paho.mqttv5.client.alpha.IMqttToken;
 import org.eclipse.paho.mqttv5.client.alpha.result.IMqttResult;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseExecutors;
 
 public class MqttToken<T extends IMqttResult<C>, C> implements IMqttToken<T, C> {
 
@@ -19,9 +17,9 @@ public class MqttToken<T extends IMqttResult<C>, C> implements IMqttToken<T, C> 
 	
 	private final int messageId;
 	
-	public MqttToken(Executor executor, ScheduledExecutorService scheduler, 
+	public MqttToken(PromiseExecutors promiseExecutors, 
 			IMqttCommonClient client, C userContext, int messageId) {
-		this.deferred = new Deferred<>(executor, scheduler);
+		this.deferred = promiseExecutors.deferred();
 		this.client = client;
 		this.userContext = userContext;
 		this.messageId = messageId;
