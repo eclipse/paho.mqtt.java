@@ -2,8 +2,6 @@ package org.eclipse.paho.mqttv5.client.alpha.internal;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.paho.mqttv5.client.alpha.IMqttCommonClient;
 import org.eclipse.paho.mqttv5.client.alpha.IMqttSubscriptionToken;
@@ -13,6 +11,7 @@ import org.eclipse.paho.mqttv5.client.alpha.result.IMqttUnsubscriptionResult;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseExecutors;
 import org.osgi.util.pushstream.PushStream;
 
 public class MqttSubscriptionToken<C> extends MqttToken<IMqttSubscriptionResult<C>, C>
@@ -23,9 +22,9 @@ public class MqttSubscriptionToken<C> extends MqttToken<IMqttSubscriptionResult<
 	
 	private final Deferred<IMqttUnsubscriptionResult<C>> d = new Deferred<>();
 	
-	public MqttSubscriptionToken(Executor executor, ScheduledExecutorService scheduler, IMqttCommonClient client,
+	public MqttSubscriptionToken(PromiseExecutors promiseExecutors, IMqttCommonClient client,
 			C userContext, List<String> topics, PushStream<IReceivedMessage<C>> stream) {
-		super(executor, scheduler, client, userContext, 0);
+		super(promiseExecutors, client, userContext, 0);
 		this.topics = Collections.unmodifiableList(topics);
 		this.stream = stream;
 	}
