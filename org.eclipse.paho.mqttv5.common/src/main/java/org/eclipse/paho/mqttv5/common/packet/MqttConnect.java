@@ -44,17 +44,27 @@ public class MqttConnect extends MqttWireMessage {
 	private String willDestination;
 	private int mqttVersion = DEFAULT_PROTOCOL_VERSION;
 	private Integer sessionExpiryInterval;
-	private Integer willDelayInterval;
 	private Integer receiveMaximum;
 	private Integer maximumPacketSize;
-
 	private Integer topicAliasMaximum;
 	private Boolean requestResponseInfo;
 	private Boolean requestProblemInfo;
-
 	private List<UserProperty> userDefinedProperties = new ArrayList<>();
 	private String authMethod;
 	private byte[] authData;
+
+	// Will Properties
+	private Integer willDelayInterval;
+	private boolean willIsUTF8 = false;
+	private Integer willPublicationExpiryInterval;
+	private String willContentType;
+	private String willResponseTopic;
+	private byte[] willCorrelationData;
+	private List<UserProperty> willUserDefinedProperties = new ArrayList<>();
+
+	// Payload format identifiers
+	public static final byte PAYLOAD_FORMAT_UNSPECIFIED = 0x00;
+	public static final byte PAYLOAD_FORMAT_UTF8 = 0x01;
 
 	/**
 	 * Constructor for an on the wire MQTT Connect message
@@ -83,7 +93,7 @@ public class MqttConnect extends MqttWireMessage {
 		if (mqttVersion != DEFAULT_PROTOCOL_VERSION) {
 			throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_UNSUPPORTED_PROTOCOL_VERSION);
 		}
-    
+
 		byte connectFlags = dis.readByte();
 		reservedByte = (connectFlags & 0x01) != 0;
 		cleanSession = (connectFlags & 0x02) != 0;
@@ -100,6 +110,7 @@ public class MqttConnect extends MqttWireMessage {
 		keepAliveInterval = dis.readUnsignedShort();
 		parseIdentifierValueFields(dis);
 		clientId = decodeUTF8(dis);
+		parseWillIdentifierValueFields(dis);
 		if (willFlag) {
 			if (willQoS == 3) {
 				throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_INVALID_WILL_QOS);
@@ -278,6 +289,64 @@ public class MqttConnect extends MqttWireMessage {
 		}
 	}
 
+	private byte[] getWillIdentifierValueFields() throws MqttException {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream outputStream = new DataOutputStream(baos);
+
+			// If Present, encode the Will Delay Interval
+			if (willDelayInterval != null) {
+				outputStream.write(MqttPropertyIdentifiers.WILL_DELAY_INTERVAL_IDENTIFIER);
+				outputStream.writeInt(willDelayInterval);
+			}
+
+			// If Present and true, encode the Payload Format Indicator
+			if (willIsUTF8) {
+				outputStream.write(MqttPropertyIdentifiers.PAYLOAD_FORMAT_INDICATOR_IDENTIFIER);
+				outputStream.writeByte(PAYLOAD_FORMAT_UTF8);
+			}
+
+			// If Present, encode the Publication Expiry Interval
+			if (willPublicationExpiryInterval != null) {
+				outputStream.write(MqttPropertyIdentifiers.PUBLICATION_EXPIRY_INTERVAL_IDENTIFIER);
+				outputStream.writeInt(willPublicationExpiryInterval);
+			}
+
+			// If Present, encode the Reply Topic
+			if (willResponseTopic != null) {
+				outputStream.write(MqttPropertyIdentifiers.RESPONSE_TOPIC_IDENTIFIER);
+				encodeUTF8(outputStream, willResponseTopic);
+			}
+
+			// If Present, encode the Correlation Data
+			if (willCorrelationData != null) {
+				outputStream.write(MqttPropertyIdentifiers.CORRELATION_DATA_IDENTIFIER);
+				outputStream.writeShort(willCorrelationData.length);
+				outputStream.write(willCorrelationData);
+			}
+
+			// If Present, encode the User Defined Name-Value Pairs
+			if (!willUserDefinedProperties.isEmpty()) {
+				for (UserProperty property : willUserDefinedProperties) {
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, property.getKey());
+					encodeUTF8(outputStream, property.getValue());
+				}
+			}
+
+			// If Present, encode the Content Type
+			if (willContentType != null) {
+				outputStream.write(MqttPropertyIdentifiers.CONTENT_TYPE_IDENTIFIER);
+				encodeUTF8(outputStream, willContentType);
+			}
+			outputStream.flush();
+
+			return baos.toByteArray();
+		} catch (IOException ioe) {
+			throw new MqttException(ioe);
+		}
+	}
+
 	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
 		// First get the length of the IV fields
 		int lengthVBI = readVariableByteInteger(dis).getValue();
@@ -323,12 +392,56 @@ public class MqttConnect extends MqttWireMessage {
 		}
 	}
 
+	private void parseWillIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
+		// First get the length of the IV fields
+		int lengthVBI = readVariableByteInteger(dis).getValue();
+		if (lengthVBI > 0) {
+			byte[] identifierValueByteArray = new byte[lengthVBI];
+			dis.read(identifierValueByteArray, 0, lengthVBI);
+			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
+			DataInputStream inputStream = new DataInputStream(bais);
+
+			while (inputStream.available() > 0) {
+				// Get the first byte (Identifier)
+				byte identifier = inputStream.readByte();
+
+				if (identifier == MqttPropertyIdentifiers.WILL_DELAY_INTERVAL_IDENTIFIER) {
+					willDelayInterval = inputStream.readInt();
+				} else if (identifier == MqttPropertyIdentifiers.PAYLOAD_FORMAT_INDICATOR_IDENTIFIER) {
+					willIsUTF8 = (boolean) inputStream.readBoolean();
+				} else if (identifier == MqttPropertyIdentifiers.PUBLICATION_EXPIRY_INTERVAL_IDENTIFIER) {
+					willPublicationExpiryInterval = inputStream.readInt();
+				} else if (identifier == MqttPropertyIdentifiers.CONTENT_TYPE_IDENTIFIER) {
+					willContentType = decodeUTF8(inputStream);
+				} else if (identifier == MqttPropertyIdentifiers.RESPONSE_TOPIC_IDENTIFIER) {
+					willResponseTopic = decodeUTF8(inputStream);
+				} else if (identifier == MqttPropertyIdentifiers.CORRELATION_DATA_IDENTIFIER) {
+					int correlationDataLength = (int) inputStream.readShort();
+					willCorrelationData = new byte[correlationDataLength];
+					inputStream.read(willCorrelationData, 0, correlationDataLength);
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
+					String key = decodeUTF8(inputStream);
+					String value = decodeUTF8(inputStream);
+					willUserDefinedProperties.add(new UserProperty(key, value));
+				} else {
+					// Unidentified Identifier
+					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
+				}
+			}
+		}
+	}
+
 	@Override
 	public byte[] getPayload() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			encodeUTF8(dos, clientId);
+
+			// Encode Will properties here
+			byte[] willIdentifierValueFieldsByteArray = getWillIdentifierValueFields();
+			dos.write(encodeVariableByteInteger(willIdentifierValueFieldsByteArray.length));
+			dos.write(willIdentifierValueFieldsByteArray);
 
 			if (willMessage != null) {
 				encodeUTF8(dos, willDestination);
@@ -458,8 +571,6 @@ public class MqttConnect extends MqttWireMessage {
 		return receiveMaximum;
 	}
 
-
-
 	public int getTopicAliasMaximum() {
 		return topicAliasMaximum;
 	}
@@ -483,7 +594,7 @@ public class MqttConnect extends MqttWireMessage {
 	public byte[] getAuthData() {
 		return authData;
 	}
-	
+
 	public int getMaximumPacketSize() {
 		return maximumPacketSize;
 	}
@@ -492,16 +603,69 @@ public class MqttConnect extends MqttWireMessage {
 		this.maximumPacketSize = maximumPacketSize;
 	}
 
+	public boolean isWillIsUTF8() {
+		return willIsUTF8;
+	}
+
+	public void setWillIsUTF8(boolean willIsUTF8) {
+		this.willIsUTF8 = willIsUTF8;
+	}
+
+	public int getWillPublicationExpiryInterval() {
+		return willPublicationExpiryInterval;
+	}
+
+	public void setWillPublicationExpiryInterval(int willPublicationExpiryInterval) {
+		this.willPublicationExpiryInterval = willPublicationExpiryInterval;
+	}
+
+	public String getWillContentType() {
+		return willContentType;
+	}
+
+	public void setWillContentType(String willContentType) {
+		this.willContentType = willContentType;
+	}
+
+	public String getWillResponseTopic() {
+		return willResponseTopic;
+	}
+
+	public void setWillResponseTopic(String willResponseTopic) {
+		this.willResponseTopic = willResponseTopic;
+	}
+
+	public byte[] getWillCorrelationData() {
+		return willCorrelationData;
+	}
+
+	public void setWillCorrelationData(byte[] willCorrelationData) {
+		this.willCorrelationData = willCorrelationData;
+	}
+
+	public List<UserProperty> getWillUserDefinedProperties() {
+		return willUserDefinedProperties;
+	}
+
+	public void setWillUserDefinedProperties(List<UserProperty> willUserDefinedProperties) {
+		this.willUserDefinedProperties = willUserDefinedProperties;
+	}
+
 	@Override
 	public String toString() {
 		return "MqttConnect [info=" + info + ", clientId=" + clientId + ", reservedByte=" + reservedByte
 				+ ", cleanSession=" + cleanSession + ", willMessage=" + willMessage + ", userName=" + userName
 				+ ", password=" + Arrays.toString(password) + ", keepAliveInterval=" + keepAliveInterval
 				+ ", willDestination=" + willDestination + ", mqttVersion=" + mqttVersion + ", sessionExpiryInterval="
-				+ sessionExpiryInterval + ", willDelayInterval=" + willDelayInterval + ", receiveMaximum="
-				+ receiveMaximum + ", maximumPacketSize=" + maximumPacketSize + ", topicAliasMaximum="
-				+ topicAliasMaximum + ", requestResponseInfo=" + requestResponseInfo + ", requestProblemInfo="
-				+ requestProblemInfo + ", userDefinedProperties=" + userDefinedProperties + ", authMethod=" + authMethod
-				+ ", authData=" + Arrays.toString(authData) + "]";
+				+ sessionExpiryInterval + ", receiveMaximum=" + receiveMaximum + ", maximumPacketSize="
+				+ maximumPacketSize + ", topicAliasMaximum=" + topicAliasMaximum + ", requestResponseInfo="
+				+ requestResponseInfo + ", requestProblemInfo=" + requestProblemInfo + ", userDefinedProperties="
+				+ userDefinedProperties + ", authMethod=" + authMethod + ", authData=" + Arrays.toString(authData)
+				+ ", willDelayInterval=" + willDelayInterval + ", willIsUTF8=" + willIsUTF8
+				+ ", willPublicationExpiryInterval=" + willPublicationExpiryInterval + ", willContentType="
+				+ willContentType + ", willResponseTopic=" + willResponseTopic + ", willCorrelationData="
+				+ Arrays.toString(willCorrelationData) + ", willUserDefinedProperties=" + willUserDefinedProperties
+				+ "]";
 	}
+
 }

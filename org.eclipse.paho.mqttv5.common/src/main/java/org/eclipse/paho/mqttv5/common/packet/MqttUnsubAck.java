@@ -47,10 +47,7 @@ public class MqttUnsubAck extends MqttAck {
 
 		msgId = inputStream.readUnsignedShort();
 
-		long remainder = (long) data.length - counter.getCounter();
-		if (remainder >= 3) {
-			parseIdentifierValueFields(inputStream);
-		}
+		parseIdentifierValueFields(inputStream);
 
 		int remainingLengh = data.length - counter.getCounter();
 		returnCodes = new int[remainingLengh];
@@ -82,11 +79,9 @@ public class MqttUnsubAck extends MqttAck {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			if (identifierValueFieldsByteArray.length != 0) {
-				// Write Identifier / Value Fields
-				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-				outputStream.write(identifierValueFieldsByteArray);
-			}
+			// Write Identifier / Value Fields
+			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+			outputStream.write(identifierValueFieldsByteArray);
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {

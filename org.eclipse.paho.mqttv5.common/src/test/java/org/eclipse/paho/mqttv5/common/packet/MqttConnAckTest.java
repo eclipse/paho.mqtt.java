@@ -36,6 +36,7 @@ public class MqttConnAckTest {
 	private static final String assignedClientIdentifier = "AssignedClientId";
 	private static final int topicAliasMaximum = 100;
 	private static final String reasonString = "Everything is fine.";
+	private static final int sessionExpiryInterval = 60;
 	private static final boolean wildcardSubscriptionsAvailable = true;
 	private static final boolean subscriptionIdentifiersAvailable = true;
 	private static final boolean sharedSubscriptionAvailable = true;
@@ -88,6 +89,7 @@ public class MqttConnAckTest {
 		Assert.assertEquals(assignedClientIdentifier, decodedConnAckPacket.getAssignedClientIdentifier());
 		Assert.assertEquals(topicAliasMaximum, decodedConnAckPacket.getTopicAliasMaximum());
 		Assert.assertEquals(reasonString, decodedConnAckPacket.getReasonString());
+		Assert.assertEquals(sessionExpiryInterval, decodedConnAckPacket.getSessionExpiryInterval());
 		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedConnAckPacket.getUserDefinedProperties().get(0)));
 		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedConnAckPacket.getUserDefinedProperties().get(1)));
 		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedConnAckPacket.getUserDefinedProperties().get(2)));
@@ -126,6 +128,7 @@ public class MqttConnAckTest {
 		mqttConnAckPacket.setAssignedClientIdentifier(assignedClientIdentifier);
 		mqttConnAckPacket.setTopicAliasMaximum(topicAliasMaximum);
 		mqttConnAckPacket.setReasonString(reasonString);
+		mqttConnAckPacket.setSessionExpiryInterval(sessionExpiryInterval);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));

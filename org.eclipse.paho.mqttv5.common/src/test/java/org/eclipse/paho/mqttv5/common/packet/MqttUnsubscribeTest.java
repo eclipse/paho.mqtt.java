@@ -18,6 +18,7 @@ package org.eclipse.paho.mqttv5.common.packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
@@ -28,6 +29,12 @@ import org.junit.Test;
 public class MqttUnsubscribeTest {
 	private static final String[] topics = { "a/b","c/d",	"e/f",	"g/g"};
 	private static final String reasonString = "Reason String 123.";
+	private static final String userKey1 = "userKey1";
+	private static final String userKey2 = "userKey2";
+	private static final String userKey3 = "userKey3";
+	private static final String userValue1 = "userValue1";
+	private static final String userValue2 = "userValue2";
+	private static final String userValue3 = "userValue3";
 	
 	@Test
 	public void testEncodingMqttUnsubscribe() throws MqttException {
@@ -48,8 +55,12 @@ public class MqttUnsubscribeTest {
 		
 		MqttUnsubscribe decodedUnsubscribePacket = (MqttUnsubscribe) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
+		
 		Assert.assertEquals(reasonString, decodedUnsubscribePacket.getReasonString());
 		Assert.assertArrayEquals(topics, decodedUnsubscribePacket.getTopics());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedUnsubscribePacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedUnsubscribePacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedUnsubscribePacket.getUserDefinedProperties().get(2)));
 		
 		
 	}
@@ -57,6 +68,11 @@ public class MqttUnsubscribeTest {
 	public MqttUnsubscribe generateMqttUnsubscribePacket(){
 		MqttUnsubscribe MqttUnsubscribePacket = new MqttUnsubscribe(topics);
 		MqttUnsubscribePacket.setReasonString(reasonString);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		MqttUnsubscribePacket.setUserDefinedProperties(userDefinedProperties);
 		
 		return MqttUnsubscribePacket;
 	}
