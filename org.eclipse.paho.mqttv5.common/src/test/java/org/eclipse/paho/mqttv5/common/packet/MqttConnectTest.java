@@ -112,7 +112,7 @@ public class MqttConnectTest{
 		Assert.assertEquals(willPublicationExpiryInterval, decodedConnectPacket.getWillPublicationExpiryInterval());
 		Assert.assertEquals(willContentType, decodedConnectPacket.getWillContentType());
 		Assert.assertEquals(willResponseTopic, decodedConnectPacket.getWillResponseTopic());
-		Assert.assertEquals(willCorrelationData, decodedConnectPacket.getWillCorrelationData());
+		Assert.assertArrayEquals(willCorrelationData, decodedConnectPacket.getWillCorrelationData());
 		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedConnectPacket.getWillUserDefinedProperties().get(0)));
 		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedConnectPacket.getWillUserDefinedProperties().get(1)));
 		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedConnectPacket.getWillUserDefinedProperties().get(2)));
@@ -144,6 +144,7 @@ public class MqttConnectTest{
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
 		mqttConnectPacket.setUserDefinedProperties(userDefinedProperties);
 		
+		mqttConnectPacket.setWillPublicationExpiryInterval(willPublicationExpiryInterval);
 		mqttConnectPacket.setWillDelayInterval(willDelayInterval);
 		mqttConnectPacket.setWillIsUTF8(willIsUTF8);
 		mqttConnectPacket.setWillContentType(willContentType);
