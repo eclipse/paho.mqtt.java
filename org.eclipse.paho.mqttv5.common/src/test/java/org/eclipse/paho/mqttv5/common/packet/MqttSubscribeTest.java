@@ -34,6 +34,12 @@ public class MqttSubscribeTest {
 	private static final String topicCD = "c/d";
 	private static final String topicEF = "e/f";
 	private static final String topicGH = "g/h";
+	private static final String userKey1 = "userKey1";
+	private static final String userKey2 = "userKey2";
+	private static final String userKey3 = "userKey3";
+	private static final String userValue1 = "userValue1";
+	private static final String userValue2 = "userValue2";
+	private static final String userValue3 = "userValue3";
 
 	@Test
 	public void testEncodingMqttSubscribe() throws MqttException {
@@ -82,6 +88,7 @@ public class MqttSubscribeTest {
 		Assert.assertEquals(false, decodedSub.isRetainAsPublished());
 		Assert.assertEquals(0, decodedSub.getRetainHandling());
 		
+		
 		Assert.assertEquals(subscriptionIdentifier, decodedMqttSubscribePacket.getSubscriptionIdentifier());
 	}
 
@@ -124,7 +131,13 @@ public class MqttSubscribeTest {
 		subscription.setNoLocal(true);
 		subscription.setRetainAsPublished(true);
 		subscription.setRetainHandling(2);
+		
 		MqttSubscribe mqttSubscribePacket = new MqttSubscribe(subscription);
+		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
+		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
+		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
+		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
+		mqttSubscribePacket.setUserDefinedProperties(userDefinedProperties);
 		mqttSubscribePacket.setSubscriptionIdentifier(subscriptionIdentifier);
 		byte[] header = mqttSubscribePacket.getHeader();
 		byte[] payload = mqttSubscribePacket.getPayload();
@@ -133,6 +146,9 @@ public class MqttSubscribeTest {
 		outputStream.write(header);
 		outputStream.write(payload);
 		MqttSubscribe decodedMqttSubscribePacket = (MqttSubscribe) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedMqttSubscribePacket.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedMqttSubscribePacket.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedMqttSubscribePacket.getUserDefinedProperties().get(2)));
 		
 		MqttSubscription[] decodedSubscriptions = decodedMqttSubscribePacket.getSubscriptions();
 		Assert.assertEquals(decodedSubscriptions.length, 1);

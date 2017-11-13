@@ -27,7 +27,9 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
 import org.eclipse.paho.mqttv5.common.packet.MqttSubAck;
+import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
 import org.eclipse.paho.mqttv5.common.packet.MqttUnsubAck;
+import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
@@ -220,6 +222,10 @@ public class MqttToken implements IMqttToken {
 			return ((MqttUnsubAck) internalTok.getWireMessage()).getUserDefinedProperties();
 		} else if (internalTok.getWireMessage() instanceof MqttAuth) {
 			return ((MqttAuth) internalTok.getWireMessage()).getUserDefinedProperties();
+		} else if (internalTok.getWireMessage() instanceof MqttSubscribe) {
+			return ((MqttSubscribe) internalTok.getWireMessage()).getUserDefinedProperties();
+		} else if (internalTok.getWireMessage() instanceof MqttUnsubscribe) {
+			return ((MqttUnsubscribe) internalTok.getWireMessage()).getUserDefinedProperties();
 		}
 		return new ArrayList<>();
 	}
@@ -250,6 +256,13 @@ public class MqttToken implements IMqttToken {
 			return ((MqttConnAck) internalTok.getWireMessage()).isSharedSubscriptionAvailable();
 		}
 		return true;
+	}
+	
+	public int getSessionExpiryInterval() {
+		if(internalTok.getWireMessage() instanceof MqttConnAck) {
+			return ((MqttConnAck) internalTok.getWireMessage()).getSessionExpiryInterval();
+		}
+		return 0;
 	}
 
 }

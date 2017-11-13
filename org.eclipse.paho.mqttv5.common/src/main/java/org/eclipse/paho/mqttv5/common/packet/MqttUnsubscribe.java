@@ -22,6 +22,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
@@ -34,6 +35,8 @@ public class MqttUnsubscribe extends MqttWireMessage{
 	// Fields
 	private String[] topics;
 	private String reasonString;
+	private List<UserProperty> userDefinedProperties = new ArrayList<>();
+
 	
 	public  MqttUnsubscribe(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE);
@@ -104,12 +107,21 @@ public class MqttUnsubscribe extends MqttWireMessage{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
-			// If Present, encode the Reason String (3.10.2.2)
+			// If Present, encode the Reason String
 			if (reasonString != null) {
 				outputStream.write(REASON_STRING_IDENTIFIER);
 				encodeUTF8(outputStream, reasonString);
 			}
-
+			
+			// If Present, encode the User Properties
+			if (!userDefinedProperties.isEmpty()) {
+				for (UserProperty property : userDefinedProperties) {
+					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
+					encodeUTF8(outputStream, property.getKey());
+					encodeUTF8(outputStream, property.getValue());
+				}
+			}
+			
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {
@@ -130,6 +142,10 @@ public class MqttUnsubscribe extends MqttWireMessage{
 				byte identifier = inputStream.readByte();
 				if (identifier == REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
+					String key = decodeUTF8(inputStream);
+					String value = decodeUTF8(inputStream);
+					userDefinedProperties.add(new UserProperty(key, value));
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
@@ -157,5 +173,13 @@ public class MqttUnsubscribe extends MqttWireMessage{
 
 	public void setReasonString(String reasonString) {
 		this.reasonString = reasonString;
+	}
+
+	public List<UserProperty> getUserDefinedProperties() {
+		return userDefinedProperties;
+	}
+
+	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
+		this.userDefinedProperties = userDefinedProperties;
 	}
 }

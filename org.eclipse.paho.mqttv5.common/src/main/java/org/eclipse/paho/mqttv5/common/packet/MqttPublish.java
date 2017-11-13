@@ -40,13 +40,16 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	public static final byte PAYLOAD_FORMAT_UTF8 = 0x01;
 
 	// Fields
-	private MqttMessage message;
+	private byte[] payload;
+	private int qos = 1;
+	private boolean retained = false;
+	private boolean dup = false;
 	private String topicName;
-	private Integer payloadFormat;
+	private boolean isUTF8 = false;
 	private Integer publicationExpiryInterval;
 	private Integer topicAlias;
 	private byte[] correlationData;
-	private List<UserProperty> userDefinedProperties = new ArrayList<>();
+	private List<UserProperty> userProperties = new ArrayList<>();
 	private Integer subscriptionIdentifier;
 	private String contentType;
 	private String responseTopic;
@@ -62,7 +65,17 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	public MqttPublish(String topic, MqttMessage message) {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBLISH);
 		this.topicName = topic;
-		this.message = message;
+		this.payload = message.getPayload();
+		this.qos = message.getQos();
+		this.dup = message.isDuplicate();
+		this.retained = message.isRetained();
+		this.isUTF8 = message.isUTF8();
+		this.publicationExpiryInterval = message.getExpiryInterval();
+		this.correlationData = message.getCorrelationData();
+		this.responseTopic = message.getResponseTopic();
+		this.userProperties = message.getUserProperties();
+		this.subscriptionIdentifier = message.getSubscriptionIdentifier();
+		this.contentType = message.getContentType();
 	}
 
 	/**
@@ -79,14 +92,13 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	 */
 	public MqttPublish(byte info, byte[] data) throws MqttException, IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBLISH);
-		message = new MqttReceivedMessage();
-		message.setQos((info >> 1) & 0x03);
+		this.qos = (info >> 1) & 0x03;
 		if ((info & 0x01) == 0x01) {
-			message.setRetained(true);
+			this.retained = true;
 		}
 
 		if ((info & 0x08) == 0x08) {
-			message.setDuplicate(true);
+			this.dup = true;
 		}
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
@@ -94,14 +106,13 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		DataInputStream dis = new DataInputStream(counter);
 
 		topicName = decodeUTF8(dis);
-		if (message.getQos() > 0) {
+		if (this.qos > 0) {
 			msgId = dis.readUnsignedShort();
 		}
 		parseIdentifierValueFields(dis);
-		byte[] payload = new byte[data.length - counter.getCounter()];
-		dis.readFully(payload);
+		this.payload = new byte[data.length - counter.getCounter()];
+		dis.readFully(this.payload);
 		dis.close();
-		message.setPayload(payload);
 	}
 
 	/**
@@ -123,7 +134,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 				// Get the first byte (identifier)
 				byte identifier = inputStream.readByte();
 				if (identifier == MqttPropertyIdentifiers.PAYLOAD_FORMAT_INDICATOR_IDENTIFIER) {
-					payloadFormat = (int) inputStream.readByte();
+					isUTF8 = (boolean) inputStream.readBoolean();
 				} else if (identifier == MqttPropertyIdentifiers.PUBLICATION_EXPIRY_INTERVAL_IDENTIFIER) {
 					publicationExpiryInterval = inputStream.readInt();
 				} else if (identifier == MqttPropertyIdentifiers.TOPIC_ALIAS_IDENTIFIER) {
@@ -137,7 +148,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
-					userDefinedProperties.add(new UserProperty(key, value));
+					userProperties.add(new UserProperty(key, value));
 				} else if (identifier == MqttPropertyIdentifiers.CONTENT_TYPE_IDENTIFIER) {
 					contentType = decodeUTF8(inputStream);
 				} else if (identifier == MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER) {
@@ -157,10 +168,10 @@ public class MqttPublish extends MqttPersistableWireMessage{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
-			// If Present, encode the Payload Format Indicator (3.3.2.4)
-			if (payloadFormat != null) {
+			// If Present and true, encode the Payload Format Indicator (3.3.2.4)
+			if (isUTF8) {
 				outputStream.write(MqttPropertyIdentifiers.PAYLOAD_FORMAT_INDICATOR_IDENTIFIER);
-				outputStream.writeByte(payloadFormat);
+				outputStream.writeByte(PAYLOAD_FORMAT_UTF8);
 			}
 
 			// If Present, encode the Publication Expiry Interval (3.3.2.5)
@@ -189,8 +200,8 @@ public class MqttPublish extends MqttPersistableWireMessage{
 			}
 
 			// If Present, encode the User Defined Name-Value Pairs (3.3.2.9)
-			if (!userDefinedProperties.isEmpty()) {
-				for (UserProperty property : userDefinedProperties) {
+			if (!userProperties.isEmpty()) {
+				for (UserProperty property : userProperties) {
 					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
 					encodeUTF8(outputStream, property.getKey());
 					encodeUTF8(outputStream, property.getValue());
@@ -231,7 +242,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 			}
 
 			
-			if (message.getQos() > 0) {
+			if (this.qos > 0) {
 				dos.writeShort(msgId);
 			}
 			// Write Identifier / Value Fields
@@ -247,11 +258,11 @@ public class MqttPublish extends MqttPersistableWireMessage{
 
 	@Override
 	protected byte getMessageInfo() {
-		byte info = (byte) (message.getQos() << 1);
-		if (message.isRetained()) {
+		byte info = (byte) (this.qos << 1);
+		if (this.retained) {
 			info |= 0x01;
 		}
-		if (message.isDuplicate() || duplicate) {
+		if (this.dup || duplicate) {
 			info |= 0x08;
 		}
 		return info;
@@ -259,25 +270,18 @@ public class MqttPublish extends MqttPersistableWireMessage{
 
 	@Override
 	public byte[] getPayload() {
-		return message.getPayload();
+		return this.payload;
 	}
 
 	@Override
 	public int getPayloadLength() {
-		if (message.getPayload() != null) {
-			return message.getPayload().length;
+		if (this.payload != null) {
+			return this.payload.length;
 		} else {
 			return 0;
 		}
 	}
 
-	@Override
-	public void setMessageId(int msgId) {
-		super.setMessageId(msgId);
-		if (message instanceof MqttReceivedMessage) {
-			((MqttReceivedMessage) message).setMessageId(msgId);
-		}
-	}
 
 	@Override
 	public boolean isMessageIdRequired() {
@@ -286,12 +290,12 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		return true;
 	}
 
-	public int getPayloadFormat() {
-		return payloadFormat;
+	public boolean isUTF8() {
+		return isUTF8;
 	}
 
-	public void setPayloadFormat(Integer payloadFormat) {
-		this.payloadFormat = payloadFormat;
+	public void setUTF8(boolean payloadFormat) {
+		this.isUTF8 = payloadFormat;
 	}
 
 	public int getPublicationExpiryInterval() {
@@ -321,20 +325,38 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		this.correlationData = correlationData;
 	}
 
-	public List<UserProperty> getUserDefinedProperties() {
-		return userDefinedProperties;
+	public List<UserProperty> getUserProperties() {
+		return userProperties;
 	}
 
-	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
-		this.userDefinedProperties = userDefinedProperties;
+	public void setUserProperties(List<UserProperty> userDefinedProperties) {
+		this.userProperties = userDefinedProperties;
 	}
 
 	public MqttMessage getMessage() {
+		MqttMessage message = new MqttMessage(payload, qos, retained);
+		message.setUTF8(isUTF8);
+		message.setExpiryInterval(publicationExpiryInterval);
+		message.setResponseTopic(responseTopic);
+		message.setCorrelationData(correlationData);
+		message.setUserProperties(userProperties);
+		message.setSubscriptionIdentifier(subscriptionIdentifier);
+		message.setContentType(contentType);
 		return message;
 	}
 	
 	public void setMessage(MqttMessage message) {
-		this.message = message;
+		this.payload = message.getPayload();
+		this.qos = message.getQos();
+		this.dup = message.isDuplicate();
+		this.retained = message.isRetained();
+		this.isUTF8 = message.isUTF8();
+		this.publicationExpiryInterval = message.getExpiryInterval();
+		this.correlationData = message.getCorrelationData();
+		this.responseTopic = message.getResponseTopic();
+		this.userProperties = message.getUserProperties();
+		this.subscriptionIdentifier = message.getSubscriptionIdentifier();
+		this.contentType = message.getContentType();
 	}
 
 	public String getTopicName() {
@@ -373,7 +395,6 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	public String toString() {
 		// Convert the first few bytes of the payload into a hex string
 		StringBuilder hex = new StringBuilder();
-		byte[] payload = message.getPayload();
 		int limit = Math.min(payload.length, 20);
 		for (int i = 0; i < limit; i++) {
 			byte b = payload[i];
@@ -396,21 +417,21 @@ public class MqttPublish extends MqttPersistableWireMessage{
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("MqttPublish [");
-		sb.append(", qos=").append(message.getQos());
-		if (message.getQos() > 0) {
+		sb.append(", qos=").append(this.qos);
+		if (this.qos > 0) {
 			sb.append(", messageId=").append(msgId);
 		}
-		sb.append(", retained=").append(message.isRetained());
+		sb.append(", retained=").append(this.retained);
 		sb.append(", duplicate=").append(duplicate);
 		sb.append(", topic=").append(topicName);
 		sb.append(", payload=[hex=").append(hex);
 		sb.append(", utf8=").append(string);
 		sb.append(", length=").append(payload.length).append("]");
-		sb.append(", payloadFormat=").append(payloadFormat);
+		sb.append(", payloadFormat=").append(isUTF8);
 		sb.append(", publicationExpiryInterval=").append(publicationExpiryInterval);
 		sb.append(", topicAlias=").append(topicAlias);
 		sb.append(", correlationData=").append(Arrays.toString(correlationData));
-		sb.append(", userDefinedProperties=").append(userDefinedProperties);
+		sb.append(", userDefinedProperties=").append(userProperties);
 
 		return sb.toString();
 	}

@@ -37,7 +37,6 @@ public class MqttConnectTest{
 	private static final int willQoS = 1;
 	
 	private static final int sessionExpiryInterval = 60;
-	private static final int willDelayInterval = 60;
 	private static final int maxPacketSize = 128000;
 	private static final int topicAliasMax = 5;
 	private static final boolean requestReplyInfo = true;
@@ -50,6 +49,13 @@ public class MqttConnectTest{
 	private static final String userValue1 = "userValue1";
 	private static final String userValue2 = "userValue2";
 	private static final String userValue3 = "userValue3";
+	
+	private static final int willDelayInterval = 60;
+	private static final boolean willIsUTF8 = true;
+	private static final int willPublicationExpiryInterval = 60;
+	private static final String willResponseTopic = "replyTopic";
+	private static final byte[] willCorrelationData = "correlationData".getBytes();
+	private static final String willContentType = "JSON";
 
 	/**
 	 * Tests that an MqttConnect packet can be encoded successfully
@@ -90,7 +96,6 @@ public class MqttConnectTest{
 		Assert.assertEquals(willQoS, decodedConnectPacket.getWillMessage().getQos());
 		Assert.assertEquals(willDestination, decodedConnectPacket.getWillDestination());
 		Assert.assertEquals(sessionExpiryInterval, decodedConnectPacket.getSessionExpiryInterval());
-		Assert.assertEquals(willDelayInterval, decodedConnectPacket.getWillDelayInterval());
 		Assert.assertEquals(maxPacketSize,  decodedConnectPacket.getMaximumPacketSize());
 		Assert.assertEquals(topicAliasMax, decodedConnectPacket.getTopicAliasMaximum());
 		Assert.assertEquals(requestReplyInfo, decodedConnectPacket.getRequestReplyInfo());
@@ -101,6 +106,17 @@ public class MqttConnectTest{
 
 		Assert.assertEquals(authMethod, decodedConnectPacket.getAuthMethod());
 		Assert.assertArrayEquals(authData, decodedConnectPacket.getAuthData());
+		
+		Assert.assertEquals(willDelayInterval, decodedConnectPacket.getWillDelayInterval());
+		Assert.assertEquals(willIsUTF8, decodedConnectPacket.isWillIsUTF8());
+		Assert.assertEquals(willPublicationExpiryInterval, decodedConnectPacket.getWillPublicationExpiryInterval());
+		Assert.assertEquals(willContentType, decodedConnectPacket.getWillContentType());
+		Assert.assertEquals(willResponseTopic, decodedConnectPacket.getWillResponseTopic());
+		Assert.assertArrayEquals(willCorrelationData, decodedConnectPacket.getWillCorrelationData());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedConnectPacket.getWillUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedConnectPacket.getWillUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedConnectPacket.getWillUserDefinedProperties().get(2)));
+
 		}
 	
 	private MqttConnect generateConnectPacket(){
@@ -115,7 +131,6 @@ public class MqttConnectTest{
 		mqttConnectPacket.setWillMessage(willMessage);
 		mqttConnectPacket.setWillDestination(willDestination);
 		mqttConnectPacket.setSessionExpiryInterval(sessionExpiryInterval);
-		mqttConnectPacket.setWillDelayInterval(willDelayInterval);
 		mqttConnectPacket.setMaximumPacketSize(maxPacketSize);
 		mqttConnectPacket.setTopicAliasMaximum(topicAliasMax);
 		mqttConnectPacket.setRequestReplyInfo(requestReplyInfo);
@@ -128,6 +143,16 @@ public class MqttConnectTest{
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
 		mqttConnectPacket.setUserDefinedProperties(userDefinedProperties);
+		
+		mqttConnectPacket.setWillPublicationExpiryInterval(willPublicationExpiryInterval);
+		mqttConnectPacket.setWillDelayInterval(willDelayInterval);
+		mqttConnectPacket.setWillIsUTF8(willIsUTF8);
+		mqttConnectPacket.setWillContentType(willContentType);
+		mqttConnectPacket.setWillResponseTopic(willResponseTopic);
+		mqttConnectPacket.setWillCorrelationData(willCorrelationData);
+		mqttConnectPacket.setWillUserDefinedProperties(userDefinedProperties);
+		
+		
 		return mqttConnectPacket;
 	}
 }

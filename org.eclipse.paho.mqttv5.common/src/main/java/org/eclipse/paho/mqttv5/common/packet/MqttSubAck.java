@@ -46,20 +46,16 @@ public class MqttSubAck extends MqttAck {
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream inputStream = new DataInputStream(counter);
 		msgId = inputStream.readUnsignedShort();
-		long remainder = (long) data.length - counter.getCounter();
-		if(remainder >= 3) {
-			parseIdentifierValueFields(inputStream);
-		}
+		parseIdentifierValueFields(inputStream);
 
 		int remainingLength = data.length - counter.getCounter();
 		returnCodes = new int[remainingLength];
 
-		for(int i = 0; i < remainingLength; i++){
+		for (int i = 0; i < remainingLength; i++) {
 			int returnCode = inputStream.readUnsignedByte();
 			validateReturnCode(returnCode, validReturnCodes);
 			returnCodes[i] = returnCode;
 		}
-
 
 		inputStream.close();
 	}
@@ -83,11 +79,10 @@ public class MqttSubAck extends MqttAck {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
-			if (identifierValueFieldsByteArray.length != 0) {
-				// Write Identifier / Value Fields
-				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
-				outputStream.write(identifierValueFieldsByteArray);
-			}
+			// Write Identifier / Value Fields
+			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
+			outputStream.write(identifierValueFieldsByteArray);
+
 			outputStream.flush();
 			return baos.toByteArray();
 		} catch (IOException ioe) {
@@ -152,7 +147,7 @@ public class MqttSubAck extends MqttAck {
 				byte identifier = inputStream.readByte();
 				if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
 					reasonString = decodeUTF8(inputStream);
-				}  else if ( identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER){
+				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
 					String key = decodeUTF8(inputStream);
 					String value = decodeUTF8(inputStream);
 					userDefinedProperties.add(new UserProperty(key, value));

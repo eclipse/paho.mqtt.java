@@ -360,7 +360,7 @@ public class ClientState implements MqttState {
 					log.fine(CLASS_NAME, methodName, "604", new Object[] { key, message });
 
 					// The inbound messages that we have persisted will be QoS 2
-					inboundQoS2.put(new Integer(message.getMessageId()), message);
+					inboundQoS2.put(Integer.valueOf(message.getMessageId()), message);
 				} else if (key.startsWith(PERSISTENCE_SENT_PREFIX)) {
 					MqttPublish sendMessage = (MqttPublish) message;
 					highestMsgId = Math.max(sendMessage.getMessageId(), highestMsgId);
@@ -375,7 +375,7 @@ public class ClientState implements MqttState {
 							// @TRACE 605=outbound QoS 2 pubrel key={0} message={1}
 							log.fine(CLASS_NAME, methodName, "605", new Object[] { key, message });
 
-							outboundQoS2.put(new Integer(confirmMessage.getMessageId()), confirmMessage);
+							outboundQoS2.put(Integer.valueOf(confirmMessage.getMessageId()), confirmMessage);
 						} else {
 							// @TRACE 606=outbound QoS 2 completed key={0} message={1}
 							log.fine(CLASS_NAME, methodName, "606", new Object[] { key, message });
@@ -388,17 +388,17 @@ public class ClientState implements MqttState {
 							// @TRACE 607=outbound QoS 2 publish key={0} message={1}
 							log.fine(CLASS_NAME, methodName, "607", new Object[] { key, message });
 
-							outboundQoS2.put(new Integer(sendMessage.getMessageId()), sendMessage);
+							outboundQoS2.put(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 						} else {
 							// @TRACE 608=outbound QoS 1 publish key={0} message={1}
 							log.fine(CLASS_NAME, methodName, "608", new Object[] { key, message });
 
-							outboundQoS1.put(new Integer(sendMessage.getMessageId()), sendMessage);
+							outboundQoS1.put(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 						}
 					}
 					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
-					inUseMsgIds.put(new Integer(sendMessage.getMessageId()), new Integer(sendMessage.getMessageId()));
+					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
 				} else if (key.startsWith(PERSISTENCE_SENT_BUFFERED_PREFIX)) {
 
 					// Buffered outgoing messages that have not yet been sent at all
@@ -407,17 +407,17 @@ public class ClientState implements MqttState {
 					if (sendMessage.getMessage().getQos() == 2) {
 						// @TRACE 607=outbound QoS 2 publish key={0} message={1}
 						log.fine(CLASS_NAME, methodName, "607", new Object[] { key, message });
-						outboundQoS2.put(new Integer(sendMessage.getMessageId()), sendMessage);
+						outboundQoS2.put(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 					} else if (sendMessage.getMessage().getQos() == 1) {
 						// @TRACE 608=outbound QoS 1 publish key={0} message={1}
 						log.fine(CLASS_NAME, methodName, "608", new Object[] { key, message });
 
-						outboundQoS1.put(new Integer(sendMessage.getMessageId()), sendMessage);
+						outboundQoS1.put(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 
 					} else {
 						// @TRACE 511=outbound QoS 0 publish key={0} message={1}
 						log.fine(CLASS_NAME, methodName, "511", new Object[] { key, message });
-						outboundQoS0.put(new Integer(sendMessage.getMessageId()), sendMessage);
+						outboundQoS0.put(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 						// Because there is no Puback, we have to trust that this is enough to send the
 						// message
 						persistence.remove(key);
@@ -426,7 +426,7 @@ public class ClientState implements MqttState {
 
 					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
-					inUseMsgIds.put(new Integer(sendMessage.getMessageId()), new Integer(sendMessage.getMessageId()));
+					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
 
 				} else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {
 					MqttPubRel pubRelMessage = (MqttPubRel) message;
@@ -542,23 +542,23 @@ public class ClientState implements MqttState {
 			synchronized (queueLock) {
 				if (actualInFlight >= this.maxInflight) {
 					// @TRACE 613= sending {0} msgs at max inflight window
-					log.fine(CLASS_NAME, methodName, "613", new Object[] { new Integer(actualInFlight) });
+					log.fine(CLASS_NAME, methodName, "613", new Object[] { Integer.valueOf(actualInFlight) });
 
 					throw new MqttException(MqttClientException.REASON_CODE_MAX_INFLIGHT);
 				}
 
 				MqttMessage innerMessage = ((MqttPublish) message).getMessage();
 				// @TRACE 628=pending publish key={0} qos={1} message={2}
-				log.fine(CLASS_NAME, methodName, "628", new Object[] { new Integer(message.getMessageId()),
-						new Integer(innerMessage.getQos()), message });
+				log.fine(CLASS_NAME, methodName, "628", new Object[] { Integer.valueOf(message.getMessageId()),
+						Integer.valueOf(innerMessage.getQos()), message });
 
 				switch (innerMessage.getQos()) {
 				case 2:
-					outboundQoS2.put(new Integer(message.getMessageId()), message);
+					outboundQoS2.put(Integer.valueOf(message.getMessageId()), message);
 					persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
 					break;
 				case 1:
-					outboundQoS1.put(new Integer(message.getMessageId()), message);
+					outboundQoS1.put(Integer.valueOf(message.getMessageId()), message);
 					persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
 					break;
 				}
@@ -568,7 +568,7 @@ public class ClientState implements MqttState {
 			}
 		} else {
 			// @TRACE 615=pending send key={0} message {1}
-			log.fine(CLASS_NAME, methodName, "615", new Object[] { new Integer(message.getMessageId()), message });
+			log.fine(CLASS_NAME, methodName, "615", new Object[] { Integer.valueOf(message.getMessageId()), message });
 
 			if (message instanceof MqttConnect) {
 				synchronized (queueLock) {
@@ -582,7 +582,7 @@ public class ClientState implements MqttState {
 				if (message instanceof MqttPingReq) {
 					this.pingCommand = message;
 				} else if (message instanceof MqttPubRel) {
-					outboundQoS2.put(new Integer(message.getMessageId()), message);
+					outboundQoS2.put(Integer.valueOf(message.getMessageId()), message);
 					persistence.put(getSendConfirmPersistenceKey(message), (MqttPubRel) message);
 				} else if (message instanceof MqttPubComp) {
 					persistence.remove(getReceivedPersistenceKey(message));
@@ -666,12 +666,12 @@ public class ClientState implements MqttState {
 		synchronized (queueLock) {
 			// @TRACE 618=key={0} QoS={1}
 			log.fine(CLASS_NAME, methodName, "618",
-					new Object[] { new Integer(message.getMessageId()), new Integer(message.getMessage().getQos()) });
+					new Object[] { Integer.valueOf(message.getMessageId()), Integer.valueOf(message.getMessage().getQos()) });
 
 			if (message.getMessage().getQos() == 1) {
-				outboundQoS1.remove(new Integer(message.getMessageId()));
+				outboundQoS1.remove(Integer.valueOf(message.getMessageId()));
 			} else {
-				outboundQoS2.remove(new Integer(message.getMessageId()));
+				outboundQoS2.remove(Integer.valueOf(message.getMessageId()));
 			}
 			pendingMessages.removeElement(message);
 			persistence.remove(getSendPersistenceKey(message));
@@ -729,8 +729,8 @@ public class ClientState implements MqttState {
 					// @TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1}
 					// lastInboundActivity={2} time={3} lastPing={4}
 					log.severe(CLASS_NAME, methodName, "619",
-							new Object[] { new Long(this.keepAlive), new Long(lastOutboundActivity),
-									new Long(lastInboundActivity), new Long(time), new Long(lastPing) });
+							new Object[] { Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity),
+									Long.valueOf(lastInboundActivity), Long.valueOf(time), Long.valueOf(lastPing) });
 
 					// A ping has already been sent. At this point, assume that the
 					// broker has hung and the TCP layer hasn't noticed.
@@ -744,8 +744,8 @@ public class ClientState implements MqttState {
 					// I am probably blocked on a write operations as I should have been able to
 					// write at least a ping message
 					log.severe(CLASS_NAME, methodName, "642",
-							new Object[] { new Long(this.keepAlive), new Long(lastOutboundActivity),
-									new Long(lastInboundActivity), new Long(time), new Long(lastPing) });
+							new Object[] { Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity),
+									Long.valueOf(lastInboundActivity), Long.valueOf(time), Long.valueOf(lastPing) });
 
 					// A ping has not been sent but I am not progressing on the current write
 					// operation.
@@ -772,8 +772,8 @@ public class ClientState implements MqttState {
 
 					// @TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1}
 					// lastInboundActivity={2}
-					log.fine(CLASS_NAME, methodName, "620", new Object[] { new Long(this.keepAlive),
-							new Long(lastOutboundActivity), new Long(lastInboundActivity) });
+					log.fine(CLASS_NAME, methodName, "620", new Object[] { Long.valueOf(this.keepAlive),
+							Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity) });
 
 					// pingOutstanding++; // it will be set after the ping has been written on the
 					// wire
@@ -796,7 +796,7 @@ public class ClientState implements MqttState {
 				}
 			}
 			// @TRACE 624=Schedule next ping at {0}
-			log.fine(CLASS_NAME, methodName, "624", new Object[] { new Long(nextPingTime) });
+			log.fine(CLASS_NAME, methodName, "624", new Object[] { Long.valueOf(nextPingTime) });
 			pingSender.schedule(nextPingTime);
 		}
 
@@ -864,7 +864,7 @@ public class ClientState implements MqttState {
 						inFlightPubRels++;
 
 						// @TRACE 617=+1 inflightpubrels={0}
-						log.fine(CLASS_NAME, methodName, "617", new Object[] { new Integer(inFlightPubRels) });
+						log.fine(CLASS_NAME, methodName, "617", new Object[] { Integer.valueOf(inFlightPubRels) });
 					}
 
 					checkQuiesceLock();
@@ -880,7 +880,7 @@ public class ClientState implements MqttState {
 						actualInFlight++;
 
 						// @TRACE 623=+1 actualInFlight={0}
-						log.fine(CLASS_NAME, methodName, "623", new Object[] { new Integer(actualInFlight) });
+						log.fine(CLASS_NAME, methodName, "623", new Object[] { Integer.valueOf(actualInFlight) });
 					} else {
 						// @TRACE 622=inflight window full
 						log.fine(CLASS_NAME, methodName, "622");
@@ -914,7 +914,7 @@ public class ClientState implements MqttState {
 			this.lastOutboundActivity = System.currentTimeMillis();
 		}
 		// @TRACE 643=sent bytes count={0}
-		log.fine(CLASS_NAME, methodName, "643", new Object[] { new Integer(sentBytesCount) });
+		log.fine(CLASS_NAME, methodName, "643", new Object[] { Integer.valueOf(sentBytesCount) });
 	}
 
 	/**
@@ -940,7 +940,7 @@ public class ClientState implements MqttState {
 					pingOutstanding++;
 				}
 				// @TRACE 635=ping sent. pingOutstanding: {0}
-				log.fine(CLASS_NAME, methodName, "635", new Object[] { new Integer(pingOutstanding) });
+				log.fine(CLASS_NAME, methodName, "635", new Object[] { Integer.valueOf(pingOutstanding) });
 			}
 		} else if (message instanceof MqttPublish) {
 			if (((MqttPublish) message).getMessage().getQos() == 0) {
@@ -961,7 +961,7 @@ public class ClientState implements MqttState {
 		synchronized (queueLock) {
 			actualInFlight--;
 			// @TRACE 646=-1 actualInFlight={0}
-			log.fine(CLASS_NAME, methodName, "646", new Object[] { new Integer(actualInFlight) });
+			log.fine(CLASS_NAME, methodName, "646", new Object[] { Integer.valueOf(actualInFlight) });
 
 			if (!checkQuiesceLock()) {
 				queueLock.notifyAll();
@@ -978,9 +978,9 @@ public class ClientState implements MqttState {
 			// @TRACE 626=quiescing={0} actualInFlight={1} pendingFlows={2}
 			// inFlightPubRels={3} callbackQuiesce={4} tokens={5}
 			log.fine(CLASS_NAME, methodName, "626",
-					new Object[] { new Boolean(quiescing), new Integer(actualInFlight),
-							new Integer(pendingFlows.size()), new Integer(inFlightPubRels),
-							Boolean.valueOf(callback.isQuiesced()), new Integer(tokC) });
+					new Object[] { new Boolean(quiescing), Integer.valueOf(actualInFlight),
+							Integer.valueOf(pendingFlows.size()), Integer.valueOf(inFlightPubRels),
+							Boolean.valueOf(callback.isQuiesced()), Integer.valueOf(tokC) });
 			synchronized (quiesceLock) {
 				quiesceLock.notifyAll();
 			}
@@ -1002,7 +1002,7 @@ public class ClientState implements MqttState {
 			this.lastInboundActivity = System.currentTimeMillis();
 		}
 		// @TRACE 630=received bytes count={0}
-		log.fine(CLASS_NAME, methodName, "630", new Object[] { new Integer(receivedBytesCount) });
+		log.fine(CLASS_NAME, methodName, "630", new Object[] { Integer.valueOf(receivedBytesCount) });
 	}
 
 	/**
@@ -1018,7 +1018,7 @@ public class ClientState implements MqttState {
 		this.lastInboundActivity = System.currentTimeMillis();
 
 		// @TRACE 627=received key={0} message={1}
-		log.fine(CLASS_NAME, methodName, "627", new Object[] { new Integer(ack.getMessageId()), ack });
+		log.fine(CLASS_NAME, methodName, "627", new Object[] { Integer.valueOf(ack.getMessageId()), ack });
 
 		MqttToken token = tokenStore.getToken(ack);
 		MqttException mex = null;
@@ -1026,7 +1026,7 @@ public class ClientState implements MqttState {
 		if (token == null) {
 
 			// @TRACE 662=no message found for ack id={0}
-			log.fine(CLASS_NAME, methodName, "662", new Object[] { new Integer(ack.getMessageId()) });
+			log.fine(CLASS_NAME, methodName, "662", new Object[] { Integer.valueOf(ack.getMessageId()) });
 		} else if (ack instanceof MqttPubRec) {
 
 			// Complete the QoS 2 flow. Unlike all other
@@ -1052,7 +1052,7 @@ public class ClientState implements MqttState {
 				}
 			}
 			// @TRACE 636=ping response received. pingOutstanding: {0}
-			log.fine(CLASS_NAME, methodName, "636", new Object[] { new Integer(pingOutstanding) });
+			log.fine(CLASS_NAME, methodName, "636", new Object[] { Integer.valueOf(pingOutstanding) });
 		} else if (ack instanceof MqttConnAck) {
 
 			int rc = ((MqttConnAck) ack).getReturnCode();
@@ -1106,7 +1106,7 @@ public class ClientState implements MqttState {
 		this.lastInboundActivity = System.currentTimeMillis();
 
 		// @TRACE 651=received key={0} message={1}
-		log.fine(CLASS_NAME, methodName, "651", new Object[] { new Integer(message.getMessageId()), message });
+		log.fine(CLASS_NAME, methodName, "651", new Object[] { Integer.valueOf(message.getMessageId()), message });
 
 		if (!quiescing) {
 			if (message instanceof MqttPublish) {
@@ -1120,13 +1120,13 @@ public class ClientState implements MqttState {
 							&& clientComms.getConOptions().getTopicAliasMaximum() > 0) {
 						// @TRACE 652=Setting Incoming New Topic Alias alias={0}, topicName={1}
 						log.fine(CLASS_NAME, methodName, "652",
-								new Object[] { new Integer(send.getTopicAlias()), send.getTopicName() });
+								new Object[] { Integer.valueOf(send.getTopicAlias()), send.getTopicName() });
 						incomingTopicAliases.put(send.getTopicAlias(), send.getTopicName());
 					} else {
 						// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
 						log.severe(CLASS_NAME, methodName, "653",
-								new Object[] { new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
-										new Integer(send.getTopicAlias()) });
+								new Object[] { Integer.valueOf(clientComms.getConOptions().getTopicAliasMaximum()),
+										Integer.valueOf(send.getTopicAlias()) });
 						throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
 					}
 				} else if (send.getTopicName() == null && send.getTopicAlias() != 0) {
@@ -1140,8 +1140,8 @@ public class ClientState implements MqttState {
 					// No Topic String provided, topic alias is invalid
 					// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
 					log.fine(CLASS_NAME, methodName, "653",
-							new Object[] { new Integer(clientComms.getConOptions().getTopicAliasMaximum()),
-									new Integer(send.getTopicAlias()) });
+							new Object[] { Integer.valueOf(clientComms.getConOptions().getTopicAliasMaximum()),
+									Integer.valueOf(send.getTopicAlias()) });
 					if (callback != null) {
 						callback.mqttErrorOccured(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
 					}
@@ -1155,7 +1155,7 @@ public class ClientState implements MqttState {
 					break;
 				case 2:
 					persistence.put(getReceivedPersistenceKey(message), (MqttPublish) message);
-					inboundQoS2.put(new Integer(send.getMessageId()), send);
+					inboundQoS2.put(Integer.valueOf(send.getMessageId()), send);
 					this.send(new MqttPubRec(MqttReturnCode.RETURN_CODE_SUCCESS, send.getMessageId()), null);
 					break;
 
@@ -1163,7 +1163,7 @@ public class ClientState implements MqttState {
 					// should NOT reach here
 				}
 			} else if (message instanceof MqttPubRel) {
-				MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(new Integer(message.getMessageId()));
+				MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(Integer.valueOf(message.getMessageId()));
 				if (sendMsg != null) {
 					if (callback != null) {
 						callback.messageArrived(sendMsg);
@@ -1198,7 +1198,7 @@ public class ClientState implements MqttState {
 
 			// @TRACE 629=received key={0} token={1} message={2}
 			log.fine(CLASS_NAME, methodName, "629",
-					new Object[] { new Integer(message.getMessageId()), token, message });
+					new Object[] { Integer.valueOf(message.getMessageId()), token, message });
 
 			MqttAck ack = (MqttAck) message;
 
@@ -1207,18 +1207,18 @@ public class ClientState implements MqttState {
 				// QoS 1 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
 				persistence.remove(getSendBufferedPersistenceKey(message));
-				outboundQoS1.remove(new Integer(ack.getMessageId()));
+				outboundQoS1.remove(Integer.valueOf(ack.getMessageId()));
 				decrementInFlight();
 				releaseMessageId(message.getMessageId());
 				tokenStore.removeToken(message);
 				// @TRACE 650=removed Qos 1 publish. key={0}
-				log.fine(CLASS_NAME, methodName, "650", new Object[] { new Integer(ack.getMessageId()) });
+				log.fine(CLASS_NAME, methodName, "650", new Object[] { Integer.valueOf(ack.getMessageId()) });
 			} else if (ack instanceof MqttPubComp) {
 				// QoS 2 - user notified now remove from persistence...
 				persistence.remove(getSendPersistenceKey(message));
 				persistence.remove(getSendConfirmPersistenceKey(message));
 				persistence.remove(getSendBufferedPersistenceKey(message));
-				outboundQoS2.remove(new Integer(ack.getMessageId()));
+				outboundQoS2.remove(Integer.valueOf(ack.getMessageId()));
 
 				inFlightPubRels--;
 				decrementInFlight();
@@ -1227,7 +1227,7 @@ public class ClientState implements MqttState {
 
 				// @TRACE 645=removed QoS 2 publish/pubrel. key={0}, -1 inFlightPubRels={1}
 				log.fine(CLASS_NAME, methodName, "645",
-						new Object[] { new Integer(ack.getMessageId()), new Integer(inFlightPubRels) });
+						new Object[] { Integer.valueOf(ack.getMessageId()), Integer.valueOf(inFlightPubRels) });
 			}
 
 			checkQuiesceLock();
@@ -1351,7 +1351,7 @@ public class ClientState implements MqttState {
 	 *            A message ID that can be freed up for re-use.
 	 */
 	private synchronized void releaseMessageId(int msgId) {
-		inUseMsgIds.remove(new Integer(msgId));
+		inUseMsgIds.remove(Integer.valueOf(msgId));
 	}
 
 	/**
@@ -1376,8 +1376,8 @@ public class ClientState implements MqttState {
 					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_NO_MESSAGE_IDS_AVAILABLE);
 				}
 			}
-		} while (inUseMsgIds.containsKey(new Integer(nextMsgId)));
-		Integer id = new Integer(nextMsgId);
+		} while (inUseMsgIds.containsKey(Integer.valueOf(nextMsgId)));
+		Integer id = Integer.valueOf(nextMsgId);
 		inUseMsgIds.put(id, id);
 		return nextMsgId;
 	}
@@ -1393,7 +1393,7 @@ public class ClientState implements MqttState {
 		// If the timeout is greater than zero t
 		if (timeout > 0) {
 			// @TRACE 637=timeout={0}
-			log.fine(CLASS_NAME, methodName, "637", new Object[] { new Long(timeout) });
+			log.fine(CLASS_NAME, methodName, "637", new Object[] { Long.valueOf(timeout) });
 			synchronized (queueLock) {
 				this.quiescing = true;
 			}
@@ -1410,8 +1410,8 @@ public class ClientState implements MqttState {
 					if (tokc > 0 || pendingFlows.size() > 0 || !callback.isQuiesced()) {
 						// @TRACE 639=wait for outstanding: actualInFlight={0} pendingFlows={1}
 						// inFlightPubRels={2} tokens={3}
-						log.fine(CLASS_NAME, methodName, "639", new Object[] { new Integer(actualInFlight),
-								new Integer(pendingFlows.size()), new Integer(inFlightPubRels), new Integer(tokc) });
+						log.fine(CLASS_NAME, methodName, "639", new Object[] { Integer.valueOf(actualInFlight),
+								Integer.valueOf(pendingFlows.size()), Integer.valueOf(inFlightPubRels), Integer.valueOf(tokc) });
 
 						// wait for outstanding in flight messages to complete and
 						// any pending flows to complete
@@ -1454,20 +1454,20 @@ public class ClientState implements MqttState {
 		final String methodName = "deliveryComplete";
 
 		// @TRACE 641=remove publish from persistence. key={0}
-		log.fine(CLASS_NAME, methodName, "641", new Object[] { new Integer(message.getMessageId()) });
+		log.fine(CLASS_NAME, methodName, "641", new Object[] { Integer.valueOf(message.getMessageId()) });
 
 		persistence.remove(getReceivedPersistenceKey(message));
-		inboundQoS2.remove(new Integer(message.getMessageId()));
+		inboundQoS2.remove(Integer.valueOf(message.getMessageId()));
 	}
 
 	protected void deliveryComplete(int messageId) throws MqttPersistenceException {
 		final String methodName = "deliveryComplete";
 
 		// @TRACE 641=remove publish from persistence. key={0}
-		log.fine(CLASS_NAME, methodName, "641", new Object[] { new Integer(messageId) });
+		log.fine(CLASS_NAME, methodName, "641", new Object[] { Integer.valueOf(messageId) });
 
 		persistence.remove(getReceivedPersistenceKey(messageId));
-		inboundQoS2.remove(new Integer(messageId));
+		inboundQoS2.remove(Integer.valueOf(messageId));
 	}
 
 	/*
@@ -1530,14 +1530,14 @@ public class ClientState implements MqttState {
 		props.put("In use msgids", inUseMsgIds);
 		props.put("pendingMessages", pendingMessages);
 		props.put("pendingFlows", pendingFlows);
-		props.put("maxInflight", new Integer(maxInflight));
-		props.put("nextMsgID", new Integer(nextMsgId));
-		props.put("actualInFlight", new Integer(actualInFlight));
-		props.put("inFlightPubRels", new Integer(inFlightPubRels));
+		props.put("maxInflight", Integer.valueOf(maxInflight));
+		props.put("nextMsgID", Integer.valueOf(nextMsgId));
+		props.put("actualInFlight", Integer.valueOf(actualInFlight));
+		props.put("inFlightPubRels", Integer.valueOf(inFlightPubRels));
 		props.put("quiescing", Boolean.valueOf(quiescing));
-		props.put("pingoutstanding", new Integer(pingOutstanding));
-		props.put("lastOutboundActivity", new Long(lastOutboundActivity));
-		props.put("lastInboundActivity", new Long(lastInboundActivity));
+		props.put("pingoutstanding", Integer.valueOf(pingOutstanding));
+		props.put("lastOutboundActivity", Long.valueOf(lastOutboundActivity));
+		props.put("lastInboundActivity", Long.valueOf(lastInboundActivity));
 		props.put("outboundQoS2", outboundQoS2);
 		props.put("outboundQoS1", outboundQoS1);
 		props.put("outboundQoS0", outboundQoS0);
