@@ -24,28 +24,74 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 /**
  * A NetworkModule provides access to a specific transport to the broker. This may be a plain socket, a TLS secured
  * connection, a serial line, etc.
+ *
+ * <h3>Lifecycle</h3>
+ * Each NetworkModule instance has a lifecycle with the following logical states:
+ * <ul>
+ * <li><b>CREATED</b> - the instance holds no connection to its broker, no network resources are allocated and the
+ * {@code get...Stream}-methods may return {@code null} or throw an {@link IOException}.
+ * <li><b>CONNECTED</b> - the instance has an active connection to its broker, underlaying network ressources (e.g.
+ * socket)
+ * are allocated, the {@code get...Stream}-methods return open streams for reading and writing.</li>
+ * <li><b>DISCONNECTED</b> - the instance holds no connection to its broker, underlaying network resources are closed
+ * and
+ * released, the {@code get...Stream}-methods will always throw an {@link IOException}.</li>
+ * </ul>
  * <p>
- * TODO: Provide description about the reusability of the NetworkModule.
+ * The following transitions may occure:
+ * <ul>
+ * <li>{@code CREATED -> CONNECTED} - if {@link #start()} succeeded</li>
+ * <li>{@code CREATED -> CREATED} - if {@link #start()} failed</li>
+ * <li>{@code CONNECTED -> DISCONNECTED} - when {@link #stop()} is called; If an {@link IOException} occures on one of
+ * the input /
+ * output streams the {@code stop()}-method will be called.</li>
+ * <li>{@code DISCONNECTED -> CONNECTED} - if {@link #start()} succeeded during a re-connect attempt</li>
+ * </ul>
+ * The {@link #start()}-method of a NetworkModule instance may only be called multiple times if either the previous call
+ * resulted in an exception or {@link #stop()} has been called in between. The objects returned by
+ * {@link #getInputStream()} und {@link #getOutputStream()} are most likely different instances each time
+ * {@link #start()} had been called.
  */
 public interface NetworkModule {
+
 	/**
-	 * Open the transport to the broker.
+	 * Open the transport to the broker. The streams provided by {@link #getInputStream()} and
+	 * {@link #getOutputStream()} are expected to be open for read / write operations after this method succeed.
 	 *
-	 * @throws IOException
-	 * @throws MqttException
+	 * @throws IOException of any underlaying transport
+	 * @throws MqttException if the server connection cannot be established, e.g. the connection is being refused
 	 */
 	public void start() throws IOException, MqttException;
 
+	/**
+	 * Returns the input stream to be used for receiving messages. This method is usually called once directly after
+	 * {@link #start()}. The returned input stream will be used in the CommsReceiver of the client connection.
+	 *
+	 * @return the input stream to be used for receiving messages ({@code null} may be returned if {@link #start()} had
+	 *         never been sucessfully called on this instance)
+	 * @throws IOException if an I/O error occurs when creating the input stream or the broker connection is not
+	 *         established
+	 */
 	public InputStream getInputStream() throws IOException;
 
+	/**
+	 * Returns the output stream to be used for sending messages. This method is usually called once directly after
+	 * {@link #start()}. The returned output stream will be used in the CommsSender of the client connection.
+	 *
+	 * @return output stream to be used for sending messages ({@code null} may be returned if {@link #start()} had never
+	 *         been sucessfully called on this instance)
+	 * @throws IOException if an I/O error occurs when creating the output stream or the broker connection is not
+	 *         established
+	 */
 	public OutputStream getOutputStream() throws IOException;
 
 	/**
-	 * Close the transport to the broker.
+	 * Close the transport to the broker. The streams provided by {@link #getInputStream()} and
+	 * {@link #getOutputStream()} should be closed after this method returns.
 	 * <p>
 	 * TODO: Check whether the input and output streams are to be closed as well?
 	 *
-	 * @throws IOException
+	 * @throws IOException if an I/O error occurs when closing the transport
 	 */
 	public void stop() throws IOException;
 
