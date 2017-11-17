@@ -106,7 +106,7 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
  * implementing the {@link MqttClientPersistence} interface and passing it to
  * the clients constructor.
  * </p>
- * 
+ *
  * TODO - Class docs taken from IMqttAsyncClient, review for v5 Enables an
  * application to communicate with an MQTT server using non-blocking methods.
  * <p>
@@ -155,7 +155,7 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
  * There are two forms of non-blocking method:
  * <ol>
  * <li>
- * 
+ *
  * <pre>
  *     IMqttToken token = asyncClient.method(parms)
  * </pre>
@@ -167,7 +167,7 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
  * action completed successfully or not. For example to wait until a connect
  * completes:
  * </p>
- * 
+ *
  * <pre>
  *      IMqttToken conToken;
  *   	conToken = asyncClient.client.connect(conToken);
@@ -177,16 +177,16 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
  * <p>
  * To turn a method into a blocking invocation the following form can be used:
  * </p>
- * 
+ *
  * <pre>
  * IMqttToken token;
  * token = asyncClient.method(parms).waitForCompletion();
  * </pre>
- * 
+ *
  * </li>
  *
  * <li>
- * 
+ *
  * <pre>
  *     IMqttToken token method(parms, Object userContext, IMqttActionListener callback)
  * </pre>
@@ -197,7 +197,7 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
  * minimised in the callback. If not the operation of the MQTT client will be
  * inhibited. For example to be notified (called back) when a connect completes:
  * </p>
- * 
+ *
  * <pre>
  *     	IMqttToken conToken;
  *	    conToken = asyncClient.connect("some context",new new MqttAsyncActionListener() {
@@ -564,7 +564,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 
 		log.setResourceName(clientId);
 
-		if (clientId != null) { 
+		if (clientId != null) {
 			// Count characters, surrogate pairs count as one character.
 			int clientIdLength = 0;
 			for (int i = 0; i < clientId.length() - 1; i++) {
@@ -578,7 +578,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		} else {
 			clientId = "";
 		}
-		
+
 
 		MqttConnectionOptions.validateURI(serverURI);
 
@@ -951,7 +951,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		if (this.mqttCallback instanceof MqttCallbackExtended) {
 			connectActionListener.setMqttCallbackExtended((MqttCallbackExtended) this.mqttCallback);
 		}
-		
+
 		if(this.connOpts.isCleanSession()) {
 			this.mqttSession.clearSession();
 		}
@@ -983,7 +983,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, MqttActionListener, int, Integer, String,
 	 *      ArrayList)
-	 * 
+	 *
 	 */
 	public IMqttToken disconnect(Object userContext, MqttActionListener callback) throws MqttException {
 		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback, MqttReturnCode.RETURN_CODE_SUCCESS, null, null,
@@ -1018,7 +1018,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * quiesce time for work to complete before disconnecting. This method must not
 	 * be called from inside {@link MqttCallback} methods.
 	 * </p>
-	 * 
+	 *
 	 * @param quiesceTimeout
 	 *            the amount of time in milliseconds to allow for existing work to
 	 *            finish before disconnecting. A value of zero or less means the
@@ -1133,7 +1133,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * server and it will certainly fail to send the disconnect packet. It will wait
 	 * for a maximum of 30 seconds for work to quiesce before disconnecting and wait
 	 * for a maximum of 10 seconds for sending the disconnect packet to server.
-	 * 
+	 *
 	 * @throws MqttException
 	 *             if any unexpected error
 	 * @since 0.4.1
@@ -1149,7 +1149,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * Because the client is able to establish the TCP/IP connection to a none MQTT
 	 * server and it will certainly fail to send the disconnect packet. It will wait
 	 * for a maximum of 30 seconds for work to quiesce before disconnecting.
-	 * 
+	 *
 	 * @param disconnectTimeout
 	 *            the amount of time in milliseconds to allow send disconnect packet
 	 *            to server.
@@ -1167,7 +1167,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * <p>
 	 * Because the client is able to establish the TCP/IP connection to a none MQTT
 	 * server and it will certainly fail to send the disconnect packet.
-	 * 
+	 *
 	 * @param quiesceTimeout
 	 *            the amount of time in milliseconds to allow for existing work to
 	 *            finish before disconnecting. A value of zero or less means the
@@ -1243,7 +1243,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	public String getClientId() {
 		return this.mqttSession.getClientId();
 	}
-	
+
 	/**
 	 * Returns the address of the server used by this client.
 	 * <p>
@@ -1443,12 +1443,12 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * when connecting to the server then the subscription remains in place until
 	 * either:
 	 * </p>
-	 * 
+	 *
 	 * <ul>
 	 * <li>The client disconnects</li>
 	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
 	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false when
 	 * connecting to the server then the subscription remains in place until either:
@@ -1721,7 +1721,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 
 		return token;
 	}
-	
+
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards.
 	 *
@@ -1751,21 +1751,21 @@ public class MqttAsyncClient implements MqttClientInterface {
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
 			IMqttMessageListener messageListener, int subscriptionIdentifier, List<UserProperty> userProperties)
 			throws MqttException {
-		
+
 		int subId = subscriptionIdentifier;
-		
+
 
 			// Automatic Subscription Identifier Assignment is enabled
 			if(connOpts.useSubscriptionIdentifiers()) {
-				
+
 				// Application is overriding the subscription Identifier
 				if(subId != 0) {
 					// Check that we are not already using this ID, else throw Illegal Argument Exception
 					if(this.comms.doesSubscriptionIdentifierExist(subId)) {
 						throw new IllegalArgumentException("The Subscription Identifier " + subId + " already exists.");
 					}
-					
-					
+
+
 				} else {
 					// Automatically assign new ID and link to callback.
 					subId = this.mqttSession.getNextSubscriptionIdentifier();
@@ -1855,7 +1855,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * The method returns control before the unsubscribe completes. Completion can
 	 * be tracked by:
 	 * </p>
-	 * 
+	 *
 	 * <ul>
 	 * <li>Waiting on the returned token {@link MqttToken#waitForCompletion()}
 	 * or</li>
@@ -1938,7 +1938,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * from each non-blocking method or using setting a {@link MqttActionListener}
 	 * on the non-blocking method.
 	 * <p>
-	 * 
+	 *
 	 * @see MqttCallback
 	 * @param callback
 	 *            which will be invoked for certain asynchronous events
@@ -1955,7 +1955,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * control over when the acks are sent. The default behaviour, when manualAcks
 	 * is false, is to send the MQTT acknowledgements automatically at the
 	 * successful completion of the messageArrived callback method.
-	 * 
+	 *
 	 * @param manualAcks
 	 *            if set to true MQTT acknowledgements are not sent
 	 */
@@ -1966,7 +1966,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	/**
 	 * Indicate that the application has completed processing the message with id
 	 * messageId. This will cause the MQTT acknowledgement to be sent to the server.
-	 * 
+	 *
 	 * @param messageId
 	 *            the MQTT message id to be acknowledged
 	 * @param qos
@@ -1992,7 +1992,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * tokens as the cleanSession option deletes all earlier state. For state to be
 	 * remembered the client must connect with cleanSession set to false
 	 * </P>
-	 * 
+	 *
 	 * @return zero or more delivery tokens
 	 */
 	public IMqttDeliveryToken[] getPendingDeliveryTokens() {
@@ -2133,11 +2133,11 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * different from <em>finance</em>. <em>/finance</em> matches "+/+" and "/+",
 	 * but not "+".</li>
 	 * <li>Do not include the null character (Unicode
-	 * 
+	 *
 	 * <pre>
 	 * \x0000
 	 * </pre>
-	 * 
+	 *
 	 * ) in any topic.</li>
 	 * </ul>
 	 *
@@ -2151,7 +2151,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * <li>There can be any number of root nodes; that is, there can be any number
 	 * of topic trees.</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
 	 * The method returns control before the publish completes. Completion can be
 	 * tracked by:
@@ -2433,7 +2433,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * Close the client Releases all resource associated with the client. After the
 	 * client has been closed it cannot be reused. For instance attempts to connect
 	 * will fail.
-	 * 
+	 *
 	 * @throws MqttException
 	 *             if the client is not disconnected.
 	 */
@@ -2445,10 +2445,10 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * Close the client Releases all resource associated with the client. After the
 	 * client has been closed it cannot be reused. For instance attempts to connect
 	 * will fail.
-	 * 
+	 *
 	 * @param force
 	 *            - Will force the connection to close.
-	 * 
+	 *
 	 * @throws MqttException
 	 *             if the client is not disconnected.
 	 */
