@@ -20,9 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -81,7 +81,7 @@ public class MqttV3Receiver implements MqttCallback {
    * @param mqttClient
    * @param reportStream
    */
-  public MqttV3Receiver(IMqttAsyncClient mqttClient, PrintStream reportStream) {
+  public MqttV3Receiver(MqttAsyncClient mqttClient, PrintStream reportStream) {
     String methodName = Utility.getMethodName();
     log.entering(className, methodName);
 

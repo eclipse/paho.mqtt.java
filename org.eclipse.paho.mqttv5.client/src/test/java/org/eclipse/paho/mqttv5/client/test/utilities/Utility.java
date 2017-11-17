@@ -17,9 +17,9 @@ import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
+import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.common.MqttException;
 
 /**
@@ -60,7 +60,7 @@ public class Utility {
    * @param client
    * @throws MqttException
    */
-  public static void disconnectAndCloseClient(IMqttAsyncClient client) throws MqttException {
+  public static void disconnectAndCloseClient(MqttAsyncClient client) throws MqttException {
     if (client != null) {
       if (client.isConnected()) {
         IMqttToken token = client.disconnect(null, null);
