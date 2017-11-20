@@ -4,9 +4,9 @@
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ * http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ * http://www.eclipse.org/org/documents/edl-v10.php.
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -34,7 +34,7 @@ public class NetworkModuleService {
 	private static final Logger LOG = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,
 			NetworkModuleService.class.getSimpleName());
 	private static final ServiceLoader<NetworkModuleFactory> FACTORY_SERVICE_LOADER = ServiceLoader.load(
-			NetworkModuleFactory.class);
+			NetworkModuleFactory.class, NetworkModuleService.class.getClassLoader());
 
 	/** Pattern to match URI authority parts: {@code authority = [userinfo"@"]host[":"port]} */
 	private static final Pattern AUTHORITY_PATTERN = Pattern.compile("((.+)@)?([^:]*)(:(\\d+))?");
@@ -126,7 +126,7 @@ public class NetworkModuleService {
 			return;
 		}
 		Matcher matcher = AUTHORITY_PATTERN.matcher(toPatch.getAuthority());
-		if (matcher.matches()) {
+		if (matcher.find()) {
 			setURIField(toPatch, "userInfo", matcher.group(AUTH_GROUP_USERINFO));
 			setURIField(toPatch, "host", matcher.group(AUTH_GROUP_HOST));
 			String portString = matcher.group(AUTH_GROUP_PORT);
