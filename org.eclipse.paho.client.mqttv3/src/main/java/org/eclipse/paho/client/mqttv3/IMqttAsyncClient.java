@@ -116,7 +116,7 @@ package org.eclipse.paho.client.mqttv3;
  *   also be notified when a message has been delivered to the requested quality of service.</p>
  *
  */
-public interface IMqttAsyncClient {
+public interface IMqttAsyncClient extends AutoCloseable {
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * <p>The default options are specified in {@link MqttConnectOptions} class.
