@@ -203,6 +203,7 @@ public class ClientComms {
 	/**
 	 * Close and tidy up.
 	 *
+	 * @param force whether close is forced or not.
 	 * Call each main class and let it tidy up e.g. releasing the token
 	 * store which normally survives a disconnect.
 	 * @throws MqttException  if not disconnected
