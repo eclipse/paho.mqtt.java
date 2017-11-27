@@ -5,15 +5,15 @@ import org.eclipse.paho.mqttv5.client.alpha.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.alpha.IMqttMessage;
 import org.eclipse.paho.mqttv5.client.alpha.result.IMqttDeliveryResult;
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.osgi.util.promise.PromiseExecutors;
+import org.osgi.util.promise.PromiseFactory;
 
 public class MqttDeliveryToken<C> extends MqttToken<IMqttDeliveryResult<C>, C> implements IMqttDeliveryToken<C> {
 
 	private final IMqttMessage message;
 
-	public MqttDeliveryToken(PromiseExecutors promiseExecutors, IMqttCommonClient client,
+	public MqttDeliveryToken(PromiseFactory promiseFactory, IMqttCommonClient client,
 			C userContext, int messageId, IMqttMessage message) {
-		super(promiseExecutors, client, userContext, messageId);
+		super(promiseFactory, client, userContext, messageId);
 		this.message = message;
 	}
 

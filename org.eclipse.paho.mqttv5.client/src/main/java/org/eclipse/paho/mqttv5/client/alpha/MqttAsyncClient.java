@@ -35,7 +35,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseExecutors;
+import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.pushstream.PushEvent;
 import org.osgi.util.pushstream.PushEventSource;
 import org.osgi.util.pushstream.PushStreamProvider;
@@ -69,7 +69,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	private final org.eclipse.paho.mqttv5.client.MqttAsyncClient delegate;
 	private final ScheduledExecutorService workers;
 	private final ScheduledExecutorService promiseTimer;
-	private final PromiseExecutors promiseExecutors;
+	private final PromiseFactory promiseFactory;
 	private final PushStreamProvider pushStreamProvider;
 	
 	private final Set<IMqttDeliveryToken<?>> pendingDeliveries = new HashSet<>();
@@ -83,7 +83,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		delegate = new org.eclipse.paho.mqttv5.client.MqttAsyncClient(serverURI, clientId,
 				null, null, workers);
 
-		promiseExecutors = new PromiseExecutors(workers, promiseTimer);
+		promiseFactory = new PromiseFactory(workers, promiseTimer);
 		pushStreamProvider = new PushStreamProvider();
 	}
 
@@ -149,7 +149,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	public <C> IMqttToken<IMqttConnectionResult<C>, C> connect(MqttConnectionOptions options, C userContext)
 			throws MqttException, MqttSecurityException {
 		MqttToken<IMqttConnectionResult<C>, C> token = 
-				new MqttToken<>(promiseExecutors, this, userContext, 0);
+				new MqttToken<>(promiseFactory, this, userContext, 0);
 		
 		delegate.connect(options, userContext, new Callback(
 				t -> token.resolve(new MqttConnectionResultImpl<C>(this, userContext, t.getSessionPresent())), 
@@ -178,7 +178,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			throws MqttException {
 		
 		MqttToken<IMqttResult<C>, C> token = 
-				new MqttToken<>(promiseExecutors, this, userContext, 0);
+				new MqttToken<>(promiseFactory, this, userContext, 0);
 		
 		delegate.disconnect(quiesceTimeout, userContext, new Callback(
 				t -> token.resolve(new MqttResultImpl<C>(this, userContext)), 
@@ -234,7 +234,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		byte[] payload = new byte[buffer.remaining()];
 		buffer.get(payload);
 		
-		Deferred<IMqttDeliveryResult<C>> d = promiseExecutors.deferred();
+		Deferred<IMqttDeliveryResult<C>> d = promiseFactory.deferred();
 		
 		int messageId = delegate.publish(topic, new MqttMessage(payload, message.getQos(), message.isRetained()), 
 				userContext, new Callback(
@@ -242,7 +242,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 					t -> d.fail(t))).getMessageId();
 		
 		MqttDeliveryToken<C> token = 
-				new MqttDeliveryToken<>(promiseExecutors, this, userContext, messageId, message);
+				new MqttDeliveryToken<>(promiseFactory, this, userContext, messageId, message);
 		
 		synchronized (pendingDeliveries) {
 			pendingDeliveries.add(token);
@@ -285,8 +285,8 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			topics[i] = subscriptions[i].getTopic();
 		}
 		
-		Deferred<IMqttSubscriptionResult<C>> subscribe = promiseExecutors.deferred();
-		Deferred<IMqttUnsubscriptionResult<C>> unsubscribe = promiseExecutors.deferred();
+		Deferred<IMqttSubscriptionResult<C>> subscribe = promiseFactory.deferred();
+		Deferred<IMqttUnsubscriptionResult<C>> unsubscribe = promiseFactory.deferred();
 		
 		PushEventSource<IReceivedMessage<C>> pes = consumer -> {
 				AutoCloseable cleanup = () -> {
@@ -337,7 +337,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				return cleanup;
 			};
 		
-		MqttSubscriptionToken<C> token = new MqttSubscriptionToken<>(promiseExecutors, this, 
+		MqttSubscriptionToken<C> token = new MqttSubscriptionToken<>(promiseFactory, this, 
 				userContext, Arrays.asList(topics), 
 				pushStreamProvider.buildStream(pes)
 						.withExecutor(workers)
