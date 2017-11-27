@@ -19,12 +19,12 @@
 package org.eclipse.paho.mqttv5.client.internal;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
@@ -57,11 +57,14 @@ public class CommsCallback implements Runnable {
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
 	private MqttCallbackExtended reconnectInternalCallback;
-	private Hashtable<String, IMqttMessageListener> callbacks; // topicFilter -> messageHandler
+	private HashMap<Integer, IMqttMessageListener> callbackMap; // Map of message handler callbacks to internal IDs
+	private HashMap<String, Integer> callbackTopicMap; // Map of Topic Strings to internal callback Ids
+	private HashMap<Integer, Integer> subscriptionIdMap; // Map of Subscription Ids to callback Ids
+	private AtomicInteger messageHandlerId = new AtomicInteger(0);
 	private ClientComms clientComms;
-	private Vector<MqttPublish> messageQueue;
-	private Vector<MqttToken> completeQueue;
-	public boolean running = false;
+	private ArrayList<MqttPublish> messageQueue;
+	private ArrayList<MqttToken> completeQueue;
+	private boolean running = false;
 	private boolean quiescing = false;
 	private Object lifecycle = new Object();
 	private Thread callbackThread;
@@ -75,9 +78,11 @@ public class CommsCallback implements Runnable {
 
 	CommsCallback(ClientComms clientComms) {
 		this.clientComms = clientComms;
-		this.messageQueue = new Vector<MqttPublish>(INBOUND_QUEUE_SIZE);
-		this.completeQueue = new Vector<MqttToken>(INBOUND_QUEUE_SIZE);
-		this.callbacks = new Hashtable<String, IMqttMessageListener>();
+		this.messageQueue = new ArrayList<>(INBOUND_QUEUE_SIZE);
+		this.completeQueue = new ArrayList<>(INBOUND_QUEUE_SIZE);
+		this.callbackMap = new HashMap<>();
+		this.callbackTopicMap = new HashMap<>();
+		this.subscriptionIdMap = new HashMap<>();
 		log.setResourceName(clientComms.getClient().getClientId());
 	}
 
@@ -188,8 +193,8 @@ public class CommsCallback implements Runnable {
 					synchronized (completeQueue) {
 						if (!completeQueue.isEmpty()) {
 							// First call the delivery arrived callback if needed
-							token = completeQueue.elementAt(0);
-							completeQueue.removeElementAt(0);
+							token = completeQueue.get(0);
+							completeQueue.remove(0);
 						}
 					}
 					if (null != token) {
@@ -203,8 +208,8 @@ public class CommsCallback implements Runnable {
 							// Note, there is a window on connect where a publish
 							// could arrive before we've
 							// finished the connect logic.
-							message = messageQueue.elementAt(0);
-							messageQueue.removeElementAt(0);
+							message = messageQueue.get(0);
+							messageQueue.remove(0);
 						}
 					}
 					if (null != message) {
@@ -289,7 +294,7 @@ public class CommsCallback implements Runnable {
 		// If there was a problem and a client callback has been set inform
 		// the connection lost listener of the problem.
 		try {
-			if(mqttCallback != null && message != null) {
+			if (mqttCallback != null && message != null) {
 
 				// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
 				log.fine(CLASS_NAME, methodName, "722", new Object[] { message.toString() });
@@ -308,14 +313,13 @@ public class CommsCallback implements Runnable {
 
 				reconnectInternalCallback.disconnected(disconnectResponse);
 			}
-		} catch (java.lang.Throwable t) {
+		} catch (Throwable t) {
 			// Just log the fact that a throwable has caught connection lost
 			// is called during shutdown processing so no need to do anything else
 			// @TRACE 720=exception from connectionLost {0}
 			log.fine(CLASS_NAME, methodName, "720", new Object[] { t });
 		}
 	}
-
 
 	/**
 	 * An action has completed - if a completion listener has been set on the token
@@ -352,7 +356,7 @@ public class CommsCallback implements Runnable {
 	 */
 	public void messageArrived(MqttPublish sendMessage) {
 		final String methodName = "messageArrived";
-		if (mqttCallback != null || callbacks.size() > 0) {
+		if (mqttCallback != null || callbackMap.size() > 0) {
 			// If we already have enough messages queued up in memory, wait
 			// until some more queue space becomes available. This helps
 			// the client protect itself from getting flooded by messages
@@ -368,7 +372,7 @@ public class CommsCallback implements Runnable {
 				}
 			}
 			if (!quiescing) {
-				messageQueue.addElement(sendMessage);
+				messageQueue.add(sendMessage);
 				// Notify the CommsCallback thread that there's work to do...
 				synchronized (workAvailable) {
 					// @TRACE 710=new msg avail, notify workAvailable
@@ -412,13 +416,10 @@ public class CommsCallback implements Runnable {
 	}
 
 	public boolean isQuiesced() {
-		if (quiescing && completeQueue.size() == 0 && messageQueue.size() == 0) {
-			return true;
-		}
-		return false;
+		return (quiescing && completeQueue.isEmpty() && messageQueue.isEmpty());
 	}
 
-	private void handleMessage(MqttPublish publishMessage) throws MqttException, Exception {
+	private void handleMessage(MqttPublish publishMessage) throws Exception {
 		final String methodName = "handleMessage";
 		// If quisecing process any pending messages.
 
@@ -458,7 +459,7 @@ public class CommsCallback implements Runnable {
 
 		if (running) {
 			// invoke callbacks on callback thread
-			completeQueue.addElement(token);
+			completeQueue.add(token);
 			synchronized (workAvailable) {
 				// @TRACE 715=new workAvailable. key={0}
 				log.fine(CLASS_NAME, methodName, "715", new Object[] { token.internalTok.getKey() });
@@ -468,7 +469,7 @@ public class CommsCallback implements Runnable {
 			// invoke async callback on invokers thread
 			try {
 				handleActionComplete(token);
-			} catch (Throwable ex) {
+			} catch (MqttException ex) {
 				// Users code could throw an Error or Exception e.g. in the case
 				// of class NoClassDefFoundError
 				// @TRACE 719=callback threw ex:
@@ -490,28 +491,89 @@ public class CommsCallback implements Runnable {
 		return callbackThread;
 	}
 
-	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
-		this.callbacks.put(topicFilter, messageListener);
+	public void setMessageListener(Integer subscriptionId, String topicFilter, IMqttMessageListener messageListener) {
+		int internalId = messageHandlerId.incrementAndGet();
+		this.callbackMap.put(internalId, messageListener);
+		this.callbackTopicMap.put(topicFilter, internalId);
+
+		if (subscriptionId != null) {
+			this.subscriptionIdMap.put(subscriptionId, internalId);
+		}
 	}
 
+	/**
+	 * Removes a Message Listener by Topic. If the Topic is null or incorrect, this
+	 * function will return without making any changes. It will also attempt to find
+	 * any subscription IDs linked to the same message listener and will remove them
+	 * too.
+	 * 
+	 * @param topicFilter
+	 *            the topic filter that identifies the Message listener to remove.
+	 */
 	public void removeMessageListener(String topicFilter) {
-		this.callbacks.remove(topicFilter); // no exception thrown if the filter was not present
+		Integer callbackId = this.callbackTopicMap.get(topicFilter);
+		this.callbackMap.remove(callbackId);
+		this.callbackTopicMap.remove(topicFilter);
+
+		// Reverse lookup the subscription ID if it exists to remove that as well
+		for (Map.Entry<Integer, Integer> entry : this.subscriptionIdMap.entrySet()) {
+			if (entry.getValue().equals(callbackId)) {
+				this.subscriptionIdMap.remove(entry.getKey());
+			}
+		}
+	}
+
+	/**
+	 * Removes a Message Listener by subscription ID. If the Subscription Identifier
+	 * is null or incorrect, this function will return without making any changes.
+	 * It will also attempt to find any Topic Strings linked to the same message
+	 * listener and will remove them too.
+	 * 
+	 * @param subscriptionId
+	 *            the subscription ID that identifies the Message listener to
+	 *            remove.
+	 */
+	public void removeMessageListener(Integer subscriptionId) {
+		Integer callbackId = this.subscriptionIdMap.get(subscriptionId);
+		this.subscriptionIdMap.remove(callbackId);
+		this.callbackMap.remove(callbackId);
+
+		// Reverse lookup the topic if it exists to remove that as well
+		for (Map.Entry<String, Integer> entry : this.callbackTopicMap.entrySet()) {
+			if (entry.getValue().equals(callbackId)) {
+				this.callbackTopicMap.remove(entry.getKey());
+			}
+		}
 	}
 
 	public void removeMessageListeners() {
-		this.callbacks.clear();
+		this.callbackMap.clear();
+		this.subscriptionIdMap.clear();
+		this.callbackTopicMap.clear();
 	}
 
 	protected boolean deliverMessage(String topicName, int messageId, MqttMessage aMessage) throws Exception {
 		boolean delivered = false;
 
-		Enumeration<String> keys = callbacks.keys();
-		while (keys.hasMoreElements()) {
-			String topicFilter = keys.nextElement();
-			if (MqttTopic.isMatched(topicFilter, topicName)) {
-				aMessage.setId(messageId);
-				(callbacks.get(topicFilter)).messageArrived(topicName, aMessage);
-				delivered = true;
+		if (aMessage.getSubscriptionIdentifiers().isEmpty()) {
+			// No Subscription IDs, use topic filter matching
+			for (Map.Entry<String, Integer> entry : this.callbackTopicMap.entrySet()) {
+				if (MqttTopic.isMatched(entry.getKey(), topicName)) {
+					aMessage.setId(messageId);
+					this.callbackMap.get(entry.getValue()).messageArrived(topicName, aMessage);
+					delivered = true;
+				}
+			}
+
+		} else {
+			// We have Subscription IDs
+			for (Integer subId : aMessage.getSubscriptionIdentifiers()) {
+				if (this.subscriptionIdMap.containsKey(subId)) {
+					Integer callbackId = this.subscriptionIdMap.get(subId);
+					aMessage.setId(messageId);
+					this.callbackMap.get(callbackId).messageArrived(topicName, aMessage);
+					delivered = true;
+				}
 			}
 		}
 
@@ -526,6 +588,10 @@ public class CommsCallback implements Runnable {
 		}
 
 		return delivered;
+	}
+
+	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
+		return (this.subscriptionIdMap.containsKey(subscriptionIdentifier));
 	}
 
 }

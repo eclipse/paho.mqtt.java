@@ -40,7 +40,7 @@ public class MqttMessage {
 	private String responseTopic;
 	private byte[] correlationData;
 	private List<UserProperty> userProperties = new ArrayList<>();
-	private Integer subscriptionIdentifier;
+	private List<Integer> subscriptionIdentifiers;
 	private String contentType;
 
 	public String getContentType() {
@@ -51,12 +51,12 @@ public class MqttMessage {
 		this.contentType = contentType;
 	}
 
-	public Integer getSubscriptionIdentifier() {
-		return subscriptionIdentifier;
+	public List<Integer> getSubscriptionIdentifiers() {
+		return subscriptionIdentifiers;
 	}
 
-	public void setSubscriptionIdentifier(Integer subscriptionIdentifier) {
-		this.subscriptionIdentifier = subscriptionIdentifier;
+	public void setSubscriptionIdentifiers(List<Integer> subscriptionIdentifiers) {
+		this.subscriptionIdentifiers = subscriptionIdentifiers;
 	}
 
 	/**
@@ -346,8 +346,8 @@ public class MqttMessage {
 		return "MqttMessage [mutable=" + mutable + ", payload=" + new String(payload) + ", qos=" + qos + ", retained="
 				+ retained + ", dup=" + dup + ", messageId=" + messageId + ", isUTF8=" + isUTF8 + ", expiryInterval="
 				+ expiryInterval + ", responseTopic=" + responseTopic + ", correlationData="
-				+ Arrays.toString(correlationData) + ", userProperties=" + userProperties + ", subscriptionIdentifier="
-				+ subscriptionIdentifier + ", contentType=" + contentType + "]";
+				+ Arrays.toString(correlationData) + ", userProperties=" + userProperties + ", subscriptionIdentifiers="
+				+ subscriptionIdentifiers + ", contentType=" + contentType + "]";
 	}
 
 }

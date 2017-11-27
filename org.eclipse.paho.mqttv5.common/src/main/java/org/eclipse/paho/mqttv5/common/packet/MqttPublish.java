@@ -50,7 +50,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 	private Integer topicAlias;
 	private byte[] correlationData;
 	private List<UserProperty> userProperties = new ArrayList<>();
-	private Integer subscriptionIdentifier;
+	private List<Integer> subscriptionIdentifiers = new ArrayList<>();
 	private String contentType;
 	private String responseTopic;
 
@@ -74,7 +74,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		this.correlationData = message.getCorrelationData();
 		this.responseTopic = message.getResponseTopic();
 		this.userProperties = message.getUserProperties();
-		this.subscriptionIdentifier = message.getSubscriptionIdentifier();
+		this.subscriptionIdentifiers = message.getSubscriptionIdentifiers();
 		this.contentType = message.getContentType();
 	}
 
@@ -152,7 +152,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 				} else if (identifier == MqttPropertyIdentifiers.CONTENT_TYPE_IDENTIFIER) {
 					contentType = decodeUTF8(inputStream);
 				} else if (identifier == MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER) {
-					subscriptionIdentifier = readVariableByteInteger(inputStream).getValue();
+					subscriptionIdentifiers.add(readVariableByteInteger(inputStream).getValue());
 				} else {
 					// Unidentified Identifier
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
@@ -209,9 +209,11 @@ public class MqttPublish extends MqttPersistableWireMessage{
 			}
 
 			// If Present, encode the Subscription Identifier (3.3.2.3.8)
-			if (subscriptionIdentifier != null){
-				outputStream.write(MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER);
-				outputStream.write(encodeVariableByteInteger(subscriptionIdentifier));
+			if (subscriptionIdentifiers != null && !subscriptionIdentifiers.isEmpty()){
+				for(int subId : subscriptionIdentifiers) {
+					outputStream.write(MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER);
+					outputStream.write(encodeVariableByteInteger(subId));
+				}
 			}
 
 
@@ -340,7 +342,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		message.setResponseTopic(responseTopic);
 		message.setCorrelationData(correlationData);
 		message.setUserProperties(userProperties);
-		message.setSubscriptionIdentifier(subscriptionIdentifier);
+		message.setSubscriptionIdentifiers(subscriptionIdentifiers);
 		message.setContentType(contentType);
 		return message;
 	}
@@ -355,7 +357,7 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		this.correlationData = message.getCorrelationData();
 		this.responseTopic = message.getResponseTopic();
 		this.userProperties = message.getUserProperties();
-		this.subscriptionIdentifier = message.getSubscriptionIdentifier();
+		this.subscriptionIdentifiers = message.getSubscriptionIdentifiers();
 		this.contentType = message.getContentType();
 	}
 
@@ -367,12 +369,12 @@ public class MqttPublish extends MqttPersistableWireMessage{
 		this.topicName = topicName;
 	}
 
-	public int getSubscriptionIdentifier() {
-		return subscriptionIdentifier;
+	public List<Integer> getSubscriptionIdentifiers() {
+		return this.subscriptionIdentifiers;
 	}
 
-	public void setSubscriptionIdentifier(int subscriptionIdentifier) {
-		this.subscriptionIdentifier = subscriptionIdentifier;
+	public void setSubscriptionIdentifiers(List<Integer> subscriptionIdentifiers) {
+		this.subscriptionIdentifiers = subscriptionIdentifiers;
 	}
 
 	public String getContentType() {

@@ -731,8 +731,8 @@ public class ClientComms {
 		this.callback.messageArrivedComplete(messageId, qos);
 	}
 
-	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
-		this.callback.setMessageListener(topicFilter, messageListener);
+	public void setMessageListener(Integer subscriptionId, String topicFilter, IMqttMessageListener messageListener) {
+		this.callback.setMessageListener(subscriptionId, topicFilter, messageListener);
 	}
 
 	public void removeMessageListener(String topicFilter) {
@@ -1080,6 +1080,11 @@ public class ClientComms {
 
 	public void setSharedSubscriptionsAvailable(boolean sharedSubscriptionsAvailable) {
 		this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
+	}
+
+	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
+		return this.callback.doesSubscriptionIdentifierExist(subscriptionIdentifier);
+		
 	}
 
 }

@@ -19,6 +19,8 @@ package org.eclipse.paho.mqttv5.common.packet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -45,7 +47,7 @@ public class MqttPublishTest {
 	private static final String userValue2 = "userValue2";
 	private static final String userValue3 = "userValue3";
 	private static final String contentType = "JSON";
-	private static final int subscriptionIdentifier = 42424242;
+	private static final List<Integer> subscriptionIdentifiers = Arrays.asList(1,2,3,4);
 	
 	private static final int messageId = 25;
 	private static final boolean duplicate = false;
@@ -84,7 +86,7 @@ public class MqttPublishTest {
 		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedPublishPacket.getUserProperties().get(2)));
 
 		Assert.assertEquals(contentType, decodedPublishPacket.getContentType());
-		Assert.assertEquals(subscriptionIdentifier, decodedPublishPacket.getSubscriptionIdentifier());
+		Assert.assertArrayEquals(subscriptionIdentifiers.toArray(), decodedPublishPacket.getSubscriptionIdentifiers().toArray());
 		Assert.assertEquals(messageId, decodedPublishPacket.getMessageId());
 		Assert.assertEquals(duplicate, decodedPublishPacket.isDuplicate());
 		
@@ -107,7 +109,7 @@ public class MqttPublishTest {
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
 		message.setUserProperties(userDefinedProperties);
 		message.setContentType(contentType);
-		message.setSubscriptionIdentifier(subscriptionIdentifier);
+		message.setSubscriptionIdentifiers(subscriptionIdentifiers);
 		
 		MqttPublish mqttPublish = new MqttPublish(topic, message);
 		mqttPublish.setMessageId(messageId);
