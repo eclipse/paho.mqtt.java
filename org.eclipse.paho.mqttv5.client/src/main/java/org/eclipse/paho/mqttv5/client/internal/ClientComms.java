@@ -1022,4 +1022,9 @@ public class ClientComms {
 	}
 
 
+	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
+		return this.callback.doesSubscriptionIdentifierExist(subscriptionIdentifier);
+		
+	}
+
 }

@@ -956,6 +956,10 @@ public class MqttAsyncClient implements MqttClientInterface {
 			this.mqttSession.clearSession();
 		}
 
+		if(this.connOpts.isCleanSession()) {
+			this.mqttSession.clearSession();
+		}
+
 		comms.setNetworkModuleIndex(0);
 		connectActionListener.connect();
 
@@ -1711,6 +1715,16 @@ public class MqttAsyncClient implements MqttClientInterface {
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
 			IMqttMessageListener[] messageListeners, List<UserProperty> userProperties)
 			throws MqttException {
+
+		IMqttToken token = this.subscribe(subscriptions, userContext, callback, 0, userProperties);
+
+		// add message handlers to the list for this client
+		for (int i = 0; i < subscriptions.length; ++i) {
+			this.comms.setMessageListener(null, subscriptions[i].getTopic(), messageListeners[i]);
+		}
+
+		return token;
+	}
 
 		IMqttToken token = this.subscribe(subscriptions, userContext, callback, 0, userProperties);
 
