@@ -11,7 +11,7 @@ import org.eclipse.paho.mqttv5.client.alpha.result.IMqttUnsubscriptionResult;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseExecutors;
+import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.pushstream.PushStream;
 
 public class MqttSubscriptionToken<C> extends MqttToken<IMqttSubscriptionResult<C>, C>
@@ -22,9 +22,9 @@ public class MqttSubscriptionToken<C> extends MqttToken<IMqttSubscriptionResult<
 	
 	private final Deferred<IMqttUnsubscriptionResult<C>> d = new Deferred<>();
 	
-	public MqttSubscriptionToken(PromiseExecutors promiseExecutors, IMqttCommonClient client,
+	public MqttSubscriptionToken(PromiseFactory promiseFactory, IMqttCommonClient client,
 			C userContext, List<String> topics, PushStream<IReceivedMessage<C>> stream) {
-		super(promiseExecutors, client, userContext, 0);
+		super(promiseFactory, client, userContext, 0);
 		this.topics = Collections.unmodifiableList(topics);
 		this.stream = stream;
 	}

@@ -5,7 +5,7 @@ import org.eclipse.paho.mqttv5.client.alpha.IMqttToken;
 import org.eclipse.paho.mqttv5.client.alpha.result.IMqttResult;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseExecutors;
+import org.osgi.util.promise.PromiseFactory;
 
 public class MqttToken<T extends IMqttResult<C>, C> implements IMqttToken<T, C> {
 
@@ -17,9 +17,9 @@ public class MqttToken<T extends IMqttResult<C>, C> implements IMqttToken<T, C> 
 	
 	private final int messageId;
 	
-	public MqttToken(PromiseExecutors promiseExecutors, 
+	public MqttToken(PromiseFactory promiseFactory, 
 			IMqttCommonClient client, C userContext, int messageId) {
-		this.deferred = promiseExecutors.deferred();
+		this.deferred = promiseFactory.deferred();
 		this.client = client;
 		this.userContext = userContext;
 		this.messageId = messageId;
