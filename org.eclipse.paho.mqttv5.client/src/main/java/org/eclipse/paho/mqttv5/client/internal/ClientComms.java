@@ -6,11 +6,11 @@ import java.util.ArrayList;
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -90,13 +90,13 @@ public class ClientComms {
 	private ExecutorService executorService;
 	private MqttSession mqttSession;
 
-	
-	
+
+
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
 	 * network calls.
-	 * 
+	 *
 	 * @param client
 	 *            The {@link IMqttAsyncClient}
 	 * @param persistence
@@ -149,7 +149,7 @@ public class ClientComms {
 	/**
 	 * Sends a message to the server. Does not check if connected this validation
 	 * must be done by invoking routines.
-	 * 
+	 *
 	 * @param message
 	 * @param token
 	 * @throws MqttException
@@ -184,7 +184,7 @@ public class ClientComms {
 	/**
 	 * Sends a message to the broker if in connected state, but only waits for the
 	 * message to be stored, before returning.
-	 * 
+	 *
 	 * @param message
 	 *            The {@link MqttWireMessage} to send
 	 * @param token
@@ -244,7 +244,7 @@ public class ClientComms {
 	 *
 	 * Call each main class and let it tidy up e.g. releasing the token store which
 	 * normally survives a disconnect.
-	 * 
+	 *
 	 * @param force
 	 *            force disconnection
 	 * @throws MqttException
@@ -290,7 +290,7 @@ public class ClientComms {
 	 * Sends a connect message and waits for an ACK or NACK. Connecting is a special
 	 * case which will also start up the network connection, receive thread, and
 	 * keep alive thread.
-	 * 
+	 *
 	 * @param options
 	 *            The {@link MqttConnectionOptions} for the connection
 	 * @param token
@@ -421,7 +421,7 @@ public class ClientComms {
 	 * result of a user calling disconnect or an abnormal disconnection. The method
 	 * may be invoked multiple times in parallel as each thread when it receives an
 	 * error uses this method to ensure that shutdown completes successfully.
-	 * 
+	 *
 	 * @param token
 	 *            the {@link MqttToken} To track closing the connection
 	 * @param reason
@@ -629,7 +629,7 @@ public class ClientComms {
 
 	/**
 	 * Disconnect the connection and reset all the states.
-	 * 
+	 *
 	 * @param quiesceTimeout
 	 *            How long to wait whilst quiesing before messages are deleted.
 	 * @param disconnectTimeout
@@ -940,7 +940,7 @@ public class ClientComms {
 	/**
 	 * When Automatic reconnect is enabled, we want ClientComs to enter the
 	 * 'resting' state if disconnected. This will allow us to publish messages
-	 * 
+	 *
 	 * @param resting
 	 *            if true, resting is enabled
 	 */
@@ -1014,17 +1014,11 @@ public class ClientComms {
 		return this.clientState.getActualInFlight();
 	}
 
-	
 
 	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
 		return this.callback.doesSubscriptionIdentifierExist(subscriptionIdentifier);
-		
+
 	}
 
-
-	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
-		return this.callback.doesSubscriptionIdentifierExist(subscriptionIdentifier);
-		
-	}
 
 }
