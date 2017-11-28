@@ -237,7 +237,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	private static final long DISCONNECT_TIMEOUT = 10000; // ms
 	private static final char MIN_HIGH_SURROGATE = '\uD800';
 	private static final char MAX_HIGH_SURROGATE = '\uDBFF';
-	private String clientId;
+	//private String clientId;
 	private String serverURI;
 	protected ClientComms comms;
 	private Hashtable<String, MqttTopic> topics;
@@ -583,7 +583,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		MqttConnectionOptions.validateURI(serverURI);
 
 		this.serverURI = serverURI;
-		this.clientId = clientId;
+		this.mqttSession.setClientId(clientId);
 
 		this.persistence = persistence;
 		if (this.persistence == null) {
@@ -604,7 +604,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
 
 		this.persistence.open(clientId);
-		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService);
+		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService, this.mqttSession);
 		this.persistence.close();
 		this.topics = new Hashtable<String, MqttTopic>();
 
@@ -716,7 +716,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 			} else if (factory instanceof SSLSocketFactory) {
 				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
-			netModule = new TCPNetworkModule(factory, host, port, clientId);
+			netModule = new TCPNetworkModule(factory, host, port, this.mqttSession.getClientId());
 			((TCPNetworkModule) netModule).setConnectTimeout(options.getConnectionTimeout());
 			break;
 		case SSL:
@@ -740,7 +740,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 			}
 
 			// Create the network module...
-			netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId);
+			netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, this.mqttSession.getClientId());
 			((SSLNetworkModule) netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
 			((SSLNetworkModule) netModule).setSSLHostnameVerifier(options.getSSLHostnameVerifier());
 			// Ciphers suites need to be set, if they are available
@@ -760,7 +760,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 			} else if (factory instanceof SSLSocketFactory) {
 				throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
-			netModule = new WebSocketNetworkModule(factory, address, host, port, clientId);
+			netModule = new WebSocketNetworkModule(factory, address, host, port, this.mqttSession.getClientId());
 			((WebSocketNetworkModule) netModule).setConnectTimeout(options.getConnectionTimeout());
 			break;
 		case WSS:
@@ -780,7 +780,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 			}
 
 			// Create the network module...
-			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, clientId);
+			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, this.mqttSession.getClientId());
 			((WebSocketSecureNetworkModule) netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
 			// Ciphers suites need to be set, if they are available
 			if (wSSFactoryFactory != null) {
@@ -942,7 +942,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		// succeeds
 		MqttToken userToken = new MqttToken(getClientId());
 		ConnectActionListener connectActionListener = new ConnectActionListener(this, persistence, comms, options,
-				userToken, userContext, callback, reconnecting);
+				userToken, userContext, callback, reconnecting, mqttSession);
 		userToken.setActionCallback(connectActionListener);
 		userToken.setUserContext(this);
 
@@ -1241,13 +1241,9 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @return the client ID used by this client.
 	 */
 	public String getClientId() {
-		return clientId;
+		return this.mqttSession.getClientId();
 	}
 	
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-
 	/**
 	 * Returns the address of the server used by this client.
 	 * <p>
@@ -2223,7 +2219,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	public void reconnect() throws MqttException {
 		final String methodName = "reconnect";
 		// @Trace 500=Attempting to reconnect client: {0}
-		log.fine(CLASS_NAME, methodName, "500", new Object[] { this.clientId });
+		log.fine(CLASS_NAME, methodName, "500", new Object[] { this.mqttSession.getClientId() });
 		// Some checks to make sure that we're not attempting to reconnect an
 		// already connected client
 		if (comms.isConnected()) {
@@ -2257,7 +2253,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	private void attemptReconnect() {
 		final String methodName = "attemptReconnect";
 		// @Trace 500=Attempting to reconnect client: {0}
-		log.fine(CLASS_NAME, methodName, "500", new Object[] { this.clientId });
+		log.fine(CLASS_NAME, methodName, "500", new Object[] { this.mqttSession.getClientId() });
 		try {
 			connect(this.connOpts, this.userContext, new MqttReconnectActionListener(methodName));
 		} catch (MqttSecurityException ex) {
@@ -2272,15 +2268,15 @@ public class MqttAsyncClient implements MqttClientInterface {
 	private void startReconnectCycle() {
 		String methodName = "startReconnectCycle";
 		// @Trace 503=Start reconnect timer for client: {0}, delay: {1}
-		log.fine(CLASS_NAME, methodName, "503", new Object[] { this.clientId, new Long(reconnectDelay) });
-		reconnectTimer = new Timer("MQTT Reconnect: " + clientId);
+		log.fine(CLASS_NAME, methodName, "503", new Object[] { this.mqttSession.getClientId(), new Long(reconnectDelay) });
+		reconnectTimer = new Timer("MQTT Reconnect: " + this.mqttSession.getClientId());
 		reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
 	}
 
 	private void stopReconnectCycle() {
 		String methodName = "stopReconnectCycle";
 		// @Trace 504=Stop reconnect timer for client: {0}
-		log.fine(CLASS_NAME, methodName, "504", new Object[] { this.clientId });
+		log.fine(CLASS_NAME, methodName, "504", new Object[] { this.mqttSession.getClientId() });
 		synchronized (clientLock) {
 			if (this.connOpts.isAutomaticReconnect()) {
 				if (reconnectTimer != null) {
@@ -2365,7 +2361,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 			// @Trace 505=Rescheduling reconnect timer for client: {0}, delay:
 			// {1}
 			log.fine(CLASS_NAME, reschedulemethodName, "505",
-					new Object[] { MqttAsyncClient.this.clientId, String.valueOf(reconnectDelay) });
+					new Object[] { MqttAsyncClient.this.mqttSession.getClientId(), String.valueOf(reconnectDelay) });
 			synchronized (clientLock) {
 				if (MqttAsyncClient.this.connOpts.isAutomaticReconnect()) {
 					if (reconnectTimer != null) {
@@ -2472,7 +2468,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @return the {@link Debug} object
 	 */
 	public Debug getDebug() {
-		return new Debug(clientId, comms);
+		return new Debug(this.mqttSession.getClientId(), comms);
 	}
 
 }

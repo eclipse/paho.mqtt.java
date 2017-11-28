@@ -152,9 +152,11 @@ public class ClientState implements MqttState {
 	private Hashtable<String, Integer> outgoingTopicAliases;
 	private Hashtable<Integer, String> incomingTopicAliases;
 	private int outgoingTopicAliasCount = 1;
+	
+	private MqttSession mqttSession;
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, CommsCallback callback,
-			ClientComms clientComms, MqttPingSender pingSender) throws MqttException {
+			ClientComms clientComms, MqttPingSender pingSender, MqttSession mqttSession) throws MqttException {
 
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "");
@@ -176,6 +178,7 @@ public class ClientState implements MqttState {
 		this.tokenStore = tokenStore;
 		this.clientComms = clientComms;
 		this.pingSender = pingSender;
+		this.mqttSession = mqttSession;
 
 		restoreState();
 	}
@@ -508,14 +511,14 @@ public class ClientState implements MqttState {
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
 			if (message instanceof MqttPublish && (((MqttPublish) message).getMessage().getQos() != 0)) {
 				message.setMessageId(getNextMessageId());
-				if (clientComms.getTopicAliasMaximum() > 0) {
+				if (this.mqttSession.getTopicAliasMaximum() > 0) {
 					String topic = ((MqttPublish) message).getTopicName();
 					if (outgoingTopicAliases.containsKey(topic)) {
 						// Existing Topic Alias, Assign it and remove the topic string
 						((MqttPublish) message).setTopicAlias(outgoingTopicAliases.get(topic));
 						((MqttPublish) message).setTopicName(null);
 					} else {
-						if (outgoingTopicAliasCount <= clientComms.getTopicAliasMaximum()) {
+						if (outgoingTopicAliasCount <= this.mqttSession.getTopicAliasMaximum()) {
 							// Create a new Topic Alias and increment the counter
 							((MqttPublish) message).setTopicAlias(outgoingTopicAliasCount);
 							outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), outgoingTopicAliasCount);
