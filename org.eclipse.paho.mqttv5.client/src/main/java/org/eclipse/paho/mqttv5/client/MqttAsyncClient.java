@@ -580,6 +580,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		}
 
 
+
 		MqttConnectionOptions.validateURI(serverURI);
 
 		this.serverURI = serverURI;
@@ -1246,6 +1247,10 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 */
 	public String getClientId() {
 		return this.mqttSession.getClientId();
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 
 	/**
