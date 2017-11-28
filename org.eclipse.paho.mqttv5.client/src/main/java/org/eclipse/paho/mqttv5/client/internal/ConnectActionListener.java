@@ -117,6 +117,7 @@ public class ConnectActionListener implements MqttActionListener {
 		comms.setWildcardSubscriptionsAvailable(((MqttToken) token).isWildcardSubscriptionAvailable());
 		comms.setSubscriptionIdentifiersAvailable(((MqttToken) token).isSubscriptionIdentifiersAvailable());
 		comms.setSharedSubscriptionsAvailable(((MqttToken) token).isSharedSubscriptionAvailable());
+		client.setClientId(((MqttToken) token).getAssignedClientIdentifier());
 
 		if (reconnect) {
 			comms.notifyReconnect();

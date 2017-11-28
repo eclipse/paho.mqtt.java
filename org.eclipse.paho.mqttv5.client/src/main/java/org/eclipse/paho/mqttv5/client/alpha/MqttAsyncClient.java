@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -272,11 +273,11 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 	@Override
 	public IMqttSubscriptionToken<Void> subscribe(MqttSubscription[] subscriptions) throws MqttException {
-		return subscribe(subscriptions, null);
+		return subscribe(subscriptions, null, null);
 	}
 
 	@Override
-	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext)
+	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, List<UserProperty> userProperties)
 			throws MqttException {
 		
 		String[] topics = new String[subscriptions.length];
@@ -332,7 +333,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				IMqttMessageListener[] listeners = new IMqttMessageListener[subscriptions.length];
 				Arrays.fill(listeners, listener);
 				
-				delegate.subscribe(subscriptions, userContext, onConnect, listeners);
+				delegate.subscribe(subscriptions, userContext, onConnect, listeners, userProperties);
 			
 				return cleanup;
 			};
@@ -364,7 +365,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 	@Override
 	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription subscription, C userContext) throws MqttException {
-		return subscribe(new MqttSubscription[] {subscription}, userContext);
+		return subscribe(new MqttSubscription[] {subscription}, userContext, null);
 	}
 
 	@Override

@@ -564,19 +564,21 @@ public class MqttAsyncClient implements MqttClientInterface {
 
 		log.setResourceName(clientId);
 
-		if (clientId == null) { // Support empty client Id, 3.1.1 standard
-			throw new IllegalArgumentException("Null clientId");
+		if (clientId != null) { 
+			// Count characters, surrogate pairs count as one character.
+			int clientIdLength = 0;
+			for (int i = 0; i < clientId.length() - 1; i++) {
+				if (Character_isHighSurrogate(clientId.charAt(i)))
+					i++;
+				clientIdLength++;
+			}
+			if (clientIdLength > 65535) {
+				throw new IllegalArgumentException("ClientId longer than 65535 characters");
+			}
+		} else {
+			clientId = "";
 		}
-		// Count characters, surrogate pairs count as one character.
-		int clientIdLength = 0;
-		for (int i = 0; i < clientId.length() - 1; i++) {
-			if (Character_isHighSurrogate(clientId.charAt(i)))
-				i++;
-			clientIdLength++;
-		}
-		if (clientIdLength > 65535) {
-			throw new IllegalArgumentException("ClientId longer than 65535 characters");
-		}
+		
 
 		MqttConnectionOptions.validateURI(serverURI);
 
@@ -1240,6 +1242,10 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 */
 	public String getClientId() {
 		return clientId;
+	}
+	
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 
 	/**

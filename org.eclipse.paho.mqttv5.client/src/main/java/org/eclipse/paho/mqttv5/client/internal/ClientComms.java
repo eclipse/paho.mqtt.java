@@ -316,6 +316,7 @@ public class ClientComms {
 
 				MqttConnect connect = new MqttConnect(client.getClientId(), conOptions.getMqttVersion(),
 						conOptions.isCleanSession(), conOptions.getKeepAliveInterval());
+				System.err.println(connect.toString());
 
 				if (conOptions.getWillDestination() != null) {
 					connect.setWillDestination(conOptions.getWillDestination());
