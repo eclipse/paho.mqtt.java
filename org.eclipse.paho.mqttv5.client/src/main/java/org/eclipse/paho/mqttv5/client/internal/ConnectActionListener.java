@@ -63,6 +63,7 @@ public class ConnectActionListener implements MqttActionListener {
 	private Object userContext;
 	private MqttActionListener userCallback;
 	private MqttCallbackExtended mqttCallbackExtended;
+	private MqttSession mqttSession;
 	private boolean reconnect;
 
 	/**
@@ -85,7 +86,7 @@ public class ConnectActionListener implements MqttActionListener {
 	 */
 	public ConnectActionListener(MqttAsyncClient client, MqttClientPersistence persistence, ClientComms comms,
 			MqttConnectionOptions options, MqttToken userToken, Object userContext, MqttActionListener userCallback,
-			boolean reconnect) {
+			boolean reconnect, MqttSession mqttSession) {
 		this.persistence = persistence;
 		this.client = client;
 		this.comms = comms;
@@ -94,6 +95,7 @@ public class ConnectActionListener implements MqttActionListener {
 		this.userContext = userContext;
 		this.userCallback = userCallback;
 		this.reconnect = reconnect;
+		this.mqttSession = mqttSession;
 		
 	}
 
@@ -109,14 +111,20 @@ public class ConnectActionListener implements MqttActionListener {
 		userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
 
 		// Set properties imposed on us by the Server
-		comms.setReceiveMaximum(((MqttToken) token).getRecieveMaximum());
-		comms.setMaximumQoS(((MqttToken) token).getMaximumQoS());
-		comms.setRetainAvailable(((MqttToken) token).isRetainAvailable());
-		comms.setMaximumPacketSize(((MqttToken) token).getMaximumPacketSize());
-		comms.setTopicAliasMaximum(((MqttToken) token).getTopicAliasMaximum());
-		comms.setWildcardSubscriptionsAvailable(((MqttToken) token).isWildcardSubscriptionAvailable());
-		comms.setSubscriptionIdentifiersAvailable(((MqttToken) token).isSubscriptionIdentifiersAvailable());
-		comms.setSharedSubscriptionsAvailable(((MqttToken) token).isSharedSubscriptionAvailable());
+		MqttToken myToken = (MqttToken) token;
+		
+		mqttSession.setReceiveMaximum(myToken.getRecieveMaximum());
+		mqttSession.setMaximumQoS(myToken.getMaximumQoS());
+		mqttSession.setRetainAvailable(myToken.isRetainAvailable());
+		mqttSession.setMaximumPacketSize(myToken.getMaximumPacketSize());
+		mqttSession.setTopicAliasMaximum(myToken.getTopicAliasMaximum());
+		mqttSession.setWildcardSubscriptionsAvailable(myToken.isWildcardSubscriptionAvailable());
+		mqttSession.setSubscriptionIdentifiersAvailable(myToken.isSubscriptionIdentifiersAvailable());
+		mqttSession.setSharedSubscriptionsAvailable(myToken.isSharedSubscriptionAvailable());
+		if(myToken.getAssignedClientIdentifier() != null) {
+			mqttSession.setClientId(myToken.getAssignedClientIdentifier());
+		}
+		
 
 		if (reconnect) {
 			comms.notifyReconnect();

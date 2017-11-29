@@ -150,7 +150,7 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
  * </p>
  *
  */
-public interface IMqttAsyncClient {
+public interface IMqttAsyncClientOld {
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * <p>

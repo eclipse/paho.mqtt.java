@@ -3,11 +3,11 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -68,7 +68,7 @@ public class MqttConnect extends MqttWireMessage {
 
 	/**
 	 * Constructor for an on the wire MQTT Connect message
-	 * 
+	 *
 	 * @param info
 	 *            - Info Byte
 	 * @param data
@@ -137,7 +137,7 @@ public class MqttConnect extends MqttWireMessage {
 
 	/**
 	 * Constructor for a new MQTT Connect Message
-	 * 
+	 *
 	 * @param clientId
 	 *            - The Client Identifier
 	 * @param mqttVersion
@@ -146,7 +146,7 @@ public class MqttConnect extends MqttWireMessage {
 	 *            - The Clean Session Identifier
 	 * @param keepAliveInterval
 	 *            - The Keep Alive Interval
-	 * 
+	 *
 	 */
 	public MqttConnect(String clientId, int mqttVersion, boolean cleanSession, int keepAliveInterval) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);

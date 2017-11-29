@@ -20,7 +20,7 @@ package org.eclipse.paho.mqttv5.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
@@ -32,30 +32,46 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Holds the set of options that control how the client connects to a server.
+ * 
+ * Constructs a new {@link MqttConnectionOptions} object using the
+ * default values.
+ *
+ * The defaults are:
+ * <ul>
+ * <li>The keep alive interval is 60 seconds</li>
+ * <li>Clean Session is true</li>
+ * <li>The message delivery retry interval is 15 seconds</li>
+ * <li>The connection timeout period is 30 seconds</li>
+ * <li>No Will message is set</li>
+ * <li>Automatic Reconnect is enabled, starting at 1 second and capped at two
+ * minutes</li>
+ * <li>A standard SocketFactory is used</li>
+ * </ul>
+ * More information about these values can be found in the setter methods.
  */
 public class MqttConnectionOptions {
 
-	static enum UriType {
+	enum UriType {
 		TCP, SSL, WS, WSS
 	}
-	
+
 	private static final String CLIENT_ID_PREFIX = "paho";
 
-	// Connection Properties
+	// Connection Behaviour Properties
 	private String[] serverURIs = null; // List of Servers to connect to in order
 	private boolean automaticReconnect = false; // Automatic Reconnect
 	private int automaticReconnectMinDelay = 1; // Time to wait before first automatic reconnection attempt in seconds.
-	private int automaticReconnectMaxDelay = 120; // Maximum time to wait for automatic reconnection attempts in
-													// seconds.
+	private int automaticReconnectMaxDelay = 120; // Max time to wait for automatic reconnection attempts in seconds.
+	private boolean useSubscriptionIdentifiers = true; // Whether to automatically assign subscription identifiers.
 	private int keepAliveInterval = 60; // Keep Alive Interval
 	private int maxInflight = 10; // Max inflight messages
 	private int connectionTimeout = 30; // Connection timeout in seconds
 
 	// Connection packet properties
-	private int MqttVersion = 5; // MQTT Version 5
+	private int mqttVersion = 5; // MQTT Version 5
 	private boolean cleanSession = true; // Clean Session
 	private String willDestination = null; // Will Topic
-	private MqttMessage willMessage = null; // Will @link{MqttMessage}
+	private MqttMessage willMessage = null; // Will Message
 	private String userName; // Username
 	private byte[] password; // Password
 	private Integer sessionExpiryInterval = null; // The Session expiry Interval in seconds, null is the default of
@@ -66,7 +82,7 @@ public class MqttConnectionOptions {
 	private Integer topicAliasMaximum = null; // The Topic Alias Maximum, null defaults to 0.
 	private Boolean requestResponseInfo = null; // Request Response Information, null defaults to false.
 	private Boolean requestProblemInfo = null; // Request Problem Information, null defaults to true.
-	private ArrayList<UserProperty> userProperties = null; // User Defined Properties.
+	private List<UserProperty> userProperties = null; // User Defined Properties.
 	private String authMethod = null; // Authentication Method, If null, Extended Authentication is not performed.
 	private byte[] authData = null; // Authentication Data.
 
@@ -76,32 +92,12 @@ public class MqttConnectionOptions {
 	private HostnameVerifier sslHostnameVerifier = null; // SSL Hostname Verifier
 
 	/**
-	 * Constructs a new <code>linkMqttConnectionOptions</code> object using the
-	 * default values.
-	 *
-	 * The defaults are:
-	 * <ul>
-	 * <li>The keep alive interval is 60 seconds</li>
-	 * <li>Clean Session is true</li>
-	 * <li>The message delivery retry interval is 15 seconds</li>
-	 * <li>The connection timeout period is 30 seconds</li>
-	 * <li>No Will message is set</li>
-	 * <li>Automatic Reconnect is enabled, starting at 1 second and capped at two
-	 * minutes</li>
-	 * <li>A standard SocketFactory is used</li>
-	 * </ul>
-	 * More information about these values can be found in the setter methods.
-	 */
-	public MqttConnectionOptions() {
-	}
-
-	/**
 	 * Returns the MQTT version.
 	 * 
 	 * @return the MQTT version.
 	 */
 	public int getMqttVersion() {
-		return MqttVersion;
+		return mqttVersion;
 	}
 
 	/**
@@ -255,7 +251,7 @@ public class MqttConnectionOptions {
 	 * @throws IllegalArgumentException
 	 *             if the keepAliveInterval was invalid
 	 */
-	public void setKeepAliveInterval(int keepAliveInterval) throws IllegalArgumentException {
+	public void setKeepAliveInterval(int keepAliveInterval){
 		if (keepAliveInterval < 0) {
 			throw new IllegalArgumentException();
 		}
@@ -510,7 +506,8 @@ public class MqttConnectionOptions {
 	 * The Server delays publishing the Client's Will Message until the Will Delay
 	 * Interval has passed or the Session ends, whichever happens first.
 	 * 
-	 * @param willDelayInterval The will delay interval
+	 * @param willDelayInterval
+	 *            The will delay interval
 	 */
 	public void setWillDelayInterval(Integer willDelayInterval) {
 		this.willDelayInterval = willDelayInterval;
@@ -567,7 +564,8 @@ public class MqttConnectionOptions {
 	 * <li>The maximum value for this property is 2,684,354,656.</li>
 	 * </ul>
 	 * 
-	 * @param maximumPacketSize The Maximum packet size.
+	 * @param maximumPacketSize
+	 *            The Maximum packet size.
 	 */
 	public void setMaximumPacketSize(Integer maximumPacketSize) {
 		this.maximumPacketSize = maximumPacketSize;
@@ -651,7 +649,8 @@ public class MqttConnectionOptions {
 	 * on any packet where it is allowed.</li>
 	 * </ul>
 	 * 
-	 * @param requestProblemInfo The Flag to request problem information.
+	 * @param requestProblemInfo
+	 *            The Flag to request problem information.
 	 */
 	public void setRequestProblemInfo(boolean requestProblemInfo) {
 		this.requestProblemInfo = requestProblemInfo;
@@ -662,7 +661,7 @@ public class MqttConnectionOptions {
 	 * 
 	 * @return the User Properties.
 	 */
-	public ArrayList<UserProperty> getUserProperties() {
+	public List<UserProperty> getUserProperties() {
 		return userProperties;
 	}
 
@@ -670,9 +669,10 @@ public class MqttConnectionOptions {
 	 * Sets the User Properties. A User Property is a UTF-8 String Pair, the same
 	 * name is allowed to appear more than once.
 	 * 
-	 * @param userProperties User Properties
+	 * @param userProperties
+	 *            User Properties
 	 */
-	public void setUserProperties(ArrayList<UserProperty> userProperties) {
+	public void setUserProperties(List<UserProperty> userProperties) {
 		this.userProperties = userProperties;
 	}
 
@@ -887,15 +887,42 @@ public class MqttConnectionOptions {
 	}
 
 	/**
+	 * Returns whether to automatically assign subscription identifiers when
+	 * subscribing to a topic.
+	 * 
+	 * @return if automatic assignment of subscription identifiers is enabled.
+	 */
+	public boolean useSubscriptionIdentifiers() {
+		return useSubscriptionIdentifiers;
+	}
+
+	/**
+	 * Sets whether to automatically assign subscription identifiers when
+	 * subscribing to a topic. This will mean that if a subscription has a callback
+	 * associated with it then it is guaranteed to be called when an incoming
+	 * message has the correct subscription ID embedded. If disabled, then the
+	 * client will do best effort topic matching with all callbacks, however this
+	 * might result in an incorrect callback being called if there are multiple
+	 * subscriptions to topics using a combination of wildcards.
+	 * 
+	 * @param useSubscriptionIdentifiers
+	 *            Whether to enable automatic assignment of subscription
+	 *            identifiers.
+	 */
+	public void setUseSubscriptionIdentifiers(boolean useSubscriptionIdentifiers) {
+		this.useSubscriptionIdentifiers = useSubscriptionIdentifiers;
+	}
+
+	/**
 	 * @return The Debug Properties
 	 */
 	public Properties getDebug() {
 		final String strNull = "null";
 		Properties p = new Properties();
-		p.put("MqttVersion", new Integer(getMqttVersion()));
+		p.put("MqttVersion", getMqttVersion());
 		p.put("CleanSession", Boolean.valueOf(isCleanSession()));
-		p.put("ConTimeout", new Integer(getConnectionTimeout()));
-		p.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
+		p.put("ConTimeout", getConnectionTimeout());
+		p.put("KeepAliveInterval", getKeepAliveInterval());
 		p.put("UserName", (getUserName() == null) ? strNull : getUserName());
 		p.put("WillDestination", (getWillDestination() == null) ? strNull : getWillDestination());
 		if (getSocketFactory() == null) {
@@ -915,8 +942,6 @@ public class MqttConnectionOptions {
 		return Debug.dumpProperties(getDebug(), "Connection options");
 	}
 
-	
-	
 	public static String generateClientId() {
 		return CLIENT_ID_PREFIX + System.nanoTime();
 	}

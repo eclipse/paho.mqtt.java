@@ -75,10 +75,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
  *
  * @see IMqttClient
  */
-public class MqttLegacyBlockingClient implements IMqttClient { // ), DestinationProvider {
-	// private static final String CLASS_NAME = MqttClient.class.getName();
-	// private static final Logger log =
-	// LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+public class MqttLegacyBlockingClient implements IMqttClient {
 
 	protected MqttAsyncClient aClient = null; // Delegate implementation to MqttAsyncClient
 	protected long timeToWait = -1; // How long each method should wait for action to complete
@@ -515,7 +512,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { // ), Destination
 	 * @see IMqttClient#subscribe(String[], int[])
 	 */
 	public void subscribe(MqttSubscription[] subscriptions) throws MqttException {
-		IMqttToken tok = aClient.subscribe(subscriptions, null, null);
+		IMqttToken tok = aClient.subscribe(subscriptions, null, null, 0, null);
 		tok.waitForCompletion(getTimeToWait());
 		int[] grantedQos = tok.getGrantedQos();
 		for (int i = 0; i < grantedQos.length; ++i) {
@@ -537,6 +534,11 @@ public class MqttLegacyBlockingClient implements IMqttClient { // ), Destination
 		this.subscribe(new String[] { topicFilter }, new int[] { 1 }, new IMqttMessageListener[] { messageListener });
 	}
 
+	@Override
+	public void subscribe(String[] topicFilters, IMqttMessageListener messageListener) throws MqttException {
+		this.subscribe(topicFilters,  new IMqttMessageListener[] { messageListener });
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -560,6 +562,11 @@ public class MqttLegacyBlockingClient implements IMqttClient { // ), Destination
 	public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
 		this.subscribe(new String[] { topicFilter }, new int[] { qos }, new IMqttMessageListener[] { messageListener });
 	}
+	
+	@Override
+	public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
+		this.subscribe(topicFilters, qos, new IMqttMessageListener[] {  });
+	}
 
 	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
@@ -567,7 +574,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { // ), Destination
 
 		// add message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
-			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+			aClient.comms.setMessageListener(0, topicFilters[i], messageListeners[i]);
 		}
 	}
 
@@ -582,7 +589,7 @@ public class MqttLegacyBlockingClient implements IMqttClient { // ), Destination
 	 * @see IMqttClient#subscribeWithResponse(String[], int[])
 	 */
 	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions) throws MqttException {
-		IMqttToken tok = aClient.subscribe(subscriptions, null, null);
+		IMqttToken tok = aClient.subscribe(subscriptions, null, null, 0, null);
 		tok.waitForCompletion(getTimeToWait());
 		return tok;
 	}
@@ -593,12 +600,9 @@ public class MqttLegacyBlockingClient implements IMqttClient { // ), Destination
 	 */
 	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners)
 			throws MqttException {
-		IMqttToken tok = this.subscribeWithResponse(subscriptions);
+		IMqttToken tok = aClient.subscribe(subscriptions, null, null, messageListeners, null);
 
-		// add message handlers to the list for this client
-		for (int i = 0; i < subscriptions.length; ++i) {
-			aClient.comms.setMessageListener(subscriptions[i].getTopic(), messageListeners[i]);
-		}
+		tok.waitForCompletion(getTimeToWait());
 		return tok;
 	}
 
@@ -814,9 +818,6 @@ public class MqttLegacyBlockingClient implements IMqttClient { // ), Destination
 		return (aClient.getDebug());
 	}
 
-	@Override
-	public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
-
-	}
+	
 
 }

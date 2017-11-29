@@ -27,7 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.mqttv5.client.BufferedMessage;
-import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
@@ -89,16 +88,10 @@ public class ClientComms {
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
 	private ExecutorService executorService;
+	private MqttSession mqttSession;
 
-	// ******* Connection properties ******//
-	private int receiveMaximum = 65535;
-	private int maximumQoS = 2;
-	private boolean retainAvailable = true;
-	private int maximumPacketSize = -1;
-	private int topicAliasMaximum = 0;
-	private boolean wildcardSubscriptionsAvailable = true;
-	private boolean subscriptionIdentifiersAvailable = true;
-	private boolean sharedSubscriptionsAvailable = true;
+	
+	
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
@@ -116,17 +109,18 @@ public class ClientComms {
 	 *             if an exception occurs whilst communicating with the server
 	 */
 	public ClientComms(MqttClientInterface client, MqttClientPersistence persistence, MqttPingSender pingSender,
-			ExecutorService executorService) throws MqttException {
+			ExecutorService executorService, MqttSession mqttSession) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client = client;
 		this.persistence = persistence;
 		this.pingSender = pingSender;
 		this.pingSender.init(this);
 		this.executorService = executorService;
+		this.mqttSession = mqttSession;
 
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback = new CommsCallback(this);
-		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender);
+		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, this.mqttSession);
 
 		callback.setClientState(clientState);
 		log.setResourceName(getClient().getClientId());
@@ -214,14 +208,14 @@ public class ClientComms {
 
 				if (message instanceof MqttPublish) {
 					// Override the QoS if the server has set a maximum
-					if (((MqttPublish) message).getMessage().getQos() > this.maximumQoS) {
+					if (((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
-						mqttMessage.setQos(this.maximumQoS);
+						mqttMessage.setQos(this.mqttSession.getMaximumQoS());
 						((MqttPublish) message).setMessage(mqttMessage);
 					}
 
 					// Override the Retain flag if the server has disabled it
-					if (((MqttPublish) message).getMessage().isRetained() && (this.retainAvailable == false)) {
+					if (((MqttPublish) message).getMessage().isRetained() && (this.mqttSession.isRetainAvailable() == false)) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setRetained(false);
 						((MqttPublish) message).setMessage(mqttMessage);
@@ -317,6 +311,7 @@ public class ClientComms {
 
 				MqttConnect connect = new MqttConnect(client.getClientId(), conOptions.getMqttVersion(),
 						conOptions.isCleanSession(), conOptions.getKeepAliveInterval());
+				System.err.println(connect.toString());
 
 				if (conOptions.getWillDestination() != null) {
 					connect.setWillDestination(conOptions.getWillDestination());
@@ -732,8 +727,8 @@ public class ClientComms {
 		this.callback.messageArrivedComplete(messageId, qos);
 	}
 
-	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
-		this.callback.setMessageListener(topicFilter, messageListener);
+	public void setMessageListener(Integer subscriptionId, String topicFilter, IMqttMessageListener messageListener) {
+		this.callback.setMessageListener(subscriptionId, topicFilter, messageListener);
 	}
 
 	public void removeMessageListener(String topicFilter) {
@@ -1019,68 +1014,12 @@ public class ClientComms {
 		return this.clientState.getActualInFlight();
 	}
 
-	public int getReceiveMaximum() {
-		return receiveMaximum;
+	
+
+	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
+		return this.callback.doesSubscriptionIdentifierExist(subscriptionIdentifier);
+		
 	}
 
-	public void setReceiveMaximum(int receiveMaximum) {
-		this.receiveMaximum = receiveMaximum;
-	}
-
-	public int getMaximumQoS() {
-		return maximumQoS;
-	}
-
-	public void setMaximumQoS(int maximumQoS) {
-		this.maximumQoS = maximumQoS;
-	}
-
-	public boolean isRetainAvailable() {
-		return retainAvailable;
-	}
-
-	public void setRetainAvailable(boolean retainAvailable) {
-		this.retainAvailable = retainAvailable;
-	}
-
-	public int getMaximumPacketSize() {
-		return maximumPacketSize;
-	}
-
-	public void setMaximumPacketSize(int maximumPacketSize) {
-		this.maximumPacketSize = maximumPacketSize;
-	}
-
-	public int getTopicAliasMaximum() {
-		return topicAliasMaximum;
-	}
-
-	public void setTopicAliasMaximum(int topicAliasMaximum) {
-		this.topicAliasMaximum = topicAliasMaximum;
-	}
-
-	public boolean isWildcardSubscriptionsAvailable() {
-		return wildcardSubscriptionsAvailable;
-	}
-
-	public void setWildcardSubscriptionsAvailable(boolean wildcardSubscriptionsAvailable) {
-		this.wildcardSubscriptionsAvailable = wildcardSubscriptionsAvailable;
-	}
-
-	public boolean isSubscriptionIdentifiersAvailable() {
-		return subscriptionIdentifiersAvailable;
-	}
-
-	public void setSubscriptionIdentifiersAvailable(boolean subscriptionIdentifiersAvailable) {
-		this.subscriptionIdentifiersAvailable = subscriptionIdentifiersAvailable;
-	}
-
-	public boolean isSharedSubscriptionsAvailable() {
-		return sharedSubscriptionsAvailable;
-	}
-
-	public void setSharedSubscriptionsAvailable(boolean sharedSubscriptionsAvailable) {
-		this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
-	}
 
 }

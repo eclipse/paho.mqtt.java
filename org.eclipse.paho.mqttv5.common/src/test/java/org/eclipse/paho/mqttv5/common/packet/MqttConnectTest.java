@@ -3,11 +3,11 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MqttConnectTest{
-	
+
 	private static final String clientId = "testClientId";
 	private static final int mqttVersion = 5;
 	private static final boolean cleanSession = true;
@@ -35,7 +35,7 @@ public class MqttConnectTest{
 	private static final String willPayload = "Will Message";
 	private static final String willDestination = "will/destination";
 	private static final int willQoS = 1;
-	
+
 	private static final int sessionExpiryInterval = 60;
 	private static final int maxPacketSize = 128000;
 	private static final int topicAliasMax = 5;
@@ -49,7 +49,7 @@ public class MqttConnectTest{
 	private static final String userValue1 = "userValue1";
 	private static final String userValue2 = "userValue2";
 	private static final String userValue3 = "userValue3";
-	
+
 	private static final int willDelayInterval = 60;
 	private static final boolean willIsUTF8 = true;
 	private static final int willPublicationExpiryInterval = 60;
@@ -60,7 +60,7 @@ public class MqttConnectTest{
 	/**
 	 * Tests that an MqttConnect packet can be encoded successfully
 	 * without throwing any exceptions.
-	 * @throws MqttException 
+	 * @throws MqttException
 	 */
 	@Test
 	public void testEncodingMqttConnect() throws MqttException{
@@ -68,9 +68,9 @@ public class MqttConnectTest{
 		mqttConnectPacket.getHeader();
 		mqttConnectPacket.getPayload();
 	}
-	
+
 	/**
-	 * Tests that an MqttConnect packet can be decoded 
+	 * Tests that an MqttConnect packet can be decoded
 	 * successfully.
 	 * @throws IOException
 	 * @throws MqttException
@@ -83,9 +83,9 @@ public class MqttConnectTest{
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
 		outputStream.write(payload);
-					
+
 		MqttConnect decodedConnectPacket = (MqttConnect) MqttWireMessage.createWireMessage(outputStream.toByteArray());
-		
+
 		Assert.assertEquals(clientId, decodedConnectPacket.getClientId());
 		Assert.assertEquals(mqttVersion, decodedConnectPacket.getMqttVersion());
 		Assert.assertEquals(cleanSession, decodedConnectPacket.isCleanSession());
@@ -106,7 +106,7 @@ public class MqttConnectTest{
 
 		Assert.assertEquals(authMethod, decodedConnectPacket.getAuthMethod());
 		Assert.assertArrayEquals(authData, decodedConnectPacket.getAuthData());
-		
+
 		Assert.assertEquals(willDelayInterval, decodedConnectPacket.getWillDelayInterval());
 		Assert.assertEquals(willIsUTF8, decodedConnectPacket.isWillIsUTF8());
 		Assert.assertEquals(willPublicationExpiryInterval, decodedConnectPacket.getWillPublicationExpiryInterval());
@@ -137,13 +137,13 @@ public class MqttConnectTest{
 		mqttConnectPacket.setRequestProblemInfo(requestPropblemInfo);
 		mqttConnectPacket.setAuthMethod(authMethod);
 		mqttConnectPacket.setAuthData(authData);
-		
+
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
 		mqttConnectPacket.setUserDefinedProperties(userDefinedProperties);
-		
+
 		mqttConnectPacket.setWillPublicationExpiryInterval(willPublicationExpiryInterval);
 		mqttConnectPacket.setWillDelayInterval(willDelayInterval);
 		mqttConnectPacket.setWillIsUTF8(willIsUTF8);
@@ -151,8 +151,8 @@ public class MqttConnectTest{
 		mqttConnectPacket.setWillResponseTopic(willResponseTopic);
 		mqttConnectPacket.setWillCorrelationData(willCorrelationData);
 		mqttConnectPacket.setWillUserDefinedProperties(userDefinedProperties);
-		
-		
+
+
 		return mqttConnectPacket;
 	}
 }

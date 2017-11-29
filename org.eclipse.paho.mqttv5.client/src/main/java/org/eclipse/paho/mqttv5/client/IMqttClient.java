@@ -335,10 +335,10 @@ public void subscribe(String topicFilter, IMqttMessageListener messageListener) 
 	 * @see #subscribe(String[], int[])
 	 *
 	 * @param topicFilters the topic to subscribe to, which can include wildcards.
-	 * @param messageListeners one or more callbacks to handle incoming messages
+	 * @param messageListener one callbacks to handle incoming messages
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-public void subscribe(String[] topicFilters, IMqttMessageListener[] messageListeners) throws MqttException;
+public void subscribe(String[] topicFilters, IMqttMessageListener messageListener) throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.

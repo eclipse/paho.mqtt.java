@@ -20,6 +20,7 @@
 package org.eclipse.paho.mqttv5.client.alpha;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -593,11 +594,13 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * the QoS specified on the subscribe.
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
+	 * @param userProperties  optional object used to pass user defined properties in
+	 * the subscribe packet.
 	 * @return token used to track and wait for the subscribe to complete. 
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext)
+	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, List<UserProperty> userProperties)
 			throws MqttException;
 	
 	/**
