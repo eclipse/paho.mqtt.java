@@ -31,6 +31,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
@@ -260,14 +261,12 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * means the client will not quiesce.
  	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
-	 * @param sessionExpiryInterval optional property to be sent in the disconnect packet to the server. Use null if not required.
-	 * @param reasonString optional property to be sent in the disconnect packet to the server. Use null if not required.
-	 * @param userDefinedProperties {@link ArrayList} of {@link UserProperty} to be sent to the server. Use null if not required.
+	 * @param disconnectProperties optional collection of properties to be sent in the disconnect packet to the server
 	 * @return token used to track and wait for the connect to complete. The token
 	 * will be passed to any callback that has been set.
 	 * @throws MqttException for problems encountered while disconnecting
 	 */
-	public <C> IMqttToken<IMqttResult<C>, C> disconnect(long quiesceTimeout, C userContext, Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties) throws MqttException;
+	public <C> IMqttToken<IMqttResult<C>, C> disconnect(long quiesceTimeout, C userContext, MqttProperties disconnectProperties) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -435,7 +434,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @see MqttMessage
 	 */
 	public <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message,
-			C userContext) throws MqttException, MqttPersistenceException;
+			C userContext, MqttProperties publishProperties) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -600,7 +599,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, List<UserProperty> userProperties)
+	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, MqttProperties subscribeProperties)
 			throws MqttException;
 	
 	/**

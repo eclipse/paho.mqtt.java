@@ -40,6 +40,7 @@ import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
 import org.eclipse.paho.mqttv5.client.TimerPingSender;
+import org.eclipse.paho.mqttv5.client.alpha.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -48,8 +49,8 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
-import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
@@ -208,14 +209,17 @@ public class ClientComms {
 
 				if (message instanceof MqttPublish) {
 					// Override the QoS if the server has set a maximum
-					if (((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
+					if (this.mqttSession.getMaximumQoS()!= null &&
+							((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setQos(this.mqttSession.getMaximumQoS());
 						((MqttPublish) message).setMessage(mqttMessage);
 					}
 
 					// Override the Retain flag if the server has disabled it
-					if (((MqttPublish) message).getMessage().isRetained() && (this.mqttSession.isRetainAvailable() == false)) {
+					if (this.mqttSession.isRetainAvailable()!= null &&
+							((MqttPublish) message).getMessage().isRetained()
+							&& (this.mqttSession.isRetainAvailable() == false)) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setRetained(false);
 						((MqttPublish) message).setMessage(mqttMessage);
@@ -310,7 +314,9 @@ public class ClientComms {
 				conOptions = options;
 
 				MqttConnect connect = new MqttConnect(client.getClientId(), conOptions.getMqttVersion(),
-						conOptions.isCleanSession(), conOptions.getKeepAliveInterval());
+						conOptions.isCleanSession(), conOptions.getKeepAliveInterval(),
+						conOptions.getConnectionProperties(), conOptions.getWillMessageProperties());
+
 				System.err.println(connect.toString());
 
 				if (conOptions.getWillDestination() != null) {
@@ -327,46 +333,6 @@ public class ClientComms {
 				}
 				if (conOptions.getPassword() != null) {
 					connect.setPassword(conOptions.getPassword());
-				}
-
-				if (conOptions.getSessionExpiryInterval() != null) {
-					connect.setSessionExpiryInterval(conOptions.getSessionExpiryInterval());
-				}
-
-				if (conOptions.getWillDelayInterval() != null) {
-					connect.setWillDelayInterval(conOptions.getWillDelayInterval());
-				}
-
-				if (conOptions.getReceiveMaximum() != null) {
-					connect.setReceiveMaximum(conOptions.getReceiveMaximum());
-				}
-
-				if (conOptions.getMaximumPacketSize() != null) {
-					connect.setMaximumPacketSize(conOptions.getMaximumPacketSize());
-				}
-
-				if (conOptions.getTopicAliasMaximum() != null) {
-					connect.setTopicAliasMaximum(conOptions.getTopicAliasMaximum());
-				}
-
-				if (conOptions.getRequestResponseInfo() != null) {
-					connect.setRequestReplyInfo(conOptions.getRequestResponseInfo());
-				}
-
-				if (conOptions.getRequestProblemInfo() != null) {
-					connect.setRequestProblemInfo(conOptions.getRequestProblemInfo());
-				}
-
-				if (conOptions.getUserProperties() != null) {
-					connect.setUserDefinedProperties(conOptions.getUserProperties());
-				}
-
-				if (conOptions.getAuthMethod() != null) {
-					connect.setAuthMethod(conOptions.getAuthMethod());
-				}
-
-				if (conOptions.getAuthData() != null) {
-					connect.setAuthData(conOptions.getAuthData());
 				}
 
 				/*
@@ -533,8 +499,8 @@ public class ClientComms {
 			callback.asyncOperationComplete(endToken);
 		}
 		if (wasConnected && callback != null) {
-				// Let the user know client has disconnected either normally or abnormally
-				callback.connectionLost(reason, message);
+			// Let the user know client has disconnected either normally or abnormally
+			callback.connectionLost(reason, message);
 		}
 
 		// While disconnecting, close may have been requested - try it now
@@ -621,10 +587,8 @@ public class ClientComms {
 	}
 
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
-			throws MqttException {
-		disconnectForcibly(quiesceTimeout, disconnectTimeout, true, reasonCode, sessionExpiryInterval, reasonString,
-				userDefinedProperties);
+			MqttProperties disconnectProperties) throws MqttException {
+		disconnectForcibly(quiesceTimeout, disconnectTimeout, true, reasonCode, disconnectProperties);
 	}
 
 	/**
@@ -651,8 +615,7 @@ public class ClientComms {
 	 *             if an error occurs whilst disconnecting
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket,
-			int reasonCode, Integer sessionExpiryInterval, String reasonString,
-			ArrayList<UserProperty> userDefinedProperties) throws MqttException {
+			int reasonCode, MqttProperties disconnectProperties) throws MqttException {
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
 			clientState.quiesce(quiesceTimeout);
@@ -661,8 +624,7 @@ public class ClientComms {
 		try {
 			// Send disconnect packet
 			if (sendDisconnectPacket) {
-				// TODO -- PASS THROUGH RETURN CODE PROPERLY
-				internalSend(new MqttDisconnect(MqttReturnCode.RETURN_CODE_SUCCESS), token);
+				internalSend(new MqttDisconnect(reasonCode, disconnectProperties), token);
 
 				// Wait util the disconnect packet sent with timeout
 				token.waitForCompletion(disconnectTimeout);
@@ -1014,11 +976,9 @@ public class ClientComms {
 		return this.clientState.getActualInFlight();
 	}
 
-
 	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
 		return this.callback.doesSubscriptionIdentifierExist(subscriptionIdentifier);
 
 	}
-
 
 }

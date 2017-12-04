@@ -59,6 +59,7 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
@@ -991,8 +992,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *
 	 */
 	public IMqttToken disconnect(Object userContext, MqttActionListener callback) throws MqttException {
-		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback, MqttReturnCode.RETURN_CODE_SUCCESS, null, null,
-				null);
+		return this.disconnect(QUIESCE_TIMEOUT, userContext, callback, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties());
 	}
 
 	/**
@@ -1036,7 +1036,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *      ArrayList)
 	 */
 	public IMqttToken disconnect(long quiesceTimeout) throws MqttException {
-		return this.disconnect(quiesceTimeout, null, null, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
+		return this.disconnect(quiesceTimeout, null, null, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties());
 	}
 
 	/**
@@ -1093,7 +1093,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             for problems encountered while disconnecting
 	 */
 	public IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback, int reasonCode,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
+			MqttProperties disconnectProperties)
 			throws MqttException {
 		final String methodName = "disconnect";
 		// @TRACE 104=> quiesceTimeout={0} userContext={1} callback={2}
@@ -1103,19 +1103,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		token.setActionCallback(callback);
 		token.setUserContext(userContext);
 
-		MqttDisconnect disconnect = new MqttDisconnect(reasonCode);
-
-		if (sessionExpiryInterval != null) {
-			disconnect.setSessionExpiryInterval(sessionExpiryInterval);
-		}
-
-		if (reasonString != null) {
-			disconnect.setReasonString(reasonString);
-		}
-
-		if (userDefinedProperties != null) {
-			disconnect.setUserDefinedProperties(userDefinedProperties);
-		}
+		MqttDisconnect disconnect = new MqttDisconnect(reasonCode, disconnectProperties);
 
 		try {
 			comms.disconnect(disconnect, quiesceTimeout, token);
@@ -1144,7 +1132,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @since 0.4.1
 	 */
 	public void disconnectForcibly() throws MqttException {
-		disconnectForcibly(QUIESCE_TIMEOUT, DISCONNECT_TIMEOUT, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
+		disconnectForcibly(QUIESCE_TIMEOUT, DISCONNECT_TIMEOUT, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties());
 	}
 
 	/**
@@ -1163,7 +1151,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @since 0.4.1
 	 */
 	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
-		disconnectForcibly(QUIESCE_TIMEOUT, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
+		disconnectForcibly(QUIESCE_TIMEOUT, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties());
 	}
 
 	/**
@@ -1196,10 +1184,9 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @since 0.4.1
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
+			MqttProperties disconnectProperties)
 			throws MqttException {
-		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, reasonCode, sessionExpiryInterval, reasonString,
-				userDefinedProperties);
+		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, reasonCode, disconnectProperties);
 	}
 
 	/**
@@ -1224,7 +1211,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket)
 			throws MqttException {
 		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket,
-				MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
+				MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties());
 	}
 
 	/**
@@ -1250,7 +1237,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	}
 
 	public void setClientId(String clientId) {
-		this.clientId = clientId;
+		this.mqttSession.setClientId(clientId);
 	}
 
 	/**
@@ -1390,8 +1377,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 */
 	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, MqttActionListener callback)
 			throws MqttException {
-		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, userContext, callback,
-				0, null);
+		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, userContext, callback, new MqttProperties());
 	}
 
 	/**
@@ -1412,7 +1398,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(String topicFilter, int qos) throws MqttException {
-		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, null, null, 0, null);
+		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, null, null, new MqttProperties());
 	}
 
 	/**
@@ -1434,7 +1420,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(MqttSubscription[] subscriptions) throws MqttException {
-		return this.subscribe(subscriptions, null, null, 0, null);
+		return this.subscribe(subscriptions, null, null, new MqttProperties());
 	}
 
 	/**
@@ -1571,8 +1557,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @throws IllegalArgumentException
 	 *             if the two supplied arrays are not the same size.
 	 */
-	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
-			int subscriptionIdentifier, List<UserProperty> userProperties) throws MqttException {
+	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback, MqttProperties subscriptionProperties) throws MqttException {
 		final String methodName = "subscribe";
 
 		// remove any message handlers for individual topics
@@ -1603,13 +1588,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		// token.internalTok.setTopics(topicFilters);
 		// TODO - Build up MQTT Subscriptions properly here
 
-		MqttSubscribe register = new MqttSubscribe(subscriptions);
-		if (subscriptionIdentifier != 0) {
-			register.setSubscriptionIdentifier(subscriptionIdentifier);
-		}
-		if (userProperties != null) {
-			register.setUserDefinedProperties(userProperties);
-		}
+		MqttSubscribe register = new MqttSubscribe(subscriptions, subscriptionProperties);
 
 		comms.sendNoWait(register, token);
 		// @TRACE 109=<
@@ -1639,11 +1618,11 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(MqttSubscription mqttSubscription, Object userContext, MqttActionListener callback,
-			IMqttMessageListener messageListener, int subscriptionIdentifier, List<UserProperty> userProperties)
+			IMqttMessageListener messageListener, MqttProperties subscriptionProperties)
 			throws MqttException {
 
 		return this.subscribe(new MqttSubscription[] { mqttSubscription }, userContext, callback,
-				messageListener , subscriptionIdentifier, userProperties);
+				messageListener ,subscriptionProperties);
 	}
 
 	/**
@@ -1663,7 +1642,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	public IMqttToken subscribe(MqttSubscription subscription, IMqttMessageListener messageListener)
 			throws MqttException {
 		return this.subscribe(new MqttSubscription[] { subscription }, null, null,
-				 messageListener , 0, null);
+				 messageListener , new MqttProperties());
 	}
 
 	/**
@@ -1688,7 +1667,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 */
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, IMqttMessageListener messageListener)
 			throws MqttException {
-		return this.subscribe(subscriptions, null, null, messageListener, 0, null);
+		return this.subscribe(subscriptions, null, null, messageListener, new MqttProperties());
 	}
 
 	/**
@@ -1718,20 +1697,10 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
-			IMqttMessageListener[] messageListeners, List<UserProperty> userProperties)
+			IMqttMessageListener[] messageListeners, MqttProperties subscriptionProperties)
 			throws MqttException {
 
-		IMqttToken token = this.subscribe(subscriptions, userContext, callback, 0, userProperties);
-
-		// add message handlers to the list for this client
-		for (int i = 0; i < subscriptions.length; ++i) {
-			this.comms.setMessageListener(null, subscriptions[i].getTopic(), messageListeners[i]);
-		}
-
-		return token;
-	}
-
-		IMqttToken token = this.subscribe(subscriptions, userContext, callback, 0, userProperties);
+		IMqttToken token = this.subscribe(subscriptions, userContext, callback, subscriptionProperties);
 
 		// add message handlers to the list for this client
 		for (int i = 0; i < subscriptions.length; ++i) {
@@ -1768,10 +1737,10 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             if there was an error registering the subscription.
 	 */
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
-			IMqttMessageListener messageListener, int subscriptionIdentifier, List<UserProperty> userProperties)
+			IMqttMessageListener messageListener, MqttProperties subscriptionProperties)
 			throws MqttException {
-
-		int subId = subscriptionIdentifier;
+		
+		int subId = subscriptionProperties.getSubscriptionIdentifiers().get(0);
 
 
 			// Automatic Subscription Identifier Assignment is enabled
@@ -1791,7 +1760,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 				}
 			}
 
-		IMqttToken token = this.subscribe(subscriptions, userContext, callback, subId, userProperties);
+		IMqttToken token = this.subscribe(subscriptions, userContext, callback, subscriptionProperties);
 
 		// add message handlers to the list for this client
 		for (int i = 0; i < subscriptions.length; ++i) {
@@ -1822,7 +1791,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 */
 	public IMqttToken unsubscribe(String topicFilter, Object userContext, MqttActionListener callback)
 			throws MqttException {
-		return unsubscribe(new String[] { topicFilter }, userContext, callback);
+		return unsubscribe(new String[] { topicFilter }, userContext, callback, new MqttProperties());
 	}
 
 	/**
@@ -1838,7 +1807,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             if there was an error unregistering the subscription.
 	 */
 	public IMqttToken unsubscribe(String topicFilter) throws MqttException {
-		return unsubscribe(new String[] { topicFilter }, null, null);
+		return unsubscribe(new String[] { topicFilter }, null, null, new MqttProperties());
 	}
 
 	/**
@@ -1855,7 +1824,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 *             if there was an error unregistering the subscription.
 	 */
 	public IMqttToken unsubscribe(String[] topicFilters) throws MqttException {
-		return unsubscribe(topicFilters, null, null);
+		return unsubscribe(topicFilters, null, null, new MqttProperties());
 	}
 
 	/**
@@ -1895,7 +1864,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @throws MqttException
 	 *             if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String[] topicFilters, Object userContext, MqttActionListener callback)
+	public IMqttToken unsubscribe(String[] topicFilters, Object userContext, MqttActionListener callback, MqttProperties unsubscribeProperties)
 			throws MqttException {
 		final String methodName = "unsubscribe";
 
@@ -1931,7 +1900,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		token.setUserContext(userContext);
 		token.internalTok.setTopics(topicFilters);
 
-		MqttUnsubscribe unregister = new MqttUnsubscribe(topicFilters);
+		MqttUnsubscribe unregister = new MqttUnsubscribe(topicFilters, unsubscribeProperties);
 
 		comms.sendNoWait(unregister, token);
 		// @TRACE 110=<
@@ -2058,7 +2027,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		MqttMessage message = new MqttMessage(payload);
 		message.setQos(qos);
 		message.setRetained(retained);
-		return this.publish(topic, message, userContext, callback);
+		return this.publish(topic, message, userContext, callback, new MqttProperties());
 	}
 
 	/**
@@ -2116,7 +2085,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 */
 	public IMqttDeliveryToken publish(String topic, MqttMessage message)
 			throws MqttException, MqttPersistenceException {
-		return this.publish(topic, message, null, null);
+		return this.publish(topic, message, null, null, new MqttProperties());
 	}
 
 	/**
@@ -2206,7 +2175,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 	 * @see MqttMessage
 	 */
 	public IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext,
-			MqttActionListener callback) throws MqttException, MqttPersistenceException {
+			MqttActionListener callback, MqttProperties publishProperties) throws MqttException, MqttPersistenceException {
 		final String methodName = "publish";
 		// @TRACE 111=< topic={0} message={1}userContext={1} callback={2}
 		log.fine(CLASS_NAME, methodName, "111", new Object[] { topic, userContext, callback });
@@ -2220,7 +2189,7 @@ public class MqttAsyncClient implements MqttClientInterface {
 		token.setMessage(message);
 		token.internalTok.setTopics(new String[] { topic });
 
-		MqttPublish pubMsg = new MqttPublish(topic, message);
+		MqttPublish pubMsg = new MqttPublish(topic, message, publishProperties);
 		comms.sendNoWait(pubMsg, token);
 
 		// @TRACE 112=<

@@ -22,7 +22,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
@@ -30,10 +30,13 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
 public class MqttSubscribe extends MqttWireMessage {
 
+	private static final Byte[] validProperties = { MqttProperties.SUBSCRIPTION_IDENTIFIER,
+			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
+
 	// Fields
+	private MqttProperties properties;
 	private MqttSubscription[] subscriptions;
-	private Integer subscriptionIdentifier;
-	private List<UserProperty> userDefinedProperties = new ArrayList<>();
+	
 
 	/**
 	 * Constructor for an on the Wire MQTT Subscribe message
@@ -49,17 +52,18 @@ public class MqttSubscribe extends MqttWireMessage {
 	 */
 	public MqttSubscribe(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
+		this.properties = new MqttProperties(validProperties);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream inputStream = new DataInputStream(counter);
 		msgId = inputStream.readUnsignedShort();
 
-		parseIdentifierValueFields(inputStream);
+		this.properties.decodeProperties(inputStream);
 
 		ArrayList<MqttSubscription> subscriptionList = new ArrayList<>();
 		// Whilst we are reading data
 		while (counter.getCounter() < data.length) {
-			String topic = decodeUTF8(inputStream);
+			String topic = MqttDataTypes.decodeUTF8(inputStream);
 			byte subscriptionOptions = inputStream.readByte();
 			subscriptionList.add(decodeSubscription(topic, subscriptionOptions));
 		}
@@ -73,9 +77,11 @@ public class MqttSubscribe extends MqttWireMessage {
 	 * @param subscriptions
 	 *            - An Array of {@link MqttSubscription} subscriptions.
 	 */
-	public MqttSubscribe(MqttSubscription[] subscriptions) {
+	public MqttSubscribe(MqttSubscription[] subscriptions, MqttProperties properties) {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
 		this.subscriptions = subscriptions;
+		this.properties = properties;
+		this.properties.setValidProperties(validProperties);
 	}
 
 	/**
@@ -84,9 +90,11 @@ public class MqttSubscribe extends MqttWireMessage {
 	 * @param subscription
 	 *            - An {@link MqttSubscription}
 	 */
-	public MqttSubscribe(MqttSubscription subscription) {
+	public MqttSubscribe(MqttSubscription subscription, MqttProperties properties) {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
 		this.subscriptions = new MqttSubscription[] { subscription };
+		this.properties = properties;
+		this.properties.setValidProperties(validProperties);
 	}
 
 	@Override
@@ -99,7 +107,7 @@ public class MqttSubscribe extends MqttWireMessage {
 			outputStream.writeShort(msgId);
 
 			// Write Identifier / Value Fields
-			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
+			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 			outputStream.write(identifierValueFieldsByteArray);
 
@@ -107,66 +115,6 @@ public class MqttSubscribe extends MqttWireMessage {
 			return baos.toByteArray();
 		} catch (IOException ioe) {
 			throw new MqttException(ioe);
-		}
-	}
-
-	private byte[] getIdentifierValueFields() throws MqttException {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			DataOutputStream outputStream = new DataOutputStream(baos);
-
-			// If Present, encode the Subscription Identifier
-			if (subscriptionIdentifier != null) {
-				outputStream.write(MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER);
-				outputStream.write(encodeVariableByteInteger(subscriptionIdentifier));
-			}
-
-			// If Present, encode the User Properties
-			if (!userDefinedProperties.isEmpty()) {
-				for (UserProperty property : userDefinedProperties) {
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, property.getKey());
-					encodeUTF8(outputStream, property.getValue());
-				}
-			}
-
-			outputStream.flush();
-			return baos.toByteArray();
-		} catch (IOException ioe) {
-			throw new MqttException(ioe);
-		}
-	}
-
-	/**
-	 * Parses the Variable Header for Identifier Value fields and populates the
-	 * relevant fields in this MqttSubscribe message.
-	 * 
-	 * @param dis
-	 * @throws IOException
-	 * @throws MqttException
-	 */
-	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
-		int length = readVariableByteInteger(dis).getValue();
-		if (length > 0) {
-			byte[] identifierValueByteArray = new byte[length];
-			dis.read(identifierValueByteArray, 0, length);
-			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
-			DataInputStream inputStream = new DataInputStream(bais);
-			while (inputStream.available() > 0) {
-				// Get the first byte (identifier)
-				byte identifier = inputStream.readByte();
-				if (identifier == MqttPropertyIdentifiers.SUBSCRIPTION_IDENTIFIER) {
-					subscriptionIdentifier = readVariableByteInteger(inputStream).getValue();
-				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
-					String key = decodeUTF8(inputStream);
-					String value = decodeUTF8(inputStream);
-					userDefinedProperties.add(new UserProperty(key, value));
-				} else {
-					// Unidentified Identifier
-					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
-				}
-			}
-
 		}
 	}
 
@@ -206,7 +154,7 @@ public class MqttSubscribe extends MqttWireMessage {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
-			encodeUTF8(outputStream, subscription.getTopic());
+			MqttDataTypes.encodeUTF8(outputStream, subscription.getTopic());
 
 			// Encode Subscription QoS
 			byte subscriptionOptions = (byte) subscription.getQos();
@@ -251,20 +199,16 @@ public class MqttSubscribe extends MqttWireMessage {
 		return subscriptions;
 	}
 
-	public int getSubscriptionIdentifier() {
-		return subscriptionIdentifier;
+	@Override
+	public MqttProperties getProperties() {
+		return this.properties;
 	}
 
-	public void setSubscriptionIdentifier(int subscriptionIdentifier) {
-		this.subscriptionIdentifier = subscriptionIdentifier;
+	@Override
+	public String toString() {
+		return "MqttSubscribe [properties=" + properties + ", subscriptions=" + Arrays.toString(subscriptions) + "]";
 	}
-
-	public List<UserProperty> getUserDefinedProperties() {
-		return userDefinedProperties;
-	}
-
-	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
-		this.userDefinedProperties = userDefinedProperties;
-	}
+	
+	
 
 }

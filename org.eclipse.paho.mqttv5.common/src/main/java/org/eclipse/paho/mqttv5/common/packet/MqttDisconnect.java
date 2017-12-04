@@ -21,8 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
@@ -50,13 +48,16 @@ public class MqttDisconnect extends MqttWireMessage {
 
 	// Fields
 	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
-	private Integer sessionExpiryInterval;
-	private String reasonString;
-	private String serverReference;
-	private List<UserProperty> userDefinedProperties = new ArrayList<>();
+	
+	private static final Byte[] validProperties = { MqttProperties.SESSION_EXPIRY_INTERVAL_IDENTIFIER,
+			MqttProperties.SERVER_REFERENCE_IDENTIFIER, MqttProperties.REASON_STRING_IDENTIFIER,
+			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
+	
+	private MqttProperties properties;
 
 	public MqttDisconnect(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
+		this.properties = new MqttProperties(validProperties);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream inputStream = new DataInputStream(counter);
@@ -67,16 +68,18 @@ public class MqttDisconnect extends MqttWireMessage {
 		
 		long remainder = (long) data.length - counter.getCounter();
 		if (remainder >= 2) {
-			parseIdentifierValueFields(inputStream);
+			this.properties.decodeProperties(inputStream);
 		}
 
 		inputStream.close();
 	}
 
-	public MqttDisconnect(int returnCode) throws MqttException {
+	public MqttDisconnect(int returnCode, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
+		this.properties = properties;
+		this.properties.setValidProperties(validProperties);
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class MqttDisconnect extends MqttWireMessage {
 			outputStream.writeByte(returnCode);
 
 			// Write Identifier / Value Fields
-			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
+			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 			if (identifierValueFieldsByteArray.length != 0) {
 				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 				outputStream.write(identifierValueFieldsByteArray);
@@ -100,121 +103,24 @@ public class MqttDisconnect extends MqttWireMessage {
 			throw new MqttException(ioe);
 		}
 	}
-
-	private byte[] getIdentifierValueFields() throws MqttException {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			DataOutputStream outputStream = new DataOutputStream(baos);
-
-			// If Present, encode the Session Expiry Interval (3.14.2.2.2)
-			if (sessionExpiryInterval != null) {
-				outputStream.write(MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER);
-				outputStream.writeInt(sessionExpiryInterval);
-			}
-
-			// If Present, encode the Reason String (3.14.2.2.3)
-			if (reasonString != null) {
-				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
-				encodeUTF8(outputStream, reasonString);
-			}
-
-			// If Present, encode the User Defined Name-Value Pairs (3.14.2.2.4)
-			if (!userDefinedProperties.isEmpty()) {
-				for (UserProperty property : userDefinedProperties) {
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, property.getKey());
-					encodeUTF8(outputStream, property.getValue());
-				}
-			}
-
-			// If present, encode the Server Reference (3.14.2.2.5)
-			if (serverReference != null) {
-				outputStream.write(MqttPropertyIdentifiers.SERVER_REFERENCE_IDENTIFIER);
-				encodeUTF8(outputStream, serverReference);
-			}
-
-			outputStream.flush();
-			return baos.toByteArray();
-		} catch (IOException ioe) {
-			throw new MqttException(ioe);
-		}
-	}
-
-	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
-		// First, get the length of the IV fields
-		int lengthVBI = readVariableByteInteger(dis).getValue();
-		if (lengthVBI > 0) {
-			byte[] identifierValueByteArray = new byte[lengthVBI];
-			dis.read(identifierValueByteArray, 0, lengthVBI);
-			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
-			DataInputStream inputStream = new DataInputStream(bais);
-			while (inputStream.available() > 0) {
-				// Get the first byte (identifier)
-				byte identifier = inputStream.readByte();
-				if (identifier == MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER) {
-					sessionExpiryInterval = inputStream.readInt();
-				} else if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
-					reasonString = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
-					String key = decodeUTF8(inputStream);
-					String value = decodeUTF8(inputStream);
-					userDefinedProperties.add(new UserProperty(key, value));
-				} else if (identifier == MqttPropertyIdentifiers.SERVER_REFERENCE_IDENTIFIER) {
-					serverReference = decodeUTF8(inputStream);
-				} else {
-					// Unidentified Identifier
-					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
-				}
-			}
-		}
-	}
-
-	public int getSessionExpiryInterval() {
-		return sessionExpiryInterval;
-	}
-
-	public void setSessionExpiryInterval(Integer sessionExpiryInterval) {
-		this.sessionExpiryInterval = sessionExpiryInterval;
-	}
-
-	public String getReasonString() {
-		return reasonString;
-	}
-
-	public void setReasonString(String reasonString) {
-		this.reasonString = reasonString;
-	}
-
-	public String getServerReference() {
-		return serverReference;
-	}
-
-	public void setServerReference(String serverReference) {
-		this.serverReference = serverReference;
-	}
-
+	
 	public int getReturnCode() {
 		return returnCode;
 	}
-
-	public List<UserProperty> getUserDefinedProperties() {
-		return userDefinedProperties;
+	
+	@Override
+	protected byte getMessageInfo() {
+		return (byte) 0;
 	}
-
-	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
-		this.userDefinedProperties = userDefinedProperties;
+	
+	@Override
+	public MqttProperties getProperties() {
+		return this.properties;
 	}
 
 	@Override
 	public String toString() {
-		return "MqttDisconnect [returnCode=" + returnCode + ", sessionExpiryInterval=" + sessionExpiryInterval
-				+ ", reasonString=" + reasonString + ", serverReference=" + serverReference + ", userDefinedProperties="
-				+ userDefinedProperties + "]";
-	}
-
-	@Override
-	protected byte getMessageInfo() {
-		return (byte) 0;
+		return "MqttDisconnect [returnCode=" + returnCode + ", properties=" + properties + "]";
 	}
 
 }

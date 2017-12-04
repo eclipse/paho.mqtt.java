@@ -39,6 +39,7 @@ import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
@@ -299,8 +300,8 @@ public class CommsCallback implements Runnable {
 				// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
 				log.fine(CLASS_NAME, methodName, "722", new Object[] { message.toString() });
 				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(message.getReturnCode(),
-						message.getReasonString(), (ArrayList<UserProperty>) message.getUserDefinedProperties(),
-						message.getServerReference());
+						message.getProperties().getReasonString(), (ArrayList<UserProperty>) message.getProperties().getUserDefinedProperties(),
+						message.getProperties().getServerReference());
 				mqttCallback.disconnected(disconnectResponse);
 			} else if (mqttCallback != null && cause != null) {
 				// @TRACE 708=call connectionLost
@@ -427,17 +428,17 @@ public class CommsCallback implements Runnable {
 
 		// @TRACE 713=call messageArrived key={0} topic={1}
 		log.fine(CLASS_NAME, methodName, "713", new Object[] { new Integer(publishMessage.getMessageId()), destName });
-		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage());
+		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage(), publishMessage.getProperties());
 
 		if (!this.manualAcks) {
 			if (publishMessage.getMessage().getQos() == 1) {
 				this.clientComms.internalSend(
-						new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, publishMessage.getMessageId()),
+						new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, publishMessage.getMessageId(), new MqttProperties()),
 						new MqttToken(clientComms.getClient().getClientId()));
 			} else if (publishMessage.getMessage().getQos() == 2) {
 				this.clientComms.deliveryComplete(publishMessage);
 				MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS,
-						publishMessage.getMessageId());
+						publishMessage.getMessageId(), new MqttProperties());
 				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 			}
 		}
@@ -445,11 +446,11 @@ public class CommsCallback implements Runnable {
 
 	public void messageArrivedComplete(int messageId, int qos) throws MqttException {
 		if (qos == 1) {
-			this.clientComms.internalSend(new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, messageId),
+			this.clientComms.internalSend(new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, messageId, new MqttProperties()),
 					new MqttToken(clientComms.getClient().getClientId()));
 		} else if (qos == 2) {
 			this.clientComms.deliveryComplete(messageId);
-			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, messageId);
+			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, messageId, new MqttProperties());
 			this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 		}
 	}
@@ -552,10 +553,10 @@ public class CommsCallback implements Runnable {
 		this.callbackTopicMap.clear();
 	}
 
-	protected boolean deliverMessage(String topicName, int messageId, MqttMessage aMessage) throws Exception {
+	protected boolean deliverMessage(String topicName, int messageId, MqttMessage aMessage, MqttProperties properties) throws Exception {
 		boolean delivered = false;
 
-		if (aMessage.getSubscriptionIdentifiers().isEmpty()) {
+		if (properties.getSubscriptionIdentifiers().isEmpty()) {
 			// No Subscription IDs, use topic filter matching
 			for (Map.Entry<String, Integer> entry : this.callbackTopicMap.entrySet()) {
 				if (MqttTopic.isMatched(entry.getKey(), topicName)) {
@@ -567,7 +568,7 @@ public class CommsCallback implements Runnable {
 
 		} else {
 			// We have Subscription IDs
-			for (Integer subId : aMessage.getSubscriptionIdentifiers()) {
+			for (Integer subId : properties.getSubscriptionIdentifiers()) {
 				if (this.subscriptionIdMap.containsKey(subId)) {
 					Integer callbackId = this.subscriptionIdMap.get(subId);
 					aMessage.setId(messageId);

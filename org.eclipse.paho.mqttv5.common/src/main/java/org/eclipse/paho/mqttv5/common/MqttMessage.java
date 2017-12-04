@@ -16,12 +16,6 @@
  */
 package org.eclipse.paho.mqttv5.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
-
 /**
  * An MQTT message holds the application payload and options specifying how the
  * message is to be delivered The message includes a "payload" (the body of the
@@ -35,30 +29,9 @@ public class MqttMessage {
 	private boolean retained = false;
 	private boolean dup = false;
 	private int messageId;
-	private boolean isUTF8 = false; // Payload format indicator
-	private Integer expiryInterval;
-	private String responseTopic;
-	private byte[] correlationData;
-	private List<UserProperty> userProperties = new ArrayList<>();
-	private List<Integer> subscriptionIdentifiers;
-	private String contentType;
+	
 
-	public String getContentType() {
-		return contentType;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
-	public List<Integer> getSubscriptionIdentifiers() {
-		return subscriptionIdentifiers;
-	}
-
-	public void setSubscriptionIdentifiers(List<Integer> subscriptionIdentifiers) {
-		this.subscriptionIdentifiers = subscriptionIdentifiers;
-	}
-
+	
 	/**
 	 * Utility method to validate the supplied QoS value.
 	 * 
@@ -291,45 +264,7 @@ public class MqttMessage {
 		return this.messageId;
 	}
 
-	public boolean isUTF8() {
-		return isUTF8;
-	}
-
-	public void setUTF8(boolean isUTF8) {
-		this.isUTF8 = isUTF8;
-	}
-
-	public Integer getExpiryInterval() {
-		return expiryInterval;
-	}
-
-	public void setExpiryInterval(Integer expiryInterval) {
-		this.expiryInterval = expiryInterval;
-	}
-
-	public String getResponseTopic() {
-		return responseTopic;
-	}
-
-	public void setResponseTopic(String responseTopic) {
-		this.responseTopic = responseTopic;
-	}
-
-	public byte[] getCorrelationData() {
-		return correlationData;
-	}
-
-	public void setCorrelationData(byte[] correlationData) {
-		this.correlationData = correlationData;
-	}
-
-	public List<UserProperty> getUserProperties() {
-		return userProperties;
-	}
-
-	public void setUserProperties(List<UserProperty> userProperties) {
-		this.userProperties = userProperties;
-	}
+	
 
 	/**
 	 * Returns a string representation of this message's payload. Makes an attempt
@@ -344,10 +279,7 @@ public class MqttMessage {
 
 	public String toDebugString() {
 		return "MqttMessage [mutable=" + mutable + ", payload=" + new String(payload) + ", qos=" + qos + ", retained="
-				+ retained + ", dup=" + dup + ", messageId=" + messageId + ", isUTF8=" + isUTF8 + ", expiryInterval="
-				+ expiryInterval + ", responseTopic=" + responseTopic + ", correlationData="
-				+ Arrays.toString(correlationData) + ", userProperties=" + userProperties + ", subscriptionIdentifiers="
-				+ subscriptionIdentifiers + ", contentType=" + contentType + "]";
+				+ retained + ", dup=" + dup + ", messageId=" + messageId + "]";
 	}
 
 }

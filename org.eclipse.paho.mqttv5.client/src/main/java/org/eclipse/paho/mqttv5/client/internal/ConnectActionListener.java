@@ -112,17 +112,17 @@ public class ConnectActionListener implements MqttActionListener {
 
 		// Set properties imposed on us by the Server
 		MqttToken myToken = (MqttToken) token;
-
-		mqttSession.setReceiveMaximum(myToken.getRecieveMaximum());
-		mqttSession.setMaximumQoS(myToken.getMaximumQoS());
-		mqttSession.setRetainAvailable(myToken.isRetainAvailable());
-		mqttSession.setMaximumPacketSize(myToken.getMaximumPacketSize());
-		mqttSession.setTopicAliasMaximum(myToken.getTopicAliasMaximum());
-		mqttSession.setWildcardSubscriptionsAvailable(myToken.isWildcardSubscriptionAvailable());
-		mqttSession.setSubscriptionIdentifiersAvailable(myToken.isSubscriptionIdentifiersAvailable());
-		mqttSession.setSharedSubscriptionsAvailable(myToken.isSharedSubscriptionAvailable());
-		if(myToken.getAssignedClientIdentifier() != null) {
-			mqttSession.setClientId(myToken.getAssignedClientIdentifier());
+		System.out.println(myToken.getMessageProperties().toString());
+		mqttSession.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
+		mqttSession.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
+		mqttSession.setRetainAvailable(myToken.getMessageProperties().isRetainAvailableAdvertisement());
+		mqttSession.setMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
+		mqttSession.setTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
+		mqttSession.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
+		mqttSession.setSubscriptionIdentifiersAvailable(myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
+		mqttSession.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
+		if(myToken.getMessageProperties().getAssignedClientIdentifier() != null) {
+			mqttSession.setClientId(myToken.getMessageProperties().getAssignedClientIdentifier());
 		}
 
 

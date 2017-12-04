@@ -104,23 +104,13 @@ public class V5Client implements MqttCallback {
 	}
 
 	public static void printSubscriptionDetails(MqttToken token) {
-		System.out.println("Subscription Response: [reasonString=" + token.getReasonString() + ", user"
-				+ ", userDefinedProperties=" + token.getUserDefinedProperties());
+		System.out.println("Subscription Response: [reasonString=" + token.getMessageProperties().getReasonString() + ", user"
+				+ ", userDefinedProperties=" + token.getMessageProperties().getUserDefinedProperties());
 
 	}
 
 	public static void printConnectDetails(MqttToken token) {
-		System.out.println("Connection Response: [ sessionPresent=" + token.getSessionPresent() + ", responseInfo="
-				+ token.getResponseInformation() + ", assignedClientIdentifier=" + token.getAssignedClientIdentifier()
-				+ ", serverKeepAlive=" + token.getServerKeepAlive() + ", authMethod=" + token.getAuthMethod()
-				+ ", authData=" + token.getAuthData() + ", serverReference=" + token.getServerReference()
-				+ ", reasonString=" + token.getReasonString() + ", recieveMaximum=" + token.getRecieveMaximum()
-				+ ", topicAliasMaximum=" + token.getTopicAliasMaximum() + ", maximumQoS=" + token.getMaximumQoS()
-				+ ", retainAvailable=" + token.isRetainAvailable() + ", userDefinedProperties="
-				+ token.getUserDefinedProperties() + ", maxPacketSize=" + token.getMaximumPacketSize()
-				+ ", wildcardSubscriptionAvailable=" + token.isWildcardSubscriptionAvailable()
-				+ ", subscriptionIdentifiersAvailable=" + token.isSubscriptionIdentifiersAvailable()
-				+ ", sharedSubscriptionAvailable=" + token.isSharedSubscriptionAvailable() + "]");
+		System.out.println("Connection Response: [ sessionPresent=" + token.getSessionPresent() + ", properties=" + token.getMessageProperties().toString() + "]");
 	}
 
 	

@@ -28,6 +28,7 @@ import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.ExceptionHelper;
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 
@@ -100,7 +101,7 @@ public class MqttInputStream extends InputStream {
 					// Invalid MQTT message type...
 					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_INVALID_MESSAGE);
 				}
-				remLen = MqttWireMessage.readVariableByteInteger(in).getValue();
+				remLen = MqttDataTypes.readVariableByteInteger(in).getValue();
 				bais.write(first);
 				// bit silly, we decode it then encode it
 				// TODO - Should this be a long or an int?

@@ -28,7 +28,6 @@ import org.junit.Test;
 
 public class MqttUnsubscribeTest {
 	private static final String[] topics = { "a/b","c/d",	"e/f",	"g/g"};
-	private static final String reasonString = "Reason String 123.";
 	private static final String userKey1 = "userKey1";
 	private static final String userKey2 = "userKey2";
 	private static final String userKey3 = "userKey3";
@@ -54,26 +53,26 @@ public class MqttUnsubscribeTest {
 		outputStream.write(payload);
 		
 		MqttUnsubscribe decodedUnsubscribePacket = (MqttUnsubscribe) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttProperties properties = decodedUnsubscribePacket.getProperties();
 		
 		
-		Assert.assertEquals(reasonString, decodedUnsubscribePacket.getReasonString());
 		Assert.assertArrayEquals(topics, decodedUnsubscribePacket.getTopics());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedUnsubscribePacket.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedUnsubscribePacket.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedUnsubscribePacket.getUserDefinedProperties().get(2)));
 		
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
 		
 	}
 	
 	public MqttUnsubscribe generateMqttUnsubscribePacket(){
-		MqttUnsubscribe MqttUnsubscribePacket = new MqttUnsubscribe(topics);
-		MqttUnsubscribePacket.setReasonString(reasonString);
+		MqttProperties properties = new MqttProperties();
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		MqttUnsubscribePacket.setUserDefinedProperties(userDefinedProperties);
-		
+		properties.setUserDefinedProperties(userDefinedProperties);
+		MqttUnsubscribe MqttUnsubscribePacket = new MqttUnsubscribe(topics, properties);
+
 		return MqttUnsubscribePacket;
 	}
 
