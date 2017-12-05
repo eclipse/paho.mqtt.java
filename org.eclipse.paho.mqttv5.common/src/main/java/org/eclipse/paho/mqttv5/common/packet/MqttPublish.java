@@ -47,7 +47,6 @@ public class MqttPublish extends MqttPersistableWireMessage {
 	private boolean dup = false;
 	private String topicName;
 
-
 	/**
 	 * Constructs a new MqttPublish message
 	 *
@@ -55,6 +54,8 @@ public class MqttPublish extends MqttPersistableWireMessage {
 	 *            - The Destination Topic.
 	 * @param message
 	 *            - The Message being sent.
+	 * @param properties
+	 *            - The {@link MqttProperties} for the packet.
 	 */
 	public MqttPublish(String topic, MqttMessage message, MqttProperties properties) {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBLISH);
@@ -105,9 +106,6 @@ public class MqttPublish extends MqttPersistableWireMessage {
 		dis.close();
 	}
 
-	
-
-	
 	@Override
 	protected byte[] getVariableHeader() throws MqttException {
 		try {
@@ -168,8 +166,6 @@ public class MqttPublish extends MqttPersistableWireMessage {
 		return true;
 	}
 
-	
-
 	public MqttMessage getMessage() {
 		MqttMessage message = new MqttMessage(payload, qos, retained);
 		return message;
@@ -189,7 +185,7 @@ public class MqttPublish extends MqttPersistableWireMessage {
 	public void setTopicName(String topicName) {
 		this.topicName = topicName;
 	}
-	
+
 	@Override
 	public MqttProperties getProperties() {
 		return this.properties;

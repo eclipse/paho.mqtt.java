@@ -140,6 +140,10 @@ public class MqttConnect extends MqttWireMessage {
 	 *            - The Clean Session Identifier
 	 * @param keepAliveInterval
 	 *            - The Keep Alive Interval
+	 * @param properties
+	 *            - The {@link MqttProperties} for the packet.
+	 * @param willProperties
+	 *            - The {@link MqttProperties} for the will message.
 	 *
 	 */
 	public MqttConnect(String clientId, int mqttVersion, boolean cleanSession, int keepAliveInterval,
@@ -271,8 +275,6 @@ public class MqttConnect extends MqttWireMessage {
 	public void setWillDestination(String willDestination) {
 		this.willDestination = willDestination;
 	}
-
-	
 
 	public byte getInfo() {
 		return info;

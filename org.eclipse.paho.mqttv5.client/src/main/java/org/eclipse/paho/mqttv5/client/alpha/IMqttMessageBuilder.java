@@ -24,7 +24,7 @@ public class IMqttMessageBuilder {
 	 * <p>
 	 * Equivalent to <code>withPayload(bytes, 0, bytes.length)</code>
 	 * 
-	 * @param bytes
+	 * @param bytes The Payload bytes
 	 * @return this builder
 	 */
 	public IMqttMessageBuilder withPayload(byte[] bytes) {
@@ -34,9 +34,9 @@ public class IMqttMessageBuilder {
 	/**
 	 * Sets the payload by copying the supplied byte range
 	 * 
-	 * @param bytes
-	 * @param pos
-	 * @param length
+	 * @param bytes  The Payload bytes
+	 * @param pos The offset
+	 * @param length The payload length
 	 * @return this builder
 	 */
 	public IMqttMessageBuilder withPayload(byte[] bytes, int pos, int length) {
@@ -50,9 +50,7 @@ public class IMqttMessageBuilder {
 	/**
 	 * Sets the payload by copying the supplied ByteBuffer
 	 * 
-	 * @param bytes
-	 * @param pos
-	 * @param length
+	 * @param buffer the buffer to copy
 	 * @return this builder
 	 */
 	public IMqttMessageBuilder withPayload(ByteBuffer buffer) {
@@ -68,8 +66,8 @@ public class IMqttMessageBuilder {
 	 * copying it. The caller is responsible for making sure that
 	 * the byte array is not subsequently modified
 	 * 
-	 * @param bytes
-	 * @return
+	 * @param bytes The Payload bytes
+	 * @return an {@link IMqttMessageBuilder}
 	 */
 	public IMqttMessageBuilder withSafePayload(byte[] bytes) {
 		payload = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
@@ -81,8 +79,10 @@ public class IMqttMessageBuilder {
 	 * copying it. The caller is responsible for making sure that
 	 * the byte array is not subsequently modified
 	 * 
-	 * @param bytes
-	 * @return
+	 * @param bytes The Payload bytes
+	 * @param pos The offset
+	 * @param length The length of the payload
+	 * @return an {@link IMqttMessageBuilder}
 	 */
 	public IMqttMessageBuilder withSafePayload(byte[] bytes, int pos, int length) {
 		payload = ByteBuffer.wrap(bytes, pos, length).asReadOnlyBuffer();
@@ -93,9 +93,9 @@ public class IMqttMessageBuilder {
 	 * Sets the payload using the supplied ByteBuffer without
 	 * copying it. The caller is responsible for making sure that
 	 * the Byte Buffer is not subsequently modified
+	 * @param buffer The buffer set
 	 * 
-	 * @param bytes
-	 * @return
+	 * @return an {@link IMqttMessageBuilder}
 	 */
 	public IMqttMessageBuilder withSafePayload(ByteBuffer buffer) {
 		payload = buffer.asReadOnlyBuffer();

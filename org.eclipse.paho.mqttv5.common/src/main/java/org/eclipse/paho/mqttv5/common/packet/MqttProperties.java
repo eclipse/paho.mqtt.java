@@ -95,6 +95,7 @@ public class MqttProperties {
 	 * 
 	 * @return a byte array containing encoded properties.
 	 * @throws MqttException
+	 *             if an exception occurs whilst encoding the properties.
 	 */
 	public byte[] encodeProperties() throws MqttException {
 		try {
@@ -134,7 +135,7 @@ public class MqttProperties {
 
 			// Subscription Identifier
 			if (!subscriptionIdentifiers.isEmpty() && validProperties.contains(SUBSCRIPTION_IDENTIFIER)) {
-				for(Integer subscriptionIdentifier : subscriptionIdentifiers) {
+				for (Integer subscriptionIdentifier : subscriptionIdentifiers) {
 					outputStream.write(SUBSCRIPTION_IDENTIFIER);
 					outputStream.write(MqttDataTypes.encodeVariableByteInteger(subscriptionIdentifier));
 				}
@@ -606,6 +607,5 @@ public class MqttProperties {
 				+ ", correlationData=" + Arrays.toString(correlationData) + ", subscriptionIdentifiers="
 				+ subscriptionIdentifiers + "]";
 	}
-
 
 }

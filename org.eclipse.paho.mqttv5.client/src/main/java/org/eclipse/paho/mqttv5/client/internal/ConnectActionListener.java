@@ -81,6 +81,8 @@ public class ConnectActionListener implements MqttActionListener {
 	 *            the User Context Object
 	 * @param userCallback
 	 *            the {@link MqttActionListener} as the callback for the user
+	 * @param mqttSession
+	 *            the {@link MqttSession}
 	 * @param reconnect
 	 *            If true, this is a reconnect attempt
 	 */
@@ -118,13 +120,14 @@ public class ConnectActionListener implements MqttActionListener {
 		mqttSession.setRetainAvailable(myToken.getMessageProperties().isRetainAvailableAdvertisement());
 		mqttSession.setMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
 		mqttSession.setTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
-		mqttSession.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
-		mqttSession.setSubscriptionIdentifiersAvailable(myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
+		mqttSession
+				.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
+		mqttSession.setSubscriptionIdentifiersAvailable(
+				myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
 		mqttSession.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
-		if(myToken.getMessageProperties().getAssignedClientIdentifier() != null) {
+		if (myToken.getMessageProperties().getAssignedClientIdentifier() != null) {
 			mqttSession.setClientId(myToken.getMessageProperties().getAssignedClientIdentifier());
 		}
-
 
 		if (reconnect) {
 			comms.notifyReconnect();

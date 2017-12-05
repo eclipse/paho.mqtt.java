@@ -51,7 +51,7 @@ public interface IMqttCommonClient {
 	 * Requests the Subscriptions known by this client which match any
 	 * of the supplied topicFilters
 	 * 
-	 * @param topicFilter the topics to search for
+	 * @param topicFilters the topics to search for
 	 * @return The subscriptions which use these topic filters
 	 */
 	public IMqttSubscriptionToken<?>[] getSubscribers(String[] topicFilters);

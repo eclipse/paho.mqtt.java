@@ -23,6 +23,7 @@ import org.osgi.util.pushstream.PushStream;
  * on the {@link PushStream} returned by {@link IMqttSubscriptionToken#getStream()}.
  * The result of this request is reflected in the promise returned by 
  * {@link IMqttSubscriptionToken}{@link #getPromise()}.</p>
+ * @param <C>  The OSGI Promise
  * 
  * 
  */
@@ -44,7 +45,7 @@ public interface IMqttSubscriptionToken<C> extends IMqttToken<IMqttSubscriptionR
 	 * subscription request will ever be sent.
 	 * </p>
 	 * @return A stream of messages for this subscription
-	 * @throws MqttException
+	 * @throws MqttException if an exception occurs whilsr returning the stream.
 	 */
 	public PushStream<IReceivedMessage<C>> getStream() throws MqttException;
 	

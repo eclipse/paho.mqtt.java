@@ -8,7 +8,6 @@ public interface IMqttMessage {
 	 * Returns the quality of service for this message.
 	 * 
 	 * @return the quality of service to use, either 0, 1, or 2.
-	 * @see #setQos(int)
 	 */
 	public int getQos();
 	
@@ -27,7 +26,6 @@ public interface IMqttMessage {
 	 *
 	 * @return <code>true</code> if the message should be, or was, retained by the
 	 *         server.
-	 * @see #setRetained(boolean)
 	 */
 	public boolean isRetained();
 }

@@ -24,25 +24,29 @@ package org.eclipse.paho.mqttv5.common.packet.util;
 public class VariableByteInteger {
 	private int value;
 	private int length;
-	
-	public VariableByteInteger(int value){
+
+	public VariableByteInteger(int value) {
 		this(value, -1);
 	}
-	
-	public VariableByteInteger(int value, int length){
+
+	public VariableByteInteger(int value, int length) {
 		this.value = value;
 		this.length = length;
 	}
-	
+
 	/**
 	 * Returns the number of bytes read when decoding this MBI
+	 * 
+	 * @return The Encoded Length of the VBI.
 	 */
-	public int getEncodedLength(){
+	public int getEncodedLength() {
 		return length;
 	}
-	
+
 	/**
 	 * Returns the value of this MBI.
+	 * 
+	 * @return The value of the VBI.
 	 */
 	public int getValue() {
 		return value;

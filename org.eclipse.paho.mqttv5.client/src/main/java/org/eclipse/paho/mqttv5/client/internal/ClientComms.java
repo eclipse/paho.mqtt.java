@@ -1,6 +1,5 @@
 package org.eclipse.paho.mqttv5.client.internal;
 
-import java.util.ArrayList;
 /*******************************************************************************
  * Copyright (c) 2009, 2016 IBM Corp.
  *
@@ -52,7 +51,6 @@ import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Handles client communications with the server. Sends and receives MQTT V5
@@ -106,6 +104,8 @@ public class ClientComms {
 	 *            the {@link TimerPingSender}
 	 * @param executorService
 	 *            the {@link ExecutorService}
+	 * @param mqttSession
+	 * 			 the {@link MqttSession}
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
 	 */
@@ -602,15 +602,8 @@ public class ClientComms {
 	 *            If true, will send a disconnect packet
 	 * @param reasonCode
 	 *            the disconnection reason code.
-	 * @param sessionExpiryInterval
-	 *            optional property to be sent in the disconnect packet to the
-	 *            server. Use null if not required.
-	 * @param reasonString
-	 *            optional property to be sent in the disconnect packet to the
-	 *            server. Use null if not required.
-	 * @param userDefinedProperties
-	 *            {@link ArrayList} of {@link UserProperty} to be sent to the
-	 *            server. Use null if not required.
+	 * @param disconnectProperties
+	 * 			  the {@link MqttProperties} to send in the Disconnect packet.
 	 * @throws MqttException
 	 *             if an error occurs whilst disconnecting
 	 */

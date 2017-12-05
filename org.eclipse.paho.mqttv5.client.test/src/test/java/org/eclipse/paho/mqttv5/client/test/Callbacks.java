@@ -37,20 +37,19 @@ public class Callbacks implements MqttCallback, IMqttMessageListener{
 		this.disconnects = new ArrayList<MqttDisconnectResponse>();
 	}
 
-	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		log.info(String.format("Message Arrived: %s", message.toString()));
 		this.messages.add(message);
 
 	}
 
-	@Override
+	
 	public void deliveryComplete(IMqttDeliveryToken token) {
 		log.info(String.format("Published: %s", token.getMessageId()));
 		this.publishedMessageIds.add(token.getMessageId());
 	}
 
-	@Override
+	
 	public void disconnected(MqttDisconnectResponse disconnectResponse) {
 		log.info(String.format("Disconnected %s", disconnectResponse.toString()));
 		this.disconnects.add(disconnectResponse);
@@ -76,7 +75,6 @@ public class Callbacks implements MqttCallback, IMqttMessageListener{
 		return disconnects;
 	}
 
-	@Override
 	public void mqttErrorOccured(MqttException exception) {
 		// TODO Auto-generated method stub
 		

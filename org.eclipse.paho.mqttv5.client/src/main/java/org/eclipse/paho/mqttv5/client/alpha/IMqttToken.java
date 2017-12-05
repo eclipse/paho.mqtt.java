@@ -36,8 +36,8 @@ import org.osgi.util.promise.Promise;
  * <li>isComplete() returns true or</li>
  * <li>getException() is not null.</li>
  * </ul>
- * @param <M>
- *
+ * @param <T> TODO
+ * @param <C> TODO
  */
 public interface IMqttToken<T extends IMqttResult<C>, C> {
 	

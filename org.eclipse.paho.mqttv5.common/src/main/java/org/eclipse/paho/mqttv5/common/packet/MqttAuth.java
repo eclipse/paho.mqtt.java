@@ -44,8 +44,6 @@ public class MqttAuth extends MqttWireMessage {
 	/**
 	 * Constructs an Auth message from a raw byte array
 	 * 
-	 * @param info
-	 *            - Info Byte
 	 * @param data
 	 *            - The variable header and payload bytes.
 	 * @throws IOException
@@ -69,6 +67,8 @@ public class MqttAuth extends MqttWireMessage {
 	 * 
 	 * @param returnCode
 	 *            - The Auth Return Code
+	 * @param properties
+	 *            - The {@link MqttProperties} for the packet.
 	 * @throws MqttException
 	 *             - If an exception occurs encoding this packet
 	 */
@@ -108,7 +108,7 @@ public class MqttAuth extends MqttWireMessage {
 	public int getReturnCode() {
 		return returnCode;
 	}
-	
+
 	@Override
 	public MqttProperties getProperties() {
 		return this.properties;

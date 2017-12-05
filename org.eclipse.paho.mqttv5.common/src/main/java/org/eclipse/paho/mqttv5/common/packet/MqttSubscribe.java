@@ -36,13 +36,10 @@ public class MqttSubscribe extends MqttWireMessage {
 	// Fields
 	private MqttProperties properties;
 	private MqttSubscription[] subscriptions;
-	
 
 	/**
 	 * Constructor for an on the Wire MQTT Subscribe message
 	 * 
-	 * @param info
-	 *            - Info Byte
 	 * @param data
 	 *            - The variable header and payload bytes.
 	 * @throws IOException
@@ -76,6 +73,8 @@ public class MqttSubscribe extends MqttWireMessage {
 	 * 
 	 * @param subscriptions
 	 *            - An Array of {@link MqttSubscription} subscriptions.
+	 * @param properties
+	 *            - The {@link MqttProperties} for the packet.
 	 */
 	public MqttSubscribe(MqttSubscription[] subscriptions, MqttProperties properties) {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
@@ -89,6 +88,8 @@ public class MqttSubscribe extends MqttWireMessage {
 	 * 
 	 * @param subscription
 	 *            - An {@link MqttSubscription}
+	 * @param properties
+	 *            - The {@link MqttProperties} for the packet.
 	 */
 	public MqttSubscribe(MqttSubscription subscription, MqttProperties properties) {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
@@ -208,7 +209,5 @@ public class MqttSubscribe extends MqttWireMessage {
 	public String toString() {
 		return "MqttSubscribe [properties=" + properties + ", subscriptions=" + Arrays.toString(subscriptions) + "]";
 	}
-	
-	
 
 }

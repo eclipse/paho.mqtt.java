@@ -19,10 +19,6 @@
 
 package org.eclipse.paho.mqttv5.client.alpha;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.alpha.result.IMqttConnectionResult;
 import org.eclipse.paho.mqttv5.client.alpha.result.IMqttResult;
@@ -32,7 +28,6 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Enables an application to communicate with an MQTT server using non-blocking methods.
@@ -83,10 +78,10 @@ import org.eclipse.paho.mqttv5.common.packet.UserProperty;
  *     <pre>
  *     	IMqttToken conToken;
  *	    conToken = asyncClient.connect()
- *          .then(p -> {
+ *          .then(p -&gt; {
  *                  log("Connected");
  *                  return p;
- *              }, p -> {
+ *              }, p -&gt; {
  *                  log ("connect failed" + exception);
  *              });
  *      </pre>
@@ -155,7 +150,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * Connects to an MQTT server using the default options.
 	 * <p>The default options are specified in {@link MqttConnectionOptions} class.
 	 * </p>
-	 *
+	 * @param <C> The OSGI Promise
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
 	 * @throws MqttSecurityException  for security related problems
@@ -178,6 +173,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * <li>Waiting on the Promise returned by the token {@link IMqttToken#getPromise()}</li>
 	 * </ul>
 	 *
+	 * @param <C> The OSGI Promise
 	 * @param options a set of connection parameters that override the defaults.
 	 * @param userContext optional object for used to pass context to the callback. Use
 	 * null if not required.
@@ -197,7 +193,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
  	 *
 	 * @return token used to track and wait for disconnect to complete
 	 * @throws MqttException for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, Integer, String, ArrayList)
+	 * @see #disconnect(long, Object, MqttProperties)
 	 */
 	public IMqttToken<IMqttResult<Void>, Void> disconnect( ) throws MqttException;
 
@@ -213,7 +209,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * means the client will not quiesce.
 	 * @return token used to track and wait for disconnect to complete.
 	 * @throws MqttException for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, Integer, String, ArrayList)
+	 * @see #disconnect(long, Object, MqttProperties)
 	 */
 	public IMqttToken<IMqttResult<Void>, Void> disconnect(long quiesceTimeout) throws MqttException;
 
@@ -224,12 +220,12 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * for a maximum of 30 seconds for work to quiesce before disconnecting.
  	 * This method must not be called from inside callback methods.
  	 * </p>
- 	 *
+ 	 * @param <C> The OSGI Promise
  	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
 	 * @return token used to track and wait for the disconnect to complete.
 	 * @throws MqttException for problems encountered while disconnecting
-	 * @see #disconnect(long, Object, MqttActionListener, Integer, String, ArrayList)
+	 * @see #disconnect(long, Object, MqttProperties)
 
 	 */
 	public <C> IMqttToken<IMqttResult<C>, C> disconnect( C userContext) throws MqttException;
@@ -256,6 +252,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * <li>Waiting on the Promise returned by the token {@link IMqttToken#getPromise()}</li>
 	 * </ul>
 	 *
+	 * @param <C> The OSGI Promise
 	 * @param quiesceTimeout the amount of time in milliseconds to allow for
 	 * existing work to finish before disconnecting.  A value of zero or less
 	 * means the client will not quiesce.
@@ -322,7 +319,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance if too many messages are being processed.
-	 * @see #publish(String, MqttMessage, Object)
+	 * @see #publish(String, IMqttMessage, Object, MqttProperties)
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
@@ -336,6 +333,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * specified QoS, and then publish it.
 	 * </p>
 	 *
+	 * @param <C> The OSGI Promise
 	 * @param topic  to deliver the message to, for example "finance/stock/ibm".
 	 * @param payload the byte array to use as the payload
 	 * @param qos the Quality of Service to deliver the message at.  Valid values are 0, 1 or 2.
@@ -347,7 +345,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance client not connected.
-	 * @see #publish(String, MqttMessage, Object)
+	 * @see #publish(String, IMqttMessage, Object, MqttProperties)
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
@@ -367,7 +365,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance client not connected.
-	 * @see #publish(String, MqttMessage, Object)
+	 * @see #publish(String, IMqttMessage, Object, MqttProperties)
 	 */
 	public IMqttDeliveryToken<Void> publish(String topic, IMqttMessage message ) throws MqttException, MqttPersistenceException;
 
@@ -422,10 +420,12 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * <li>Waiting on the Promise returned by the token {@link IMqttToken#getPromise()}</li>
 	 * </ul>
 	 *
+	 * @param <C> The OSGI Promise
 	 * @param topic  to deliver the message to, for example "finance/stock/ibm".
 	 * @param message to deliver to the server
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
+	 * @param publishProperties optional {@link MqttProperties} object to send with the message.
 	 * @return token used to track and wait for the publish to complete.
  	 * @throws MqttPersistenceException when a problem occurs storing the message
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
@@ -439,7 +439,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object)
+	 * @see #subscribe(String, int, Object)
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages
@@ -455,8 +455,9 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object, MqttActionListener) throws MqttException
+	 * @see #subscribe(String, int, Object) throws MqttException
 	 *
+	 * @param <C> The OSGI Promise
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param qos the maximum quality of service at which to subscribe. Messages
 	 * published at a lower quality of service will be received at the published
@@ -464,8 +465,6 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * the QoS specified on the subscribe.
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
-	 * @param callback optional listener that will be notified when subscribe
-	 * has completed
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
@@ -479,13 +478,9 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * <p>Provides an optimized way to subscribe to multiple topics compared to
 	 * subscribing to each one individually.</p>
 	 *
-	 * @see #subscribe(String[], int[], Object)
+	 * @see #subscribe(String, int, Object)
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param subscriptions An array of {@link MqttSubscription} objects containing the details for a number of subscriptions.
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
@@ -586,15 +581,11 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * <li>Waiting on the Promise returned by the token {@link IMqttToken#getPromise()}</li>
 	 * </ul>
 	 *
-	 * @param topicFilters one or more topics to subscribe to, which can include wildcards
-	 * @param qos the maximum quality of service to subscribe each topic at.Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param <C> The OSGI Promise
+	 * @param subscriptions An array of {@link MqttSubscription} objects containing the details for a number of subscriptions.
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
-	 * @param userProperties  optional object used to pass user defined properties in
-	 * the subscribe packet.
+	 * @param subscribeProperties optional {@link MqttProperties} object to send with the message.
 	 * @return token used to track and wait for the subscribe to complete. 
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
@@ -605,13 +596,10 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object)
+	 * @see #subscribe(String, int, Object)
 	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param <C> The OSGI Promise
+	 * @param subscription A {@link MqttSubscription}  containing the details for a subscription.
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
 	 * @return token used to track and wait for the subscribe to complete. The token
@@ -624,13 +612,9 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
-	 * @see #subscribe(String[], int[], Object)
+	 * @see #subscribe(String, int, Object)
 	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
+	 * @param subscription A {@link MqttSubscription}  containing the details for a subscription.
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
