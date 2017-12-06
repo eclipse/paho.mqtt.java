@@ -9,36 +9,36 @@ import java.util.concurrent.atomic.AtomicInteger;
  * preserved and used in the subsequent connections. Currently there are no
  * plans to persist this information, however that could be added at a later
  * date.
- * 
+ *
  * Properties returned in subsequent connect packets will override existing properties
  * here as well.
- * 
+ *
  * Session variables that this class holds:
- * 
+ *
  * <ul>
  * <li>Next Subscription Identifier - Used when automatic subscription
  * Identifier assignment is enabled</li>
- * 
+ *
  * </ul>
  *
  */
 public class MqttSession {
-	
+
 	// ******* Connection properties ******//
-	private int receiveMaximum = 65535;
-	private int maximumQoS = 2;
-	private boolean retainAvailable = true;
-	private int maximumPacketSize = -1;
-	private int topicAliasMaximum = 0;
-	private boolean wildcardSubscriptionsAvailable = true;
-	private boolean subscriptionIdentifiersAvailable = true;
-	private boolean sharedSubscriptionsAvailable = true;
-	
+	private Integer receiveMaximum = 65535;
+	private Integer maximumQoS = 2;
+	private Boolean retainAvailable = true;
+	private Integer maximumPacketSize = -1;
+	private Integer topicAliasMaximum = 0;
+	private Boolean wildcardSubscriptionsAvailable = true;
+	private Boolean subscriptionIdentifiersAvailable = true;
+	private Boolean sharedSubscriptionsAvailable = true;
+
 	// ******* Session Specific Properties and counters ******//
 	private AtomicInteger nextSubscriptionIdentifier = new AtomicInteger(1);
 	private String clientId;
 
-	
+
 
 	/**
 	 * Clears the session and resets. This would be called when the connection has
@@ -47,73 +47,73 @@ public class MqttSession {
 	public void clearSession() {
 		nextSubscriptionIdentifier.set(1);
 	}
-	
-	
-	public int getReceiveMaximum() {
+
+
+	public Integer getReceiveMaximum() {
 		return receiveMaximum;
 	}
 
-	public void setReceiveMaximum(int receiveMaximum) {
+	public void setReceiveMaximum(Integer receiveMaximum) {
 		this.receiveMaximum = receiveMaximum;
 	}
 
-	public int getMaximumQoS() {
+	public Integer getMaximumQoS() {
 		return maximumQoS;
 	}
 
-	public void setMaximumQoS(int maximumQoS) {
+	public void setMaximumQoS(Integer maximumQoS) {
 		this.maximumQoS = maximumQoS;
 	}
 
-	public boolean isRetainAvailable() {
+	public Boolean isRetainAvailable() {
 		return retainAvailable;
 	}
 
-	public void setRetainAvailable(boolean retainAvailable) {
+	public void setRetainAvailable(Boolean retainAvailable) {
 		this.retainAvailable = retainAvailable;
 	}
 
-	public int getMaximumPacketSize() {
+	public Integer getMaximumPacketSize() {
 		return maximumPacketSize;
 	}
 
-	public void setMaximumPacketSize(int maximumPacketSize) {
+	public void setMaximumPacketSize(Integer maximumPacketSize) {
 		this.maximumPacketSize = maximumPacketSize;
 	}
 
-	public int getTopicAliasMaximum() {
+	public Integer getTopicAliasMaximum() {
 		return topicAliasMaximum;
 	}
 
-	public void setTopicAliasMaximum(int topicAliasMaximum) {
+	public void setTopicAliasMaximum(Integer topicAliasMaximum) {
 		this.topicAliasMaximum = topicAliasMaximum;
 	}
 
-	public boolean isWildcardSubscriptionsAvailable() {
+	public Boolean isWildcardSubscriptionsAvailable() {
 		return wildcardSubscriptionsAvailable;
 	}
 
-	public void setWildcardSubscriptionsAvailable(boolean wildcardSubscriptionsAvailable) {
+	public void setWildcardSubscriptionsAvailable(Boolean wildcardSubscriptionsAvailable) {
 		this.wildcardSubscriptionsAvailable = wildcardSubscriptionsAvailable;
 	}
 
-	public boolean isSubscriptionIdentifiersAvailable() {
+	public Boolean isSubscriptionIdentifiersAvailable() {
 		return subscriptionIdentifiersAvailable;
 	}
 
-	public void setSubscriptionIdentifiersAvailable(boolean subscriptionIdentifiersAvailable) {
+	public void setSubscriptionIdentifiersAvailable(Boolean subscriptionIdentifiersAvailable) {
 		this.subscriptionIdentifiersAvailable = subscriptionIdentifiersAvailable;
 	}
 
-	public boolean isSharedSubscriptionsAvailable() {
+	public Boolean isSharedSubscriptionsAvailable() {
 		return sharedSubscriptionsAvailable;
 	}
 
-	public void setSharedSubscriptionsAvailable(boolean sharedSubscriptionsAvailable) {
+	public void setSharedSubscriptionsAvailable(Boolean sharedSubscriptionsAvailable) {
 		this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
 	}
 	
-	public int getNextSubscriptionIdentifier() {
+	public Integer getNextSubscriptionIdentifier() {
 		return nextSubscriptionIdentifier.getAndIncrement();
 	}
 

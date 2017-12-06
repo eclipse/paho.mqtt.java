@@ -16,9 +16,9 @@ package org.eclipse.paho.mqttv5.client.test.client;
 
 import java.net.URI;
 
-import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
+import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 
 
 /**
@@ -53,7 +53,7 @@ public class MqttClientFactoryPaho {
    * @return client
    * @throws Exception 
    */
-  public MqttAsyncClient createMqttAsyncClient(URI serverURI, String clientId) throws Exception {
+  public IMqttAsyncClient createMqttAsyncClient(URI serverURI, String clientId) throws Exception {
     return new MqttAsyncClientPaho(serverURI.toString(), clientId);
   }
 
@@ -64,7 +64,7 @@ public class MqttClientFactoryPaho {
    * @return client
    * @throws Exception 
    */
-  public MqttAsyncClient createMqttAsyncClient(URI serverURI, String clientId, MqttClientPersistence persistence) throws Exception {
+  public IMqttAsyncClient createMqttAsyncClient(URI serverURI, String clientId, MqttClientPersistence persistence) throws Exception {
     return new MqttAsyncClientPaho(serverURI.toString(), clientId, persistence);
   }
 

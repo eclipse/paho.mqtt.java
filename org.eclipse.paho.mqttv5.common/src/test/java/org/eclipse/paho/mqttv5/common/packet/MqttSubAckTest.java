@@ -62,11 +62,12 @@ public class MqttSubAckTest {
 		outputStream.write(payload);
 		
 		MqttSubAck decodedSubAckPacket = (MqttSubAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttProperties properties = decodedSubAckPacket.getProperties();
 		
-		Assert.assertEquals(reasonString, decodedSubAckPacket.getReasonString());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedSubAckPacket.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedSubAckPacket.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedSubAckPacket.getUserDefinedProperties().get(2)));
+		Assert.assertEquals(reasonString, properties.getReasonString());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
 
 		Assert.assertArrayEquals(returnCodes, decodedSubAckPacket.getReturnCodes());
 		
@@ -74,14 +75,15 @@ public class MqttSubAckTest {
 	}
 	
 	private MqttSubAck generatemqttSubAckPacket() throws MqttException{
-		MqttSubAck mqttSubAckPacket = new MqttSubAck(returnCodes);
-		mqttSubAckPacket.setReasonString(reasonString);
+		MqttProperties properties = new MqttProperties();
+		properties.setReasonString(reasonString);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		mqttSubAckPacket.setUserDefinedProperties(userDefinedProperties);
-		
+		properties.setUserDefinedProperties(userDefinedProperties);
+				MqttSubAck mqttSubAckPacket = new MqttSubAck(returnCodes, properties);
+
 		return mqttSubAckPacket;
 	}
 

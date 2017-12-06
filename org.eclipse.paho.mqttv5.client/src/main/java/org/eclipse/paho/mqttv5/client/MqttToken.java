@@ -16,22 +16,10 @@
 
 package org.eclipse.paho.mqttv5.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.paho.mqttv5.client.internal.Token;
 import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttAuth;
-import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
-import org.eclipse.paho.mqttv5.common.packet.MqttUnsubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Provides a mechanism for tracking the completion of an asynchronous action.
@@ -114,155 +102,8 @@ public class MqttToken implements IMqttToken {
 		return internalTok.getResponse();
 	}
 
-	public String getAssignedClientIdentifier() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getAssignedClientIdentifier();
-		}
-		return null;
-	}
-
-	public int getServerKeepAlive() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getServerKeepAlive();
-		}
-		return -1;
-	}
-
-	public String getAuthMethod() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getAuthMethod();
-		} else if (internalTok.getWireMessage() instanceof MqttAuth) {
-			return ((MqttAuth) internalTok.getWireMessage()).getAuthMethod();
-		}
-		return null;
-	}
-
-	public byte[] getAuthData() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getAuthData();
-		} else if (internalTok.getWireMessage() instanceof MqttAuth) {
-			return ((MqttAuth) internalTok.getWireMessage()).getAuthData();
-		}
-		return null;
-	}
-
-	public String getResponseInformation() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getResponseInfo();
-		}
-		return null;
-	}
-
-	public String getServerReference() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getServerReference();
-		}
-		return null;
-	}
-
-	public String getReasonString() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getReasonString();
-		} else if (internalTok.getWireMessage() instanceof MqttPubAck) {
-			return ((MqttPubAck) internalTok.getWireMessage()).getReasonString();
-		} else if (internalTok.getWireMessage() instanceof MqttPubRec) {
-			return ((MqttPubRec) internalTok.getWireMessage()).getReasonString();
-		} else if (internalTok.getWireMessage() instanceof MqttPubComp) {
-			return ((MqttPubComp) internalTok.getWireMessage()).getReasonString();
-		} else if (internalTok.getWireMessage() instanceof MqttSubAck) {
-			return ((MqttSubAck) internalTok.getWireMessage()).getReasonString();
-		} else if (internalTok.getWireMessage() instanceof MqttUnsubAck) {
-			return ((MqttUnsubAck) internalTok.getWireMessage()).getReasonString();
-		} else if (internalTok.getWireMessage() instanceof MqttAuth) {
-			return ((MqttAuth) internalTok.getWireMessage()).getReasonString();
-		}
-		return null;
-	}
-
-	public int getRecieveMaximum() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getReceiveMaximum();
-		}
-		return 65535;
-	}
-
-	public int getTopicAliasMaximum() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getTopicAliasMaximum();
-		}
-		return 0;
-	}
-
-	public int getMaximumQoS() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getMaximumQoS();
-		}
-		return 2;
-	}
-
-	public boolean isRetainAvailable() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).isRetainAvailableAdvertisement();
-		}
-		return true;
-	}
-
-	public List<UserProperty> getUserDefinedProperties() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttPubAck) {
-			return ((MqttPubAck) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttPubRec) {
-			return ((MqttPubRec) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttPubComp) {
-			return ((MqttPubComp) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttSubAck) {
-			return ((MqttSubAck) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttUnsubAck) {
-			return ((MqttUnsubAck) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttAuth) {
-			return ((MqttAuth) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttSubscribe) {
-			return ((MqttSubscribe) internalTok.getWireMessage()).getUserDefinedProperties();
-		} else if (internalTok.getWireMessage() instanceof MqttUnsubscribe) {
-			return ((MqttUnsubscribe) internalTok.getWireMessage()).getUserDefinedProperties();
-		}
-		return new ArrayList<>();
-	}
-
-	public int getMaximumPacketSize() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getMaximumPacketSize();
-		}
-		return -1;
-	}
-
-	public boolean isWildcardSubscriptionAvailable() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).isWildcardSubscriptionsAvailable();
-		}
-		return true;
-	}
-
-	public boolean isSubscriptionIdentifiersAvailable() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).isSubscriptionIdentifiersAvailable();
-		}
-		return true;
-	}
-
-	public boolean isSharedSubscriptionAvailable() {
-		if (internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).isSharedSubscriptionAvailable();
-		}
-		return true;
-	}
-	
-	public int getSessionExpiryInterval() {
-		if(internalTok.getWireMessage() instanceof MqttConnAck) {
-			return ((MqttConnAck) internalTok.getWireMessage()).getSessionExpiryInterval();
-		}
-		return 0;
+	public MqttProperties getMessageProperties() {
+		return internalTok.getWireMessage().getProperties();
 	}
 
 }

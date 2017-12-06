@@ -53,26 +53,28 @@ public class MqttPubRelTest {
 		outputStream.write(payload);
 		
 		MqttPubRel decodedPubRelPacket = (MqttPubRel) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttProperties properties = decodedPubRelPacket.getProperties();
 		
 		Assert.assertEquals(returnCode, decodedPubRelPacket.getReturnCode());
-		Assert.assertEquals(reasonString, decodedPubRelPacket.getReasonString());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedPubRelPacket.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedPubRelPacket.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedPubRelPacket.getUserDefinedProperties().get(2)));
+		Assert.assertEquals(reasonString, properties.getReasonString());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
 
 		
 		
 	}
 	
 	public MqttPubRel generateMqttPubRelPacket() throws MqttException{
-		MqttPubRel mqttPubRelPacket = new MqttPubRel(returnCode, 1);
-		mqttPubRelPacket.setReasonString(reasonString);
+		MqttProperties properties = new MqttProperties();
+		
+		properties.setReasonString(reasonString);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		mqttPubRelPacket.setUserDefinedProperties(userDefinedProperties);
-		
+		properties.setUserDefinedProperties(userDefinedProperties);
+		MqttPubRel mqttPubRelPacket = new MqttPubRel(returnCode, 1, properties);
 		return mqttPubRelPacket;
 	}
 	

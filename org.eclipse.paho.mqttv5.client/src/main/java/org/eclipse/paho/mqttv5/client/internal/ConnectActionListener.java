@@ -3,13 +3,13 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
- *   
+ *
  * Contributors:
  *   Ian Craggs - MQTT 3.1.1 support
  *   Ian Craggs - fix bug 469527
@@ -81,6 +81,8 @@ public class ConnectActionListener implements MqttActionListener {
 	 *            the User Context Object
 	 * @param userCallback
 	 *            the {@link MqttActionListener} as the callback for the user
+	 * @param mqttSession
+	 *            the {@link MqttSession}
 	 * @param reconnect
 	 *            If true, this is a reconnect attempt
 	 */
@@ -96,12 +98,12 @@ public class ConnectActionListener implements MqttActionListener {
 		this.userCallback = userCallback;
 		this.reconnect = reconnect;
 		this.mqttSession = mqttSession;
-		
+
 	}
 
 	/**
 	 * If the connect succeeded then call the users onSuccess callback
-	 * 
+	 *
 	 * @param token
 	 *            the {@link IMqttToken} from the successful connection
 	 */
@@ -112,19 +114,20 @@ public class ConnectActionListener implements MqttActionListener {
 
 		// Set properties imposed on us by the Server
 		MqttToken myToken = (MqttToken) token;
-		
-		mqttSession.setReceiveMaximum(myToken.getRecieveMaximum());
-		mqttSession.setMaximumQoS(myToken.getMaximumQoS());
-		mqttSession.setRetainAvailable(myToken.isRetainAvailable());
-		mqttSession.setMaximumPacketSize(myToken.getMaximumPacketSize());
-		mqttSession.setTopicAliasMaximum(myToken.getTopicAliasMaximum());
-		mqttSession.setWildcardSubscriptionsAvailable(myToken.isWildcardSubscriptionAvailable());
-		mqttSession.setSubscriptionIdentifiersAvailable(myToken.isSubscriptionIdentifiersAvailable());
-		mqttSession.setSharedSubscriptionsAvailable(myToken.isSharedSubscriptionAvailable());
-		if(myToken.getAssignedClientIdentifier() != null) {
-			mqttSession.setClientId(myToken.getAssignedClientIdentifier());
+		System.out.println(myToken.getMessageProperties().toString());
+		mqttSession.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
+		mqttSession.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
+		mqttSession.setRetainAvailable(myToken.getMessageProperties().isRetainAvailableAdvertisement());
+		mqttSession.setMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
+		mqttSession.setTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
+		mqttSession
+				.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
+		mqttSession.setSubscriptionIdentifiersAvailable(
+				myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
+		mqttSession.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
+		if (myToken.getMessageProperties().getAssignedClientIdentifier() != null) {
+			mqttSession.setClientId(myToken.getMessageProperties().getAssignedClientIdentifier());
 		}
-		
 
 		if (reconnect) {
 			comms.notifyReconnect();
@@ -145,7 +148,7 @@ public class ConnectActionListener implements MqttActionListener {
 	/**
 	 * The connect failed, so try the next URI on the list. If there are no more
 	 * URIs, then fail the overall connect.
-	 * 
+	 *
 	 * @param token
 	 *            the {@link IMqttToken} from the failed connection attempt
 	 * @param exception
@@ -186,7 +189,7 @@ public class ConnectActionListener implements MqttActionListener {
 
 	/**
 	 * Start the connect processing
-	 * 
+	 *
 	 * @throws MqttPersistenceException
 	 *             if an error is thrown whilst setting up persistence
 	 */
@@ -210,7 +213,7 @@ public class ConnectActionListener implements MqttActionListener {
 
 	/**
 	 * Set the MqttCallbackExtened callback to receive connectComplete callbacks
-	 * 
+	 *
 	 * @param mqttCallbackExtended
 	 *            the {@link MqttCallbackExtended} to be called when the connection
 	 *            completes

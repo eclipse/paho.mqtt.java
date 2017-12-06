@@ -176,6 +176,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @see #subscribe(String[], int[])
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
+	 * @return The Subscription Token
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws MqttSecurityException if the client is not authorized to register the subscription
 	 */
@@ -187,6 +188,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @see #subscribe(String[], int[])
 	 *
 	 * @param topicFilters the topic to subscribe to, which can include wildcards.
+	 * @return The Subscription Token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
   public IMqttSubscriptionToken<Void> subscribe(String[] topicFilters) throws MqttException;
@@ -201,6 +203,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
+	 * @return The Subscription Token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
   public IMqttSubscriptionToken<Void> subscribe(String topicFilter, int qos) throws MqttException;
@@ -294,6 +297,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
+	 * @return The Subscription Token
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */

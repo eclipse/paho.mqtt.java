@@ -21,8 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
@@ -34,14 +32,16 @@ public class MqttPubAck extends MqttAck {
 			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR, MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
 			MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID, MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
 			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID };
-
-	// Fields
+	
+	private static final Byte[] validProperties = {MqttProperties.REASON_STRING_IDENTIFIER, MqttProperties.USER_DEFINED_PAIR_IDENTIFIER};
+	
 	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
-	private String reasonString;
-	private List<UserProperty> userDefinedProperties = new ArrayList<>();
+	private MqttProperties properties;
+	
 
 	public MqttPubAck( byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
+		properties = new MqttProperties(validProperties);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream dis = new DataInputStream(counter);
@@ -52,15 +52,17 @@ public class MqttPubAck extends MqttAck {
 			validateReturnCode(returnCode, validReturnCodes);
 		}
 		 if( remainder >= 4) {
-			 parseIdentifierValueFields(dis);
+			 this.properties.decodeProperties(dis);
 		 }
 		dis.close();
 	}
 
-	public MqttPubAck(int returnCode, int msgId) throws MqttException {
+	public MqttPubAck(int returnCode, int msgId, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
 		this.returnCode = returnCode;
 		this.msgId = msgId;
+		this.properties = properties;
+		this.properties.setValidProperties(validProperties);
 		validateReturnCode(returnCode, validReturnCodes);
 	}
 
@@ -73,7 +75,7 @@ public class MqttPubAck extends MqttAck {
 			// Encode the Message ID
 			outputStream.writeShort(msgId);
 
-			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
+			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 
 			if (returnCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
 
@@ -91,77 +93,19 @@ public class MqttPubAck extends MqttAck {
 			throw new MqttException(ioe);
 		}
 	}
-
-	private byte[] getIdentifierValueFields() throws MqttException {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			DataOutputStream outputStream = new DataOutputStream(baos);
-
-			// If Present, encode the Reason String (3.4.2.2.2)
-			if (reasonString != null) {
-				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
-				encodeUTF8(outputStream, reasonString);
-			}
-
-			// If Present, encode the User Properties (3.4.2.2.3)
-			if(!userDefinedProperties.isEmpty()){
-				for(UserProperty property : userDefinedProperties) {
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, property.getKey());
-					encodeUTF8(outputStream, property.getValue());
-				}
-			}
-
-			outputStream.flush();
-			return baos.toByteArray();
-		} catch (IOException ioe) {
-			throw new MqttException(ioe);
-		}
-	}
-
-	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
-		// First get the length of the IV fields
-		int length = readVariableByteInteger(dis).getValue();
-		if (length > 0) {
-			byte[] identifierValueByteArray = new byte[length];
-			dis.read(identifierValueByteArray, 0, length);
-			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
-			DataInputStream inputStream = new DataInputStream(bais);
-			while (inputStream.available() > 0) {
-				// Get the first Byte
-				byte identifier = inputStream.readByte();
-				if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
-					reasonString = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
-					String key = decodeUTF8(inputStream);
-					String value = decodeUTF8(inputStream);
-					userDefinedProperties.add(new UserProperty(key,  value));
-				} else {
-					// Unidentified Identifier
-					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
-				}
-			}
-		}
-	}
-
+	
 	public int getReturnCode() {
 		return returnCode;
 	}
-
-	public String getReasonString() {
-		return reasonString;
+	
+	@Override
+	public MqttProperties getProperties() {
+		return this.properties;
 	}
 
-	public void setReasonString(String reasonString) {
-		this.reasonString = reasonString;
-	}
-
-	public List<UserProperty> getUserDefinedProperties() {
-		return userDefinedProperties;
-	}
-
-	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
-		this.userDefinedProperties = userDefinedProperties;
+	@Override
+	public String toString() {
+		return "MqttPubAck [returnCode=" + returnCode + ", properties=" + properties + "]";
 	}
 
 }

@@ -28,6 +28,7 @@ import javax.net.ssl.HostnameVerifier;
 
 import org.eclipse.paho.mqttv5.client.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
@@ -66,6 +67,25 @@ public class MqttConnectionOptions {
 	private int keepAliveInterval = 60; // Keep Alive Interval
 	private int maxInflight = 10; // Max inflight messages
 	private int connectionTimeout = 30; // Connection timeout in seconds
+	
+	MqttProperties connectionProperties = new MqttProperties();
+	public MqttProperties getConnectionProperties() {
+		return connectionProperties;
+	}
+
+	public void setConnectionProperties(MqttProperties connectionProperties) {
+		this.connectionProperties = connectionProperties;
+	}
+
+	public MqttProperties getWillMessageProperties() {
+		return willMessageProperties;
+	}
+
+	public void setWillMessageProperties(MqttProperties willMessageProperties) {
+		this.willMessageProperties = willMessageProperties;
+	}
+
+	MqttProperties willMessageProperties = new MqttProperties();
 
 	// Connection packet properties
 	private int mqttVersion = 5; // MQTT Version 5

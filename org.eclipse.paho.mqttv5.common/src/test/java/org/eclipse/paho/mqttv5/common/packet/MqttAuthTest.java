@@ -54,28 +54,32 @@ public class MqttAuthTest {
 		outputStream.write(payload);
 		
 		MqttAuth decodedAuthPacket = (MqttAuth) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		MqttProperties properties = decodedAuthPacket.getProperties();
 		
 		Assert.assertEquals(returnCode, decodedAuthPacket.getReturnCode());
-		Assert.assertEquals(authMethod, decodedAuthPacket.getAuthMethod());
-		Assert.assertArrayEquals(authData, decodedAuthPacket.getAuthData());
-		Assert.assertEquals(reasonString, decodedAuthPacket.getReasonString());
-		Assert.assertEquals(3, decodedAuthPacket.getUserDefinedProperties().size());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedAuthPacket.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedAuthPacket.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedAuthPacket.getUserDefinedProperties().get(2)));
+		Assert.assertEquals(authMethod, properties.getAuthMethod());
+		Assert.assertArrayEquals(authData, properties.getAuthData());
+		Assert.assertEquals(reasonString, properties.getReasonString());
+		Assert.assertEquals(3, properties.getUserDefinedProperties().size());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
 
 	}
 	
 	public MqttAuth generateMqttAuthPacket() throws MqttException{
-		MqttAuth mqttAuthPacket = new MqttAuth(returnCode);
-		mqttAuthPacket.setAuthMethod(authMethod);
-		mqttAuthPacket.setAuthData(authData);
-		mqttAuthPacket.setReasonString(reasonString);
+		
+		
+		MqttProperties properties = new MqttProperties();
+		properties.setAuthMethod(authMethod);
+		properties.setAuthData(authData);
+		properties.setReasonString(reasonString);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		mqttAuthPacket.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserDefinedProperties(userDefinedProperties);
+		MqttAuth mqttAuthPacket = new MqttAuth(returnCode, properties);
 		return mqttAuthPacket;
 	}
 

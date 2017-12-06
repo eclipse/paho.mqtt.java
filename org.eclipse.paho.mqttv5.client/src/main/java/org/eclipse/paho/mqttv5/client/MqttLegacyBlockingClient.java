@@ -30,6 +30,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 
 /**
@@ -427,7 +428,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @see IMqttClient#disconnect(long)
 	 */
 	public void disconnect(long quiesceTimeout) throws MqttException {
-		aClient.disconnect(quiesceTimeout, null, null, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null)
+		aClient.disconnect(quiesceTimeout, null, null, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties())
 				.waitForCompletion();
 	}
 
@@ -456,7 +457,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * long)
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
-		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS, null, null, null);
+		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties());
 	}
 
 	/**
@@ -512,7 +513,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @see IMqttClient#subscribe(String[], int[])
 	 */
 	public void subscribe(MqttSubscription[] subscriptions) throws MqttException {
-		IMqttToken tok = aClient.subscribe(subscriptions, null, null, 0, null);
+		IMqttToken tok = aClient.subscribe(subscriptions, null, null, new MqttProperties());
 		tok.waitForCompletion(getTimeToWait());
 		int[] grantedQos = tok.getGrantedQos();
 		for (int i = 0; i < grantedQos.length; ++i) {
@@ -589,7 +590,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @see IMqttClient#subscribeWithResponse(String[], int[])
 	 */
 	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions) throws MqttException {
-		IMqttToken tok = aClient.subscribe(subscriptions, null, null, 0, null);
+		IMqttToken tok = aClient.subscribe(subscriptions, null, null, new MqttProperties());
 		tok.waitForCompletion(getTimeToWait());
 		return tok;
 	}
@@ -618,7 +619,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 */
 	public void unsubscribe(String[] topicFilters) throws MqttException {
 		// message handlers removed in the async client unsubscribe below
-		aClient.unsubscribe(topicFilters, null, null).waitForCompletion(getTimeToWait());
+		aClient.unsubscribe(topicFilters, null, null, new MqttProperties()).waitForCompletion(getTimeToWait());
 	}
 
 	/*
@@ -636,7 +637,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @see IMqttClient#publishBlock(String, MqttMessage)
 	 */
 	public void publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException {
-		aClient.publish(topic, message, null, null).waitForCompletion(getTimeToWait());
+		aClient.publish(topic, message, null, null, new MqttProperties()).waitForCompletion(getTimeToWait());
 	}
 
 	/**

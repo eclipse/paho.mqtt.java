@@ -1,16 +1,15 @@
 package org.eclipse.paho.mqttv5.client.internal;
 
-import java.util.ArrayList;
 /*******************************************************************************
  * Copyright (c) 2009, 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
@@ -40,6 +39,7 @@ import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
 import org.eclipse.paho.mqttv5.client.TimerPingSender;
+import org.eclipse.paho.mqttv5.client.alpha.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -48,10 +48,9 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
-import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 /**
  * Handles client communications with the server. Sends and receives MQTT V5
@@ -90,13 +89,13 @@ public class ClientComms {
 	private ExecutorService executorService;
 	private MqttSession mqttSession;
 
-	
-	
+
+
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
 	 * network calls.
-	 * 
+	 *
 	 * @param client
 	 *            The {@link IMqttAsyncClient}
 	 * @param persistence
@@ -105,6 +104,8 @@ public class ClientComms {
 	 *            the {@link TimerPingSender}
 	 * @param executorService
 	 *            the {@link ExecutorService}
+	 * @param mqttSession
+	 * 			 the {@link MqttSession}
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
 	 */
@@ -149,7 +150,7 @@ public class ClientComms {
 	/**
 	 * Sends a message to the server. Does not check if connected this validation
 	 * must be done by invoking routines.
-	 * 
+	 *
 	 * @param message
 	 * @param token
 	 * @throws MqttException
@@ -184,7 +185,7 @@ public class ClientComms {
 	/**
 	 * Sends a message to the broker if in connected state, but only waits for the
 	 * message to be stored, before returning.
-	 * 
+	 *
 	 * @param message
 	 *            The {@link MqttWireMessage} to send
 	 * @param token
@@ -208,14 +209,17 @@ public class ClientComms {
 
 				if (message instanceof MqttPublish) {
 					// Override the QoS if the server has set a maximum
-					if (((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
+					if (this.mqttSession.getMaximumQoS()!= null &&
+							((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setQos(this.mqttSession.getMaximumQoS());
 						((MqttPublish) message).setMessage(mqttMessage);
 					}
 
 					// Override the Retain flag if the server has disabled it
-					if (((MqttPublish) message).getMessage().isRetained() && (this.mqttSession.isRetainAvailable() == false)) {
+					if (this.mqttSession.isRetainAvailable()!= null &&
+							((MqttPublish) message).getMessage().isRetained()
+							&& (this.mqttSession.isRetainAvailable() == false)) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setRetained(false);
 						((MqttPublish) message).setMessage(mqttMessage);
@@ -244,7 +248,7 @@ public class ClientComms {
 	 *
 	 * Call each main class and let it tidy up e.g. releasing the token store which
 	 * normally survives a disconnect.
-	 * 
+	 *
 	 * @param force
 	 *            force disconnection
 	 * @throws MqttException
@@ -290,7 +294,7 @@ public class ClientComms {
 	 * Sends a connect message and waits for an ACK or NACK. Connecting is a special
 	 * case which will also start up the network connection, receive thread, and
 	 * keep alive thread.
-	 * 
+	 *
 	 * @param options
 	 *            The {@link MqttConnectionOptions} for the connection
 	 * @param token
@@ -310,7 +314,9 @@ public class ClientComms {
 				conOptions = options;
 
 				MqttConnect connect = new MqttConnect(client.getClientId(), conOptions.getMqttVersion(),
-						conOptions.isCleanSession(), conOptions.getKeepAliveInterval());
+						conOptions.isCleanSession(), conOptions.getKeepAliveInterval(),
+						conOptions.getConnectionProperties(), conOptions.getWillMessageProperties());
+
 				System.err.println(connect.toString());
 
 				if (conOptions.getWillDestination() != null) {
@@ -327,46 +333,6 @@ public class ClientComms {
 				}
 				if (conOptions.getPassword() != null) {
 					connect.setPassword(conOptions.getPassword());
-				}
-
-				if (conOptions.getSessionExpiryInterval() != null) {
-					connect.setSessionExpiryInterval(conOptions.getSessionExpiryInterval());
-				}
-
-				if (conOptions.getWillDelayInterval() != null) {
-					connect.setWillDelayInterval(conOptions.getWillDelayInterval());
-				}
-
-				if (conOptions.getReceiveMaximum() != null) {
-					connect.setReceiveMaximum(conOptions.getReceiveMaximum());
-				}
-
-				if (conOptions.getMaximumPacketSize() != null) {
-					connect.setMaximumPacketSize(conOptions.getMaximumPacketSize());
-				}
-
-				if (conOptions.getTopicAliasMaximum() != null) {
-					connect.setTopicAliasMaximum(conOptions.getTopicAliasMaximum());
-				}
-
-				if (conOptions.getRequestResponseInfo() != null) {
-					connect.setRequestReplyInfo(conOptions.getRequestResponseInfo());
-				}
-
-				if (conOptions.getRequestProblemInfo() != null) {
-					connect.setRequestProblemInfo(conOptions.getRequestProblemInfo());
-				}
-
-				if (conOptions.getUserProperties() != null) {
-					connect.setUserDefinedProperties(conOptions.getUserProperties());
-				}
-
-				if (conOptions.getAuthMethod() != null) {
-					connect.setAuthMethod(conOptions.getAuthMethod());
-				}
-
-				if (conOptions.getAuthData() != null) {
-					connect.setAuthData(conOptions.getAuthData());
 				}
 
 				/*
@@ -421,7 +387,7 @@ public class ClientComms {
 	 * result of a user calling disconnect or an abnormal disconnection. The method
 	 * may be invoked multiple times in parallel as each thread when it receives an
 	 * error uses this method to ensure that shutdown completes successfully.
-	 * 
+	 *
 	 * @param token
 	 *            the {@link MqttToken} To track closing the connection
 	 * @param reason
@@ -533,8 +499,8 @@ public class ClientComms {
 			callback.asyncOperationComplete(endToken);
 		}
 		if (wasConnected && callback != null) {
-				// Let the user know client has disconnected either normally or abnormally
-				callback.connectionLost(reason, message);
+			// Let the user know client has disconnected either normally or abnormally
+			callback.connectionLost(reason, message);
 		}
 
 		// While disconnecting, close may have been requested - try it now
@@ -621,15 +587,13 @@ public class ClientComms {
 	}
 
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
-			throws MqttException {
-		disconnectForcibly(quiesceTimeout, disconnectTimeout, true, reasonCode, sessionExpiryInterval, reasonString,
-				userDefinedProperties);
+			MqttProperties disconnectProperties) throws MqttException {
+		disconnectForcibly(quiesceTimeout, disconnectTimeout, true, reasonCode, disconnectProperties);
 	}
 
 	/**
 	 * Disconnect the connection and reset all the states.
-	 * 
+	 *
 	 * @param quiesceTimeout
 	 *            How long to wait whilst quiesing before messages are deleted.
 	 * @param disconnectTimeout
@@ -638,21 +602,13 @@ public class ClientComms {
 	 *            If true, will send a disconnect packet
 	 * @param reasonCode
 	 *            the disconnection reason code.
-	 * @param sessionExpiryInterval
-	 *            optional property to be sent in the disconnect packet to the
-	 *            server. Use null if not required.
-	 * @param reasonString
-	 *            optional property to be sent in the disconnect packet to the
-	 *            server. Use null if not required.
-	 * @param userDefinedProperties
-	 *            {@link ArrayList} of {@link UserProperty} to be sent to the
-	 *            server. Use null if not required.
+	 * @param disconnectProperties
+	 * 			  the {@link MqttProperties} to send in the Disconnect packet.
 	 * @throws MqttException
 	 *             if an error occurs whilst disconnecting
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket,
-			int reasonCode, Integer sessionExpiryInterval, String reasonString,
-			ArrayList<UserProperty> userDefinedProperties) throws MqttException {
+			int reasonCode, MqttProperties disconnectProperties) throws MqttException {
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
 			clientState.quiesce(quiesceTimeout);
@@ -661,8 +617,7 @@ public class ClientComms {
 		try {
 			// Send disconnect packet
 			if (sendDisconnectPacket) {
-				// TODO -- PASS THROUGH RETURN CODE PROPERLY
-				internalSend(new MqttDisconnect(MqttReturnCode.RETURN_CODE_SUCCESS), token);
+				internalSend(new MqttDisconnect(reasonCode, disconnectProperties), token);
 
 				// Wait util the disconnect packet sent with timeout
 				token.waitForCompletion(disconnectTimeout);
@@ -940,7 +895,7 @@ public class ClientComms {
 	/**
 	 * When Automatic reconnect is enabled, we want ClientComs to enter the
 	 * 'resting' state if disconnected. This will allow us to publish messages
-	 * 
+	 *
 	 * @param resting
 	 *            if true, resting is enabled
 	 */
@@ -1014,12 +969,9 @@ public class ClientComms {
 		return this.clientState.getActualInFlight();
 	}
 
-	
-
 	public boolean doesSubscriptionIdentifierExist(int subscriptionIdentifier) {
 		return this.callback.doesSubscriptionIdentifierExist(subscriptionIdentifier);
-		
-	}
 
+	}
 
 }

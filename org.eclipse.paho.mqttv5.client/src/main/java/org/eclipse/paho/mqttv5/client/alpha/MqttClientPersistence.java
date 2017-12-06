@@ -15,13 +15,14 @@
  */
 package org.eclipse.paho.mqttv5.client.alpha;
 
+import org.eclipse.paho.mqttv5.client.MqttLegacyBlockingClient;
 import org.eclipse.paho.mqttv5.common.MqttPersistable;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 
 /**
  * Represents a persistent data store, used to store outbound and inbound messages while they
  * are in flight, enabling delivery to the QoS specified. You can specify an implementation
- * of this interface using {@link MqttLegacyBlockingClient#MqttClient(String, String, MqttClientPersistence)},
+ * of this interface using {@link MqttLegacyBlockingClient#MqttLegacyBlockingClient(String, String)},
  * which the {@link MqttLegacyBlockingClient} will use to persist QoS 1 and 2 messages.
  * <p>
  * If the methods defined throw the MqttPersistenceException then the state of the data persisted

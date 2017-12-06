@@ -1,10 +1,8 @@
 package org.eclipse.paho.mqttv5.client.alpha;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,8 +30,8 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -165,17 +163,17 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 	@Override
 	public IMqttToken<IMqttResult<Void>, Void> disconnect(long quiesceTimeout) throws MqttException {
-		return disconnect(quiesceTimeout, null, null, null, null);
+		return disconnect(quiesceTimeout, null, null);
 	}
 
 	@Override
 	public <C> IMqttToken<IMqttResult<C>, C> disconnect(C userContext) throws MqttException {
-		return disconnect(30000, userContext, null, null, null);
+		return disconnect(30000, userContext, null);
 	}
 
 	@Override
 	public <C> IMqttToken<IMqttResult<C>, C> disconnect(long quiesceTimeout, C userContext,
-			Integer sessionExpiryInterval, String reasonString, ArrayList<UserProperty> userDefinedProperties)
+			MqttProperties disconnectProperties)
 			throws MqttException {
 		
 		MqttToken<IMqttResult<C>, C> token = 
@@ -183,8 +181,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		
 		delegate.disconnect(quiesceTimeout, userContext, new Callback(
 				t -> token.resolve(new MqttResultImpl<C>(this, userContext)), 
-				t -> token.fail(t)), MqttReturnCode.RETURN_CODE_SUCCESS, sessionExpiryInterval, 
-				reasonString, userDefinedProperties);
+				t -> token.fail(t)), MqttReturnCode.RETURN_CODE_SUCCESS, disconnectProperties);
 		return token;
 	}
 
@@ -218,17 +215,17 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			.retained(retained)
 			.build();
 		
-		return publish(topic, message, userContext);
+		return publish(topic, message, userContext, null);
 	}
 
 	@Override
 	public IMqttDeliveryToken<Void> publish(String topic, IMqttMessage message)
 			throws MqttException, MqttPersistenceException {
-		return publish(topic, message, null);
+		return publish(topic, message, null, null);
 	}
 
 	@Override
-	public <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message, C userContext)
+	public <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message, C userContext, MqttProperties publishProperties)
 			throws MqttException, MqttPersistenceException {
 		
 		ByteBuffer buffer = message.payload();
@@ -240,7 +237,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		int messageId = delegate.publish(topic, new MqttMessage(payload, message.getQos(), message.isRetained()), 
 				userContext, new Callback(
 					t -> d.resolve(new MqttDeliveryResultImpl<C>(this, userContext, message)), 
-					t -> d.fail(t))).getMessageId();
+					t -> d.fail(t)), publishProperties).getMessageId();
 		
 		MqttDeliveryToken<C> token = 
 				new MqttDeliveryToken<>(promiseFactory, this, userContext, messageId, message);
@@ -277,7 +274,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	}
 
 	@Override
-	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, List<UserProperty> userProperties)
+	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, MqttProperties subscribeProperties)
 			throws MqttException {
 		
 		String[] topics = new String[subscriptions.length];
@@ -297,7 +294,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 										unsubscribe.resolve(new MqttUnsubscriptionResultImpl<>(this, userContext, t.getMessageId()));
 									}, t -> {
 										unsubscribe.fail(t);
-									}));
+									}), null);
 					} catch (Exception e) {
 						// TODO Should this be logged?
 					}
@@ -333,7 +330,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				IMqttMessageListener[] listeners = new IMqttMessageListener[subscriptions.length];
 				Arrays.fill(listeners, listener);
 				
-				delegate.subscribe(subscriptions, userContext, onConnect, listeners, userProperties);
+				delegate.subscribe(subscriptions, userContext, onConnect, listeners, subscribeProperties);
 			
 				return cleanup;
 			};

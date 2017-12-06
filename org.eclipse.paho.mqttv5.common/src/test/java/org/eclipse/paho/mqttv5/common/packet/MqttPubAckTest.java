@@ -54,23 +54,27 @@ public class MqttPubAckTest {
 		MqttPubAck decodedPubackPacket = (MqttPubAck) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		
 		Assert.assertEquals(returnCode, decodedPubackPacket.getReturnCode());
-		Assert.assertEquals(reasonString, decodedPubackPacket.getReasonString());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedPubackPacket.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedPubackPacket.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedPubackPacket.getUserDefinedProperties().get(2)));
+		MqttProperties decodedProperties = decodedPubackPacket.getProperties();
+		Assert.assertEquals(reasonString, decodedProperties.getReasonString());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedProperties.getUserDefinedProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedProperties.getUserDefinedProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedProperties.getUserDefinedProperties().get(2)));
 
 		
 		
 	}
 	
 	public MqttPubAck generateMqttPubackPacket() throws MqttException{
-		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode,1);
-		mqttPubackPacket.setReasonString(reasonString);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		mqttPubackPacket.setUserDefinedProperties(userDefinedProperties);
+		
+		MqttProperties properties = new MqttProperties();
+		properties.setReasonString(reasonString);
+		properties.setUserDefinedProperties(userDefinedProperties);
+		
+		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode,1, properties);
 		
 		return mqttPubackPacket;
 	}

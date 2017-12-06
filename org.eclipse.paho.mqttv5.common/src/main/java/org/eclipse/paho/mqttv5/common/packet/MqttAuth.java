@@ -21,8 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -32,22 +30,20 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 public class MqttAuth extends MqttWireMessage {
 
 	// Return codes
-
 	private static final int[] validReturnCodes = { MqttReturnCode.RETURN_CODE_SUCCESS,
 			MqttReturnCode.RETURN_CODE_CONTINUE_AUTHENTICATION, MqttReturnCode.RETURN_CODE_RE_AUTHENTICATE };
 
+	private static final Byte[] validProperties = { MqttProperties.AUTH_METHOD_IDENTIFIER,
+			MqttProperties.AUTH_DATA_IDENTIFIER, MqttProperties.REASON_STRING_IDENTIFIER,
+			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
+
 	// Fields
 	private int returnCode;
-	private String authMethod;
-	private byte[] authData;
-	private String reasonString;
-	private List<UserProperty> userDefinedProperties = new ArrayList<>();
+	private MqttProperties properties;
 
 	/**
 	 * Constructs an Auth message from a raw byte array
 	 * 
-	 * @param info
-	 *            - Info Byte
 	 * @param data
 	 *            - The variable header and payload bytes.
 	 * @throws IOException
@@ -57,11 +53,12 @@ public class MqttAuth extends MqttWireMessage {
 	 */
 	public MqttAuth(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
+		properties = new MqttProperties(validProperties);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream inputStream = new DataInputStream(bais);
 		returnCode = inputStream.readUnsignedByte();
 		validateReturnCode(returnCode, validReturnCodes);
-		parseIdentifierValueFields(inputStream);
+		this.properties.decodeProperties(inputStream);
 		inputStream.close();
 	}
 
@@ -70,11 +67,15 @@ public class MqttAuth extends MqttWireMessage {
 	 * 
 	 * @param returnCode
 	 *            - The Auth Return Code
+	 * @param properties
+	 *            - The {@link MqttProperties} for the packet.
 	 * @throws MqttException
 	 *             - If an exception occurs encoding this packet
 	 */
-	public MqttAuth(int returnCode) throws MqttException {
+	public MqttAuth(int returnCode, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
+		this.properties = properties;
+		this.properties.setValidProperties(validProperties);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
@@ -89,7 +90,7 @@ public class MqttAuth extends MqttWireMessage {
 			outputStream.writeByte(returnCode);
 
 			// Write Identifier / Value Fields
-			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
+			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 			outputStream.write(identifierValueFieldsByteArray);
 			outputStream.flush();
@@ -99,116 +100,22 @@ public class MqttAuth extends MqttWireMessage {
 		}
 	}
 
-	private byte[] getIdentifierValueFields() throws MqttException {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			DataOutputStream outputStream = new DataOutputStream(baos);
-
-			// If Present, encode the Auth Method (3.15.2.2.2)
-			if (authMethod != null) {
-				outputStream.write(MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER);
-				encodeUTF8(outputStream, authMethod);
-			}
-
-			// If present, encode the Auth Data (3.15.2.2.3)
-			if (authData != null) {
-				outputStream.write(MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER);
-				outputStream.writeShort(authData.length);
-				outputStream.write(authData);
-			}
-
-			// If Present, encode the Reason String (3.15.2.2.?)
-			if (reasonString != null) {
-				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
-				encodeUTF8(outputStream, reasonString);
-			}
-
-			// If Present, encode the User Properties (3.15.2.2.4)
-			if (!userDefinedProperties.isEmpty()) {
-				for (UserProperty property : userDefinedProperties) {
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, property.getKey());
-					encodeUTF8(outputStream, property.getValue());
-				}
-			}
-
-			outputStream.flush();
-			return baos.toByteArray();
-		} catch (IOException ioe) {
-			throw new MqttException(ioe);
-		}
-	}
-
-	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
-		// First, get the length of the IV fields
-		int lengthVBI = readVariableByteInteger(dis).getValue();
-		if (lengthVBI > 0) {
-			byte[] identifierValueByteArray = new byte[lengthVBI];
-			dis.read(identifierValueByteArray, 0, lengthVBI);
-			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
-			DataInputStream inputStream = new DataInputStream(bais);
-			while (inputStream.available() > 0) {
-				// Get the first byte (identifier)
-				byte identifier = inputStream.readByte();
-				if (identifier == MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER) {
-					authMethod = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER) {
-					int authDataLength = inputStream.readShort();
-					authData = new byte[authDataLength];
-					inputStream.read(authData, 0, authDataLength);
-				} else if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
-					reasonString = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
-					String key = decodeUTF8(inputStream);
-					String value = decodeUTF8(inputStream);
-					userDefinedProperties.add(new UserProperty(key, value));
-				} else {
-					// Unidentified Identifier
-					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
-				}
-			}
-		}
-	}
-
 	@Override
 	protected byte getMessageInfo() {
 		return (byte) (1);
-	}
-
-	public String getAuthMethod() {
-		return authMethod;
-	}
-
-	public void setAuthMethod(String authMethod) {
-		this.authMethod = authMethod;
-	}
-
-	public byte[] getAuthData() {
-		return authData;
-	}
-
-	public void setAuthData(byte[] authData) {
-		this.authData = authData;
 	}
 
 	public int getReturnCode() {
 		return returnCode;
 	}
 
-	public String getReasonString() {
-		return reasonString;
+	@Override
+	public MqttProperties getProperties() {
+		return this.properties;
 	}
 
-	public void setReasonString(String reasonString) {
-		this.reasonString = reasonString;
+	@Override
+	public String toString() {
+		return "MqttAuth [returnCode=" + returnCode + ", properties=" + properties + "]";
 	}
-
-	public List<UserProperty> getUserDefinedProperties() {
-		return userDefinedProperties;
-	}
-
-	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
-		this.userDefinedProperties = userDefinedProperties;
-	}
-
 }

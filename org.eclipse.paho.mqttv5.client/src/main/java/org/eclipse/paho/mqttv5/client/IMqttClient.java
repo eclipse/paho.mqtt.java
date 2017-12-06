@@ -24,6 +24,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 /**
  * Enables an application to communicate with an MQTT server using blocking methods.
@@ -787,7 +788,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:</p>
 	 * <ul>
 	 * <li>{@link MqttLegacyBlockingClient#publish(String, MqttMessage)} to publish a message in a blocking manner
-	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener)}
+	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener, MqttProperties)}
 	 * </ul>
 	 * <p>When building an application,
 	 * the design of the topic tree should take into account the following principles

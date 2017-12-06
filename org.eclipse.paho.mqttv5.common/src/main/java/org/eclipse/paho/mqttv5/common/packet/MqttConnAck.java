@@ -21,9 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -45,44 +42,37 @@ public class MqttConnAck extends MqttAck {
 			MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER, MqttReturnCode.RETURN_CODE_SERVER_MOVED,
 			MqttReturnCode.RETURN_CODE_CONNECTION_RATE_EXCEEDED };
 
-	// Fields
-	private Integer receiveMaximum;
-	private Integer maximumQoS;
-	private Integer maximumPacketSize;
-	private boolean retainAvailableAdvertisement = false;
-	private String assignedClientIdentifier;
-	private Integer topicAliasMaximum;
-	private String reasonString;
-	private Integer serverKeepAlive;
-	private String responseInfo;
-	private String serverReference;
-	private String authMethod;
-	private byte[] authData;
-	private List<UserProperty> userDefinedProperties = new ArrayList<>();
-	private boolean wildcardSubscriptionsAvailable = false;
-	private boolean subscriptionIdentifiersAvailable = false;
-	private boolean sharedSubscriptionAvailable = false;
-	private Integer sessionExpiryInterval;
+	private static final Byte[] validProperties = { MqttProperties.SESSION_EXPIRY_INTERVAL_IDENTIFIER,
+			MqttProperties.RECEIVE_MAXIMUM_IDENTIFIER, MqttProperties.MAXIMUM_QOS_IDENTIFIER,
+			MqttProperties.RETAIN_AVAILABLE_IDENTIFIER, MqttProperties.MAXIMUM_PACKET_SIZE_IDENTIFIER,
+			MqttProperties.ASSIGNED_CLIENT_IDENTIFIER_IDENTIFIER, MqttProperties.TOPIC_ALIAS_MAXIMUM_IDENTIFIER,
+			MqttProperties.WILDCARD_SUB_AVAILABLE_IDENTIFIER, MqttProperties.SUBSCRIPTION_AVAILABLE_IDENTIFIER,
+			MqttProperties.SHARED_SUBSCRIPTION_AVAILABLE_IDENTIFIER, MqttProperties.SERVER_KEEP_ALIVE_IDENTIFIER,
+			MqttProperties.RESPONSE_INFO_IDENTIFIER, MqttProperties.SERVER_REFERENCE_IDENTIFIER,
+			MqttProperties.AUTH_METHOD_IDENTIFIER, MqttProperties.AUTH_DATA_IDENTIFIER,
+			MqttProperties.REASON_STRING_IDENTIFIER, MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
 	private int returnCode;
 	private boolean sessionPresent;
+	private MqttProperties properties;
 
 	public MqttConnAck(byte[] variableHeader) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
+		this.properties = new MqttProperties(validProperties);
 		ByteArrayInputStream bais = new ByteArrayInputStream(variableHeader);
 		DataInputStream dis = new DataInputStream(bais);
 		sessionPresent = (dis.readUnsignedByte() & 0x01) == 0x01;
 		returnCode = dis.readUnsignedByte();
 		validateReturnCode(returnCode, validReturnCodes);
-		parseIdentifierValueFields(dis);
+		this.properties.decodeProperties(dis);
 		dis.close();
 	}
 
-	public MqttConnAck(boolean sessionPresent, int returnCode) throws MqttException {
+	public MqttConnAck(boolean sessionPresent, int returnCode, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
+		this.properties = properties;
+		this.properties.setValidProperties(validProperties);
 		this.sessionPresent = sessionPresent;
-		validateReturnCode(returnCode, validReturnCodes);
-		this.returnCode = returnCode;
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 	}
@@ -104,7 +94,7 @@ public class MqttConnAck extends MqttAck {
 			dos.write((byte) returnCode);
 
 			// Write Identifier / Value Fields
-			byte[] identifierValueFieldsByteArray = getIdentifierValueFields();
+			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 			dos.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 			dos.write(identifierValueFieldsByteArray);
 			dos.flush();
@@ -113,177 +103,6 @@ public class MqttConnAck extends MqttAck {
 			throw new MqttException(ioe);
 		}
 
-	}
-
-	private byte[] getIdentifierValueFields() throws MqttException {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			DataOutputStream outputStream = new DataOutputStream(baos);
-
-			// If Present, encode the Session Expiry Interval
-			if (sessionExpiryInterval != null) {
-				outputStream.write(MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER);
-				outputStream.writeInt(sessionExpiryInterval);
-			}
-
-			// If present, encode the Receive Maximum
-			if (receiveMaximum != null) {
-				outputStream.write(MqttPropertyIdentifiers.RECEIVE_MAXIMUM_IDENTIFIER);
-				outputStream.writeShort(receiveMaximum);
-			}
-
-			// If present, encode the Maxumum QoS
-			if (maximumQoS != null) {
-				outputStream.write(MqttPropertyIdentifiers.MAXIMUM_QOS_IDENTIFIER);
-				outputStream.writeShort(maximumQoS);
-			}
-
-			// If present, encode the Retain Available Advertisement
-			if (retainAvailableAdvertisement) {
-				outputStream.write(MqttPropertyIdentifiers.RETAIN_AVAILABLE_IDENTIFIER);
-			}
-
-			// If present, encode the Maximum Packet Size
-			if (maximumPacketSize != null) {
-				outputStream.write(MqttPropertyIdentifiers.MAXIMUM_PACKET_SIZE_IDENTIFIER);
-				outputStream.writeInt(maximumPacketSize);
-			}
-
-			// If present, encode the Assigned Client Identifier
-			if (assignedClientIdentifier != null) {
-				outputStream.write(MqttPropertyIdentifiers.ASSIGNED_CLIENT_IDENTIFIER_IDENTIFIER);
-				encodeUTF8(outputStream, assignedClientIdentifier);
-			}
-
-			// If present, encode the Topic Alias Maximum
-			if (topicAliasMaximum != null) {
-				outputStream.write(MqttPropertyIdentifiers.TOPIC_ALIAS_MAXIMUM_IDENTIFIER);
-				outputStream.writeShort(topicAliasMaximum);
-			}
-
-			// If present, encode the Reason String
-			if (reasonString != null) {
-				outputStream.write(MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER);
-				encodeUTF8(outputStream, reasonString);
-			}
-
-			// If present, encode the User Defined Name-Value Pairs
-			if (!userDefinedProperties.isEmpty()) {
-				for (UserProperty property : userDefinedProperties) {
-					outputStream.write(MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER);
-					encodeUTF8(outputStream, property.getKey());
-					encodeUTF8(outputStream, property.getValue());
-				}
-			}
-
-			// If present, encode the Wildcard Subscription Available flag
-			if (wildcardSubscriptionsAvailable) {
-				outputStream.write(MqttPropertyIdentifiers.WILDCARD_SUB_AVAILABLE_IDENTIFIER);
-			}
-
-			// If present, encode the Subscription Identifiers Available flag
-			if (subscriptionIdentifiersAvailable) {
-				outputStream.write(MqttPropertyIdentifiers.SUBSCRIPTION_AVAILABLE_IDENTIFIER);
-			}
-
-			// If present, encode the Shared Subscription Available flag
-			if (sharedSubscriptionAvailable) {
-				outputStream.write(MqttPropertyIdentifiers.SHARED_SUBSCRIPTION_AVAILABLE_IDENTIFIER);
-			}
-
-			// If present, encode the Server Keep Alive
-			if (serverKeepAlive != null) {
-				outputStream.write(MqttPropertyIdentifiers.SERVER_KEEP_ALIVE_IDENTIFIER);
-				outputStream.writeShort(serverKeepAlive);
-			}
-
-			// If present, encode the Response Info
-			if (responseInfo != null) {
-				outputStream.write(MqttPropertyIdentifiers.RESPONSE_INFO_IDENTIFIER);
-				encodeUTF8(outputStream, responseInfo);
-			}
-
-			// If present, encode the Server Reference
-			if (serverReference != null) {
-				outputStream.write(MqttPropertyIdentifiers.SERVER_REFERENCE_IDENTIFIER);
-				encodeUTF8(outputStream, serverReference);
-			}
-
-			// If present, encode the Auth Method
-			if (authMethod != null) {
-				outputStream.write(MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER);
-				encodeUTF8(outputStream, authMethod);
-			}
-
-			// If present, encode the Auth Data
-			if (authData != null) {
-				outputStream.write(MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER);
-				outputStream.writeShort(authData.length);
-				outputStream.write(authData);
-			}
-
-			outputStream.flush();
-			return baos.toByteArray();
-		} catch (IOException ioe) {
-			throw new MqttException(ioe);
-		}
-	}
-
-	private void parseIdentifierValueFields(DataInputStream dis) throws IOException, MqttException {
-		// First, get the length of the IV fields
-		int lengthVBI = readVariableByteInteger(dis).getValue();
-		if (lengthVBI > 0) {
-			byte[] identifierValueByteArray = new byte[lengthVBI];
-			dis.read(identifierValueByteArray, 0, lengthVBI);
-			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
-			DataInputStream inputStream = new DataInputStream(bais);
-			while (inputStream.available() > 0) {
-				// Get the first byte (identifier)
-				byte identifier = inputStream.readByte();
-				if (identifier == MqttPropertyIdentifiers.SESSION_EXPIRY_INTERVAL_IDENTIFIER) {
-					sessionExpiryInterval = inputStream.readInt();
-				} else if (identifier == MqttPropertyIdentifiers.RECEIVE_MAXIMUM_IDENTIFIER) {
-					receiveMaximum = (int) inputStream.readShort();
-				} else if (identifier == MqttPropertyIdentifiers.MAXIMUM_QOS_IDENTIFIER) {
-					maximumQoS = (int) inputStream.readShort();
-				} else if (identifier == MqttPropertyIdentifiers.RETAIN_AVAILABLE_IDENTIFIER) {
-					retainAvailableAdvertisement = true;
-				} else if (identifier == MqttPropertyIdentifiers.MAXIMUM_PACKET_SIZE_IDENTIFIER) {
-					maximumPacketSize = inputStream.readInt();
-				} else if (identifier == MqttPropertyIdentifiers.ASSIGNED_CLIENT_IDENTIFIER_IDENTIFIER) {
-					assignedClientIdentifier = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.TOPIC_ALIAS_MAXIMUM_IDENTIFIER) {
-					topicAliasMaximum = (int) inputStream.readShort();
-				} else if (identifier == MqttPropertyIdentifiers.REASON_STRING_IDENTIFIER) {
-					reasonString = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.USER_DEFINED_PAIR_IDENTIFIER) {
-					String key = decodeUTF8(inputStream);
-					String value = decodeUTF8(inputStream);
-					userDefinedProperties.add(new UserProperty(key, value));
-				} else if (identifier == MqttPropertyIdentifiers.WILDCARD_SUB_AVAILABLE_IDENTIFIER) {
-					wildcardSubscriptionsAvailable = true;
-				} else if (identifier == MqttPropertyIdentifiers.SUBSCRIPTION_AVAILABLE_IDENTIFIER) {
-					subscriptionIdentifiersAvailable = true;
-				} else if (identifier == MqttPropertyIdentifiers.SHARED_SUBSCRIPTION_AVAILABLE_IDENTIFIER) {
-					sharedSubscriptionAvailable = true;
-				} else if (identifier == MqttPropertyIdentifiers.SERVER_KEEP_ALIVE_IDENTIFIER) {
-					serverKeepAlive = (int) inputStream.readShort();
-				} else if (identifier == MqttPropertyIdentifiers.RESPONSE_INFO_IDENTIFIER) {
-					responseInfo = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.SERVER_REFERENCE_IDENTIFIER) {
-					serverReference = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.AUTH_METHOD_IDENTIFIER) {
-					authMethod = decodeUTF8(inputStream);
-				} else if (identifier == MqttPropertyIdentifiers.AUTH_DATA_IDENTIFIER) {
-					int authDataLength = inputStream.readShort();
-					authData = new byte[authDataLength];
-					inputStream.read(authData, 0, authDataLength);
-				} else {
-					// Unidentified Identifier
-					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
-				}
-			}
-		}
 	}
 
 	/**
@@ -315,190 +134,19 @@ public class MqttConnAck extends MqttAck {
 		this.returnCode = returnCode;
 	}
 
-	public int getReceiveMaximum() {
-		if (receiveMaximum == null) {
-			return 65535;
-		}
-		return receiveMaximum;
-	}
-
-	public void setReceiveMaximum(Integer receiveMaximum) {
-		this.receiveMaximum = receiveMaximum;
-	}
-
-	public boolean getRetainUnavailableAdvertisement() {
-		return retainAvailableAdvertisement;
-	}
-
-	public void setRetainAvailableAdvertisement(Boolean retainUnavailableAdvertisement) {
-		this.retainAvailableAdvertisement = retainUnavailableAdvertisement;
-	}
-
-	public String getAssignedClientIdentifier() {
-		return assignedClientIdentifier;
-	}
-
-	public void setAssignedClientIdentifier(String assignedClientIdentifier) {
-		this.assignedClientIdentifier = assignedClientIdentifier;
-	}
-
-	public int getTopicAliasMaximum() {
-		if (topicAliasMaximum == null) {
-			return 0;
-		}
-		return topicAliasMaximum;
-
-	}
-
-	public void setTopicAliasMaximum(Integer topicAliasMaximum) {
-		this.topicAliasMaximum = topicAliasMaximum;
-	}
-
-	public String getReasonString() {
-		return reasonString;
-	}
-
-	public void setReasonString(String reasonString) {
-		this.reasonString = reasonString;
-	}
-
-	public int getServerKeepAlive() {
-		if (serverKeepAlive == null) {
-			return -1;
-		}
-		return serverKeepAlive;
-	}
-
-	public void setServerKeepAlive(int serverKeepAlive) {
-		this.serverKeepAlive = serverKeepAlive;
-	}
-
-	public String getResponseInfo() {
-		return responseInfo;
-	}
-
-	public void setResponseInfo(String replyInfo) {
-		this.responseInfo = replyInfo;
-	}
-
-	public String getServerReference() {
-		return serverReference;
-	}
-
-	public void setServerReference(String serverReference) {
-		if ((returnCode == MqttReturnCode.RETURN_CODE_USE_ANOTHER_SERVER)
-				|| (returnCode == MqttReturnCode.RETURN_CODE_SERVER_MOVED)) {
-			this.serverReference = serverReference;
-		} else {
-			// FIXME
-			throw new IllegalArgumentException(
-					"The Server MUST only send a Server Reference along with a Return Code of 0x9C - Use another Server or 0x9D - Server Moved. (3.2.2.12)");
-		}
-
-	}
-
-	public String getAuthMethod() {
-		return authMethod;
-	}
-
-	public void setAuthMethod(String authMethod) {
-		this.authMethod = authMethod;
-	}
-
-	public byte[] getAuthData() {
-		return authData;
-	}
-
-	public void setAuthData(byte[] authData) {
-		this.authData = authData;
-	}
-
-	public List<UserProperty> getUserDefinedProperties() {
-		return userDefinedProperties;
-	}
-
-	public void setUserDefinedProperties(List<UserProperty> userDefinedProperties) {
-		this.userDefinedProperties = userDefinedProperties;
-	}
-
-	public boolean isWildcardSubscriptionsAvailable() {
-		return wildcardSubscriptionsAvailable;
-	}
-
-	public void setWildcardSubscriptionsAvailable(boolean wildcardSubscriptionsAvailable) {
-		this.wildcardSubscriptionsAvailable = wildcardSubscriptionsAvailable;
-	}
-
-	public boolean isSubscriptionIdentifiersAvailable() {
-		return subscriptionIdentifiersAvailable;
-	}
-
-	public void setSubscriptionIdentifiersAvailable(boolean subscriptionIdentifiersAvailable) {
-		this.subscriptionIdentifiersAvailable = subscriptionIdentifiersAvailable;
-	}
-
-	public boolean isSharedSubscriptionAvailable() {
-		return sharedSubscriptionAvailable;
-	}
-
-	public void setSharedSubscriptionAvailable(boolean sharedSubscriptionAvailable) {
-		this.sharedSubscriptionAvailable = sharedSubscriptionAvailable;
-	}
-
-	public int getMaximumQoS() {
-		if (maximumQoS == null) {
-			return 2;
-		}
-		return maximumQoS;
-	}
-
-	public void setMaximumQoS(int maximumQoS) {
-		this.maximumQoS = maximumQoS;
-	}
-
-	public int getMaximumPacketSize() {
-		if (maximumPacketSize == null) {
-			return -1;
-		}
-		return maximumPacketSize;
-	}
-
-	public void setMaximumPacketSize(Integer maximumPacketSize) {
-		this.maximumPacketSize = maximumPacketSize;
-	}
-
-	public boolean isRetainAvailableAdvertisement() {
-		return retainAvailableAdvertisement;
-	}
-
-	public void setRetainAvailableAdvertisement(boolean retainAvailableAdvertisement) {
-		this.retainAvailableAdvertisement = retainAvailableAdvertisement;
+	@Override
+	public MqttProperties getProperties() {
+		return properties;
 	}
 
 	public static int[] getValidreturncodes() {
 		return validReturnCodes;
 	}
 
-	public int getSessionExpiryInterval() {
-		return sessionExpiryInterval;
-	}
-
-	public void setSessionExpiryInterval(int sessionExpiryInterval) {
-		this.sessionExpiryInterval = sessionExpiryInterval;
-	}
-
 	@Override
 	public String toString() {
-		return "MqttConnAck [receiveMaximum=" + receiveMaximum + ", maximumQoS=" + maximumQoS + ", maximumPacketSize="
-				+ maximumPacketSize + ", retainAvailableAdvertisement=" + retainAvailableAdvertisement
-				+ ", assignedClientIdentifier=" + assignedClientIdentifier + ", topicAliasMaximum=" + topicAliasMaximum
-				+ ", reasonString=" + reasonString + ", serverKeepAlive=" + serverKeepAlive + ", responseInfo="
-				+ responseInfo + ", serverReference=" + serverReference + ", authMethod=" + authMethod + ", authData="
-				+ Arrays.toString(authData) + ", userDefinedProperties=" + userDefinedProperties
-				+ ", wildcardSubscriptionsAvailable=" + wildcardSubscriptionsAvailable
-				+ ", subscriptionIdentifiersAvailable=" + subscriptionIdentifiersAvailable
-				+ ", sharedSubscriptionAvailable=" + sharedSubscriptionAvailable + ", sessionExpiryInterval="
-				+ sessionExpiryInterval + ", returnCode=" + returnCode + ", sessionPresent=" + sessionPresent + "]";
+		return "MqttConnAck [returnCode=" + returnCode + ", sessionPresent=" + sessionPresent + ", properties="
+				+ properties + "]";
 	}
 
 }

@@ -16,9 +16,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BasicTest {
+public class BasicIT {
 	
-	static final Class<?> cclass = BasicTest.class;
+	static final Class<?> cclass = BasicIT.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 	
@@ -69,7 +69,7 @@ public class BasicTest {
 			String clientId = methodName;
 			client = clientFactory.createMqttClient(serverURI, clientId);
 			
-			log.info("Connecting...(serverURI: " + serverURI + ", ClientId: " + clientId);
+			log.info("Connecting: [serverURI: " + serverURI + ", ClientId: " + clientId + "]");
 			client.connect();
 			
 			String clientId2  = client.getClientId();
