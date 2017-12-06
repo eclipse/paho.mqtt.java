@@ -104,8 +104,9 @@ public class MqttConnect extends MqttWireMessage {
 		keepAliveInterval = dis.readUnsignedShort();
 		properties.decodeProperties(dis);
 		clientId = MqttDataTypes.decodeUTF8(dis);
-		willProperties.decodeProperties(dis);
+		
 		if (willFlag) {
+			willProperties.decodeProperties(dis);
 			if (willQoS == 3) {
 				throw new MqttPacketException(MqttPacketException.PACKET_CONNECT_ERROR_INVALID_WILL_QOS);
 			}
@@ -223,12 +224,14 @@ public class MqttConnect extends MqttWireMessage {
 			DataOutputStream dos = new DataOutputStream(baos);
 			MqttDataTypes.encodeUTF8(dos, clientId);
 
-			// Encode Will properties here
-			byte[] willIdentifierValueFieldsByteArray = willProperties.encodeProperties();
-			dos.write(encodeVariableByteInteger(willIdentifierValueFieldsByteArray.length));
-			dos.write(willIdentifierValueFieldsByteArray);
+			
 
 			if (willMessage != null) {
+				// Encode Will properties here
+				byte[] willIdentifierValueFieldsByteArray = willProperties.encodeProperties();
+				dos.write(encodeVariableByteInteger(willIdentifierValueFieldsByteArray.length));
+				dos.write(willIdentifierValueFieldsByteArray);
+				
 				MqttDataTypes.encodeUTF8(dos, willDestination);
 				dos.writeShort(willMessage.getPayload().length);
 				dos.write(willMessage.getPayload());

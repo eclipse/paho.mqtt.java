@@ -19,6 +19,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.junit.Assert;
@@ -84,6 +86,7 @@ public class MqttConnectTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header);
 		outputStream.write(payload);
+		
 
 		MqttConnect decodedConnectPacket = (MqttConnect) MqttWireMessage.createWireMessage(outputStream.toByteArray());
 		MqttProperties properties = decodedConnectPacket.getProperties();

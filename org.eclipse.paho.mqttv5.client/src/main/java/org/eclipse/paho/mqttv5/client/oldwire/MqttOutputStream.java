@@ -19,6 +19,8 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.eclipse.paho.mqttv5.client.internal.MqttState;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
@@ -76,6 +78,8 @@ public class MqttOutputStream extends OutputStream {
 		byte[] pl = message.getPayload();
 //		out.write(message.getHeader());
 //		out.write(message.getPayload());
+		System.out.println(DatatypeConverter.printHexBinary(bytes));
+		System.out.println(DatatypeConverter.printHexBinary(pl));
 		out.write(bytes,0,bytes.length);
 		clientState.notifySentBytes(bytes.length);
 		
