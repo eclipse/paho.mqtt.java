@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
-import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
@@ -38,6 +37,7 @@ import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttAuth;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
@@ -57,7 +57,7 @@ public class CommsCallback implements Runnable {
 
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
-	private MqttCallbackExtended reconnectInternalCallback;
+	private MqttCallback reconnectInternalCallback;
 	private HashMap<Integer, IMqttMessageListener> callbackMap; // Map of message handler callbacks to internal IDs
 	private HashMap<String, Integer> callbackTopicMap; // Map of Topic Strings to internal callback Ids
 	private HashMap<Integer, Integer> subscriptionIdMap; // Map of Subscription Ids to callback Ids
@@ -154,7 +154,7 @@ public class CommsCallback implements Runnable {
 		this.mqttCallback = mqttCallback;
 	}
 
-	public void setReconnectCallback(MqttCallbackExtended callback) {
+	public void setReconnectCallback(MqttCallback callback) {
 		this.reconnectInternalCallback = callback;
 	}
 
@@ -381,6 +381,16 @@ public class CommsCallback implements Runnable {
 					workAvailable.notifyAll();
 				}
 			}
+		}
+	}
+	
+	/**
+	 * This method is called when an Auth Message is received.
+	 * @param authMessage The {@link MqttAuth} message.
+	 */
+	public void authMessageReceived(MqttAuth authMessage) {
+		if(mqttCallback != null) {
+			mqttCallback.authMessageArrived(authMessage.getReturnCode(), authMessage.getProperties());
 		}
 	}
 

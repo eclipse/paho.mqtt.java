@@ -568,8 +568,8 @@ public interface IMqttAsyncClient {
 	 *            completed
 	 * @param messageListener
 	 *            a callback to handle incoming messages
-	 *  @param subscriptionProperties
-	 * 				The {@link MqttProperties} to be sent.
+	 * @param subscriptionProperties
+	 *            The {@link MqttProperties} to be sent.
 	 * @return token used to track and wait for the subscribe to complete. The token
 	 *         will be passed to callback methods if set.
 	 * @throws MqttException
@@ -1027,6 +1027,28 @@ public interface IMqttAsyncClient {
 	 */
 	IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext, MqttActionListener callback,
 			MqttProperties publishProperties) throws MqttException, MqttPersistenceException;
+
+	/**
+	 * An AUTH Packet is sent from Client to Server or Server to Client as part of
+	 * an extended authentication exchange, such as challenge / response
+	 * authentication. It is a protocol error for the Client or Server to send an
+	 * AUTH packet if the CONNECT packet did not contain the same Authentication
+	 * Method.
+	 * 
+	 * @param reasonCode
+	 *            The Reason code, can be Success (0), Continue authentication (24)
+	 *            or Re-authenticate (25).
+	 * @param userContext
+	 *            optional object used to pass context to the callback. Use null if
+	 *            not required.
+	 * @param properties
+	 *            The {@link MqttProperties} to be sent, containing the
+	 *            Authentication Method, Authentication Data and any required User
+	 *            Defined Properties.
+	 * @return token used to track and wait for the authentication to complete. 
+	 * @throws MqttException
+	 */
+	IMqttToken authenticate(int reasonCode, Object userContext, MqttProperties properties) throws MqttException;
 
 	/**
 	 * User triggered attempt to reconnect

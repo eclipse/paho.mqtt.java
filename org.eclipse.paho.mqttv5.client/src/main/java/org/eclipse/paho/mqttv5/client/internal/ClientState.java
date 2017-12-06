@@ -42,6 +42,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistable;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.packet.MqttAck;
+import org.eclipse.paho.mqttv5.common.packet.MqttAuth;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingReq;
@@ -1180,6 +1181,9 @@ public class ClientState implements MqttState {
 					MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, message.getMessageId(), new MqttProperties());
 					this.send(pubComp, null);
 				}
+			} else if (message instanceof MqttAuth) {
+				MqttAuth authMsg = (MqttAuth) message;
+				callback.authMessageReceived(authMsg);
 			}
 		}
 	}

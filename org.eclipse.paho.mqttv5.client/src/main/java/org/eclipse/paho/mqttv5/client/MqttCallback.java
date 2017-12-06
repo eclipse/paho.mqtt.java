@@ -17,6 +17,7 @@ package org.eclipse.paho.mqttv5.client;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 /**
  * Enables an application to be notified when asynchronous events related to the
@@ -36,18 +37,20 @@ public interface MqttCallback {
 	 *            related to the cause of the disconnection.
 	 */
 	public void disconnected(MqttDisconnectResponse disconnectResponse);
-	
+
 	/**
-	 * This method is called when an exception is thrown within the MQTT client.
-	 * The reasons for this may vary, from malformed packets, to protocol errors
-	 * or even bugs within the MQTT client itself. This callback surfaces those
-	 * errors to the application so that it may decide how best to deal with them.
+	 * This method is called when an exception is thrown within the MQTT client. The
+	 * reasons for this may vary, from malformed packets, to protocol errors or even
+	 * bugs within the MQTT client itself. This callback surfaces those errors to
+	 * the application so that it may decide how best to deal with them.
 	 * 
 	 * For example, The MQTT server may have sent a publish message with an invalid
-	 * topic alias, the MQTTv5 specification suggests that the client should disconnect
-	 * from the broker with the appropriate return code, however this is completely up to
-	 * the application itself.
-	 * @param exception - The exception thrown causing the error.
+	 * topic alias, the MQTTv5 specification suggests that the client should
+	 * disconnect from the broker with the appropriate return code, however this is
+	 * completely up to the application itself.
+	 * 
+	 * @param exception
+	 *            - The exception thrown causing the error.
 	 */
 	public void mqttErrorOccured(MqttException exception);
 
@@ -101,5 +104,28 @@ public interface MqttCallback {
 	 *            the delivery token associated with the message.
 	 */
 	public void deliveryComplete(IMqttDeliveryToken token);
+
+	/**
+	 * Called when the connection to the server is completed successfully.
+	 * 
+	 * @param reconnect
+	 *            If true, the connection was the result of automatic reconnect.
+	 * @param serverURI
+	 *            The server URI that the connection was made to.
+	 */
+	public void connectComplete(boolean reconnect, String serverURI);
+
+	/**
+	 * Called when an AUTH packet is received by the client.
+	 * 
+	 * @param reasonCode
+	 *            The Reason code, can be Success (0), Continue authentication (24)
+	 *            or Re-authenticate (25).
+	 * @param properties
+	 *            The {@link MqttProperties} to be sent, containing the
+	 *            Authentication Method, Authentication Data and any required User
+	 *            Defined Properties.
+	 */
+	public void authMessageArrived(int reasonCode, MqttProperties properties);
 
 }

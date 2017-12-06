@@ -27,6 +27,7 @@ import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 /**
  * Listen for in bound messages and connection loss.
@@ -461,6 +462,18 @@ public void disconnected(MqttDisconnectResponse disconnectResponse) {
 
 @Override
 public void mqttErrorOccured(MqttException exception) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void connectComplete(boolean reconnect, String serverURI) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void authMessageArrived(int reasonCode, MqttProperties properties) {
 	// TODO Auto-generated method stub
 	
 }

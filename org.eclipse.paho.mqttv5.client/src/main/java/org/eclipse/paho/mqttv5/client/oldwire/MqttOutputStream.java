@@ -78,8 +78,6 @@ public class MqttOutputStream extends OutputStream {
 		byte[] pl = message.getPayload();
 //		out.write(message.getHeader());
 //		out.write(message.getPayload());
-		System.out.println(DatatypeConverter.printHexBinary(bytes));
-		System.out.println(DatatypeConverter.printHexBinary(pl));
 		out.write(bytes,0,bytes.length);
 		clientState.notifySentBytes(bytes.length);
 		
