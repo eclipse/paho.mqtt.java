@@ -76,9 +76,16 @@ public class TCPNetworkModule implements NetworkModule {
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
 			if (factory instanceof SSLSocketFactory) {
 				// SNI support
-				Socket tempsocket = new Socket();
-				tempsocket.connect(sockaddr, conTimeout*1000);
-				socket = ((SSLSocketFactory)factory).createSocket(tempsocket, host, port, true);
+				Socket tempsocket = null;
+				try {
+					tempsocket = new Socket();
+					tempsocket.connect(sockaddr, conTimeout*1000);
+					socket = ((SSLSocketFactory)factory).createSocket(tempsocket, host, port, true);
+				} catch (Exception exc) {
+					// problem with socket generation
+					tempsocket.close();
+					socket = ((SSLSocketFactory)factory).createSocket(null, host, port, true);
+				}
 			} else {
 				socket = factory.createSocket();
 				socket.connect(sockaddr, conTimeout*1000);
