@@ -13,6 +13,7 @@ import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 public class V5Client implements MqttCallback {
 
@@ -135,6 +136,18 @@ public class V5Client implements MqttCallback {
 
 	@Override
 	public void mqttErrorOccured(MqttException exception) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connectComplete(boolean reconnect, String serverURI) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void authMessageArrived(int reasonCode, MqttProperties properties) {
 		// TODO Auto-generated method stub
 		
 	}

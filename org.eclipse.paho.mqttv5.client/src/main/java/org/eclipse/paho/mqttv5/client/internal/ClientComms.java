@@ -29,7 +29,6 @@ import org.eclipse.paho.mqttv5.client.BufferedMessage;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
-import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientInterface;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
@@ -670,7 +669,7 @@ public class ClientComms {
 		this.callback.setCallback(mqttCallback);
 	}
 
-	public void setReconnectCallback(MqttCallbackExtended callback) {
+	public void setReconnectCallback(MqttCallback callback) {
 		this.callback.setReconnectCallback(callback);
 	}
 

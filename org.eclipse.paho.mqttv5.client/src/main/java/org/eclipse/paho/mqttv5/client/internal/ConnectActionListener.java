@@ -17,10 +17,10 @@
  */
 package org.eclipse.paho.mqttv5.client.internal;
 
-import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
-import org.eclipse.paho.mqttv5.client.MqttCallbackExtended;
+import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttToken;
@@ -62,7 +62,7 @@ public class ConnectActionListener implements MqttActionListener {
 	private MqttToken userToken;
 	private Object userContext;
 	private MqttActionListener userCallback;
-	private MqttCallbackExtended mqttCallbackExtended;
+	private MqttCallback mqttCallback;
 	private MqttSession mqttSession;
 	private boolean reconnect;
 
@@ -138,9 +138,9 @@ public class ConnectActionListener implements MqttActionListener {
 			userCallback.onSuccess(userToken);
 		}
 
-		if (mqttCallbackExtended != null) {
+		if (mqttCallback != null) {
 			String serverURI = comms.getNetworkModules()[comms.getNetworkModuleIndex()].getServerURI();
-			mqttCallbackExtended.connectComplete(reconnect, serverURI);
+			mqttCallback.connectComplete(reconnect, serverURI);
 		}
 
 	}
@@ -214,12 +214,12 @@ public class ConnectActionListener implements MqttActionListener {
 	/**
 	 * Set the MqttCallbackExtened callback to receive connectComplete callbacks
 	 *
-	 * @param mqttCallbackExtended
-	 *            the {@link MqttCallbackExtended} to be called when the connection
+	 * @param mqttCallback
+	 *            the {@link MqttCallback} to be called when the connection
 	 *            completes
 	 */
-	public void setMqttCallbackExtended(MqttCallbackExtended mqttCallbackExtended) {
-		this.mqttCallbackExtended = mqttCallbackExtended;
+	public void setMqttCallbackExtended(MqttCallback mqttCallback) {
+		this.mqttCallback = mqttCallback;
 	}
 
 }

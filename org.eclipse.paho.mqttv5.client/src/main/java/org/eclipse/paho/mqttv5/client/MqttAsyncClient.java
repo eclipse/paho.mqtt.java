@@ -55,6 +55,7 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.MqttAuth;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
@@ -878,8 +879,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 
 		// If we are using the MqttCallbackExtended, set it on the
 		// connectActionListener
-		if (this.mqttCallback instanceof MqttCallbackExtended) {
-			connectActionListener.setMqttCallbackExtended((MqttCallbackExtended) this.mqttCallback);
+		if (this.mqttCallback instanceof MqttCallback) {
+			connectActionListener.setMqttCallbackExtended((MqttCallback) this.mqttCallback);
 		}
 
 		if(this.connOpts.isCleanSession()) {
@@ -1518,7 +1519,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		}
 	}
 
-	class MqttReconnectCallback implements MqttCallbackExtended {
+	class MqttReconnectCallback implements MqttCallback {
 
 		final boolean automaticReconnect;
 
@@ -1535,7 +1536,6 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		public void connectComplete(boolean reconnect, String serverURI) {
 		}
 
-		@Override
 		public void disconnected(MqttDisconnectResponse disconnectResponse) {
 			if (automaticReconnect) {
 				// Automatic reconnect is set so make sure comms is in resting
@@ -1546,8 +1546,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			}
 		}
 
-		@Override
 		public void mqttErrorOccured(MqttException exception) {
+		}
+
+		public void authMessageArrived(int reasonCode, MqttProperties properties) {
+			
 		}
 
 	}
@@ -1665,6 +1668,16 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	@Override
 	public Debug getDebug() {
 		return new Debug(this.mqttSession.getClientId(), comms);
+	}
+
+	@Override
+	public IMqttToken authenticate(int reasonCode, Object userContext, MqttProperties properties) throws MqttException {
+		MqttToken token = new MqttToken(getClientId());
+		token.setUserContext(userContext);
+		
+		MqttAuth auth = new MqttAuth(reasonCode, properties);
+		comms.sendNoWait(auth, token);
+		return null;
 	}
 
 }
