@@ -25,7 +25,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 /**
  * Default ping sender implementation
  *
- * <p>This class implements the {@link IMqttPingSender} pinger interface
+ * <p>This class implements the {@link MqttPingSender} pinger interface
  * allowing applications to send ping packet to server every keep alive interval.
  * </p>
  *
