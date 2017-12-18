@@ -468,9 +468,14 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {
 		this.subscribe(topicFilters, qos);
 
-		// add message handlers to the list for this client
+		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
-			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            if (messageListeners[i] == null) {
+                aClient.comms.removeMessageListener(topicFilters[i]);
+            }
+            else {
+                aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            }
 		}
 	}
 
@@ -542,10 +547,16 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 			throws MqttException {
 		IMqttToken tok = this.subscribeWithResponse(topicFilters, qos);
 
-		// add message handlers to the list for this client
+		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
-			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            if (messageListeners[i] == null) {
+                aClient.comms.removeMessageListener(topicFilters[i]);
+            }
+            else {
+                aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            }
 		}
+
 		return tok;
 	}
 
