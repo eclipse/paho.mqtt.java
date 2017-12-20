@@ -54,7 +54,7 @@ public class MqttConnect extends MqttWireMessage {
 			MqttProperties.AUTH_DATA_IDENTIFIER };
 
 	private static final Byte[] validWillProperties = { MqttProperties.WILL_DELAY_INTERVAL_IDENTIFIER,
-			MqttProperties.PAYLOAD_FORMAT_INDICATOR_IDENTIFIER, MqttProperties.PUBLICATION_EXPIRY_INTERVAL_IDENTIFIER,
+			MqttProperties.PAYLOAD_FORMAT_INDICATOR_IDENTIFIER, MqttProperties.MESSAGE_EXPIRY_INTERVAL_IDENTIFIER,
 			MqttProperties.RESPONSE_TOPIC_IDENTIFIER, MqttProperties.CORRELATION_DATA_IDENTIFIER,
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER, MqttProperties.CONTENT_TYPE_IDENTIFIER };
 
@@ -208,9 +208,9 @@ public class MqttConnect extends MqttWireMessage {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
-			dos.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 			dos.write(identifierValueFieldsByteArray);
 			dos.flush();
+			
 			return baos.toByteArray();
 		} catch (IOException ioe) {
 			throw new MqttException(ioe);
@@ -229,7 +229,6 @@ public class MqttConnect extends MqttWireMessage {
 			if (willMessage != null) {
 				// Encode Will properties here
 				byte[] willIdentifierValueFieldsByteArray = willProperties.encodeProperties();
-				dos.write(encodeVariableByteInteger(willIdentifierValueFieldsByteArray.length));
 				dos.write(willIdentifierValueFieldsByteArray);
 				
 				MqttDataTypes.encodeUTF8(dos, willDestination);

@@ -91,7 +91,6 @@ public class MqttAuth extends MqttWireMessage {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
-			outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 			outputStream.write(identifierValueFieldsByteArray);
 			outputStream.flush();
 			return baos.toByteArray();

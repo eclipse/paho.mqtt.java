@@ -33,7 +33,7 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 public class MqttPublish extends MqttPersistableWireMessage {
 
 	private static final Byte[] validProperties = { MqttProperties.PAYLOAD_FORMAT_INDICATOR_IDENTIFIER,
-			MqttProperties.PUBLICATION_EXPIRY_INTERVAL_IDENTIFIER, MqttProperties.TOPIC_ALIAS_IDENTIFIER,
+			MqttProperties.MESSAGE_EXPIRY_INTERVAL_IDENTIFIER, MqttProperties.TOPIC_ALIAS_IDENTIFIER,
 			MqttProperties.RESPONSE_TOPIC_IDENTIFIER, MqttProperties.CORRELATION_DATA_IDENTIFIER,
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER, MqttProperties.CONTENT_TYPE_IDENTIFIER,
 			MqttProperties.SUBSCRIPTION_IDENTIFIER };
@@ -124,7 +124,6 @@ public class MqttPublish extends MqttPersistableWireMessage {
 			}
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsArray = this.properties.encodeProperties();
-			dos.write(encodeVariableByteInteger(identifierValueFieldsArray.length));
 			dos.write(identifierValueFieldsArray);
 			dos.flush();
 			return baos.toByteArray();

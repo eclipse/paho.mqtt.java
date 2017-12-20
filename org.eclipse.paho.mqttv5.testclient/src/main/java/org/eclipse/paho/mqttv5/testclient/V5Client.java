@@ -106,7 +106,7 @@ public class V5Client implements MqttCallback {
 
 	public static void printSubscriptionDetails(MqttToken token) {
 		System.out.println("Subscription Response: [reasonString=" + token.getMessageProperties().getReasonString() + ", user"
-				+ ", userDefinedProperties=" + token.getMessageProperties().getUserDefinedProperties());
+				+ ", userDefinedProperties=" + token.getMessageProperties().getUserProperties());
 
 	}
 
@@ -147,7 +147,7 @@ public class V5Client implements MqttCallback {
 	}
 
 	@Override
-	public void authMessageArrived(int reasonCode, MqttProperties properties) {
+	public void authPacketArrived(int reasonCode, MqttProperties properties) {
 		// TODO Auto-generated method stub
 		
 	}

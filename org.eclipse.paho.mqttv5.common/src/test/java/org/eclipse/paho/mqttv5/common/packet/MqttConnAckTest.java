@@ -32,11 +32,11 @@ public class MqttConnAckTest {
 	private static final Integer receiveMaximum = 100;
 	private static final Integer maximumQoS = 1;
 	private static final boolean retainAvailableAdvertisement = true;
-	private static final Integer maximumPacketSize = 128000;
+	private static final Long maximumPacketSize = 128000L;
 	private static final String assignedClientIdentifier = "AssignedClientId";
 	private static final Integer topicAliasMaximum = 100;
 	private static final String reasonString = "Everything is fine.";
-	private static final Integer sessionExpiryInterval = 60;
+	private static final Long sessionExpiryInterval = 60L;
 	private static final boolean wildcardSubscriptionsAvailable = true;
 	private static final boolean subscriptionIdentifiersAvailable = true;
 	private static final boolean sharedSubscriptionAvailable = true;
@@ -85,23 +85,23 @@ public class MqttConnAckTest {
 		
 		Assert.assertEquals(receiveMaximum, properties.getReceiveMaximum());
 		Assert.assertEquals(maximumQoS, properties.getMaximumQoS());
-		Assert.assertEquals(retainAvailableAdvertisement, properties.isRetainAvailableAdvertisement());
+		Assert.assertEquals(retainAvailableAdvertisement, properties.isRetainAvailable());
 		Assert.assertEquals(maximumPacketSize, properties.getMaximumPacketSize());
 		Assert.assertEquals(assignedClientIdentifier, properties.getAssignedClientIdentifier());
 		Assert.assertEquals(topicAliasMaximum, properties.getTopicAliasMaximum());
 		Assert.assertEquals(reasonString, properties.getReasonString());
 		Assert.assertEquals(sessionExpiryInterval, properties.getSessionExpiryInterval());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
 		Assert.assertEquals(wildcardSubscriptionsAvailable, properties.isWildcardSubscriptionsAvailable());
 		Assert.assertEquals(subscriptionIdentifiersAvailable, properties.isSubscriptionIdentifiersAvailable());
 		Assert.assertEquals(sharedSubscriptionAvailable, properties.isSharedSubscriptionAvailable());
 		Assert.assertEquals(serverKeepAlive, properties.getServerKeepAlive());
 		Assert.assertEquals(responseInfo, properties.getResponseInfo());
 		Assert.assertEquals(serverReference, properties.getServerReference());
-		Assert.assertEquals(authMethod, properties.getAuthMethod());
-		Assert.assertArrayEquals(authData, properties.getAuthData());
+		Assert.assertEquals(authMethod, properties.getAuthenticationMethod());
+		Assert.assertArrayEquals(authData, properties.getAuthenticationData());
 		Assert.assertEquals(sessionPresent, decodedConnAckPacket.getSessionPresent());
 		Assert.assertEquals(returnCode, decodedConnAckPacket.getReturnCode());
 	}
@@ -116,7 +116,7 @@ public class MqttConnAckTest {
 		
 		properties.setReceiveMaximum(receiveMaximum);
 		properties.setMaximumQoS(maximumQoS);
-		properties.setRetainAvailableAdvertisement(retainAvailableAdvertisement);
+		properties.setRetainAvailable(retainAvailableAdvertisement);
 		properties.setMaximumPacketSize(maximumPacketSize);
 		properties.setAssignedClientIdentifier(assignedClientIdentifier);
 		properties.setTopicAliasMaximum(topicAliasMaximum);
@@ -126,15 +126,15 @@ public class MqttConnAckTest {
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		properties.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserProperties(userDefinedProperties);
 		properties.setWildcardSubscriptionsAvailable(wildcardSubscriptionsAvailable);
 		properties.setSubscriptionIdentifiersAvailable(subscriptionIdentifiersAvailable);
 		properties.setSharedSubscriptionAvailable(sharedSubscriptionAvailable);
 		properties.setServerKeepAlive(serverKeepAlive);
 		properties.setResponseInfo(responseInfo);
 		properties.setServerReference(serverReference);
-		properties.setAuthMethod(authMethod);
-		properties.setAuthData(authData);
+		properties.setAuthenticationMethod(authMethod);
+		properties.setAuthenticationData(authData);
 		
 		MqttConnAck mqttConnAckPacket = new MqttConnAck(sessionPresent, returnCode, properties);
 		

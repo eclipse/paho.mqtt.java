@@ -473,7 +473,7 @@ public void connectComplete(boolean reconnect, String serverURI) {
 }
 
 @Override
-public void authMessageArrived(int reasonCode, MqttProperties properties) {
+public void authPacketArrived(int reasonCode, MqttProperties properties) {
 	// TODO Auto-generated method stub
 	
 }

@@ -57,13 +57,13 @@ public class MqttAuthTest {
 		MqttProperties properties = decodedAuthPacket.getProperties();
 		
 		Assert.assertEquals(returnCode, decodedAuthPacket.getReturnCode());
-		Assert.assertEquals(authMethod, properties.getAuthMethod());
-		Assert.assertArrayEquals(authData, properties.getAuthData());
+		Assert.assertEquals(authMethod, properties.getAuthenticationMethod());
+		Assert.assertArrayEquals(authData, properties.getAuthenticationData());
 		Assert.assertEquals(reasonString, properties.getReasonString());
-		Assert.assertEquals(3, properties.getUserDefinedProperties().size());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
+		Assert.assertEquals(3, properties.getUserProperties().size());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
 
 	}
 	
@@ -71,14 +71,14 @@ public class MqttAuthTest {
 		
 		
 		MqttProperties properties = new MqttProperties();
-		properties.setAuthMethod(authMethod);
-		properties.setAuthData(authData);
+		properties.setAuthenticationMethod(authMethod);
+		properties.setAuthenticationData(authData);
 		properties.setReasonString(reasonString);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		properties.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserProperties(userDefinedProperties);
 		MqttAuth mqttAuthPacket = new MqttAuth(returnCode, properties);
 		return mqttAuthPacket;
 	}

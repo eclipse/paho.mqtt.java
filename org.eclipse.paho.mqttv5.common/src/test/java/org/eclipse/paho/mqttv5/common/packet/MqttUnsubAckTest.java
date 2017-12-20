@@ -63,9 +63,9 @@ public class MqttUnsubAckTest {
 		MqttProperties properties = decodedUnsubAckPacket.getProperties();
 
 		Assert.assertEquals(reasonString, properties.getReasonString());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
 
 		Assert.assertArrayEquals(returnCodes, decodedUnsubAckPacket.getReturnCodes());
 
@@ -78,7 +78,7 @@ public class MqttUnsubAckTest {
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		properties.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserProperties(userDefinedProperties);
 		MqttUnsubAck mqttUnsubAckPacket = new MqttUnsubAck(returnCodes, properties);
 
 		return mqttUnsubAckPacket;

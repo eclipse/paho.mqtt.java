@@ -38,8 +38,8 @@ public class MqttConnectTest {
 	private static final String willDestination = "will/destination";
 	private static final int willQoS = 1;
 
-	private static final Integer sessionExpiryInterval = 60;
-	private static final Integer maxPacketSize = 128000;
+	private static final Long sessionExpiryInterval = 60L;
+	private static final Long maxPacketSize = 128000L;
 	private static final Integer topicAliasMax = 5;
 	private static final boolean requestResponseInfo = true;
 	private static final boolean requestPropblemInfo = true;
@@ -52,9 +52,9 @@ public class MqttConnectTest {
 	private static final String userValue2 = "userValue2";
 	private static final String userValue3 = "userValue3";
 
-	private static final Integer willDelayInterval = 60;
+	private static final Long willDelayInterval = 60L;
 	private static final boolean willIsUTF8 = true;
-	private static final Integer willPublicationExpiryInterval = 60;
+	private static final Long willPublicationExpiryInterval = 60L;
 	private static final String willResponseTopic = "replyTopic";
 	private static final byte[] willCorrelationData = "correlationData".getBytes();
 	private static final String willContentType = "JSON";
@@ -104,27 +104,27 @@ public class MqttConnectTest {
 		Assert.assertEquals(sessionExpiryInterval, properties.getSessionExpiryInterval());
 		Assert.assertEquals(maxPacketSize, properties.getMaximumPacketSize());
 		Assert.assertEquals(topicAliasMax, properties.getTopicAliasMaximum());
-		Assert.assertEquals(requestResponseInfo, properties.getRequestResponseInfo());
-		Assert.assertEquals(requestPropblemInfo, properties.getRequestProblemInfo());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
+		Assert.assertEquals(requestResponseInfo, properties.requestResponseInfo());
+		Assert.assertEquals(requestPropblemInfo, properties.requestProblemInfo());
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
 
-		Assert.assertEquals(authMethod, properties.getAuthMethod());
-		Assert.assertArrayEquals(authData, properties.getAuthData());
+		Assert.assertEquals(authMethod, properties.getAuthenticationMethod());
+		Assert.assertArrayEquals(authData, properties.getAuthenticationData());
 
 		Assert.assertEquals(willDelayInterval, willProperties.getWillDelayInterval());
-		Assert.assertEquals(willIsUTF8, willProperties.isUTF8());
-		Assert.assertEquals(willPublicationExpiryInterval, willProperties.getPublicationExpiryInterval());
+		Assert.assertEquals(willIsUTF8, willProperties.getPayloadFormat());
+		Assert.assertEquals(willPublicationExpiryInterval, willProperties.getMessageExpiryInterval());
 		Assert.assertEquals(willContentType, willProperties.getContentType());
 		Assert.assertEquals(willResponseTopic, willProperties.getResponseTopic());
 		Assert.assertArrayEquals(willCorrelationData, willProperties.getCorrelationData());
 		Assert.assertTrue(
-				new UserProperty(userKey1, userValue1).equals(willProperties.getUserDefinedProperties().get(0)));
+				new UserProperty(userKey1, userValue1).equals(willProperties.getUserProperties().get(0)));
 		Assert.assertTrue(
-				new UserProperty(userKey2, userValue2).equals(willProperties.getUserDefinedProperties().get(1)));
+				new UserProperty(userKey2, userValue2).equals(willProperties.getUserProperties().get(1)));
 		Assert.assertTrue(
-				new UserProperty(userKey3, userValue3).equals(willProperties.getUserDefinedProperties().get(2)));
+				new UserProperty(userKey3, userValue3).equals(willProperties.getUserProperties().get(2)));
 
 	}
 
@@ -140,23 +140,23 @@ public class MqttConnectTest {
 		properties.setTopicAliasMaximum(topicAliasMax);
 		properties.setRequestResponseInfo(requestResponseInfo);
 		properties.setRequestProblemInfo(requestPropblemInfo);
-		properties.setAuthMethod(authMethod);
-		properties.setAuthData(authData);
+		properties.setAuthenticationMethod(authMethod);
+		properties.setAuthenticationData(authData);
 
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		properties.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserProperties(userDefinedProperties);
 
-		willProperties.setPublicationExpiryInterval(willPublicationExpiryInterval);
+		willProperties.setMessageExpiryInterval(willPublicationExpiryInterval);
 		willProperties.setWillDelayInterval(willDelayInterval);
-		willProperties.setUTF8(willIsUTF8);
+		willProperties.setPayloadFormat(willIsUTF8);
 		willProperties.setContentType(willContentType);
 		willProperties.setResponseTopic(willResponseTopic);
 		willProperties.setCorrelationData(willCorrelationData);
 
-		willProperties.setUserDefinedProperties(userDefinedProperties);
+		willProperties.setUserProperties(userDefinedProperties);
 		MqttConnect mqttConnectPacket = new MqttConnect(clientId, mqttVersion, cleanSession, keepAliveInterval,
 				properties, willProperties);
 

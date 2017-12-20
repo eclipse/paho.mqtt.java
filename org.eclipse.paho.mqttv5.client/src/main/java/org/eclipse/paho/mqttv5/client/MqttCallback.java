@@ -126,6 +126,6 @@ public interface MqttCallback {
 	 *            Authentication Method, Authentication Data and any required User
 	 *            Defined Properties.
 	 */
-	public void authMessageArrived(int reasonCode, MqttProperties properties);
+	public void authPacketArrived(int reasonCode, MqttProperties properties);
 
 }

@@ -28,7 +28,7 @@ public class MqttSession {
 	private Integer receiveMaximum = 65535;
 	private Integer maximumQoS = 2;
 	private Boolean retainAvailable = true;
-	private Integer maximumPacketSize = -1;
+	private Long maximumPacketSize = -1L;
 	private Integer topicAliasMaximum = 0;
 	private Boolean wildcardSubscriptionsAvailable = true;
 	private Boolean subscriptionIdentifiersAvailable = true;
@@ -73,11 +73,11 @@ public class MqttSession {
 		this.retainAvailable = retainAvailable;
 	}
 
-	public Integer getMaximumPacketSize() {
+	public Long getMaximumPacketSize() {
 		return maximumPacketSize;
 	}
 
-	public void setMaximumPacketSize(Integer maximumPacketSize) {
+	public void setMaximumPacketSize(Long maximumPacketSize) {
 		this.maximumPacketSize = maximumPacketSize;
 	}
 

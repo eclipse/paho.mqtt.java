@@ -1549,7 +1549,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		public void mqttErrorOccured(MqttException exception) {
 		}
 
-		public void authMessageArrived(int reasonCode, MqttProperties properties) {
+		public void authPacketArrived(int reasonCode, MqttProperties properties) {
 			
 		}
 

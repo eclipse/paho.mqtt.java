@@ -300,7 +300,7 @@ public class CommsCallback implements Runnable {
 				// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
 				log.fine(CLASS_NAME, methodName, "722", new Object[] { message.toString() });
 				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(message.getReturnCode(),
-						message.getProperties().getReasonString(), (ArrayList<UserProperty>) message.getProperties().getUserDefinedProperties(),
+						message.getProperties().getReasonString(), (ArrayList<UserProperty>) message.getProperties().getUserProperties(),
 						message.getProperties().getServerReference());
 				mqttCallback.disconnected(disconnectResponse);
 			} else if (mqttCallback != null && cause != null) {
@@ -390,7 +390,7 @@ public class CommsCallback implements Runnable {
 	 */
 	public void authMessageReceived(MqttAuth authMessage) {
 		if(mqttCallback != null) {
-			mqttCallback.authMessageArrived(authMessage.getReturnCode(), authMessage.getProperties());
+			mqttCallback.authPacketArrived(authMessage.getReturnCode(), authMessage.getProperties());
 		}
 	}
 

@@ -27,7 +27,7 @@ import org.junit.Test;
 public class MqttDisconnectTest {
 	private static final int returnCode = MqttReturnCode.RETURN_CODE_PROTOCOL_ERROR;
 	private static final String reasonString = "Reason String 123.";
-	private static final Integer sessionExpiryInterval = 60;
+	private static final Long sessionExpiryInterval = 60L;
 	private static final String serverReference = "127.0.0.1";
 	private static final String userKey1 = "userKey1";
 	private static final String userKey2 = "userKey2";
@@ -62,9 +62,9 @@ public class MqttDisconnectTest {
 		Assert.assertEquals(reasonString, properties.getReasonString());
 		Assert.assertEquals(sessionExpiryInterval, properties.getSessionExpiryInterval());
 		Assert.assertEquals(serverReference, properties.getServerReference());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
 
 		
 	}
@@ -98,7 +98,7 @@ public class MqttDisconnectTest {
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		properties.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserProperties(userDefinedProperties);
 		MqttDisconnect mqttDisconnectPacket = new MqttDisconnect(returnCode, properties);
 		return mqttDisconnectPacket;
 	}

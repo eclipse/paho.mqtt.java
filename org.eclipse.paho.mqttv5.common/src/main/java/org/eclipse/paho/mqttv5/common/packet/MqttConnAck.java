@@ -95,7 +95,6 @@ public class MqttConnAck extends MqttAck {
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
-			dos.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 			dos.write(identifierValueFieldsByteArray);
 			dos.flush();
 			return baos.toByteArray();

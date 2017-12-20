@@ -36,7 +36,7 @@ public class MqttPublishTest {
 	private static final int qos = 1;
 	private static final boolean retained = true;
 	private static final boolean isUTF8 = true;
-	private static final Integer publicationExpiryInterval = 60;
+	private static final Long publicationExpiryInterval = 60L;
 	private static final Integer topicAlias = 1;
 	private static final String responseTopic = "replyTopic";
 	private static final byte[] correlationData = "correlationData".getBytes();
@@ -77,14 +77,14 @@ public class MqttPublishTest {
 		Assert.assertEquals(qos, decodedPublishPacket.getMessage().getQos());
 		Assert.assertArrayEquals(payloadMessage.getBytes(), decodedPublishPacket.getMessage().getPayload());
 		Assert.assertEquals(retained, decodedPublishPacket.getMessage().isRetained());
-		Assert.assertEquals(isUTF8, properties.isUTF8());
-		Assert.assertEquals(publicationExpiryInterval, properties.getPublicationExpiryInterval());
+		Assert.assertEquals(isUTF8, properties.getPayloadFormat());
+		Assert.assertEquals(publicationExpiryInterval, properties.getMessageExpiryInterval());
 		Assert.assertEquals(topicAlias, properties.getTopicAlias());
 		Assert.assertEquals(responseTopic, properties.getResponseTopic());
 		Assert.assertArrayEquals(correlationData, properties.getCorrelationData());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserDefinedProperties().get(2)));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
 
 		Assert.assertEquals(contentType, properties.getContentType());
 		Assert.assertArrayEquals(subscriptionIdentifiers.toArray(), properties.getSubscriptionIdentifiers().toArray());
@@ -101,15 +101,15 @@ public class MqttPublishTest {
 		message.setQos(qos);
 		message.setRetained(retained);
 				
-		properties.setUTF8(isUTF8);
-		properties.setPublicationExpiryInterval(publicationExpiryInterval);
+		properties.setPayloadFormat(isUTF8);
+		properties.setMessageExpiryInterval(publicationExpiryInterval);
 		properties.setResponseTopic(responseTopic);
 		properties.setCorrelationData(correlationData);
 		ArrayList<UserProperty> userDefinedProperties = new ArrayList<UserProperty>();
 		userDefinedProperties.add(new UserProperty(userKey1, userValue1));
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
-		properties.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserProperties(userDefinedProperties);
 		properties.setContentType(contentType);
 		properties.setSubscriptionIdentifiers(subscriptionIdentifiers);
 		properties.setTopicAlias(topicAlias);

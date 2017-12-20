@@ -80,7 +80,6 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 				outputStream.write((byte) returnCode);
 
 				// Write Identifier / Value Fields
-				outputStream.write(encodeVariableByteInteger(identifierValueFieldsByteArray.length));
 				outputStream.write(identifierValueFieldsByteArray);
 			}
 			outputStream.flush();

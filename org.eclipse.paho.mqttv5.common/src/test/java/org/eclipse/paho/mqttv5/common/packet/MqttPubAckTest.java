@@ -56,9 +56,9 @@ public class MqttPubAckTest {
 		Assert.assertEquals(returnCode, decodedPubackPacket.getReturnCode());
 		MqttProperties decodedProperties = decodedPubackPacket.getProperties();
 		Assert.assertEquals(reasonString, decodedProperties.getReasonString());
-		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedProperties.getUserDefinedProperties().get(0)));
-		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedProperties.getUserDefinedProperties().get(1)));
-		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedProperties.getUserDefinedProperties().get(2)));
+		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(decodedProperties.getUserProperties().get(0)));
+		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(decodedProperties.getUserProperties().get(1)));
+		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(decodedProperties.getUserProperties().get(2)));
 
 		
 		
@@ -72,7 +72,7 @@ public class MqttPubAckTest {
 		
 		MqttProperties properties = new MqttProperties();
 		properties.setReasonString(reasonString);
-		properties.setUserDefinedProperties(userDefinedProperties);
+		properties.setUserProperties(userDefinedProperties);
 		
 		MqttPubAck mqttPubackPacket = new MqttPubAck(returnCode,1, properties);
 		
