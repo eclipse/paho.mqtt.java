@@ -48,6 +48,12 @@ public class MqttProperties {
 	/** 11 - Subscription Identifier (Variable Byte Int). */
 	public static final byte SUBSCRIPTION_IDENTIFIER = 0x0B;
 
+	/** 126 - Subscription Identifier Multi Flag (NOT ACTUAL PROPERTY). */
+	public static final byte SUBSCRIPTION_IDENTIFIER_MULTI = 0x7E;
+
+	/** 127 - Subscription Identifier Single Flag (NOT ACTUAL PROPERTY). */
+	public static final byte SUBSCRIPTION_IDENTIFIER_SINGLE = 0x7F;
+
 	/** 17 - Session Expiry Interval (Four Byte Int). */
 	public static final byte SESSION_EXPIRY_INTERVAL_IDENTIFIER = 0x11;
 
@@ -151,7 +157,8 @@ public class MqttProperties {
 	private byte[] authenticationData;
 
 	// Variable Byte Integer
-	private List<Integer> subscriptionIdentifiers = new ArrayList<>();
+	private List<Integer> publishSubscriptionIdentifiers = new ArrayList<>();
+	private Integer subscribeSubscriptionIdentifier;
 
 	/**
 	 * Initialises this MqttProperties Object.
@@ -227,11 +234,15 @@ public class MqttProperties {
 			}
 
 			// Subscription Identifier
-			if (!subscriptionIdentifiers.isEmpty() && validProperties.contains(SUBSCRIPTION_IDENTIFIER)) {
-				for (Integer subscriptionIdentifier : subscriptionIdentifiers) {
+			if (!publishSubscriptionIdentifiers.isEmpty() && validProperties.contains(SUBSCRIPTION_IDENTIFIER_MULTI)) {
+				for (Integer subscriptionIdentifier : publishSubscriptionIdentifiers) {
 					outputStream.write(SUBSCRIPTION_IDENTIFIER);
 					outputStream.write(MqttDataTypes.encodeVariableByteInteger(subscriptionIdentifier));
 				}
+			}
+			if (subscribeSubscriptionIdentifier != null && validProperties.contains(SUBSCRIPTION_IDENTIFIER_SINGLE)) {
+				outputStream.write(SUBSCRIPTION_IDENTIFIER);
+				outputStream.write(MqttDataTypes.encodeVariableByteInteger(subscribeSubscriptionIdentifier));
 			}
 
 			// Session Expiry Interval
@@ -415,7 +426,11 @@ public class MqttProperties {
 						correlationData = new byte[correlationDataLength];
 						inputStream.read(correlationData, 0, correlationDataLength);
 					} else if (identifier == SUBSCRIPTION_IDENTIFIER) {
-						subscriptionIdentifiers.add(MqttDataTypes.readVariableByteInteger(inputStream).getValue());
+						int subscriptionIdentifier = MqttDataTypes.readVariableByteInteger(inputStream).getValue();
+						publishSubscriptionIdentifiers.add(subscriptionIdentifier);
+						// Bit of a hack, where we potentially write this many times, users should make
+						// sure they read the JavaDoc.
+						subscribeSubscriptionIdentifier = subscriptionIdentifier;
 					} else if (identifier == SESSION_EXPIRY_INTERVAL_IDENTIFIER) {
 						sessionExpiryInterval = MqttDataTypes.readUnsignedFourByteInt(inputStream);
 					} else if (identifier == ASSIGNED_CLIENT_IDENTIFIER_IDENTIFIER) {
@@ -1224,13 +1239,15 @@ public class MqttProperties {
 	 * a Subscription Identifier, then any incoming messages that match that
 	 * subscription will contain the associated subscription identifier, if the
 	 * incoming message matches multiple subscriptions made by the same client, then
-	 * it will contain a list of all associated subscription identifiers.
+	 * it will contain a list of all associated subscription identifiers. This
+	 * property is ONLY for PUBLISH packets. For a Subscription Identifier sent in a
+	 * SUBSCRIBE packet, see {@link MqttProperties#getSubscriptionIdentifier()}
 	 * </p>
 	 * 
 	 * @return A {@link List} of Subscription Identifiers.
 	 */
 	public List<Integer> getSubscriptionIdentifiers() {
-		return subscriptionIdentifiers;
+		return publishSubscriptionIdentifiers;
 	}
 
 	/**
@@ -1244,7 +1261,36 @@ public class MqttProperties {
 		for (Integer subId : subscriptionIdentifiers) {
 			MqttDataTypes.validateVariableByteInt(subId);
 		}
-		this.subscriptionIdentifiers = subscriptionIdentifiers;
+		this.publishSubscriptionIdentifiers = subscriptionIdentifiers;
+	}
+
+	/**
+	 * Subscription Identifier. (Subscribe Only)
+	 * 
+	 * <p>
+	 * The Subscription identifier field can be set on a SUBSCRIBE packet and will
+	 * be returned with any incoming PUBLISH packets that match the associated
+	 * subscription. This property is ONLY for SUBSCRIBE packets. For Subscription
+	 * Identifier(s) sent in a PUBLISH packet, see
+	 * {@link MqttProperties#getSubscriptionIdentifiers()}
+	 * </p>
+	 * 
+	 * @return The Subscription Identifier.
+	 */
+	public Integer getSubscriptionIdentifier() {
+		return subscribeSubscriptionIdentifier;
+	}
+
+	/**
+	 * Subscription Identifier. (Subscribe Only) See
+	 * {@link MqttProperties#getSubscriptionIdentifier()}
+	 * 
+	 * @param subscriptionIdentifier
+	 *            The Subscription Identifier.
+	 */
+	public void setSubscriptionIdentifier(Integer subscriptionIdentifier) {
+		MqttDataTypes.validateVariableByteInt(subscriptionIdentifier);
+		this.subscribeSubscriptionIdentifier = subscriptionIdentifier;
 	}
 
 	@Override
@@ -1329,8 +1375,8 @@ public class MqttProperties {
 		if (correlationData != null) {
 			sb.append(", correlationData=" + Arrays.toString(correlationData));
 		}
-		if (subscriptionIdentifiers.size() != 0) {
-			sb.append(", subscriptionIdentifiers=" + subscriptionIdentifiers);
+		if (publishSubscriptionIdentifiers.size() != 0) {
+			sb.append(", subscriptionIdentifiers=" + publishSubscriptionIdentifiers);
 		}
 		sb.append("]");
 		return (sb.toString());

@@ -24,8 +24,6 @@ import java.util.Arrays;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -69,7 +67,7 @@ public class MqttSubscribeTest {
 	public void testDecodingSimpleMqttSubscribe() throws MqttException, IOException {
 		MqttSubscription subscription = new MqttSubscription(topicAB);
 		MqttProperties properties = new MqttProperties();
-		properties.setSubscriptionIdentifiers(Arrays.asList(subscriptionIdentifier));
+		properties.setSubscriptionIdentifier(subscriptionIdentifier);
 		MqttSubscribe mqttSubscribePacket = new MqttSubscribe(subscription, properties);
 		
 		byte[] header = mqttSubscribePacket.getHeader();
@@ -95,7 +93,7 @@ public class MqttSubscribeTest {
 		Assert.assertEquals(0, decodedSub.getRetainHandling());
 		
 		
-		Assert.assertEquals(subscriptionIdentifier, decodedProperties.getSubscriptionIdentifiers().get(0));
+		Assert.assertEquals(subscriptionIdentifier, decodedProperties.getSubscriptionIdentifier());
 	}
 
 	@Test
@@ -107,7 +105,7 @@ public class MqttSubscribeTest {
 		subscriptions.add(new MqttSubscription(topicGH));
 		MqttSubscription[] subArray = subscriptions.toArray(new MqttSubscription[subscriptions.size()]);
 		MqttProperties properties = new MqttProperties();
-		properties.setSubscriptionIdentifiers(Arrays.asList(subscriptionIdentifier));
+		properties.setSubscriptionIdentifier(subscriptionIdentifier);
 		
 		MqttSubscribe mqttSubscribePacket = new MqttSubscribe(subArray, properties);
 		
@@ -130,7 +128,7 @@ public class MqttSubscribeTest {
 		Assert.assertEquals(topicEF, decodedSubscriptions[2].getTopic());
 		Assert.assertEquals(topicGH, decodedSubscriptions[3].getTopic());
 		
-		Assert.assertEquals(subscriptionIdentifier, decodedProperties.getSubscriptionIdentifiers().get(0));
+		Assert.assertEquals(subscriptionIdentifier, decodedProperties.getSubscriptionIdentifier());
 	}
 	
 	@Test
@@ -147,7 +145,7 @@ public class MqttSubscribeTest {
 		userDefinedProperties.add(new UserProperty(userKey2, userValue2));
 		userDefinedProperties.add(new UserProperty(userKey3, userValue3));
 		properties.setUserProperties(userDefinedProperties);
-		properties.setSubscriptionIdentifiers(Arrays.asList(subscriptionIdentifier));
+		properties.setSubscriptionIdentifier(subscriptionIdentifier);
 		MqttSubscribe mqttSubscribePacket = new MqttSubscribe(subscription, properties);
 		byte[] header = mqttSubscribePacket.getHeader();
 		byte[] payload = mqttSubscribePacket.getPayload();
@@ -173,7 +171,7 @@ public class MqttSubscribeTest {
 		Assert.assertEquals(true, decodedSub.isRetainAsPublished());
 		Assert.assertEquals(2, decodedSub.getRetainHandling());
 		
-		Assert.assertEquals(subscriptionIdentifier, decodedProperties.getSubscriptionIdentifiers().get(0));
+		Assert.assertEquals(subscriptionIdentifier, decodedProperties.getSubscriptionIdentifier());
 	}
 	
 }

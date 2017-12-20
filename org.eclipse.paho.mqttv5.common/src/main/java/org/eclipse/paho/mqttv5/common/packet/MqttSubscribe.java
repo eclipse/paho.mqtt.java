@@ -31,6 +31,7 @@ import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 public class MqttSubscribe extends MqttWireMessage {
 
 	private static final Byte[] validProperties = { MqttProperties.SUBSCRIPTION_IDENTIFIER,
+			MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE,
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
 	// Fields

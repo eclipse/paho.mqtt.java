@@ -36,7 +36,7 @@ public class MqttPublish extends MqttPersistableWireMessage {
 			MqttProperties.MESSAGE_EXPIRY_INTERVAL_IDENTIFIER, MqttProperties.TOPIC_ALIAS_IDENTIFIER,
 			MqttProperties.RESPONSE_TOPIC_IDENTIFIER, MqttProperties.CORRELATION_DATA_IDENTIFIER,
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER, MqttProperties.CONTENT_TYPE_IDENTIFIER,
-			MqttProperties.SUBSCRIPTION_IDENTIFIER };
+			MqttProperties.SUBSCRIPTION_IDENTIFIER_MULTI, MqttProperties.SUBSCRIPTION_IDENTIFIER };
 
 	private MqttProperties properties;
 

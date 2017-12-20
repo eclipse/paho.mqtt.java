@@ -168,26 +168,26 @@ public class MqttPropertiesTest {
 	@Test
 	public void testVariableByteIntPropertyValid() throws MqttException, IOException {
 		// Test Min
-		MqttProperties inputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER });
-		List<Integer> subscriptionIdentifiers = new ArrayList<Integer>();
-		subscriptionIdentifiers.add(0);
-		inputProps.setSubscriptionIdentifiers(subscriptionIdentifiers);
+		MqttProperties inputProps = new MqttProperties(
+				new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER, MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE });
+		inputProps.setSubscriptionIdentifier(0);
 		byte[] encodedProperties = inputProps.encodeProperties();
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(encodedProperties));
-		MqttProperties outputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER });
+		MqttProperties outputProps = new MqttProperties(
+				new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER, MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE });
 		outputProps.decodeProperties(dis);
-		Assert.assertEquals(0, outputProps.getSubscriptionIdentifiers().get(0).intValue());
+		Assert.assertEquals(0, outputProps.getSubscriptionIdentifier().intValue());
 
 		// Test Max
-		inputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER });
-		subscriptionIdentifiers = new ArrayList<Integer>();
-		subscriptionIdentifiers.add(VARIABLE_BYTE_INT_MAX);
-		inputProps.setSubscriptionIdentifiers(subscriptionIdentifiers);
+		inputProps = new MqttProperties(
+				new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER, MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE });
+		inputProps.setSubscriptionIdentifier(VARIABLE_BYTE_INT_MAX);
 		encodedProperties = inputProps.encodeProperties();
 		dis = new DataInputStream(new ByteArrayInputStream(encodedProperties));
-		outputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER });
+		outputProps = new MqttProperties(
+				new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER, MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE });
 		outputProps.decodeProperties(dis);
-		Assert.assertEquals(VARIABLE_BYTE_INT_MAX, outputProps.getSubscriptionIdentifiers().get(0).intValue());
+		Assert.assertEquals(VARIABLE_BYTE_INT_MAX, outputProps.getSubscriptionIdentifier().intValue());
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class MqttPropertiesTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testVariableByteIntPropertyInvalidNegative() throws MqttException, IOException {
-		MqttProperties inputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER });
+		MqttProperties inputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE });
 		List<Integer> subscriptionIdentifiers = new ArrayList<Integer>();
 		subscriptionIdentifiers.add(-1);
 		inputProps.setSubscriptionIdentifiers(subscriptionIdentifiers);
@@ -214,7 +214,7 @@ public class MqttPropertiesTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testVariableByteIntPropertyInvalidMax() throws MqttException, IOException {
-		MqttProperties inputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER });
+		MqttProperties inputProps = new MqttProperties(new Byte[] { MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE });
 		List<Integer> subscriptionIdentifiers = new ArrayList<Integer>();
 		subscriptionIdentifiers.add(VARIABLE_BYTE_INT_MAX + 1);
 		inputProps.setSubscriptionIdentifiers(subscriptionIdentifiers);
