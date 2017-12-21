@@ -1231,7 +1231,7 @@ public class MqttProperties {
 	}
 
 	/**
-	 * Subscription Identifiers.
+	 * Subscription Identifiers. (Publish Only)
 	 * 
 	 * <p>
 	 * The Subscription Identifiers are associated with any subscription created or
@@ -1251,7 +1251,7 @@ public class MqttProperties {
 	}
 
 	/**
-	 * Subscription Identifiers. See
+	 * Subscription Identifiers. (Publish Only) See
 	 * {@link MqttProperties#getSubscriptionIdentifiers()}
 	 * 
 	 * @param subscriptionIdentifiers
