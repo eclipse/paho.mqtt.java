@@ -637,7 +637,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @see IMqttClient#publishBlock(String, MqttMessage)
 	 */
 	public void publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException {
-		aClient.publish(topic, message, null, null, new MqttProperties()).waitForCompletion(getTimeToWait());
+		aClient.publish(topic, message, null, null).waitForCompletion(getTimeToWait());
 	}
 
 	/**

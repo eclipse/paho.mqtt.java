@@ -438,7 +438,7 @@ public class CommsCallback implements Runnable {
 
 		// @TRACE 713=call messageArrived key={0} topic={1}
 		log.fine(CLASS_NAME, methodName, "713", new Object[] { new Integer(publishMessage.getMessageId()), destName });
-		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage(), publishMessage.getProperties());
+		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage());
 
 		if (!this.manualAcks) {
 			if (publishMessage.getMessage().getQos() == 1) {
@@ -563,10 +563,10 @@ public class CommsCallback implements Runnable {
 		this.callbackTopicMap.clear();
 	}
 
-	protected boolean deliverMessage(String topicName, int messageId, MqttMessage aMessage, MqttProperties properties) throws Exception {
+	protected boolean deliverMessage(String topicName, int messageId, MqttMessage aMessage) throws Exception {
 		boolean delivered = false;
 
-		if (properties.getSubscriptionIdentifiers().isEmpty()) {
+		if (aMessage.getProperties().getSubscriptionIdentifiers().isEmpty()) {
 			// No Subscription IDs, use topic filter matching
 			for (Map.Entry<String, Integer> entry : this.callbackTopicMap.entrySet()) {
 				if (MqttTopic.isMatched(entry.getKey(), topicName)) {
@@ -578,7 +578,7 @@ public class CommsCallback implements Runnable {
 
 		} else {
 			// We have Subscription IDs
-			for (Integer subId : properties.getSubscriptionIdentifiers()) {
+			for (Integer subId : aMessage.getProperties().getSubscriptionIdentifiers()) {
 				if (this.subscriptionIdMap.containsKey(subId)) {
 					Integer callbackId = this.subscriptionIdMap.get(subId);
 					aMessage.setId(messageId);

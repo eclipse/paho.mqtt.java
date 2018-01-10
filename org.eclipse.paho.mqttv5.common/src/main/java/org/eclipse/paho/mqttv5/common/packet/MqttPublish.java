@@ -166,7 +166,7 @@ public class MqttPublish extends MqttPersistableWireMessage {
 	}
 
 	public MqttMessage getMessage() {
-		MqttMessage message = new MqttMessage(payload, qos, retained);
+		MqttMessage message = new MqttMessage(payload, qos, retained, properties);
 		return message;
 	}
 

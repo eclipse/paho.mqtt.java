@@ -874,8 +874,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException
 	 *             for other errors encountered while publishing the message. For
 	 *             instance client not connected.
-	 * @see #publish(String, MqttMessage, Object, MqttActionListener,
-	 *      MqttProperties)
+	 * @see #publish(String, MqttMessage, Object, MqttActionListener)
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
@@ -907,8 +906,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException
 	 *             for other errors encountered while publishing the message. For
 	 *             instance if too many messages are being processed.
-	 * @see #publish(String, MqttMessage, Object, MqttActionListener,
-	 *      MqttProperties)
+	 * @see #publish(String, MqttMessage, Object, MqttActionListener)
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
@@ -932,8 +930,7 @@ public interface IMqttAsyncClient {
 	 * @throws MqttException
 	 *             for other errors encountered while publishing the message. For
 	 *             instance client not connected.
-	 * @see #publish(String, MqttMessage, Object, MqttActionListener,
-	 *      MqttProperties)
+	 * @see #publish(String, MqttMessage, Object, MqttActionListener)
 	 */
 	IMqttDeliveryToken publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException;
 
@@ -1012,8 +1009,6 @@ public interface IMqttAsyncClient {
 	 * @param callback
 	 *            optional listener that will be notified when message delivery has
 	 *            completed to the requested quality of service.
-	 * @param publishProperties
-	 *            The {@link MqttProperties} to be sent.
 	 * @return token used to track and wait for the publish to complete. The token
 	 *         will be passed to callback methods if set.
 	 * @throws MqttPersistenceException
@@ -1025,8 +1020,8 @@ public interface IMqttAsyncClient {
 	 *             instance client not connected.
 	 * @see MqttMessage
 	 */
-	IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext, MqttActionListener callback,
-			MqttProperties publishProperties) throws MqttException, MqttPersistenceException;
+	IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext, MqttActionListener callback)
+			throws MqttException, MqttPersistenceException;
 
 	/**
 	 * An AUTH Packet is sent from Client to Server or Server to Client as part of
@@ -1045,8 +1040,8 @@ public interface IMqttAsyncClient {
 	 *            The {@link MqttProperties} to be sent, containing the
 	 *            Authentication Method, Authentication Data and any required User
 	 *            Defined Properties.
-	 * @return token used to track and wait for the authentication to complete. 
-	 * @throws MqttException
+	 * @return token used to track and wait for the authentication to complete.
+	 * @throws MqttException if an exception occurs whilst sending the authenticate packet.
 	 */
 	IMqttToken authenticate(int reasonCode, Object userContext, MqttProperties properties) throws MqttException;
 

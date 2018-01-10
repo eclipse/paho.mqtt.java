@@ -659,6 +659,7 @@ public class MqttProperties {
 	 * Maximum QoS. See {@link MqttProperties#getMaximumQoS()}
 	 * 
 	 * @param maximumQoS
+	 *            The Maximum QoS
 	 */
 	public void setMaximumQoS(Integer maximumQoS) {
 		this.maximumQoS = maximumQoS;
@@ -1046,7 +1047,7 @@ public class MqttProperties {
 	}
 
 	/**
-	 * Authentication Data. See {@link MqttProperties#getAthenticationData()}
+	 * Authentication Data. See {@link MqttProperties#getAuthenticationData()}
 	 * 
 	 * @param authenticationData
 	 *            The Authentication Data.
@@ -1110,12 +1111,13 @@ public class MqttProperties {
 	 * 
 	 * <p>
 	 * A flag defining the payload format:
+	 * </p>
 	 * <ul>
 	 * <li>False: Unspecified bytes, which is equivalent to not sending the payload
 	 * format.</li>
 	 * <li>True: A UTF-8 Encoded Character Data.</li>
 	 * </ul>
-	 * </p>
+	 * 
 	 * 
 	 * @return The Payload Format flag.
 	 */

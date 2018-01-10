@@ -39,10 +39,9 @@ public class MqttDataTypes {
 		if (value >= 0 && value <= VARIABLE_BYTE_INT_MAX) {
 			return;
 		} else {
-			throw new IllegalArgumentException(
-					"This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
+			throw new IllegalArgumentException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
 		}
-		
+
 	}
 
 	public static void writeUnsignedFourByteInt(long value, DataOutputStream stream) throws IOException {
@@ -61,6 +60,7 @@ public class MqttDataTypes {
 	 * @return a {@link Long} containing the value of the Four Byte int (Between 0
 	 *         and 4294967295)
 	 * @throws IOException
+	 *             if an exception occurs whilst reading from the Input Stream
 	 */
 	public static Long readUnsignedFourByteInt(DataInputStream inputStream) throws IOException {
 		byte readBuffer[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -74,6 +74,14 @@ public class MqttDataTypes {
 	/**
 	 * Reads a Two Byte Integer, this is because Java does not have unsigned
 	 * integers.
+	 * 
+	 * @param inputStream
+	 *            The input stream to read from.
+	 * @return a {@link int} containing the value of the Two Byte int (Between 0 and
+	 *         65535)
+	 * @throws IOException
+	 *             if an exception occurs whilst reading from the Input Stream
+	 * 
 	 */
 	public static int readUnsignedTwoByteInt(DataInputStream inputStream) throws IOException {
 		// byte readBuffer[] = {0,0}

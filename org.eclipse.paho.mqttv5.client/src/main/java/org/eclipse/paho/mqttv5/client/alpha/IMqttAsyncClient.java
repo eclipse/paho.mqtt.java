@@ -319,7 +319,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance if too many messages are being processed.
-	 * @see #publish(String, IMqttMessage, Object, MqttProperties)
+	 * @see #publish(String, IMqttMessage, Object)
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
@@ -345,7 +345,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance client not connected.
-	 * @see #publish(String, IMqttMessage, Object, MqttProperties)
+	 * @see #publish(String, IMqttMessage, Object)
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
@@ -365,7 +365,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance client not connected.
-	 * @see #publish(String, IMqttMessage, Object, MqttProperties)
+	 * @see #publish(String, IMqttMessage, Object)
 	 */
 	public IMqttDeliveryToken<Void> publish(String topic, IMqttMessage message ) throws MqttException, MqttPersistenceException;
 
@@ -425,7 +425,6 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @param message to deliver to the server
 	 * @param userContext optional object used to pass context to the callback. Use
 	 * null if not required.
-	 * @param publishProperties optional {@link MqttProperties} object to send with the message.
 	 * @return token used to track and wait for the publish to complete.
  	 * @throws MqttPersistenceException when a problem occurs storing the message
 	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
@@ -434,7 +433,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @see MqttMessage
 	 */
 	public <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message,
-			C userContext, MqttProperties publishProperties) throws MqttException, MqttPersistenceException;
+			C userContext) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.

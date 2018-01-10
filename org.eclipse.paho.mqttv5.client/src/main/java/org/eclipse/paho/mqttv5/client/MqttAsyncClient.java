@@ -1382,9 +1382,10 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
 			MqttActionListener callback) throws MqttException, MqttPersistenceException {
 		MqttMessage message = new MqttMessage(payload);
+		message.setProperties(new MqttProperties());
 		message.setQos(qos);
 		message.setRetained(retained);
-		return this.publish(topic, message, userContext, callback, new MqttProperties());
+		return this.publish(topic, message, userContext, callback);
 	}
 
 	/* (non-Javadoc)
@@ -1402,7 +1403,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	@Override
 	public IMqttDeliveryToken publish(String topic, MqttMessage message)
 			throws MqttException, MqttPersistenceException {
-		return this.publish(topic, message, null, null, new MqttProperties());
+		return this.publish(topic, message, null, null);
 	}
 
 	/* (non-Javadoc)
@@ -1410,7 +1411,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 */
 	@Override
 	public IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext,
-			MqttActionListener callback, MqttProperties publishProperties) throws MqttException, MqttPersistenceException {
+			MqttActionListener callback) throws MqttException, MqttPersistenceException {
 		final String methodName = "publish";
 		// @TRACE 111=< topic={0} message={1}userContext={1} callback={2}
 		log.fine(CLASS_NAME, methodName, "111", new Object[] { topic, userContext, callback });
@@ -1424,7 +1425,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		token.setMessage(message);
 		token.internalTok.setTopics(new String[] { topic });
 
-		MqttPublish pubMsg = new MqttPublish(topic, message, publishProperties);
+		MqttPublish pubMsg = new MqttPublish(topic, message, message.getProperties());
 		comms.sendNoWait(pubMsg, token);
 
 		// @TRACE 112=<

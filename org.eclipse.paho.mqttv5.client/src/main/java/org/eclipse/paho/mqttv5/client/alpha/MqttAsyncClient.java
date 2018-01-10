@@ -215,17 +215,17 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			.retained(retained)
 			.build();
 		
-		return publish(topic, message, userContext, null);
+		return publish(topic, message, userContext);
 	}
 
 	@Override
 	public IMqttDeliveryToken<Void> publish(String topic, IMqttMessage message)
 			throws MqttException, MqttPersistenceException {
-		return publish(topic, message, null, null);
+		return publish(topic, message, null);
 	}
 
 	@Override
-	public <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message, C userContext, MqttProperties publishProperties)
+	public <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message, C userContext)
 			throws MqttException, MqttPersistenceException {
 		
 		ByteBuffer buffer = message.payload();
@@ -234,10 +234,10 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		
 		Deferred<IMqttDeliveryResult<C>> d = promiseFactory.deferred();
 		
-		int messageId = delegate.publish(topic, new MqttMessage(payload, message.getQos(), message.isRetained()), 
+		int messageId = delegate.publish(topic, new MqttMessage(payload, message.getQos(), message.isRetained(), null), 
 				userContext, new Callback(
 					t -> d.resolve(new MqttDeliveryResultImpl<C>(this, userContext, message)), 
-					t -> d.fail(t)), publishProperties).getMessageId();
+					t -> d.fail(t))).getMessageId();
 		
 		MqttDeliveryToken<C> token = 
 				new MqttDeliveryToken<>(promiseFactory, this, userContext, messageId, message);

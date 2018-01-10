@@ -16,6 +16,8 @@
  */
 package org.eclipse.paho.mqttv5.common;
 
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+
 /**
  * An MQTT message holds the application payload and options specifying how the
  * message is to be delivered The message includes a "payload" (the body of the
@@ -29,16 +31,16 @@ public class MqttMessage {
 	private boolean retained = false;
 	private boolean dup = false;
 	private int messageId;
-	
+	private MqttProperties properties;
 
-	
 	/**
 	 * Utility method to validate the supplied QoS value.
 	 * 
-	 * @throws IllegalArgumentException
-	 *             if value of QoS is not 0, 1 or 2.
 	 * @param qos
 	 *            The Quality Of Service Level to validate
+	 * @throws IllegalArgumentException
+	 *             if value of QoS is not 0, 1 or 2.
+	 * 
 	 */
 	public static void validateQos(int qos) {
 		if ((qos < 0) || (qos > 2)) {
@@ -80,11 +82,14 @@ public class MqttMessage {
 	 *            The Message QoS.
 	 * @param retained
 	 *            If the message is retained.
+	 * @param properties
+	 *            The Message {@link MqttProperties}
 	 */
-	public MqttMessage(byte[] payload, int qos, boolean retained) {
+	public MqttMessage(byte[] payload, int qos, boolean retained, MqttProperties properties) {
 		setPayload(payload);
 		setQos(qos);
 		setRetained(retained);
+		setProperties(properties);
 	}
 
 	/**
@@ -263,8 +268,16 @@ public class MqttMessage {
 	public int getId() {
 		return this.messageId;
 	}
-
 	
+
+
+	public MqttProperties getProperties() {
+		return properties;
+	}
+
+	public void setProperties(MqttProperties properties) {
+		this.properties = properties;
+	}
 
 	/**
 	 * Returns a string representation of this message's payload. Makes an attempt

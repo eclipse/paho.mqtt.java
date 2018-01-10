@@ -788,7 +788,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:</p>
 	 * <ul>
 	 * <li>{@link MqttLegacyBlockingClient#publish(String, MqttMessage)} to publish a message in a blocking manner
-	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener, MqttProperties)}
+	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener)}
 	 * </ul>
 	 * <p>When building an application,
 	 * the design of the topic tree should take into account the following principles
