@@ -11,7 +11,11 @@ Paho reflects the inherent physical and cost constraints of device connectivity.
 ## Client Libraries and Utilities
  - [MQTTv3 Library](MQTTv3.md) - The Original Paho MQTTv3 Library, supports MQTT version 3.1 and 3.1.1.
  - [MQTTv5 Library](MQTTv5.md) - The New Paho MQTTv5 Library based on the original, Currently under active development, supports MQTT version 5.
- - [Paho Utility App](org.eclipse.paho.sample.utility/utility.md) - A
+ - [Paho Utility App](org.eclipse.paho.sample.utility/utility.md) - A useful lightweight MQTT GUI utility. (V3 Only)
+ - [Paho Eclipse View](org.eclipse.paho.client.eclipse.view) - An Eclipse View similar to the Utility. (V3 Only)
+ - [Mqttv3app](org.eclipse.paho.sample.mqttv3app) - Sample Application using the MQTTv3 Client.
+ 
+
 
 
 ## Links
