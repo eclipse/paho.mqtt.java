@@ -37,7 +37,7 @@ public class V5Client implements MqttCallback {
 			MqttConnectionOptionsBuilder conOptsBuilder = new MqttConnectionOptionsBuilder();
 			MqttConnectionOptions conOpts = conOptsBuilder.serverURI(broker).cleanSession(true)
 					.sessionExpiryInterval(120).automaticReconnect(true)
-					.will(topic, new MqttMessage(willContent.getBytes(), qos, false, null)).topicAliasMaximum(1000).build();
+					.will(topic, new MqttMessage(willContent.getBytes(), qos, false)).topicAliasMaximum(1000).build();
 			asyncClient.setCallback(this);
 
 
@@ -83,7 +83,7 @@ public class V5Client implements MqttCallback {
 					message = "FINISH";
 					running = false;
 				}
-				asyncClient.publish(topic, new MqttMessage(message.getBytes(), 2, false, null));
+				asyncClient.publish(topic, new MqttMessage(message.getBytes(), 2, false));
 				x++;
 
 			}
@@ -139,17 +139,6 @@ public class V5Client implements MqttCallback {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void connectComplete(boolean reconnect, String serverURI) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void authPacketArrived(int reasonCode, MqttProperties properties) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 }
