@@ -13,13 +13,10 @@ sudo: required
 before_install:
   - ./start-broker.sh
 
-jobs:
-  include:
-    - stage: mqttv3 tests
-      script: mvn --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test
-    - stage: mqttv5 tests
-      script: mvn --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client test
-
+script:
+  - mvn clean
+  - mvn --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test
+  - mvn --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client test
 
 addons:
   apt:
