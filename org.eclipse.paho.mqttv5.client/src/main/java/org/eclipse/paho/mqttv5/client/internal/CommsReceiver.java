@@ -25,7 +25,7 @@ import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
-import org.eclipse.paho.mqttv5.client.oldwire.MqttInputStream;
+import org.eclipse.paho.mqttv5.client.wire.MqttInputStream;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;

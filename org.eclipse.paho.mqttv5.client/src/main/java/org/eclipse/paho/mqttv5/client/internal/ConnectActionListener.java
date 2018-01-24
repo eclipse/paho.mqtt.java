@@ -114,7 +114,6 @@ public class ConnectActionListener implements MqttActionListener {
 
 		// Set properties imposed on us by the Server
 		MqttToken myToken = (MqttToken) token;
-		System.out.println(myToken.getMessageProperties().toString());
 		mqttSession.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
 		mqttSession.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
 		mqttSession.setRetainAvailable(myToken.getMessageProperties().isRetainAvailable());

@@ -13,7 +13,7 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  */
-package org.eclipse.paho.mqttv5.client.oldwire;
+package org.eclipse.paho.mqttv5.client.wire;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

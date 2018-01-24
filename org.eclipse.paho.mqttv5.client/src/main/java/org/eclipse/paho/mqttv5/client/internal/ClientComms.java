@@ -88,9 +88,6 @@ public class ClientComms {
 	private ExecutorService executorService;
 	private MqttSession mqttSession;
 
-
-
-
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
 	 * network calls.
@@ -104,7 +101,7 @@ public class ClientComms {
 	 * @param executorService
 	 *            the {@link ExecutorService}
 	 * @param mqttSession
-	 * 			 the {@link MqttSession}
+	 *            the {@link MqttSession}
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
 	 */
@@ -208,16 +205,16 @@ public class ClientComms {
 
 				if (message instanceof MqttPublish) {
 					// Override the QoS if the server has set a maximum
-					if (this.mqttSession.getMaximumQoS()!= null &&
-							((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
+					if (this.mqttSession.getMaximumQoS() != null
+							&& ((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setQos(this.mqttSession.getMaximumQoS());
 						((MqttPublish) message).setMessage(mqttMessage);
 					}
 
 					// Override the Retain flag if the server has disabled it
-					if (this.mqttSession.isRetainAvailable()!= null &&
-							((MqttPublish) message).getMessage().isRetained()
+					if (this.mqttSession.isRetainAvailable() != null
+							&& ((MqttPublish) message).getMessage().isRetained()
 							&& (this.mqttSession.isRetainAvailable() == false)) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setRetained(false);
@@ -316,11 +313,8 @@ public class ClientComms {
 						conOptions.isCleanSession(), conOptions.getKeepAliveInterval(),
 						conOptions.getConnectionProperties(), conOptions.getWillMessageProperties());
 
-				System.err.println(connect.toString());
-
 				if (conOptions.getWillDestination() != null) {
 					connect.setWillDestination(conOptions.getWillDestination());
-
 				}
 
 				if (conOptions.getWillMessage() != null) {
@@ -602,7 +596,7 @@ public class ClientComms {
 	 * @param reasonCode
 	 *            the disconnection reason code.
 	 * @param disconnectProperties
-	 * 			  the {@link MqttProperties} to send in the Disconnect packet.
+	 *            the {@link MqttProperties} to send in the Disconnect packet.
 	 * @throws MqttException
 	 *             if an error occurs whilst disconnecting
 	 */

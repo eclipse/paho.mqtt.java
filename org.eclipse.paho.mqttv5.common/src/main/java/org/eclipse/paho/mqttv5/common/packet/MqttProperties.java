@@ -1317,7 +1317,7 @@ public class MqttProperties {
 		if (maximumPacketSize != null) {
 			sb.append(", maximumPacketSize=" + maximumPacketSize);
 		}
-		if (retainAvailable) {
+		if (retainAvailable != null) {
 			sb.append(", retainAvailable=" + retainAvailable);
 		}
 		if (assignedClientIdentifier != null) {

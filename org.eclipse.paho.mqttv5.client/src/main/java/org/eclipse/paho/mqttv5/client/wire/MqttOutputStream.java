@@ -13,13 +13,11 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  */
-package org.eclipse.paho.mqttv5.client.oldwire;
+package org.eclipse.paho.mqttv5.client.wire;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.paho.mqttv5.client.internal.MqttState;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
@@ -76,10 +74,6 @@ public class MqttOutputStream extends OutputStream {
 		final String methodName = "write";
 		byte[] bytes = message.getHeader();
 		byte[] pl = message.getPayload();
-//		out.write(message.getHeader());
-//		out.write(message.getPayload());
-		System.out.println(DatatypeConverter.printHexBinary(bytes));
-		System.out.println(DatatypeConverter.printHexBinary(pl));
 		out.write(bytes,0,bytes.length);
 		clientState.notifySentBytes(bytes.length);
 		
