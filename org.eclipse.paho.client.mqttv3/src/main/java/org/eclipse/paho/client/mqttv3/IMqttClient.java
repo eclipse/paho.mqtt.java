@@ -59,7 +59,7 @@ package org.eclipse.paho.client.mqttv3;
  * style. The blocking client provides compatibility with earlier versions
  * of the MQTT client.</p>
  */
-public interface IMqttClient { //extends IMqttAsyncClient {
+public interface IMqttClient extends AutoCloseable { //extends IMqttAsyncClient {
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * <p>The default options are specified in {@link MqttConnectOptions} class.
