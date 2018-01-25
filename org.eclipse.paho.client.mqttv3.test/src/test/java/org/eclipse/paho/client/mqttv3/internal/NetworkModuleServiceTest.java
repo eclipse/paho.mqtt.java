@@ -10,6 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class NetworkModuleServiceTest {
 
@@ -21,14 +22,33 @@ public class NetworkModuleServiceTest {
 		NetworkModuleService.validateURI("wss://host_literal:443/path/to/ws");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void failInvalidUri() {
-		NetworkModuleService.validateURI("no URI at all");
+	public void failEmptyUri() {
+		try {
+			NetworkModuleService.validateURI("");
+			fail("Must fail: Empty URI");
+		} catch (IllegalArgumentException e) {
+			assertEquals("missing scheme in broker URI: ", e.getMessage());
+		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
+	public void failInvalidUri() {
+		try {
+			NetworkModuleService.validateURI("no URI at all");
+			fail("Must fail: Can't parse string to URI");
+		} catch (IllegalArgumentException e) {
+			assertEquals("Can't parse string to URI \"no URI at all\"", e.getMessage());
+		}
+	}
+
+	@Test
 	public void failWithPathOnTcpUri() {
-		NetworkModuleService.validateURI("tcp://host_literal:1883/somePath");
+		try {
+			NetworkModuleService.validateURI("tcp://host_literal:1883/somePath");
+			fail("Must fail: URI path must be empty");
+		} catch (IllegalArgumentException e) {
+			assertEquals("URI path must be empty \"tcp://host_literal:1883/somePath\"", e.getMessage());
+		}
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -36,9 +56,15 @@ public class NetworkModuleServiceTest {
 		NetworkModuleService.validateURI("ssl://host_literal:1883/somePath");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failWithUnsuppurtedSchemeUri() {
-		NetworkModuleService.validateURI("unknown://host_literal:1883");
+		try {
+			NetworkModuleService.validateURI("unknown://host_literal:1883");
+			fail("Must fail: Unknow scheme");
+		} catch (IllegalArgumentException e) {
+			assertEquals("no NetworkModule installed for scheme \"unknown\" of URI \"unknown://host_literal:1883\"", e
+					.getMessage());
+		}
 	}
 
 	/**

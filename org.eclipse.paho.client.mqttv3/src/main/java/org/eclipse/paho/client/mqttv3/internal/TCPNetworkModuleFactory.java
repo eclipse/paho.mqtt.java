@@ -4,9 +4,9 @@
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ * http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ * http://www.eclipse.org/org/documents/edl-v10.php.
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -33,7 +33,7 @@ public class TCPNetworkModuleFactory implements NetworkModuleFactory {
 	public void validateURI(URI brokerUri) throws IllegalArgumentException {
 		String path = brokerUri.getPath();
 		if (path != null && !path.isEmpty()) {
-			throw new IllegalArgumentException(brokerUri.toString());
+			throw new IllegalArgumentException("URI path must be empty \"" + brokerUri.toString() + "\"");
 		}
 	}
 

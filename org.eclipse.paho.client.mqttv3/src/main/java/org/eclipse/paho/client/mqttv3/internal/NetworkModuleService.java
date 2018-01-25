@@ -67,9 +67,10 @@ public class NetworkModuleService {
 					return;
 				}
 			}
-			throw new IllegalArgumentException("no NetworkModule installed for URI scheme: " + brokerUri);
+			throw new IllegalArgumentException("no NetworkModule installed for scheme \"" + scheme
+					+ "\" of URI \"" + brokerUri + "\"");
 		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(brokerUri, e);
+			throw new IllegalArgumentException("Can't parse string to URI \"" + brokerUri + "\"", e);
 		}
 	}
 
