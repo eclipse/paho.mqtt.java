@@ -63,7 +63,11 @@ public class MqttUnsubscribe extends MqttWireMessage{
 	public MqttUnsubscribe(String[] topics, MqttProperties properties){
 		super(MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE);
 		this.topics = topics;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 	

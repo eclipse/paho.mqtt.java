@@ -68,7 +68,11 @@ public class MqttSubAck extends MqttAck {
 			validateReturnCode(returnCode, validReturnCodes);
 		}
 		this.returnCodes = returnCodes;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 

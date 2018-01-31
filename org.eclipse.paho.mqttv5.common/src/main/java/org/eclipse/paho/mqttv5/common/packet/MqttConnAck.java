@@ -70,7 +70,11 @@ public class MqttConnAck extends MqttAck {
 
 	public MqttConnAck(boolean sessionPresent, int returnCode, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNACK);
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 		this.sessionPresent = sessionPresent;
 		validateReturnCode(returnCode, validReturnCodes);

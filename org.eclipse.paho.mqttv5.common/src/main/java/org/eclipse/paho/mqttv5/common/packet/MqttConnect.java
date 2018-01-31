@@ -154,7 +154,11 @@ public class MqttConnect extends MqttWireMessage {
 		this.mqttVersion = mqttVersion;
 		this.cleanSession = cleanSession;
 		this.keepAliveInterval = keepAliveInterval;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 		this.willProperties = willProperties;
 		this.willProperties.setValidProperties(validWillProperties);

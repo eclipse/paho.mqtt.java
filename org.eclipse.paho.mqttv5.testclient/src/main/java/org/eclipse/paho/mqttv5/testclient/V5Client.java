@@ -18,8 +18,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 public class V5Client implements MqttCallback {
 
 	private String broker = "tcp://localhost:1883";
-	//private String broker = "tcp://9.20.87.69:1883";
-	private String clientId = "TestV5Client";
+	private String clientId = ""; // Use Empty ID to get a server assigned client ID
 	private String topic = "MQTT Examples";
 	private String content = "Message from MqttPublishSample";
 	private String willContent = "I've Disconnected, sorry!";

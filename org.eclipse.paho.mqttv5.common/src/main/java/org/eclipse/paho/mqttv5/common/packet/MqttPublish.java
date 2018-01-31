@@ -64,7 +64,11 @@ public class MqttPublish extends MqttPersistableWireMessage {
 		this.qos = message.getQos();
 		this.dup = message.isDuplicate();
 		this.retained = message.isRetained();
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 

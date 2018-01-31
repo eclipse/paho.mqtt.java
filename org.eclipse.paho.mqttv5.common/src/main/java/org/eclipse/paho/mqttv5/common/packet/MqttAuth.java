@@ -74,7 +74,11 @@ public class MqttAuth extends MqttWireMessage {
 	 */
 	public MqttAuth(int returnCode, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_AUTH);
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;

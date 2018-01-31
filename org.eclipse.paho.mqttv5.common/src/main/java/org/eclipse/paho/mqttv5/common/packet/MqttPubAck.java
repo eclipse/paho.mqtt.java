@@ -61,7 +61,11 @@ public class MqttPubAck extends MqttAck {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
 		this.returnCode = returnCode;
 		this.msgId = msgId;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 		validateReturnCode(returnCode, validReturnCodes);
 	}

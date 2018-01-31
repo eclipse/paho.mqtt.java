@@ -34,6 +34,8 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 public class TestMemoryPersistence implements MqttClientPersistence {
 
 	private Hashtable data;
+	private String clientId;
+	private String serverURI;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#close()
@@ -60,6 +62,8 @@ public class TestMemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#open(java.lang.String, java.lang.String)
 	 */
 	public void open(String clientId, String serverURI) throws MqttPersistenceException {
+		this.clientId = clientId;
+		this.serverURI = serverURI;
 		if(this.data ==  null){
 			this.data = new Hashtable();
 		}
@@ -97,6 +101,30 @@ public class TestMemoryPersistence implements MqttClientPersistence {
 	public void open(String clientId) throws MqttPersistenceException {
 		data = new Hashtable();
 		
+	}
+
+	public Hashtable getData() {
+		return data;
+	}
+
+	public void setData(Hashtable data) {
+		this.data = data;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	public String getServerURI() {
+		return serverURI;
+	}
+
+	public void setServerURI(String serverURI) {
+		this.serverURI = serverURI;
 	}
 	
 	

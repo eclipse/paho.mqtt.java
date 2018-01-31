@@ -122,7 +122,6 @@ public class MqttSession {
 		return clientId;
 	}
 
-
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}

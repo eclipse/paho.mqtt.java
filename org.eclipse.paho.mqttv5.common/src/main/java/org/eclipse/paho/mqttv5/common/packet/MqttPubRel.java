@@ -60,7 +60,11 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
 		this.msgId = msgId;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 
