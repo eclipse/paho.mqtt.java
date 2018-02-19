@@ -35,7 +35,7 @@ public class V5Client implements MqttCallback {
 			// Lets build our Connection Options:
 			MqttConnectionOptionsBuilder conOptsBuilder = new MqttConnectionOptionsBuilder();
 			MqttConnectionOptions conOpts = conOptsBuilder.serverURI(broker).cleanSession(true)
-					.sessionExpiryInterval(120).automaticReconnect(true)
+					.sessionExpiryInterval(120L).automaticReconnect(true)
 					.will(topic, new MqttMessage(willContent.getBytes(), qos, false, null)).topicAliasMaximum(1000).build();
 			asyncClient.setCallback(this);
 
