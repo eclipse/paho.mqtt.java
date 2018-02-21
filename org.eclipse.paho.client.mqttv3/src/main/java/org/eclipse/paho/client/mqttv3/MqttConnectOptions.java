@@ -22,10 +22,8 @@ import java.util.Properties;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 
+import org.eclipse.paho.client.mqttv3.network.NetworkModuleFactory;
 import org.eclipse.paho.client.mqttv3.util.Debug;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Holds the set of options that control how the client connects to a server.
@@ -60,12 +58,6 @@ public class MqttConnectOptions {
 	 */
 	public static final int MQTT_VERSION_3_1_1 = 4;
 
-	protected static final int URI_TYPE_TCP = 0;
-	protected static final int URI_TYPE_SSL = 1;
-	protected static final int URI_TYPE_LOCAL = 2;
-	protected static final int URI_TYPE_WS = 3;
-	protected static final int URI_TYPE_WSS = 4;
-
 	private int keepAliveInterval = KEEP_ALIVE_INTERVAL_DEFAULT;
 	private int maxInflight = MAX_INFLIGHT_DEFAULT;
 	private String willDestination = null;
@@ -81,6 +73,7 @@ public class MqttConnectOptions {
 	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
 
+	private NetworkModuleFactory networkModuleFactory = NetworkModuleFactory.getInstance();
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
 	 * default values.
@@ -513,51 +506,12 @@ public class MqttConnectOptions {
 	 * @param array of serverURIs
 	 */
 	public void setServerURIs(String[] array) {
-		for (int i = 0; i < array.length; i++) {
-			validateURI(array[i]);
-		}
+        for (String address : array) {
+            networkModuleFactory.validateURI(address);
+        }
 		this.serverURIs = array.clone();
 	}
 
-	/**
-	 * Validate a URI
-	 * @param srvURI The Server URI
-	 * @return the URI type
-	 */
-	public static int validateURI(String srvURI) {
-		URI vURI;
-		try {
-			vURI = new URI(srvURI);
-		} catch (URISyntaxException ex) {
-			throw new IllegalArgumentException("Can't parse string to URI \"" + srvURI + "\"", ex);
-		}
-
-		if ("ws".equals(vURI.getScheme())){
-			return URI_TYPE_WS;
-		}
-		else if ("wss".equals(vURI.getScheme())) {
-			return URI_TYPE_WSS;
-		}
-		if ((vURI.getPath() == null) || vURI.getPath().isEmpty()) {
-			// No op path must be empty
-		}
-		else {
-			throw new IllegalArgumentException("URI path must be empty \"" + srvURI + "\"");
-		} 
-		if ("tcp".equals(vURI.getScheme())) {
-			return URI_TYPE_TCP;
-		}
-		else if ("ssl".equals(vURI.getScheme())) {
-			return URI_TYPE_SSL;
-		}
-		else if ("local".equals(vURI.getScheme())) {
-			return URI_TYPE_LOCAL;
-		}
-		else {
-			throw new IllegalArgumentException("Unknown scheme \"" + vURI.getScheme() + "\" of URI \"" + srvURI + "\"");
-		}
-	}
-	
 	/**
 	 * Sets the MQTT version.
 	 * The default action is to connect with version 3.1.1, 
