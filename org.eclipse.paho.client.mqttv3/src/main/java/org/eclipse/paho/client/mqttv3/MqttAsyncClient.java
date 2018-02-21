@@ -21,9 +21,6 @@
 
 package org.eclipse.paho.client.mqttv3;
 
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Timer;
@@ -32,24 +29,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
 import org.eclipse.paho.client.mqttv3.internal.ConnectActionListener;
 import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
 import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
-import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+import org.eclipse.paho.client.mqttv3.network.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
@@ -122,6 +114,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	private static Object clientLock = new Object(); // Simple lock
 
 	private ScheduledExecutorService executorService;
+	private NetworkModuleFactory networkModuleFactory = NetworkModuleFactory.getInstance();
 
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT
@@ -460,7 +453,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			throw new IllegalArgumentException("ClientId longer than 65535 characters");
 		}
 
-		MqttConnectOptions.validateURI(serverURI);
+		networkModuleFactory.validateURI(serverURI);
 
 		this.serverURI = serverURI;
 		this.clientId = clientId;
@@ -546,143 +539,9 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		final String methodName = "createNetworkModule";
 		// @TRACE 115=URI={0}
 		log.fine(CLASS_NAME,methodName, "115", new Object[] {address});
-
-		NetworkModule netModule;
-		SocketFactory factory = options.getSocketFactory();
-
-		int serverURIType = MqttConnectOptions.validateURI(address);
-
-		URI uri;
-		try {
-			uri = new URI(address);
-			// If the returned uri contains no host and the address contains underscores,
-			// then it's likely that Java did not parse the URI
-			if(uri.getHost() == null && address.contains("_")){
-				try {
-					final Field hostField = URI.class.getDeclaredField("host");
-					hostField.setAccessible(true);
-					// Get everything after the scheme://
-					String shortAddress = address.substring(uri.getScheme().length() + 3);
-					hostField.set(uri, getHostName(shortAddress));
-					
-				} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-					throw ExceptionHelper.createMqttException(e.getCause());
-				} 
-				
-			}
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Malformed URI: " + address + ", " + e.getMessage());
-		}
-
-		String host = uri.getHost();
-		int port = uri.getPort(); // -1 if not defined
-
-		switch (serverURIType) {
-		case MqttConnectOptions.URI_TYPE_TCP :
-			if (port == -1) {
-				port = 1883;
-			}
-			if (factory == null) {
-				factory = SocketFactory.getDefault();
-			}
-			else if (factory instanceof SSLSocketFactory) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-			netModule = new TCPNetworkModule(factory, host, port, clientId);
-			((TCPNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
-			break;
-		case MqttConnectOptions.URI_TYPE_SSL:
-			if (port == -1) {
-				port = 8883;
-			}
-			SSLSocketFactoryFactory factoryFactory = null;
-			if (factory == null) {
-//				try {
-					factoryFactory = new SSLSocketFactoryFactory();
-					Properties sslClientProps = options.getSSLProperties();
-					if (null != sslClientProps)
-						factoryFactory.initialize(sslClientProps, null);
-					factory = factoryFactory.createSocketFactory(null);
-//				}
-//				catch (MqttDirectException ex) {
-//					throw ExceptionHelper.createMqttException(ex.getCause());
-//				}
-			}
-			else if ((factory instanceof SSLSocketFactory) == false) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-
-			// Create the network module...
-			netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId);
-			((SSLNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
-			((SSLNetworkModule)netModule).setSSLHostnameVerifier(options.getSSLHostnameVerifier());
-			// Ciphers suites need to be set, if they are available
-			if (factoryFactory != null) {
-				String[] enabledCiphers = factoryFactory.getEnabledCipherSuites(null);
-				if (enabledCiphers != null) {
-					((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
-				}
-			}
-			break;
-		case MqttConnectOptions.URI_TYPE_WS:
-			if (port == -1) {
-				port = 80;
-			}
-			if (factory == null) {
-				factory = SocketFactory.getDefault();
-			}
-			else if (factory instanceof SSLSocketFactory) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-			netModule = new WebSocketNetworkModule(factory, address, host, port, clientId);
-			((WebSocketNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
-			break;
-		case MqttConnectOptions.URI_TYPE_WSS:
-			if (port == -1) {
-				port = 443;
-			}
-			SSLSocketFactoryFactory wSSFactoryFactory = null;
-			if (factory == null) {
-				wSSFactoryFactory = new SSLSocketFactoryFactory();
-					Properties sslClientProps = options.getSSLProperties();
-					if (null != sslClientProps)
-						wSSFactoryFactory.initialize(sslClientProps, null);
-					factory = wSSFactoryFactory.createSocketFactory(null);
-
-			}
-			else if ((factory instanceof SSLSocketFactory) == false) {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
-			}
-
-			// Create the network module...
-			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, clientId);
-			((WebSocketSecureNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
-			// Ciphers suites need to be set, if they are available
-			if (wSSFactoryFactory != null) {
-				String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);
-				if (enabledCiphers != null) {
-					((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
-				}
-			}
-			break;
-		default:
-			// This shouldn't happen, as long as validateURI() has been called.
-			log.fine(CLASS_NAME,methodName, "119", new Object[] {address});
-			netModule = null;
-		}
-		return netModule;
+		return networkModuleFactory.create(address, options, clientId);
 	}
 
-	private String getHostName(String uri) {
-		int portIndex = uri.indexOf(':');
-		if (portIndex == -1) {
-			portIndex = uri.indexOf('/');
-		}
-		if (portIndex == -1) {
-			portIndex = uri.length();
-		}
-		return uri.substring(0, portIndex);
-	}
 
 	/*
 	 * (non-Javadoc)
