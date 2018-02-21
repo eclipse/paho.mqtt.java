@@ -11,6 +11,11 @@ public class MqttClientException {
 	public static final short REASON_CODE_INVALID_TOPIC_ALAS = 32301;
 	
 	/**
+	 * The Server sent a publish message with an unknown topic alias and no topic string.
+	 */
+	public static final short REASON_CODE_UNKNOWN_TOPIC_ALIAS = 32302;
+	
+	/**
 	 * Client timed out while waiting for a response from the server. The server is
 	 * no longer responding to keep-alive messages.
 	 */

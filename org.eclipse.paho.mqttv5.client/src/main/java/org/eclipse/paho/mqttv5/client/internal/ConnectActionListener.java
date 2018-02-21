@@ -114,7 +114,7 @@ public class ConnectActionListener implements MqttActionListener {
 		mqttSession.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
 		mqttSession.setRetainAvailable(myToken.getMessageProperties().isRetainAvailable());
 		mqttSession.setMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
-		mqttSession.setTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
+		mqttSession.setOutgoingTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
 		mqttSession
 				.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
 		mqttSession.setSubscriptionIdentifiersAvailable(

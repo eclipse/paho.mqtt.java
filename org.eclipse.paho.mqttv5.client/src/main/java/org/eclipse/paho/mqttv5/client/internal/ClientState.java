@@ -513,14 +513,14 @@ public class ClientState implements MqttState {
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
 			if (message instanceof MqttPublish && (((MqttPublish) message).getMessage().getQos() != 0)) {
 				message.setMessageId(getNextMessageId());
-				if (this.mqttSession.getTopicAliasMaximum() > 0) {
+				if (this.mqttSession.getOutgoingTopicAliasMaximum() > 0) {
 					String topic = ((MqttPublish) message).getTopicName();
 					if (outgoingTopicAliases.containsKey(topic)) {
 						// Existing Topic Alias, Assign it and remove the topic string
 						((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliases.get(topic));
 						((MqttPublish) message).setTopicName(null);
 					} else {
-						if (outgoingTopicAliasCount <= this.mqttSession.getTopicAliasMaximum()) {
+						if (outgoingTopicAliasCount <= this.mqttSession.getOutgoingTopicAliasMaximum()) {
 							// Create a new Topic Alias and increment the counter
 							((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliasCount);
 							outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), outgoingTopicAliasCount);
@@ -1117,41 +1117,44 @@ public class ClientState implements MqttState {
 		if (!quiescing) {
 			if (message instanceof MqttPublish) {
 				MqttPublish send = (MqttPublish) message;
-				// If using Topic Aliases, restore the Topic Name or create the new Alias
-				if (send.getTopicName() != null && send.getProperties().getTopicAlias() != 0) {
-					// We've been sent an new topic alias
-
-					// Do we have space for this alias? / Are aliases enabled?
-					if (incomingTopicAliases.size() < clientComms.getConOptions().getTopicAliasMaximum()
-							&& clientComms.getConOptions().getTopicAliasMaximum() > 0) {
+				
+				// Do we have an incoming topic Alias?
+				if(send.getProperties().getTopicAlias() != null && send.getProperties().getTopicAlias() != 0) {
+					int incomingTopicAlias = send.getProperties().getTopicAlias();
+					
+					// Are incoming Topic Aliases enabled / is it a valid Alias?
+					if(incomingTopicAlias > this.mqttSession.getIncomingTopicAliasMax() || incomingTopicAlias == 0) {
+						// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
+						log.severe(CLASS_NAME, methodName, "653",
+								new Object[] { Integer.valueOf(this.mqttSession.getIncomingTopicAliasMax()),
+										Integer.valueOf(incomingTopicAlias) });
+						if (callback != null) {
+							callback.mqttErrorOccured(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
+						}
+						throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
+						
+					}
+					
+					// Is this alias being sent with a topic string?
+					if(send.getTopicName() != null) {
 						// @TRACE 652=Setting Incoming New Topic Alias alias={0}, topicName={1}
 						log.fine(CLASS_NAME, methodName, "652",
 								new Object[] { Integer.valueOf(send.getProperties().getTopicAlias()), send.getTopicName() });
 						incomingTopicAliases.put(send.getProperties().getTopicAlias(), send.getTopicName());
 					} else {
-						// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
-						log.severe(CLASS_NAME, methodName, "653",
-								new Object[] { Integer.valueOf(clientComms.getConOptions().getTopicAliasMaximum()),
-										Integer.valueOf(send.getProperties().getTopicAlias()) });
-						throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
-					}
-				} else if (send.getTopicName() == null && send.getProperties().getTopicAlias() != 0) {
-					// We've been sent an existing topic alias
-					if (incomingTopicAliases.get(send.getProperties().getTopicAlias()) != null) {
-						send.setTopicName(incomingTopicAliases.get(send.getProperties().getTopicAlias()));
-					}
-				} else if ((send.getTopicName() == null || send.getTopicName().length() == 0)
-						&& (send.getProperties().getTopicAlias() == 0
-								|| send.getProperties().getTopicAlias() > clientComms.getConOptions().getTopicAliasMaximum())) {
-					// No Topic String provided, topic alias is invalid
-					// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
-					log.fine(CLASS_NAME, methodName, "653",
-							new Object[] { Integer.valueOf(clientComms.getConOptions().getTopicAliasMaximum()),
-									Integer.valueOf(send.getProperties().getTopicAlias()) });
-					if (callback != null) {
-						callback.mqttErrorOccured(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
+						// No Topic String, so must be in incomingTopicAliases.
+						if(incomingTopicAliases.contains(incomingTopicAlias)) {
+							send.setTopicName(incomingTopicAliases.get(incomingTopicAlias));
+						} else {
+							// @TRACE 654=Unknown Topic Alias: Incoming Alias={1}
+							log.severe(CLASS_NAME, methodName, "654",
+									new Object[] { Integer.valueOf(send.getProperties().getTopicAlias()) });
+							throw new MqttException(MqttClientException.REASON_CODE_UNKNOWN_TOPIC_ALIAS);
+						}
 					}
 				}
+				
+				
 				switch (send.getMessage().getQos()) {
 				case 0:
 				case 1:

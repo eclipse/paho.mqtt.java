@@ -890,6 +890,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		if(this.connOpts.isCleanSession()) {
 			this.mqttSession.clearSession();
 		}
+		
+		this.mqttSession.setIncomingTopicAliasMax(this.connOpts.getTopicAliasMaximum());
 
 		comms.setNetworkModuleIndex(0);
 		connectActionListener.connect();
