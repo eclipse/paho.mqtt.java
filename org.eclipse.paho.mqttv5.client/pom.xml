@@ -94,6 +94,19 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+						<filters>
+							<filter>
+							<artifact>org.eclipse.paho:org.eclipse.paho.mqttv5.common</artifact>
+							<includes>
+								<include>**</include>
+							</includes>
+							</filter>
+						</filters>  
+						 <artifactSet>
+							<excludes>
+							<exclude>org.osgi:*</exclude>
+							</excludes>
+						</artifactSet>
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
