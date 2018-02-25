@@ -15,7 +15,7 @@
 		<build.level>${maven.build.timestamp}</build.level>
 		<tycho.version>1.1.0</tycho.version>
 		<junit.version>4.12</junit.version>
-		<kepler.repo.url>http://download.eclipse.org/releases/kepler</kepler.repo.url>
+		<mars.repo.url>http://download.eclipse.org/releases/mars</mars.repo.url>
 		<test.exclude>**/*ConformantTest.java</test.exclude>
 		<download.location>/home/data/httpd/download.eclipse.org/paho/releases/${project.version}/Java</download.location>
 	</properties>
@@ -58,8 +58,8 @@
 
 	<repositories>
 		<repository>
-			<id>eclipse-kepler</id>
-			<url>${kepler.repo.url}</url>
+			<id>eclipse-mars</id>
+			<url>${mars.repo.url}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
