@@ -66,7 +66,8 @@ public abstract class MqttWireMessage {
 	
 	// The MQTT Message ID
 	protected int msgId;
-
+	protected int[] reasonCodes = null; // Multiple Reason Codes (SUBACK, UNSUBACK)
+	protected int reasonCode = -1; // Single Reason Code, init with -1 as that's an invalid RC
 	protected boolean duplicate = false;
 
 	public MqttWireMessage(byte type) {
@@ -340,5 +341,32 @@ public abstract class MqttWireMessage {
 		}
 		throw new MqttException(MqttException.REASON_CODE_INVALID_RETURN_CODE);
 	}
-
+	
+	/**
+	 * Returns the reason codes from the MqttWireMessage.
+	 * These will be present if the messages is of the following types:
+	 * <ul>
+	 * <li>CONNACK - 1 Reason Code Max.</li>
+	 * <li>PUBACK - 1 Reason Code Max.</li>
+	 * <li>PUBREC - 1 Reason Code Max.</li>
+	 * <li>PUBCOMP - 1 Reason Code Max.</li>
+	 * <li>PUBREL - 1 Reason Code Max.</li>
+	 * <li>SUBACK - 1 or more Reason Codes.</li>
+	 * <li>UNSUBACK - 1 or more Reason Codes.</li>
+	 * <li>AUTH - 1 Reason Code Max.</li>
+	 * </ul>
+	 * 
+	 * May be null if this message does not contain any Reason Codes.
+	 * @return
+	 */
+	public int[] getReasonCodes() {
+		if(this.reasonCodes != null) {
+			return this.reasonCodes;
+		} else if (this.reasonCode != -1) {
+			return new int[] {this.reasonCode};
+		} else {
+			return null;
+		}
+	}
+	
 }

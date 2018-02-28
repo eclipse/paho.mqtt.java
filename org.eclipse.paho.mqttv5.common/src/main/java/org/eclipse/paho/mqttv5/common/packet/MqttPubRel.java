@@ -34,7 +34,6 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
 	// Fields
-	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private MqttProperties properties;
 
 	public MqttPubRel(byte[] data) throws IOException, MqttException {
@@ -46,8 +45,8 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 		msgId = dis.readUnsignedShort();
 		long remainder = (long) data.length - counter.getCounter();
 		if (remainder > 2) {
-			returnCode = dis.readUnsignedByte();
-			validateReturnCode(returnCode, validReturnCodes);
+			reasonCode = dis.readUnsignedByte();
+			validateReturnCode(reasonCode, validReturnCodes);
 		}
 		if (remainder >= 4) {
 			this.properties.decodeProperties(dis);
@@ -58,7 +57,7 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 	public MqttPubRel(int returnCode, int msgId, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBREL);
 		validateReturnCode(returnCode, validReturnCodes);
-		this.returnCode = returnCode;
+		this.reasonCode = returnCode;
 		this.msgId = msgId;
 		if (properties != null) {
 			this.properties = properties;
@@ -79,9 +78,9 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 
-			if (returnCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
+			if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
 				// Encode the Return Code
-				outputStream.write((byte) returnCode);
+				outputStream.write((byte) reasonCode);
 
 				// Write Identifier / Value Fields
 				outputStream.write(identifierValueFieldsByteArray);
@@ -99,11 +98,11 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 	}
 
 	public int getReturnCode() {
-		return returnCode;
+		return reasonCode;
 	}
 
 	public void setReturnCode(int returnCode) {
-		this.returnCode = returnCode;
+		this.reasonCode = returnCode;
 	}
 
 	@Override
@@ -113,7 +112,7 @@ public class MqttPubRel extends MqttPersistableWireMessage {
 
 	@Override
 	public String toString() {
-		return "MqttPubRel [returnCode=" + returnCode + ", properties=" + properties + "]";
+		return "MqttPubRel [returnCode=" + reasonCode + ", properties=" + properties + "]";
 	}
 
 }

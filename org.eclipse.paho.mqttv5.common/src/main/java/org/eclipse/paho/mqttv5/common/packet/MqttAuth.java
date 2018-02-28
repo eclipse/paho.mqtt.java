@@ -38,7 +38,6 @@ public class MqttAuth extends MqttWireMessage {
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
 	// Fields
-	private int returnCode;
 	private MqttProperties properties;
 
 	/**
@@ -56,8 +55,8 @@ public class MqttAuth extends MqttWireMessage {
 		properties = new MqttProperties(validProperties);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		DataInputStream inputStream = new DataInputStream(bais);
-		returnCode = inputStream.readUnsignedByte();
-		validateReturnCode(returnCode, validReturnCodes);
+		reasonCode = inputStream.readUnsignedByte();
+		validateReturnCode(reasonCode, validReturnCodes);
 		this.properties.decodeProperties(inputStream);
 		inputStream.close();
 	}
@@ -81,7 +80,7 @@ public class MqttAuth extends MqttWireMessage {
 		}
 		this.properties.setValidProperties(validProperties);
 		validateReturnCode(returnCode, validReturnCodes);
-		this.returnCode = returnCode;
+		this.reasonCode = returnCode;
 	}
 
 	@Override
@@ -91,7 +90,7 @@ public class MqttAuth extends MqttWireMessage {
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
 			// Encode the Return Code
-			outputStream.writeByte(returnCode);
+			outputStream.writeByte(reasonCode);
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
@@ -109,7 +108,7 @@ public class MqttAuth extends MqttWireMessage {
 	}
 
 	public int getReturnCode() {
-		return returnCode;
+		return reasonCode;
 	}
 
 	@Override
@@ -119,6 +118,6 @@ public class MqttAuth extends MqttWireMessage {
 
 	@Override
 	public String toString() {
-		return "MqttAuth [returnCode=" + returnCode + ", properties=" + properties + "]";
+		return "MqttAuth [returnCode=" + reasonCode + ", properties=" + properties + "]";
 	}
 }

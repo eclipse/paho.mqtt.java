@@ -52,7 +52,6 @@ public class MqttConnAck extends MqttAck {
 			MqttProperties.AUTH_METHOD_IDENTIFIER, MqttProperties.AUTH_DATA_IDENTIFIER,
 			MqttProperties.REASON_STRING_IDENTIFIER, MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
-	private int returnCode;
 	private boolean sessionPresent;
 	private MqttProperties properties;
 
@@ -62,8 +61,8 @@ public class MqttConnAck extends MqttAck {
 		ByteArrayInputStream bais = new ByteArrayInputStream(variableHeader);
 		DataInputStream dis = new DataInputStream(bais);
 		sessionPresent = (dis.readUnsignedByte() & 0x01) == 0x01;
-		returnCode = dis.readUnsignedByte();
-		validateReturnCode(returnCode, validReturnCodes);
+		reasonCode = dis.readUnsignedByte();
+		validateReturnCode(reasonCode, validReturnCodes);
 		this.properties.decodeProperties(dis);
 		dis.close();
 	}
@@ -78,7 +77,7 @@ public class MqttConnAck extends MqttAck {
 		this.properties.setValidProperties(validProperties);
 		this.sessionPresent = sessionPresent;
 		validateReturnCode(returnCode, validReturnCodes);
-		this.returnCode = returnCode;
+		this.reasonCode = returnCode;
 	}
 
 	@Override
@@ -95,7 +94,7 @@ public class MqttConnAck extends MqttAck {
 			dos.write(connectAchnowledgeFlag);
 
 			// Encode the Connect Return Code
-			dos.write((byte) returnCode);
+			dos.write((byte) reasonCode);
 
 			// Write Identifier / Value Fields
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
@@ -130,11 +129,11 @@ public class MqttConnAck extends MqttAck {
 	}
 
 	public int getReturnCode() {
-		return returnCode;
+		return reasonCode;
 	}
 
 	public void setReturnCode(int returnCode) {
-		this.returnCode = returnCode;
+		this.reasonCode = returnCode;
 	}
 
 	@Override
@@ -148,7 +147,7 @@ public class MqttConnAck extends MqttAck {
 
 	@Override
 	public String toString() {
-		return "MqttConnAck [returnCode=" + returnCode + ", sessionPresent=" + sessionPresent + ", properties="
+		return "MqttConnAck [returnCode=" + reasonCode + ", sessionPresent=" + sessionPresent + ", properties="
 				+ properties + "]";
 	}
 
