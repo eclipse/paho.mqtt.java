@@ -67,6 +67,7 @@ public class MqttConnectionOptions {
 	private int keepAliveInterval = 60; // Keep Alive Interval
 	private int maxInflight = 10; // Max inflight messages
 	private int connectionTimeout = 30; // Connection timeout in seconds
+	private boolean httpsHostnameVerificationEnabled = true;
 	
 	
 	public MqttProperties getConnectionProperties() {
@@ -909,6 +910,16 @@ public class MqttConnectionOptions {
 	public void setUseSubscriptionIdentifiers(boolean useSubscriptionIdentifiers) {
 		this.useSubscriptionIdentifiers = useSubscriptionIdentifiers;
 	}
+
+	public boolean isHttpsHostnameVerificationEnabled() {
+		return httpsHostnameVerificationEnabled;
+	}
+
+
+	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
+		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
+	}
+
 
 	/**
 	 * @return The Debug Properties

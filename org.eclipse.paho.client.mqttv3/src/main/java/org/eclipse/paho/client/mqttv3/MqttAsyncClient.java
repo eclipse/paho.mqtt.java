@@ -616,6 +616,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId);
 			((SSLNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
 			((SSLNetworkModule)netModule).setSSLHostnameVerifier(options.getSSLHostnameVerifier());
+			((SSLNetworkModule)netModule).setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());
 			// Ciphers suites need to be set, if they are available
 			if (factoryFactory != null) {
 				String[] enabledCiphers = factoryFactory.getEnabledCipherSuites(null);
@@ -657,6 +658,8 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			// Create the network module...
 			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, clientId);
 			((WebSocketSecureNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
+			((WebSocketSecureNetworkModule)netModule).setSSLHostnameVerifier(options.getSSLHostnameVerifier());
+			((WebSocketSecureNetworkModule)netModule).setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());
 			// Ciphers suites need to be set, if they are available
 			if (wSSFactoryFactory != null) {
 				String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);
