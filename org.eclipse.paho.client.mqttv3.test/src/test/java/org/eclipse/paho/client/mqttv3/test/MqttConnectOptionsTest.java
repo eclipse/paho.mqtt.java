@@ -1,6 +1,10 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+
+import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1;
+import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1_1;
+import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_DEFAULT;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -53,6 +57,26 @@ public class MqttConnectOptionsTest {
 		} catch (IllegalArgumentException e) {
 			assertEquals("Can't parse string to URI \"tcp://\"", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testValidateMQTTVersions() {
+		MqttConnectOptions connectOptions = new MqttConnectOptions();
+		try {
+			connectOptions.setMqttVersion(MQTT_VERSION_DEFAULT);
+			connectOptions.setMqttVersion(MQTT_VERSION_3_1);
+			connectOptions.setMqttVersion(MQTT_VERSION_3_1_1);
+		} catch(IllegalArgumentException e) {
+			fail("MQTT Versions are valid");
+		}
+
+		try {
+			connectOptions.setMqttVersion(9);
+			fail("MQTT Version is not valid");
+		} catch (IllegalArgumentException e) {
+			assertEquals("An incorrect version was used \"9\". Acceptable version options are " + MQTT_VERSION_DEFAULT + ", " + MQTT_VERSION_3_1 + " and " + MQTT_VERSION_3_1_1 + ".", e.getMessage());
+		}
+
 	}
 
 }
