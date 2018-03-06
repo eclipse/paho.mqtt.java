@@ -18,6 +18,7 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.io.IOException;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -36,6 +37,9 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
 	private HostnameVerifier hostnameVerifier;
+	private boolean httpsHostnameVerificationEnabled = false;
+
+	
 
 	private String host;
 	private int port;
@@ -108,6 +112,14 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	public void setSSLHostnameVerifier(HostnameVerifier hostnameVerifier) {
 		this.hostnameVerifier = hostnameVerifier;
 	}
+	
+	public boolean isHttpsHostnameVerificationEnabled() {
+		return httpsHostnameVerificationEnabled;
+	}
+
+	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
+		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
+	}
 
 	public void start() throws IOException, MqttException {
 		super.start();
@@ -115,8 +127,15 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		int soTimeout = socket.getSoTimeout();
 		// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
 		socket.setSoTimeout(this.handshakeTimeoutSecs * 1000);
+		
+		// If default Hostname verification is enabled, use the same method that is used with HTTPS
+		if(this.httpsHostnameVerificationEnabled) {
+			SSLParameters sslParams = new SSLParameters();
+			sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+			((SSLSocket) socket).setSSLParameters(sslParams);
+		}
 		((SSLSocket) socket).startHandshake();
-		if (hostnameVerifier != null) {
+		if (hostnameVerifier != null && !this.httpsHostnameVerificationEnabled) {
 			SSLSession session = ((SSLSocket) socket).getSession();
 			hostnameVerifier.verify(host, session);
 		}
