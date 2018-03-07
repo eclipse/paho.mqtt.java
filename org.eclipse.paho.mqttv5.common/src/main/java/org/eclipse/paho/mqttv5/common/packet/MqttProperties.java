@@ -344,7 +344,7 @@ public class MqttProperties {
 			}
 
 			// User Defined Properties
-			if (!userProperties.isEmpty() && validProperties.contains(USER_DEFINED_PAIR_IDENTIFIER)) {
+			if (userProperties != null && !userProperties.isEmpty() && validProperties.contains(USER_DEFINED_PAIR_IDENTIFIER)) {
 				for (UserProperty property : userProperties) {
 					// outputStream.write(USER_DEFINED_PAIR_IDENTIFIER);
 					outputStream.writeByte(USER_DEFINED_PAIR_IDENTIFIER);
@@ -1359,7 +1359,7 @@ public class MqttProperties {
 		if (reasonString != null) {
 			sb.append(", reasonString=" + reasonString);
 		}
-		if (userProperties.size() != 0) {
+		if (userProperties != null && userProperties.size() != 0) {
 			sb.append(", userProperties=" + userProperties);
 		}
 		if (payloadFormat) {

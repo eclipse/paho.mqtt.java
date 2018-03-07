@@ -74,6 +74,7 @@ public class SSLNetworkModuleFactory implements NetworkModuleFactory {
 		SSLNetworkModule netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId);
 		netModule.setSSLhandshakeTimeout(options.getConnectionTimeout());
 		netModule.setSSLHostnameVerifier(options.getSSLHostnameVerifier());
+		netModule.setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());
 		// Ciphers suites need to be set, if they are available
 		if (factoryFactory != null) {
 			String[] enabledCiphers = factoryFactory.getEnabledCipherSuites(null);

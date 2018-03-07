@@ -108,25 +108,45 @@ public class ConnectActionListener implements MqttActionListener {
 	 *            the {@link IMqttToken} from the successful connection
 	 */
 	public void onSuccess(IMqttToken token) {
-		userToken.internalTok.markComplete(token.getResponse(), null);
-		userToken.internalTok.notifyComplete();
-		userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
-
 		// Set properties imposed on us by the Server
 		MqttToken myToken = (MqttToken) token;
 		mqttSession.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
 		mqttSession.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
 		mqttSession.setRetainAvailable(myToken.getMessageProperties().isRetainAvailable());
 		mqttSession.setMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
-		mqttSession.setTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
+		mqttSession.setOutgoingTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
 		mqttSession
 				.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
 		mqttSession.setSubscriptionIdentifiersAvailable(
 				myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
 		mqttSession.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
+
+		// If we are assigning the client ID post connect, then we need to re-initialise
+		// our persistence layer.
 		if (myToken.getMessageProperties().getAssignedClientIdentifier() != null) {
 			mqttSession.setClientId(myToken.getMessageProperties().getAssignedClientIdentifier());
+			try {
+				persistence.open(myToken.getMessageProperties().getAssignedClientIdentifier());
+
+				if (options.isCleanSession()) {
+					persistence.clear();
+				}
+			} catch (MqttPersistenceException exception) {
+
+				// If we fail to open persistence at this point, our best bet is to immediately
+				// close the connection.
+				try {
+					client.disconnect();
+				} catch (MqttException ex) {
+				}
+				onFailure(token, exception);
+				return;
+			}
 		}
+
+		userToken.internalTok.markComplete(token.getResponse(), null);
+		userToken.internalTok.notifyComplete();
+		userToken.internalTok.setClient(this.client); // fix bug 469527 - maybe should be set elsewhere?
 
 		if (reconnect) {
 			comms.notifyReconnect();
@@ -197,10 +217,12 @@ public class ConnectActionListener implements MqttActionListener {
 		token.setActionCallback(this);
 		token.setUserContext(this);
 
-		persistence.open(client.getClientId());
+		if (!client.getClientId().equals("")) {
+			persistence.open(client.getClientId());
 
-		if (options.isCleanSession()) {
-			persistence.clear();
+			if (options.isCleanSession()) {
+				persistence.clear();
+			}
 		}
 
 		try {

@@ -177,7 +177,7 @@ public class CommsSender implements Runnable {
 	private void handleRunException(MqttWireMessage message, Exception ex) {
 		final String methodName = "handleRunException";
 		//@TRACE 804=exception
-		log.fine(CLASS_NAME,methodName,"804",null, ex);
+		log.severe(CLASS_NAME,methodName,"804",null, ex);
 		MqttException mex;
 		if ( !(ex instanceof MqttException)) {
 			mex = new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ex);

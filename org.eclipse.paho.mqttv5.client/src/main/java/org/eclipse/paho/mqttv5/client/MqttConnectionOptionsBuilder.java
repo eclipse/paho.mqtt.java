@@ -67,17 +67,12 @@ public class MqttConnectionOptionsBuilder {
 		return this;
 	}
 	
-	public MqttConnectionOptionsBuilder sessionExpiryInterval(Integer sessionExpiryInterval) {
+	public MqttConnectionOptionsBuilder sessionExpiryInterval(Long sessionExpiryInterval) {
 		mqttConnectionOptions.setSessionExpiryInterval(sessionExpiryInterval);
 		return this;
 	}
 	
-	public MqttConnectionOptionsBuilder willDelayInterval(Integer willDelayInterval) {
-		mqttConnectionOptions.setWillDelayInterval(willDelayInterval);
-		return this;
-	}
-	
-	public MqttConnectionOptionsBuilder maximumPacketSize(Integer maximumPacketSize) {
+	public MqttConnectionOptionsBuilder maximumPacketSize(Long maximumPacketSize) {
 		mqttConnectionOptions.setMaximumPacketSize(maximumPacketSize);
 		return this;
 	}

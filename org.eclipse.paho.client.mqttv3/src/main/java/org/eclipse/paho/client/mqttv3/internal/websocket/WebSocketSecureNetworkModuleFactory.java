@@ -66,6 +66,8 @@ public class WebSocketSecureNetworkModuleFactory implements NetworkModuleFactory
 		WebSocketSecureNetworkModule netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory,
 				brokerUri.toString(), host, port, clientId);
 		netModule.setSSLhandshakeTimeout(options.getConnectionTimeout());
+		netModule.setSSLHostnameVerifier(options.getSSLHostnameVerifier());
+		netModule.setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());
 		// Ciphers suites need to be set, if they are available
 		if (wSSFactoryFactory != null) {
 			String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);

@@ -152,6 +152,21 @@ public interface IMqttToken {
 	public int[] getGrantedQos();
 	
 	/**
+	 * Returns a list of reason codes that were returned as a result of this token's action.
+	 * You will receive reason codes from the following MQTT actions:
+	 * <ul>
+	 * <li>CONNECT - in the corresponding CONNACK Packet.</li>
+	 * <li>PUBLISH - in the corresponding PUBACK, PUBREC, PUBCOMP, PUBREL packets</li>
+	 * <li>SUBSCRIBE - in the corresponding SUBACK Packet.</li>
+	 * <li>UNSUBSCRIBE - in the corresponding UNSUBACK Packet.</li>
+	 * <li>AUTH - in the returned AUTH Packet.</li>
+	 * </ul>
+	 * @return the reason code(s) from the response for this token's action.
+	 * 
+	 */
+	public int[] getReasonCodes();                                           
+	
+	/**
 	 * @return the session present flag from a connack 
 	 */
 	public boolean getSessionPresent();

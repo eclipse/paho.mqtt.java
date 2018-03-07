@@ -29,7 +29,8 @@ public class MqttSession {
 	private Integer maximumQoS = 2;
 	private Boolean retainAvailable = true;
 	private Long maximumPacketSize = -1L;
-	private Integer topicAliasMaximum = 0;
+	private Integer outgoingTopicAliasMaximum = 0;
+	private Integer incomingTopicAliasMax = 0;
 	private Boolean wildcardSubscriptionsAvailable = true;
 	private Boolean subscriptionIdentifiersAvailable = true;
 	private Boolean sharedSubscriptionsAvailable = true;
@@ -81,12 +82,12 @@ public class MqttSession {
 		this.maximumPacketSize = maximumPacketSize;
 	}
 
-	public Integer getTopicAliasMaximum() {
-		return topicAliasMaximum;
+	public Integer getOutgoingTopicAliasMaximum() {
+		return outgoingTopicAliasMaximum;
 	}
 
-	public void setTopicAliasMaximum(Integer topicAliasMaximum) {
-		this.topicAliasMaximum = topicAliasMaximum;
+	public void setOutgoingTopicAliasMaximum(Integer topicAliasMaximum) {
+		this.outgoingTopicAliasMaximum = topicAliasMaximum;
 	}
 
 	public Boolean isWildcardSubscriptionsAvailable() {
@@ -122,9 +123,18 @@ public class MqttSession {
 		return clientId;
 	}
 
-
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+
+	public Integer getIncomingTopicAliasMax() {
+		return incomingTopicAliasMax;
+	}
+
+
+	public void setIncomingTopicAliasMax(Integer incomingTopicAliasMax) {
+		this.incomingTopicAliasMax = incomingTopicAliasMax;
 	}
 
 }

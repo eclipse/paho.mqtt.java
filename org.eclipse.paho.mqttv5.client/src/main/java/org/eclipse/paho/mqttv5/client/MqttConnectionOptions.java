@@ -67,15 +67,23 @@ public class MqttConnectionOptions {
 	private int keepAliveInterval = 60; // Keep Alive Interval
 	private int maxInflight = 10; // Max inflight messages
 	private int connectionTimeout = 30; // Connection timeout in seconds
+	private boolean httpsHostnameVerificationEnabled = true;
 	
-	MqttProperties connectionProperties = new MqttProperties();
+	
 	public MqttProperties getConnectionProperties() {
+		MqttProperties connectionProperties = new MqttProperties();
+		connectionProperties.setSessionExpiryInterval(sessionExpiryInterval);
+		connectionProperties.setReceiveMaximum(receiveMaximum);
+		connectionProperties.setMaximumPacketSize(maximumPacketSize);
+		connectionProperties.setTopicAliasMaximum(topicAliasMaximum);
+		connectionProperties.setRequestResponseInfo(requestResponseInfo);
+		connectionProperties.setRequestProblemInfo(requestProblemInfo);
+		connectionProperties.setUserProperties(userProperties);
+		connectionProperties.setAuthenticationMethod(authMethod);
+		connectionProperties.setAuthenticationData(authData);
 		return connectionProperties;
 	}
 
-	public void setConnectionProperties(MqttProperties connectionProperties) {
-		this.connectionProperties = connectionProperties;
-	}
 
 	public MqttProperties getWillMessageProperties() {
 		return willMessageProperties;
@@ -94,11 +102,10 @@ public class MqttConnectionOptions {
 	private MqttMessage willMessage = null; // Will Message
 	private String userName; // Username
 	private byte[] password; // Password
-	private Integer sessionExpiryInterval = null; // The Session expiry Interval in seconds, null is the default of
+	private Long sessionExpiryInterval = null; // The Session expiry Interval in seconds, null is the default of
 													// never.
-	private Integer willDelayInterval = null; // The Will Delay Interval in seconds, null is the default of 0.
 	private Integer receiveMaximum = null; // The Receive Maximum, null defaults to 65,535, cannot be 0.
-	private Integer maximumPacketSize = null; // The Maximum packet size, null defaults to no limit.
+	private Long maximumPacketSize = null; // The Maximum packet size, null defaults to no limit.
 	private Integer topicAliasMaximum = null; // The Topic Alias Maximum, null defaults to 0.
 	private Boolean requestResponseInfo = null; // Request Response Information, null defaults to false.
 	private Boolean requestProblemInfo = null; // Request Problem Information, null defaults to true.
@@ -476,7 +483,7 @@ public class MqttConnectionOptions {
 	 * 
 	 * @return the Session Expiry Interval in seconds.
 	 */
-	public Integer getSessionExpiryInterval() {
+	public Long getSessionExpiryInterval() {
 		return sessionExpiryInterval;
 	}
 
@@ -499,45 +506,16 @@ public class MqttConnectionOptions {
 	 * @param sessionExpiryInterval
 	 *            The Session Expiry Interval in seconds.
 	 */
-	public void setSessionExpiryInterval(Integer sessionExpiryInterval) {
+	public void setSessionExpiryInterval(Long sessionExpiryInterval) {
 		this.sessionExpiryInterval = sessionExpiryInterval;
 	}
 
-	/**
-	 * Returns the Will Delay Interval. If <code>null</code>, it will default to 0
-	 * and there is no will delay before the will message is published.
-	 * 
-	 * @return The Will Delay Interval in seconds.
-	 */
-	public Integer getWillDelayInterval() {
-		return willDelayInterval;
-	}
-
-	/**
-	 * Sets the Will Delay Interval. This value, measured in seconds, defines the
-	 * time that the server will wait to send the Client's will message after it has
-	 * disconnected.
-	 * <ul>
-	 * <li>By default this value is null and so will not be sent, in this case, the
-	 * default value is 0.</li>
-	 * <li>If a 0 is sent, the will message will be sent immediately.</li>
-	 * </ul>
-	 * 
-	 * The Server delays publishing the Client's Will Message until the Will Delay
-	 * Interval has passed or the Session ends, whichever happens first.
-	 * 
-	 * @param willDelayInterval
-	 *            The will delay interval
-	 */
-	public void setWillDelayInterval(Integer willDelayInterval) {
-		this.willDelayInterval = willDelayInterval;
-	}
 
 	/**
 	 * Returns the Receive Maximum value. If <code>null</code>, it will default to
 	 * 65,535.
 	 * 
-	 * @return the Receive Maxumum
+	 * @return the Receive Maximum
 	 */
 	public Integer getReceiveMaximum() {
 		return receiveMaximum;
@@ -569,7 +547,7 @@ public class MqttConnectionOptions {
 	 * 
 	 * @return the Maximum Packet Size in bytes.
 	 */
-	public Integer getMaximumPacketSize() {
+	public Long getMaximumPacketSize() {
 		return maximumPacketSize;
 	}
 
@@ -587,7 +565,7 @@ public class MqttConnectionOptions {
 	 * @param maximumPacketSize
 	 *            The Maximum packet size.
 	 */
-	public void setMaximumPacketSize(Integer maximumPacketSize) {
+	public void setMaximumPacketSize(Long maximumPacketSize) {
 		this.maximumPacketSize = maximumPacketSize;
 	}
 
@@ -932,6 +910,16 @@ public class MqttConnectionOptions {
 	public void setUseSubscriptionIdentifiers(boolean useSubscriptionIdentifiers) {
 		this.useSubscriptionIdentifiers = useSubscriptionIdentifiers;
 	}
+
+	public boolean isHttpsHostnameVerificationEnabled() {
+		return httpsHostnameVerificationEnabled;
+	}
+
+
+	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
+		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
+	}
+
 
 	/**
 	 * @return The Debug Properties

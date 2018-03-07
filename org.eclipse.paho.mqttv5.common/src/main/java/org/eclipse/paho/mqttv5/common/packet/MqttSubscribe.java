@@ -80,7 +80,11 @@ public class MqttSubscribe extends MqttWireMessage {
 	public MqttSubscribe(MqttSubscription[] subscriptions, MqttProperties properties) {
 		super(MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE);
 		this.subscriptions = subscriptions;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 

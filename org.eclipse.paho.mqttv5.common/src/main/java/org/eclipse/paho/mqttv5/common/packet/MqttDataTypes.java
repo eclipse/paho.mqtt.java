@@ -19,7 +19,10 @@ public class MqttDataTypes {
 		throw new IllegalAccessException("Utility Class");
 	}
 
-	public static void validateTwoByteInt(int value) throws IllegalArgumentException {
+	public static void validateTwoByteInt(Integer value) throws IllegalArgumentException {
+		if(value == null) {
+			return;
+		}
 		if (value >= 0 && value <= TWO_BYTE_INT_MAX) {
 			return;
 		} else {
@@ -27,7 +30,10 @@ public class MqttDataTypes {
 		}
 	}
 
-	public static void validateFourByteInt(long value) throws IllegalArgumentException {
+	public static void validateFourByteInt(Long value) throws IllegalArgumentException {
+		if(value == null) {
+			return;
+		}
 		if (value >= 0 && value <= FOUR_BYTE_INT_MAX) {
 			return;
 		} else {

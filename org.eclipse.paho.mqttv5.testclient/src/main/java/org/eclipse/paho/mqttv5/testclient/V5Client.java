@@ -18,8 +18,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 public class V5Client implements MqttCallback {
 
 	private String broker = "tcp://localhost:1883";
-	//private String broker = "tcp://9.20.87.69:1883";
-	private String clientId = "TestV5Client";
+	private String clientId = ""; // Use Empty ID to get a server assigned client ID
 	private String topic = "MQTT Examples";
 	private String content = "Message from MqttPublishSample";
 	private String willContent = "I've Disconnected, sorry!";
@@ -36,8 +35,9 @@ public class V5Client implements MqttCallback {
 			// Lets build our Connection Options:
 			MqttConnectionOptionsBuilder conOptsBuilder = new MqttConnectionOptionsBuilder();
 			MqttConnectionOptions conOpts = conOptsBuilder.serverURI(broker).cleanSession(true)
-					.sessionExpiryInterval(120).automaticReconnect(true)
-					.will(topic, new MqttMessage(willContent.getBytes(), qos, false, null)).topicAliasMaximum(1000).build();
+					.sessionExpiryInterval(120L).automaticReconnect(true)
+					.topicAliasMaximum(0)
+					.will(topic, new MqttMessage(willContent.getBytes(), qos, false, null)).build();
 			asyncClient.setCallback(this);
 
 
@@ -136,18 +136,19 @@ public class V5Client implements MqttCallback {
 
 	@Override
 	public void mqttErrorOccured(MqttException exception) {
-		// TODO Auto-generated method stub
+		System.out.println("An exception occured in the MQTT Client: " + exception.getMessage());
 		
 	}
 
 	@Override
 	public void connectComplete(boolean reconnect, String serverURI) {
+		System.out.println("Client successfully connected, reconnect: " + reconnect + ", URI: " + serverURI);
 		
 	}
 
 	@Override
 	public void authPacketArrived(int reasonCode, MqttProperties properties) {
-		
+		System.out.println("An auth packet was recieved");
 	}
 	
 

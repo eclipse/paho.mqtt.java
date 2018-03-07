@@ -37,7 +37,6 @@ public class MqttUnsubAck extends MqttAck {
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
 	// Fields
-	private int[] returnCodes;
 	private MqttProperties properties;
 
 	public MqttUnsubAck(byte[] data) throws IOException, MqttException {
@@ -52,11 +51,11 @@ public class MqttUnsubAck extends MqttAck {
 		this.properties.decodeProperties(inputStream);
 
 		int remainingLengh = data.length - counter.getCounter();
-		returnCodes = new int[remainingLengh];
+		reasonCodes = new int[remainingLengh];
 
 		for (int i = 0; i < remainingLengh; i++) {
-			returnCodes[i] = inputStream.readUnsignedByte();
-			validateReturnCode(returnCodes[i], validReturnCodes);
+			reasonCodes[i] = inputStream.readUnsignedByte();
+			validateReturnCode(reasonCodes[i], validReturnCodes);
 		}
 
 		inputStream.close();
@@ -67,8 +66,12 @@ public class MqttUnsubAck extends MqttAck {
 		for (int returnCode : returnCodes) {
 			validateReturnCode(returnCode, validReturnCodes);
 		}
-		this.returnCodes = returnCodes;
-		this.properties = properties;
+		this.reasonCodes = returnCodes;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 
@@ -98,7 +101,7 @@ public class MqttUnsubAck extends MqttAck {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
-			for (int returnCode : returnCodes) {
+			for (int returnCode : reasonCodes) {
 				outputStream.writeByte(returnCode);
 			}
 
@@ -111,7 +114,7 @@ public class MqttUnsubAck extends MqttAck {
 	}
 
 	public int[] getReturnCodes() {
-		return returnCodes;
+		return reasonCodes;
 	}
 
 	@Override
@@ -121,7 +124,7 @@ public class MqttUnsubAck extends MqttAck {
 
 	@Override
 	public String toString() {
-		return "MqttUnsubAck [returnCodes=" + Arrays.toString(returnCodes) + ", properties=" + properties + "]";
+		return "MqttUnsubAck [returnCodes=" + Arrays.toString(reasonCodes) + ", properties=" + properties + "]";
 	}
 
 }

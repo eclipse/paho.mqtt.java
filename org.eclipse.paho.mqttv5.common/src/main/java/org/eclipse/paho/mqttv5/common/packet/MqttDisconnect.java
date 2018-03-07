@@ -78,7 +78,11 @@ public class MqttDisconnect extends MqttWireMessage {
 		super(MqttWireMessage.MESSAGE_TYPE_DISCONNECT);
 		validateReturnCode(returnCode, validReturnCodes);
 		this.returnCode = returnCode;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 

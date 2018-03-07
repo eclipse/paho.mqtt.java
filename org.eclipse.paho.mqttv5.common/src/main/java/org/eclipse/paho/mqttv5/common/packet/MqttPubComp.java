@@ -34,7 +34,6 @@ public class MqttPubComp extends MqttAck {
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
 	// Fields
-	private int returnCode = MqttReturnCode.RETURN_CODE_SUCCESS;
 	private MqttProperties properties;
 
 	public MqttPubComp(byte[] data) throws IOException, MqttException {
@@ -46,8 +45,8 @@ public class MqttPubComp extends MqttAck {
 		msgId = dis.readUnsignedShort();
 		long remainder = (long) data.length - counter.getCounter();
 		if (remainder > 2) {
-			returnCode = dis.readUnsignedByte();
-			validateReturnCode(returnCode, validReturnCodes);
+			reasonCode = dis.readUnsignedByte();
+			validateReturnCode(reasonCode, validReturnCodes);
 		}
 		if (remainder >= 4) {
 			this.properties.decodeProperties(dis);
@@ -59,9 +58,13 @@ public class MqttPubComp extends MqttAck {
 	public MqttPubComp(int returnCode, int msgId, MqttProperties properties) throws MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBCOMP);
 		validateReturnCode(returnCode, validReturnCodes);
-		this.returnCode = returnCode;
+		this.reasonCode = returnCode;
 		this.msgId = msgId;
-		this.properties = properties;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 
@@ -76,9 +79,9 @@ public class MqttPubComp extends MqttAck {
 
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 
-			if (returnCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
+			if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
 				// Encode the Return Code
-				outputStream.write((byte) returnCode);
+				outputStream.write((byte) reasonCode);
 
 				// Write Identifier / Value Fields
 				outputStream.write(identifierValueFieldsByteArray);
@@ -92,11 +95,11 @@ public class MqttPubComp extends MqttAck {
 	}
 
 	public int getReturnCode() {
-		return returnCode;
+		return reasonCode;
 	}
 
 	public void setReturnCode(int returnCode) {
-		this.returnCode = returnCode;
+		this.reasonCode = returnCode;
 	}
 
 	@Override
@@ -106,7 +109,7 @@ public class MqttPubComp extends MqttAck {
 
 	@Override
 	public String toString() {
-		return "MqttPubComp [returnCode=" + returnCode + ", properties=" + properties + "]";
+		return "MqttPubComp [returnCode=" + reasonCode + ", properties=" + properties + "]";
 	}
 
 }

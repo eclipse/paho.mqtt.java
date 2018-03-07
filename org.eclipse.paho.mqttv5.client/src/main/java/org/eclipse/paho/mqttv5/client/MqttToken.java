@@ -106,4 +106,9 @@ public class MqttToken implements IMqttToken {
 		return internalTok.getWireMessage().getProperties();
 	}
 
+	@Override
+	public int[] getReasonCodes() {
+		return internalTok.getWireMessage().getReasonCodes();
+	}
+
 }

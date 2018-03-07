@@ -28,12 +28,4 @@ public abstract class MqttAck extends MqttWireMessage {
 	protected byte getMessageInfo() {
 		return 0;
 	}
-
-	/**
-	 * @return String representation of the wire message
-	 */
-	@Override
-	public String toString() {
-		return super.toString() + " msgId " + msgId;
-	}
 }

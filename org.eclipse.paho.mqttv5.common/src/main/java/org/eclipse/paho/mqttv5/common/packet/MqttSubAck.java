@@ -38,7 +38,6 @@ public class MqttSubAck extends MqttAck {
 			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 
 	// Fields
-	private int[] returnCodes;
 	private MqttProperties properties;
 
 	public MqttSubAck(byte[] data) throws IOException, MqttException {
@@ -51,12 +50,12 @@ public class MqttSubAck extends MqttAck {
 		this.properties.decodeProperties(inputStream);
 
 		int remainingLength = data.length - counter.getCounter();
-		returnCodes = new int[remainingLength];
+		reasonCodes = new int[remainingLength];
 
 		for (int i = 0; i < remainingLength; i++) {
 			int returnCode = inputStream.readUnsignedByte();
 			validateReturnCode(returnCode, validReturnCodes);
-			returnCodes[i] = returnCode;
+			reasonCodes[i] = returnCode;
 		}
 
 		inputStream.close();
@@ -67,8 +66,12 @@ public class MqttSubAck extends MqttAck {
 		for (int returnCode : returnCodes) {
 			validateReturnCode(returnCode, validReturnCodes);
 		}
-		this.returnCodes = returnCodes;
-		this.properties = properties;
+		this.reasonCodes = returnCodes;
+		if (properties != null) {
+			this.properties = properties;
+		} else {
+			this.properties = new MqttProperties();
+		}
 		this.properties.setValidProperties(validProperties);
 	}
 
@@ -99,7 +102,7 @@ public class MqttSubAck extends MqttAck {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream outputStream = new DataOutputStream(baos);
 
-			for (int returnCode : returnCodes) {
+			for (int returnCode : reasonCodes) {
 				outputStream.writeByte(returnCode);
 			}
 
@@ -111,11 +114,11 @@ public class MqttSubAck extends MqttAck {
 	}
 
 	public int[] getReturnCodes() {
-		return returnCodes;
+		return reasonCodes;
 	}
 
 	public void setReturnCodes(int[] returnCodes) {
-		this.returnCodes = returnCodes;
+		this.reasonCodes = returnCodes;
 	}
 
 	@Override
@@ -125,7 +128,7 @@ public class MqttSubAck extends MqttAck {
 
 	@Override
 	public String toString() {
-		return "MqttSubAck [returnCodes=" + Arrays.toString(returnCodes) + ", properties=" + properties + "]";
+		return "MqttSubAck [returnCodes=" + Arrays.toString(reasonCodes) + ", properties=" + properties + "]";
 	}
 
 }
