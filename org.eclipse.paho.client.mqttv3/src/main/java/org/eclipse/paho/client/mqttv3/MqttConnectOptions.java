@@ -74,6 +74,7 @@ public class MqttConnectOptions {
 	private char[] password;
 	private SocketFactory socketFactory;
 	private Properties sslClientProps = null;
+	private boolean httpsHostnameVerificationEnabled = false;
 	private HostnameVerifier sslHostnameVerifier = null;
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
@@ -409,6 +410,14 @@ public class MqttConnectOptions {
 	 */
 	public void setSSLProperties(Properties props) {
 		this.sslClientProps = props;
+	}
+	
+	public boolean isHttpsHostnameVerificationEnabled() {
+		return httpsHostnameVerificationEnabled;
+	}
+
+	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
+		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
 	}
 
 	/**
