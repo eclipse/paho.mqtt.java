@@ -81,7 +81,7 @@ public class MqttConnectOptions {
 	private String[] serverURIs = null;
 	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
-
+	private Properties customHeaders = null;
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
 	 * default values.
@@ -636,6 +636,19 @@ public class MqttConnectOptions {
 			p.put("SSLProperties", getSSLProperties());
 		}
 		return p;
+	}
+
+	/**
+	 * Sets the Custom Headers for the WebSocket Connection.
+	 *
+	 * @param props The custom headers {@link Properties}
+	 */
+	public void setCustomHeaders(Properties props) {
+		this.customHeaders = props;
+	}
+
+	public Properties getCustomHeaders() {
+		return customHeaders;
 	}
 
 	public String toString() {

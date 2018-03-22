@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Iterator;
 /**
  * Helper class to execute a WebSocket Handshake.
  */
@@ -52,16 +55,16 @@ public class WebSocketHandshake {
 	String uri;
 	String host;
 	int port;
+	Properties customHeaders;
 
-
-	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port){
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Properties customHeaders){
 		this.input = input;
 		this.output = output;
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
+		this.customHeaders = customHeaders;
 	}
-
 
 	/**
 	 * Executes a Websocket Handshake.
@@ -107,6 +110,16 @@ public class WebSocketHandshake {
 			pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Protocol: mqtt" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
+
+			if (customHeaders != null) {
+				Set keys = customHeaders.keySet();
+				Iterator i = keys.iterator();
+				while (i.hasNext()) {
+					String k = (String) i.next();
+					String value = customHeaders.getProperty(k);
+					pw.print(k + ": " + value + LINE_SEPARATOR);
+				}
+			}
 
 			String userInfo = srvUri.getUserInfo();
 			if(userInfo != null) {
