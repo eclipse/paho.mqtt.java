@@ -98,3 +98,37 @@ public class MqttPublishSample {
 }
 ```
 
+## Adding custom headers for Websocket connection
+
+This possibility was added in this forked version. See example how to use it
+
+```
+MqttClient client = new MqttClient("wss://<BROKER_URI>", "MyClient");
+
+MqttConnectOptions connectOptions = new MqttConnectOptions();
+Properties properties = new Properties();
+properties.setProperty("X-Amz-CustomAuthorizer-Name", <SOME_VALUE>);
+properties.setProperty("X-Amz-CustomAuthorizer-Signature", <SOME_VALUE>);
+properties.setProperty(<SOME_VALUE>, <SOME_VALUE>);
+connectOptions.setCustomHeaders(properties);
+
+client.connect(connectOptions);
+
+MqttMessage message = new MqttMessage("Hello From Paho Client".getBytes());
+client.publish("test/out", message);
+
+client.subscribe("test/in");
+
+client.setCallback(new MqttCallback() {
+    @Override
+    public void connectionLost(Throwable cause) { }
+
+    @Override
+    public void messageArrived(String topic, MqttMessage message) throws Exception {
+        System.out.println("received message : " + message.toString());
+    }
+
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken token) { }
+});
+```
