@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
+import java.util.Properties;
 
 import javax.net.SocketFactory;
 
@@ -37,6 +38,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	private String uri;
 	private String host;
 	private int port;
+	private Properties customHeaders;
 	private PipedInputStream pipedInputStream;
 	private WebSocketReceiver webSocketReceiver;
 	ByteBuffer recievedPayload;
@@ -47,7 +49,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	 *  Frame before passing it through to the real socket.
 	 */
 	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
-	
+
 	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext){
 		super(factory, host, port, resourceContext);
 		this.uri = uri;
@@ -60,7 +62,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	
 	public void start() throws IOException, MqttException {
 		super.start();
-		WebSocketHandshake handshake = new WebSocketHandshake(getSocketInputStream(), getSocketOutputStream(), uri, host, port);
+		WebSocketHandshake handshake = new WebSocketHandshake(getSocketInputStream(), getSocketOutputStream(), uri, host, port, customHeaders);
 		handshake.execute();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("webSocketReceiver");
@@ -101,5 +103,8 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	public String getServerURI() {
 		return "ws://" + host + ":" + port;
 	}
-	
+
+	public void setCustomHeaders(Properties customHeaders) {
+		this.customHeaders = customHeaders;
+	}
 }
