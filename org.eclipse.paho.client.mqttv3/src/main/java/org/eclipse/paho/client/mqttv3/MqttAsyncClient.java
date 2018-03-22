@@ -635,7 +635,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			else if (factory instanceof SSLSocketFactory) {
 				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 			}
-			netModule = new WebSocketNetworkModule(factory, address, host, port, clientId);
+			netModule = new WebSocketNetworkModule(factory, address, host, port, clientId, options.getCustomWebsocketHeaders());
 			((WebSocketNetworkModule)netModule).setConnectTimeout(options.getConnectionTimeout());
 			break;
 		case MqttConnectOptions.URI_TYPE_WSS:
@@ -656,7 +656,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			}
 
 			// Create the network module...
-			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, clientId);
+			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port, clientId, options.getCustomWebsocketHeaders());
 			((WebSocketSecureNetworkModule)netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
 			((WebSocketSecureNetworkModule)netModule).setSSLHostnameVerifier(options.getSSLHostnameVerifier());
 			((WebSocketSecureNetworkModule)netModule).setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());

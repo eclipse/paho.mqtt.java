@@ -17,6 +17,7 @@
  */
 package org.eclipse.paho.client.mqttv3;
 
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
@@ -81,7 +82,7 @@ public class MqttConnectOptions {
 	private String[] serverURIs = null;
 	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
-
+	private Map<String,String> customWebsocketHeaders = null;
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
 	 * default values.
@@ -636,6 +637,23 @@ public class MqttConnectOptions {
 			p.put("SSLProperties", getSSLProperties());
 		}
 		return p;
+	}
+
+	/**
+	 * A Websocket connection is established by an upgrade request on a HTTP connection.
+	 * You can specify custom HTTP headers that should be send in this handshake.
+	 *
+	 * @param headers Custom HTTP headers
+	 */
+	public void setCustomWebsocketHeaders(Map<String, String> headers) {
+		this.customWebsocketHeaders = headers;
+	}
+
+	/**
+	 * Return the custom HTTP headers, used by the Websocket upgrade handshake.
+	 */
+	public Map<String, String> getCustomWebsocketHeaders() {
+		return customWebsocketHeaders;
 	}
 
 	public String toString() {
