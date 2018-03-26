@@ -141,13 +141,8 @@ public class MqttConnectionOptions {
 	 * 
 	 * @param userName
 	 *            The Username as a String
-	 * @throws IllegalArgumentException
-	 *             if the user name is blank or only contains whitespace characters.
 	 */
 	public void setUserName(String userName) {
-		if ((userName != null) && (userName.trim().equals(""))) {
-			throw new IllegalArgumentException();
-		}
 		this.userName = userName;
 	}
 
