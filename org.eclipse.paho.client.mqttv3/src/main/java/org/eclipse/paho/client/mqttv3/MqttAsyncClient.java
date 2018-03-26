@@ -429,7 +429,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 * @param pingSender
 	 *            Custom {@link MqttPingSender} implementation.
 	 * @param executorService
-	 *            used for managing threads. If null then a newFixedThreadPool
+	 *            used for managing threads. If null then a newScheduledThreadPool
 	 *            is used.
 	 * @throws IllegalArgumentException
 	 *             if the URI does not start with "tcp://", "ssl://" or
