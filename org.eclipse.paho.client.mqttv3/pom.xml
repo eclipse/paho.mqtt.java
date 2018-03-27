@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>java-parent</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
@@ -19,7 +19,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>templating-maven-plugin</artifactId>
-				<version>1.0-alpha-3</version>
+				<version>1.0.0</version>
 				<executions>
 					<execution>
 						<id>filter-src</id>
@@ -32,7 +32,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4.2</version>
+				<version>3.0.2</version>
 				<executions>
 					<execution>
 						<id>default-copy-resources</id>
@@ -59,7 +59,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-compiler-plugin</artifactId>
-				<version>0.20.0</version>
+				<version>${tycho.version}</version>
 				<configuration>
 					<source>${mqttclient.java.version}</source>
 					<target>${mqttclient.java.version}</target>
@@ -69,7 +69,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>

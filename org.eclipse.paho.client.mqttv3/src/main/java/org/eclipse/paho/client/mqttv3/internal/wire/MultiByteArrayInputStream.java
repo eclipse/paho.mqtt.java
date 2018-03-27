@@ -30,8 +30,8 @@ public class MultiByteArrayInputStream extends InputStream {
 	private int pos = 0;
 	
 	public MultiByteArrayInputStream(byte[] bytesA, int offsetA, int lengthA, byte[] bytesB, int offsetB, int lengthB) {
-		this.bytesA = bytesA;
-		this.bytesB = bytesB;
+		this.bytesA = bytesA.clone();
+		this.bytesB = bytesB.clone();
 		this.offsetA = offsetA;
 		this.offsetB = offsetB;
 		this.lengthA = lengthA;

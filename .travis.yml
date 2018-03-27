@@ -1,6 +1,6 @@
 sudo: true
 language: java
-
+install: true
 matrix:
   include:
     - os: linux
@@ -11,9 +11,12 @@ matrix:
 sudo: required
 
 before_install:
-  - ./travis-install.sh
+  - ./start-broker.sh
 
-script: mvn --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test -Dtest.server_ssl_port=18885 -Dtest.server_uri=tcp://localhost:1883 -Dtest.server_websocket_uri=ws://localhost:8080 -B
+script:
+  - mvn clean
+  - mvn --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test
+  - mvn --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client test
 
 addons:
   apt:

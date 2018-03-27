@@ -74,11 +74,12 @@ public class MqttConnectOptions {
 	private char[] password;
 	private SocketFactory socketFactory;
 	private Properties sslClientProps = null;
+	private boolean httpsHostnameVerificationEnabled = false;
 	private HostnameVerifier sslHostnameVerifier = null;
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
 	private String[] serverURIs = null;
-	private int MqttVersion = MQTT_VERSION_DEFAULT;
+	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
 
 	/**
@@ -97,6 +98,7 @@ public class MqttConnectOptions {
 	 * More information about these values can be found in the setter methods.
 	 */
 	public MqttConnectOptions() {
+		// Initialise Base MqttConnectOptions Object
 	}
 
 	/**
@@ -112,7 +114,7 @@ public class MqttConnectOptions {
 	 * @param password A Char Array of the password
 	 */
 	public void setPassword(char[] password) {
-		this.password = password;
+		this.password = password.clone();
 	}
 
 	/**
@@ -126,13 +128,8 @@ public class MqttConnectOptions {
 	/**
 	 * Sets the user name to use for the connection.
 	 * @param userName The Username as a String
-	 * @throws IllegalArgumentException if the user name is blank or only
-	 * contains whitespace characters.
 	 */
 	public void setUserName(String userName) {
-		if ((userName != null) && (userName.trim().equals(""))) {
-			throw new IllegalArgumentException();
-		}
 		this.userName = userName;
 	}
 
@@ -213,7 +210,7 @@ public class MqttConnectOptions {
 	 * @return the MQTT version.
 	 */
 	public int getMqttVersion() {
-		return MqttVersion;
+		return mqttVersion;
 	}
 
 	/**
@@ -409,6 +406,14 @@ public class MqttConnectOptions {
 	public void setSSLProperties(Properties props) {
 		this.sslClientProps = props;
 	}
+	
+	public boolean isHttpsHostnameVerificationEnabled() {
+		return httpsHostnameVerificationEnabled;
+	}
+
+	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
+		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
+	}
 
 	/**
      * Returns the HostnameVerifier for the SSL connection.
@@ -515,7 +520,7 @@ public class MqttConnectOptions {
 		for (int i = 0; i < array.length; i++) {
 			validateURI(array[i]);
 		}
-		this.serverURIs = array;
+		this.serverURIs = array.clone();
 	}
 
 	/**
@@ -524,35 +529,36 @@ public class MqttConnectOptions {
 	 * @return the URI type
 	 */
 	public static int validateURI(String srvURI) {
+		URI vURI;
 		try {
-			URI vURI = new URI(srvURI);
-			if ("ws".equals(vURI.getScheme())){
-				return URI_TYPE_WS;
-			}
-			else if ("wss".equals(vURI.getScheme())) {
-				return URI_TYPE_WSS;
-			}
-
-			if ((vURI.getPath() == null) || vURI.getPath().isEmpty()) {
-				// No op path must be empty
-			}
-			else {
-				throw new IllegalArgumentException(srvURI);
-			} 
-			if ("tcp".equals(vURI.getScheme())) {
-				return URI_TYPE_TCP;
-			}
-			else if ("ssl".equals(vURI.getScheme())) {
-				return URI_TYPE_SSL;
-			}
-			else if ("local".equals(vURI.getScheme())) {
-				return URI_TYPE_LOCAL;
-			}
-			else {
-				throw new IllegalArgumentException(srvURI);
-			}
+			vURI = new URI(srvURI);
 		} catch (URISyntaxException ex) {
-			throw new IllegalArgumentException(srvURI);
+			throw new IllegalArgumentException("Can't parse string to URI \"" + srvURI + "\"", ex);
+		}
+
+		if ("ws".equals(vURI.getScheme())){
+			return URI_TYPE_WS;
+		}
+		else if ("wss".equals(vURI.getScheme())) {
+			return URI_TYPE_WSS;
+		}
+		if ((vURI.getPath() == null) || vURI.getPath().isEmpty()) {
+			// No op path must be empty
+		}
+		else {
+			throw new IllegalArgumentException("URI path must be empty \"" + srvURI + "\"");
+		} 
+		if ("tcp".equals(vURI.getScheme())) {
+			return URI_TYPE_TCP;
+		}
+		else if ("ssl".equals(vURI.getScheme())) {
+			return URI_TYPE_SSL;
+		}
+		else if ("local".equals(vURI.getScheme())) {
+			return URI_TYPE_LOCAL;
+		}
+		else {
+			throw new IllegalArgumentException("Unknown scheme \"" + vURI.getScheme() + "\" of URI \"" + srvURI + "\"");
 		}
 	}
 	
@@ -563,16 +569,16 @@ public class MqttConnectOptions {
 	 * Version 3.1.1 or 3.1 can be selected specifically, with no fall back,
 	 * by using the MQTT_VERSION_3_1_1 or MQTT_VERSION_3_1 options respectively.
 	 *
-	 * @param MqttVersion the version of the MQTT protocol.
+	 * @param mqttVersion the version of the MQTT protocol.
 	 * @throws IllegalArgumentException If the MqttVersion supplied is invalid
 	 */
-	public void setMqttVersion(int MqttVersion)throws IllegalArgumentException {
-		if (MqttVersion != MQTT_VERSION_DEFAULT && 
-			MqttVersion != MQTT_VERSION_3_1 && 
-			MqttVersion != MQTT_VERSION_3_1_1) {
-			throw new IllegalArgumentException();
+	public void setMqttVersion(int mqttVersion)throws IllegalArgumentException {
+		if (mqttVersion != MQTT_VERSION_DEFAULT && 
+			mqttVersion != MQTT_VERSION_3_1 && 
+			mqttVersion != MQTT_VERSION_3_1_1) {
+			throw new IllegalArgumentException("An incorrect version was used \"" + mqttVersion + "\". Acceptable version options are " + MQTT_VERSION_DEFAULT + ", " + MQTT_VERSION_3_1 + " and " + MQTT_VERSION_3_1_1 + ".");
 		}
-		this.MqttVersion = MqttVersion;
+		this.mqttVersion = mqttVersion;
 	}
 
 	/**
@@ -608,10 +614,10 @@ public class MqttConnectOptions {
 	public Properties getDebug() {
 		final String strNull="null";
 		Properties p = new Properties();
-		p.put("MqttVersion", new Integer(getMqttVersion()));
+		p.put("MqttVersion", Integer.valueOf(getMqttVersion()));
 		p.put("CleanSession", Boolean.valueOf(isCleanSession()));
-		p.put("ConTimeout", new Integer(getConnectionTimeout()));
-		p.put("KeepAliveInterval", new Integer(getKeepAliveInterval()));
+		p.put("ConTimeout", Integer.valueOf(getConnectionTimeout()));
+		p.put("KeepAliveInterval", Integer.valueOf(getKeepAliveInterval()));
 		p.put("UserName", (getUserName() == null) ? strNull : getUserName());
 		p.put("WillDestination", (getWillDestination() == null) ? strNull : getWillDestination());
 		if (getSocketFactory()==null) {

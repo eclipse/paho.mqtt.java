@@ -29,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.BufferedMessage;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
@@ -201,10 +202,21 @@ public class ClientComms {
 	}
 
 	/**
+	 * Removes the message corresponding to the token from the outbound queue and persistence.
+	 * @param token The {@link IMqttDeliveryToken} to remove
+	 * @return if the message is removed, then true, otherwise false
+	 * @throws MqttException if an error occurs sending the message
+	 */
+	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException {
+		return this.clientState.removeMessage(token);
+	}
+
+	/**
 	 * Close and tidy up.
 	 *
 	 * Call each main class and let it tidy up e.g. releasing the token
 	 * store which normally survives a disconnect.
+	 * @param force - whether to force the connection to close.
 	 * @throws MqttException  if not disconnected
 	 */
 	public void close(boolean force) throws MqttException {
@@ -281,7 +293,7 @@ public class ClientComms {
 			}
 			else {
 				// @TRACE 207=connect failed: not disconnected {0}
-				log.fine(CLASS_NAME,methodName,"207", new Object[] {new Byte(conState)});
+				log.fine(CLASS_NAME,methodName,"207", new Object[] {Byte.valueOf(conState)});
 				if (isClosed() || closePending) {
 					throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
 				} else if (isConnecting()) {
@@ -310,7 +322,7 @@ public class ClientComms {
 		}
 
 		// @TRACE 204=connect failed: rc={0}
-		log.fine(CLASS_NAME,methodName,"204", new Object[]{new Integer(rc)});
+		log.fine(CLASS_NAME,methodName,"204", new Object[]{Integer.valueOf(rc)});
 		throw mex;
 	}
 
@@ -414,7 +426,7 @@ public class ClientComms {
 		// it now. This is done at the end to allow a new connect
 		// to be processed and now throw a currently disconnecting error.
 		// any outstanding tokens and unblock any waiters
-		if (endToken != null & callback != null) {
+		if (endToken != null && callback != null) {
 			callback.asyncOperationComplete(endToken);
 		}
 
@@ -615,7 +627,7 @@ public class ClientComms {
 		return networkModules;
 	}
 	public void setNetworkModules(NetworkModule[] networkModules) {
-		this.networkModules = networkModules;
+		this.networkModules = networkModules.clone();
 	}
 	public MqttDeliveryToken[] getPendingDeliveryTokens() {
 		return tokenStore.getOutstandingDelTokens();
@@ -647,7 +659,7 @@ public class ClientComms {
 
 	public Properties getDebug() {
 		Properties props = new Properties();
-		props.put("conState", new Integer(conState));
+		props.put("conState", Integer.valueOf(conState));
 		props.put("serverURI", getClient().getServerURI());
 		props.put("callback", callback);
 		props.put("stoppingComms", new Boolean(stoppingComms));

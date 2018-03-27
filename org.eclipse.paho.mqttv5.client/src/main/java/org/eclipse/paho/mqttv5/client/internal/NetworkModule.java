@@ -13,8 +13,23 @@
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  */
-package org.eclipse.paho.client.mqttv3.internal;
+package org.eclipse.paho.mqttv5.client.internal;
 
-public class ClientDefaults {
-	public static final int MAX_MSG_SIZE = 1024 * 1024 * 256; // 256 MB
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.eclipse.paho.mqttv5.common.MqttException;
+
+
+public interface NetworkModule {
+	public void start() throws IOException, MqttException;
+	
+	public InputStream getInputStream() throws IOException;
+	
+	public OutputStream getOutputStream() throws IOException;
+	
+	public void stop() throws IOException;
+
+	public String getServerURI();
 }

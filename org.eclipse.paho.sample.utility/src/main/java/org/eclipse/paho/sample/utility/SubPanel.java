@@ -55,7 +55,7 @@ public class SubPanel implements ActionListener {
 	private JCheckBox  receivedRetain;
 	private JTextArea receivedData;
 	private MQTTFrame mqttMgr = null;
-	private Integer[]  qos = { new Integer(0), new Integer(1), new Integer(2) };
+	private Integer[]  qos = { Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(2) };
 	private JComboBox qosList;
 	private boolean hexDisplay = true;
     private JLabel subLabel = null;
@@ -298,7 +298,7 @@ public class SubPanel implements ActionListener {
      	
      	// Store the data content in a buffer incase in needs to be written to a file
      	// If the data is binary reading it back from the receivedData field is not good enough
-     	fileContent = data;
+     	fileContent = data.clone();
      	
      	
      	// If the display was originally in hex then switch back to hex

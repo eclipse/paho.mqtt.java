@@ -39,15 +39,19 @@ public class MqttConnect extends MqttWireMessage {
 	private char[] password;
 	private int keepAliveInterval;
 	private String willDestination;
-	private int MqttVersion;
-	
+	private int mqttVersion;
+
 	/**
 	 * Constructor for an on the wire MQTT connect message
 	 * 
-	 * @param info The info byte
-	 * @param data the data byte array
-	 * @throws IOException thrown if an exception occurs when reading the input streams
-	 * @throws MqttException thrown if an exception occurs when decoding UTF-8
+	 * @param info
+	 *            The info byte
+	 * @param data
+	 *            the data byte array
+	 * @throws IOException
+	 *             thrown if an exception occurs when reading the input streams
+	 * @throws MqttException
+	 *             thrown if an exception occurs when decoding UTF-8
 	 */
 	public MqttConnect(byte info, byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
@@ -62,16 +66,19 @@ public class MqttConnect extends MqttWireMessage {
 		dis.close();
 	}
 
-	public MqttConnect(String clientId, int MqttVersion, boolean cleanSession, int keepAliveInterval, String userName, char[] password, MqttMessage willMessage, String willDestination) {
+	public MqttConnect(String clientId, int mqttVersion, boolean cleanSession, int keepAliveInterval, String userName,
+			char[] password, MqttMessage willMessage, String willDestination) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.cleanSession = cleanSession;
 		this.keepAliveInterval = keepAliveInterval;
 		this.userName = userName;
-		this.password = password;
+		if (password != null) {
+			this.password = password.clone();
+		}
 		this.willMessage = willMessage;
 		this.willDestination = willDestination;
-		this.MqttVersion = MqttVersion;
+		this.mqttVersion = mqttVersion;
 	}
 
 	public String toString() {
@@ -79,7 +86,7 @@ public class MqttConnect extends MqttWireMessage {
 		rc += " clientId " + clientId + " keepAliveInterval " + keepAliveInterval;
 		return rc;
 	}
-	
+
 	protected byte getMessageInfo() {
 		return (byte) 0;
 	}
@@ -87,34 +94,33 @@ public class MqttConnect extends MqttWireMessage {
 	public boolean isCleanSession() {
 		return cleanSession;
 	}
-	
+
 	protected byte[] getVariableHeader() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			
-			if (MqttVersion == 3) {
-				encodeUTF8(dos,"MQIsdp");			
+
+			if (mqttVersion == 3) {
+				encodeUTF8(dos, "MQIsdp");
+			} else if (mqttVersion == 4) {
+				encodeUTF8(dos, "MQTT");
 			}
-			else if (MqttVersion == 4) {
-				encodeUTF8(dos,"MQTT");			
-			}
-			dos.write(MqttVersion);
+			dos.write(mqttVersion);
 
 			byte connectFlags = 0;
-			
+
 			if (cleanSession) {
 				connectFlags |= 0x02;
 			}
-			
-			if (willMessage != null ) {
+
+			if (willMessage != null) {
 				connectFlags |= 0x04;
-				connectFlags |= (willMessage.getQos()<<3);
+				connectFlags |= (willMessage.getQos() << 3);
 				if (willMessage.isRetained()) {
 					connectFlags |= 0x20;
 				}
 			}
-			
+
 			if (userName != null) {
 				connectFlags |= 0x80;
 				if (password != null) {
@@ -125,27 +131,27 @@ public class MqttConnect extends MqttWireMessage {
 			dos.writeShort(keepAliveInterval);
 			dos.flush();
 			return baos.toByteArray();
-		} catch(IOException ioe) {
+		} catch (IOException ioe) {
 			throw new MqttException(ioe);
 		}
 	}
-	
+
 	public byte[] getPayload() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			encodeUTF8(dos,clientId);
-			
+			encodeUTF8(dos, clientId);
+
 			if (willMessage != null) {
-				encodeUTF8(dos,willDestination);
+				encodeUTF8(dos, willDestination);
 				dos.writeShort(willMessage.getPayload().length);
 				dos.write(willMessage.getPayload());
 			}
-			
+
 			if (userName != null) {
-				encodeUTF8(dos,userName);
+				encodeUTF8(dos, userName);
 				if (password != null) {
-					encodeUTF8(dos,new String(password));
+					encodeUTF8(dos, new String(password));
 				}
 			}
 			dos.flush();
@@ -154,14 +160,14 @@ public class MqttConnect extends MqttWireMessage {
 			throw new MqttException(ex);
 		}
 	}
-	
+
 	/**
 	 * Returns whether or not this message needs to include a message ID.
 	 */
 	public boolean isMessageIdRequired() {
 		return false;
 	}
-	
+
 	public String getKey() {
 		return KEY;
 	}

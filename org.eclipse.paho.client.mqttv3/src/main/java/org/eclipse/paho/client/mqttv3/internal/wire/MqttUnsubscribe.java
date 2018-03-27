@@ -27,25 +27,32 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * An on-the-wire representation of an MQTT UNSUBSCRIBE message.
  */
 public class MqttUnsubscribe extends MqttWireMessage {
-	
+
 	private String[] names;
 	private int count;
 
 	/**
 	 * Constructs an MqttUnsubscribe
-	 * @param names The topics to unsubscribe from
+	 * 
+	 * @param names
+	 *            The topics to unsubscribe from
 	 */
 	public MqttUnsubscribe(String[] names) {
 		super(MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE);
-		this.names = names;
+		if (names != null) {
+			this.names = names.clone();
+		}
 	}
-	
+
 	/**
 	 * Constructor for an on the wire MQTT un-subscribe message
 	 * 
-	 * @param info the info byte
-	 * @param data the data byte array
-	 * @throws IOException if an exception occurs whilst reading the input stream
+	 * @param info
+	 *            the info byte
+	 * @param data
+	 *            the data byte array
+	 * @throws IOException
+	 *             if an exception occurs whilst reading the input stream
 	 */
 	public MqttUnsubscribe(byte info, byte[] data) throws IOException {
 		super(MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE);
@@ -86,7 +93,7 @@ public class MqttUnsubscribe extends MqttWireMessage {
 	protected byte getMessageInfo() {
 		return (byte) (2 | (duplicate ? 8 : 0));
 	}
-	
+
 	protected byte[] getVariableHeader() throws MqttException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -103,7 +110,7 @@ public class MqttUnsubscribe extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			for (int i=0; i<names.length; i++) {
+			for (int i = 0; i < names.length; i++) {
 				encodeUTF8(dos, names[i]);
 			}
 			dos.flush();

@@ -68,7 +68,7 @@ public class PublishMessage extends Bindable {
 	}
 
 	public void setPayload(byte[] payload) {
-		this.payload = payload;
+		this.payload = payload.clone();
 	}
 
 	@Override

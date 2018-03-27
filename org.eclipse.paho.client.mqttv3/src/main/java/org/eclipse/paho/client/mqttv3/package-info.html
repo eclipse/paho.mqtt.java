@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Eclipse Paho MQTTv3 Java Client</title>
+</head>
+
+<body>
+    Contains a programming interface enabling applications to communicate with an MQTT server.
+    <p>The MQ Telemetry Transport (MQTT) is a lightweight broker-based publish/subscribe messaging protocol designed to be open,
+        simple, lightweight and easy to implement. These characteristics make it ideal for use in constrained environments,
+        for example, but not limited to:</p>
+    <ul>
+        <li>Where the network is expensive, has low bandwidth or is unreliable such as mobile and vsat networks</li>
+        <li>When run on an embedded or mobile device with limited processor, memory or battery</li>
+    </ul>
+    <p>Features of the protocol include:</p>
+    <ul>
+        <li>The publish/subscribe message pattern to provide one-to-many message distribution and decoupling of applications</li>
+        <li>A messaging transport that is agnostic to the content of the payload</li>
+        <li>The use of TCP/IP to provide network connectivity</li>
+        <li>The use of SSL/TLS to provide network security and trust</li>
+        <li>Three qualities of service for message delivery which are maintained across network, client and server breaks.
+            <ul>
+                <li>"At most once", where messages are delivered according to the best efforts of the underlying TCP/IP network.
+                    Message loss or duplication can occur. This level could be used, for example, with ambient sensor data
+                    where it does not matter if an individual reading is lost as the next one will be published soon after.</li>
+                <li>"At least once", where messages are assured to arrive but duplicates may occur.</li>
+                <li>"Exactly once", where message are assured to arrive exactly once. This level could be used, for example,
+                    with billing systems where duplicate or lost messages could lead to incorrect charges being applied.</li>
+            </ul>
+            The quality of service for message delivery is met even if the network connection breaks, or the client or the server stop
+            while a message is being delivered</li>
+        <li>A small transport overhead (the fixed-length header is just 2 bytes), and protocol exchanges minimised to reduce
+            network traffic</li>
+        <li>A mechanism to notify interested parties to an abnormal disconnection of a client using the Last Will and Testament
+            feature</li>
+    </ul>
+    <p>The basic means of operating the client is:</p>
+    <ol>
+        <li>Create an instance of {@link org.eclipse.paho.client.mqttv3.MqttClient} or {@link org.eclipse.paho.client.mqttv3.MqttAsyncClient},
+            providing the address of an MQTT server and a unique client identifier.</li>
+        <li>
+            <code>connect</code> to the server</li>
+        <li>Exchange messages with the server:
+            <ul>
+                <li>
+                    <code>publish messages</code> to the server specifying a
+                    <code>topic</code> as the destination on the server</li>
+                <li>
+                    <code>subscribe</code> to one more
+                    <code>topics</code>. The server will send any messages it receives on those topics to the client. The client
+                    will be informed when a message arrives via a
+                    <code>callback</code>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <code>disconnect</code> from the server.</li>
+    </ol>
+    <p>The programming model and concepts like the protocol are small and easy to use. Key concepts to use when creating MQTT
+        application include:</p>
+    <ul>
+        <li>Every client instance that connects to an MQTT server must have a unique client identifier. If a second instance
+            of a client with the same ID connects to a server the first instance will be disconnected.</li>
+        <li>For message delivery to be reliable and withstand normal and abnormal network breaks together with client and server
+            outages the client must use a persistent store to hold messages while they are being delivered. This is the default
+            case where a file based persistent store {@link org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence
+            MqttDefaultFilePersistence} is used.</li>
+        <li>When connecting the {@link org.eclipse.paho.client.mqttv3.MqttConnectOptions#setCleanSession(boolean) cleansession}
+            option has a big impact on the operation of the client. If set to false:
+            <ul>
+                <li>Message delivery will match the quality of service specified when the message was published even across failures
+                    of the network, client or server</li>
+                <li>The server will store messages for active subscriptions on behalf of the client when the client is not connected.
+                    The server will deliver these messages to the client the next time it connects.</li>
+            </ul>
+            If set to true:
+            <ul>
+                <li>Any state stored on the client and server related to the client will be cleansed before the connection is
+                    fully started. Subscriptions from earlier sessions will be unsubscribed and any messages still in-flight
+                    from previous sessions will be deleted.</li>
+                <li>When the client disconnects either as the result of the application requesting a disconnect or a network
+                    failure, state related to the client will be cleansed just as at connect time.</li>
+                <li>Messages will only be delivered to the quality of service requested at publish time if the connection is
+                    maintained while the message is being delivered</li>
+            </ul>
+        </li>
+        <li>When subscribing for messages the subscription can be for an absolute topic or a wildcarded topic.</li>
+        <li>When unsubscribing the topic to be unsubscribed must match one specified on an earlier subscribe.</li>
+        <li>There are two MQTT client libraries to choose from:
+            <ol>
+                <li>{@link org.eclipse.paho.client.mqttv3.IMqttAsyncClient MqttAsyncClient} which provides a non-blocking interface
+                    where methods return before the requested operation has completed. The completion of the operation can
+                    be monitored by in several ways:
+                    <ul>
+                        <li>Use the {@link org.eclipse.paho.client.mqttv3.IMqttToken#waitForCompletion waitForCompletion} call
+                            on the token returned from the operation. This will block until the operation completes.</li>
+                        <li>Pass a {@link org.eclipse.paho.client.mqttv3.IMqttActionListener IMqttActionListener} to the operation.
+                            The listener will then be called back when the operation completes.</li>
+                        <li>Set a {@link org.eclipse.paho.client.mqttv3.MqttCallback MqttCallback} on the client. It will be
+                            notified when a message arrives, a message have been delivered to the server and when the connection
+                            to the server is lost.</li>
+                    </ul>
+                </li>
+                <li>{@link org.eclipse.paho.client.mqttv3.IMqttClient MqttClient} where methods block until the operation has
+                    completed.</li>
+            </ol>
+        </li>
+        <li>For both the blocking and non-blocking clients some operations are asynchronous. This includes:
+            <ul>
+                <li>Notification that a new message has arrived: {@link org.eclipse.paho.client.mqttv3.MqttCallback#messageArrived
+                    messageArrived}.</li>
+                <li>Notification that the connection to the server has broken: {@link org.eclipse.paho.client.mqttv3.MqttCallback#connectionLost
+                    connectionLost}.</li>
+                <li>Notification that a message has been delivered to the server: {@link org.eclipse.paho.client.mqttv3.MqttCallback#deliveryComplete
+                    deliveryComplete}.</li>
+            </ul>
+            A client registers interest in these notifications by registering a {@link org.eclipse.paho.client.mqttv3.MqttCallback MqttCallback}
+            on the client</li>
+        <li>There are a number of programs that demonstrate the different modes of writing MQTT applications
+            <ul>
+                <li>{@link org.eclipse.paho.sample.mqttv3app.Sample} uses the blocking client interface</li>
+                <li>{@link org.eclipse.paho.sample.mqttv3app.SampleAsyncCallBack} uses the asynchronous client with callbacks
+                    which are notified when an operation completes</li>
+                <li>{@link org.eclipse.paho.sample.mqttv3app.SampleAsyncWait} uses the asynchronous client and shows how to use
+                    the token returned from each operation to block until the operation completes.</li>
+            </ul>
+        </li>
+        <li>{@link org.eclipse.paho.client.mqttv3.MqttConnectOptions MqttConnectOptions} can be used to override the default
+            connection options. This includes:
+            <ul>
+                <li>Setting the cleansession flag</li>
+                <li>Specifying a list of MQTT servers that the client can attempt to connect to</li>
+                <li>Set a keepalive interval</li>
+                <li>Setting the last will and testament</li>
+                <li>Setting security credentials</li>
+            </ul>
+        </li>
+    </ul>
+</body>
+
+</html>
