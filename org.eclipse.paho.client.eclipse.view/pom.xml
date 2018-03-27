@@ -6,17 +6,17 @@
 		<artifactId>java-parent</artifactId>
 		<version>1.2.1-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>org.eclipse.paho.client.eclipse.view</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-compiler-plugin</artifactId>
@@ -27,7 +27,7 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -56,5 +56,4 @@
 			</plugin>
 		</plugins>
 	</build>
-</project> 
-
+</project>

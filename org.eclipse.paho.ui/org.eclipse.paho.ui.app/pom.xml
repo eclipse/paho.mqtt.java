@@ -9,7 +9,7 @@
 
 	<artifactId>org.eclipse.paho.ui.app</artifactId>
 	<packaging>eclipse-repository</packaging>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -41,4 +41,4 @@
 		</plugins>
 	</build>
 
-</project> 
+</project>
