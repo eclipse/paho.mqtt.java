@@ -1144,9 +1144,14 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 		IMqttToken token = this.subscribe(topicFilters, qos, userContext, callback);
 
-		// add message handlers to the list for this client
+		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
-			this.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            if (messageListeners[i] == null) {
+                this.comms.removeMessageListener(topicFilters[i]);
+            }
+            else {
+                this.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            }
 		}
 
 		return token;
