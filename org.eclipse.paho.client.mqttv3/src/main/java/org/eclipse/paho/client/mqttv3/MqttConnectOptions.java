@@ -576,7 +576,7 @@ public class MqttConnectOptions {
 		if (mqttVersion != MQTT_VERSION_DEFAULT && 
 			mqttVersion != MQTT_VERSION_3_1 && 
 			mqttVersion != MQTT_VERSION_3_1_1) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("An incorrect version was used \"" + mqttVersion + "\". Acceptable version options are " + MQTT_VERSION_DEFAULT + ", " + MQTT_VERSION_3_1 + " and " + MQTT_VERSION_3_1_1 + ".");
 		}
 		this.mqttVersion = mqttVersion;
 	}
