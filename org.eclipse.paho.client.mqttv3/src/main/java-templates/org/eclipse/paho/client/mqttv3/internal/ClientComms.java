@@ -530,6 +530,7 @@ public class ClientComms {
 	 * @throws MqttException if an error occurs whilst disconnecting
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
+		conState = DISCONNECTING;
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
 			clientState.quiesce(quiesceTimeout);
