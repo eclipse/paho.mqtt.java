@@ -1006,7 +1006,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		// @TRACE 117=>
 		log.fine(CLASS_NAME, methodName, "117");
 
-		token = comms.checkForActivity();
+		token = comms.checkForActivity(callback);
 		// @TRACE 118=<
 		log.fine(CLASS_NAME, methodName, "118");
 
