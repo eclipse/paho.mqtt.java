@@ -10,7 +10,7 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptionsBuilder;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
-import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.client.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
@@ -18,45 +18,50 @@ import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 public class V5Client implements MqttCallback {
 
 	private String broker = "tcp://localhost:1883";
-	private String clientId = ""; // Use Empty ID to get a server assigned client ID
+	private String clientId = "test-client-id"; 
 	private String topic = "MQTT Examples";
 	private String content = "Message from MqttPublishSample";
 	private String willContent = "I've Disconnected, sorry!";
-	private int qos = 1;
+	private int qos = 0;
 	Object runningLock;
 	boolean running = true;
 	int x = 0;
 	public V5Client() throws InterruptedException {
 
 		try {
-			MemoryPersistence persistence = new MemoryPersistence();
+			MqttDefaultFilePersistence persistence = new MqttDefaultFilePersistence();
 			MqttAsyncClient asyncClient = new MqttAsyncClient(broker, clientId, persistence);
 
 			// Lets build our Connection Options:
 			MqttConnectionOptionsBuilder conOptsBuilder = new MqttConnectionOptionsBuilder();
 			MqttConnectionOptions conOpts = conOptsBuilder.serverURI(broker).cleanSession(true)
 					.sessionExpiryInterval(120L).automaticReconnect(true)
-					.topicAliasMaximum(0)
+					.topicAliasMaximum(10)
 					.will(topic, new MqttMessage(willContent.getBytes(), qos, false, null)).build();
 			asyncClient.setCallback(this);
 
 
 			System.out.println("Connecting to broker: " + broker);
 
-			asyncClient.connect(conOpts, null, new MqttActionListener() {
+			IMqttToken connectToken = asyncClient.connect(conOpts, null, new MqttActionListener() {
 
 				@Override
 				public void onSuccess(IMqttToken asyncActionToken) {
-					System.out.println("Connected");
+					System.out.println("Connected, RC: " + asyncActionToken.getResponse());
+					
 
 					printConnectDetails((MqttToken) asyncActionToken);
 					try {
 						IMqttToken subToken = asyncClient.subscribe(topic, qos);
 						subToken.waitForCompletion();
 						printSubscriptionDetails((MqttToken) subToken);
+						System.out.println("Sub Return Code: " );
+						System.out.println(subToken.getReasonCodes()[0]);
+						
 						MqttMessage msg = new MqttMessage(content.getBytes());
 						msg.setQos(qos);
-						asyncClient.publish(topic, msg);
+						IMqttDeliveryToken pubDelToken = asyncClient.publish(topic, msg);
+						
 					} catch (MqttException e) {
 						System.err.println("Exception Occured whilst Subscribing:");
 						e.printStackTrace();
@@ -71,6 +76,8 @@ public class V5Client implements MqttCallback {
 				}
 			});
 			
+			connectToken.waitForCompletion();
+			
 			
 
 			while (running) {
@@ -83,10 +90,19 @@ public class V5Client implements MqttCallback {
 					message = "FINISH";
 					running = false;
 				}
-				asyncClient.publish(topic, new MqttMessage(message.getBytes(), 2, false, null));
+				IMqttDeliveryToken deliveryToken = asyncClient.publish(topic, new MqttMessage(message.getBytes(), qos, false, null));
+				deliveryToken.waitForCompletion();
+				//System.out.println("Delivery Reason Code: " + deliveryToken.getReasonCodes()[0]);
 				x++;
 
 			}
+			
+			// Unsubscribe from the topic
+			IMqttToken unsubscribeToken = asyncClient.unsubscribe(topic);
+			unsubscribeToken.waitForCompletion();
+			System.out.println("Unsubscribed: " + unsubscribeToken.getResponse().getReasonCodes()[0]);
+			
+			
 			asyncClient.disconnect(5000);
 			System.out.println("Disconnected");
 			asyncClient.close();
