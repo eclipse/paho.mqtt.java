@@ -56,6 +56,8 @@
 						<exclude>${test.exclude}</exclude>
 					</excludes>
 					<runOrder>alphabetical</runOrder>
+					<reuseForks>false</reuseForks>
+        			<forkCount>1</forkCount>
 				</configuration>
 			</plugin>
 		</plugins>
