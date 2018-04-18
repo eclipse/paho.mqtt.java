@@ -343,6 +343,7 @@ public abstract class MqttWireMessage {
 	}
 	
 	/**
+	 * 
 	 * Returns the reason codes from the MqttWireMessage.
 	 * These will be present if the messages is of the following types:
 	 * <ul>
@@ -356,8 +357,10 @@ public abstract class MqttWireMessage {
 	 * <li>AUTH - 1 Reason Code Max.</li>
 	 * </ul>
 	 * 
+	 * Warning: This method may be removed in favour of Token.getReasonCodes()
+	 * 
 	 * May be null if this message does not contain any Reason Codes.
-	 * @return
+	 * @return An array of return codes, or null.
 	 */
 	public int[] getReasonCodes() {
 		if(this.reasonCodes != null) {
