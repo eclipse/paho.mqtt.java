@@ -1512,7 +1512,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 			// @Trace 502=Automatic Reconnect failed, rescheduling: {0}
 			log.fine(CLASS_NAME, methodName, "502", new Object[] { asyncActionToken.getClient().getClientId() });
-			if (reconnectDelay < 128000) {
+			if (reconnectDelay < connOpts.getMaxReconnectDelay()) {
 				reconnectDelay = reconnectDelay * 2;
 			}
 			rescheduleReconnectCycle(reconnectDelay);
