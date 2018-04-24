@@ -80,6 +80,7 @@ public class MqttConnectOptions {
 	private String[] serverURIs = null;
 	private int MqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
+	private int maxReconnectDelay = 128000;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
@@ -113,6 +114,22 @@ public class MqttConnectOptions {
 	 */
 	public void setPassword(char[] password) {
 		this.password = password;
+	}
+
+	/**
+	 * Get the maximum time (in millis) to wait between reconnects
+	 * @return Get the maximum time (in millis) to wait between reconnects
+	 */
+	public int getMaxReconnectDelay() {
+	    return maxReconnectDelay;
+	}
+
+	/**
+	 * Set the maximum time to wait between reconnects
+	 * @param maxReconnectDelay the duration (in millis)
+	 */
+	public void setMaxReconnectDelay(int maxReconnectDelay) {
+	    this.maxReconnectDelay = maxReconnectDelay;
 	}
 
 	/**
