@@ -20,7 +20,9 @@ package org.eclipse.paho.mqttv5.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
@@ -119,6 +121,7 @@ public class MqttConnectionOptions {
 	private Properties sslClientProps = null; // SSL Client Properties
 	private HostnameVerifier sslHostnameVerifier = null; // SSL Hostname Verifier
 
+	private Map<String, String> customWebSocketHeaders;
 	/**
 	 * Returns the MQTT version.
 	 * 
@@ -933,6 +936,18 @@ public class MqttConnectionOptions {
 		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
 	}
 
+	/**
+	 * Sets the Custom WebSocket Headers for the WebSocket Connection.
+	 *
+	 * @param headers The custom websocket headers {@link Properties}
+	 */
+	public void setCustomWebSocketHeaders(Map<String, String> headers) {
+		this.customWebSocketHeaders = Collections.unmodifiableMap(headers);
+	}
+
+	public Map<String, String> getCustomWebSocketHeaders() {
+		return customWebSocketHeaders;
+	}
 
 	/**
 	 * @return The Debug Properties
