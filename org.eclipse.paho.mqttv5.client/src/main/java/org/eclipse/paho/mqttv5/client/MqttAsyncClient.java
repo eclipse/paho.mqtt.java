@@ -783,7 +783,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port,
 					this.mqttSession.getClientId());
 			((WebSocketSecureNetworkModule) netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
-			((WebSocketNetworkModule) netModule).setCustomWebSocketHeaders(options.getCustomWebSocketHeaders());
+			((WebSocketSecureNetworkModule) netModule).setCustomWebSocketHeaders(options.getCustomWebSocketHeaders());
 			// Ciphers suites need to be set, if they are available
 			if (wSSFactoryFactory != null) {
 				String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);
