@@ -40,7 +40,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	private String uri;
 	private String host;
 	private int port;
-	private Properties customHeaders;
+	private Properties customWebSocketHeaders;
 
 	ByteBuffer recievedPayload;
 	
@@ -51,19 +51,19 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	 */
 	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
 
-	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, Properties customHeaders) {
+	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, Properties customWebSocketHeaders) {
 		super(factory, host, port, clientId);
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
-		this.customHeaders = customHeaders;
+		this.customWebSocketHeaders = customWebSocketHeaders;
 		this.pipedInputStream = new PipedInputStream();
 		log.setResourceName(clientId);
 	}
 
 	public void start() throws IOException, MqttException {
 		super.start();
-		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port, customHeaders);
+		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port, customWebSocketHeaders);
 		handshake.execute();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("WssSocketReceiver");

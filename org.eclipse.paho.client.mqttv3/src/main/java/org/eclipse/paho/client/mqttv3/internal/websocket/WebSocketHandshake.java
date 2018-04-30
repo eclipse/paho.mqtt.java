@@ -55,15 +55,15 @@ public class WebSocketHandshake {
 	String uri;
 	String host;
 	int port;
-	Properties customHeaders;
+	Properties customWebSocketHeaders;
 
-	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Properties customHeaders){
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Properties customWebSocketHeaders){
 		this.input = input;
 		this.output = output;
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
-		this.customHeaders = customHeaders;
+		this.customWebSocketHeaders = customWebSocketHeaders;
 	}
 
 	/**
@@ -111,12 +111,12 @@ public class WebSocketHandshake {
 			pw.print("Sec-WebSocket-Protocol: mqtt" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
 
-			if (customHeaders != null) {
-				Set keys = customHeaders.keySet();
+			if (customWebSocketHeaders != null) {
+				Set keys = customWebSocketHeaders.keySet();
 				Iterator i = keys.iterator();
 				while (i.hasNext()) {
 					String k = (String) i.next();
-					String value = customHeaders.getProperty(k);
+					String value = customWebSocketHeaders.getProperty(k);
 					pw.print(k + ": " + value + LINE_SEPARATOR);
 				}
 			}
