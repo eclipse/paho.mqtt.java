@@ -154,7 +154,7 @@ public class ClientState implements MqttState {
 	private Hashtable<String, Integer> outgoingTopicAliases;
 	private Hashtable<Integer, String> incomingTopicAliases;
 	private int outgoingTopicAliasCount = 1;
-	
+
 	private MqttSession mqttSession;
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, CommsCallback callback,
@@ -403,7 +403,8 @@ public class ClientState implements MqttState {
 					}
 					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
-					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
+					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()),
+							Integer.valueOf(sendMessage.getMessageId()));
 				} else if (key.startsWith(PERSISTENCE_SENT_BUFFERED_PREFIX)) {
 
 					// Buffered outgoing messages that have not yet been sent at all
@@ -431,7 +432,8 @@ public class ClientState implements MqttState {
 
 					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
-					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
+					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()),
+							Integer.valueOf(sendMessage.getMessageId()));
 
 				} else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {
 					MqttPubRel pubRelMessage = (MqttPubRel) message;
@@ -510,25 +512,10 @@ public class ClientState implements MqttState {
 	@Override
 	public void send(MqttWireMessage message, MqttToken token) throws MqttException {
 		final String methodName = "send";
+		// Set Message ID if required
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
 			if (message instanceof MqttPublish && (((MqttPublish) message).getMessage().getQos() != 0)) {
 				message.setMessageId(getNextMessageId());
-				if (this.mqttSession.getOutgoingTopicAliasMaximum() > 0) {
-					String topic = ((MqttPublish) message).getTopicName();
-					if (outgoingTopicAliases.containsKey(topic)) {
-						// Existing Topic Alias, Assign it and remove the topic string
-						((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliases.get(topic));
-						((MqttPublish) message).setTopicName(null);
-					} else {
-						if (outgoingTopicAliasCount <= this.mqttSession.getOutgoingTopicAliasMaximum()) {
-							// Create a new Topic Alias and increment the counter
-							((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliasCount);
-							outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), outgoingTopicAliasCount);
-							outgoingTopicAliasCount++;
-						}
-					}
-				}
-
 			} else if (message instanceof MqttPubAck || message instanceof MqttPubRec || message instanceof MqttPubRel
 					|| message instanceof MqttPubComp || message instanceof MqttSubscribe
 					|| message instanceof MqttSubAck || message instanceof MqttUnsubscribe
@@ -536,6 +523,23 @@ public class ClientState implements MqttState {
 				message.setMessageId(getNextMessageId());
 			}
 		}
+		// Set Topic Alias if required
+		if (message instanceof MqttPublish && this.mqttSession.getOutgoingTopicAliasMaximum() > 0) {
+			String topic = ((MqttPublish) message).getTopicName();
+			if (outgoingTopicAliases.containsKey(topic)) {
+				// Existing Topic Alias, Assign it and remove the topic string
+				((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliases.get(topic));
+				((MqttPublish) message).setTopicName(null);
+			} else {
+				if (outgoingTopicAliasCount <= this.mqttSession.getOutgoingTopicAliasMaximum()) {
+					// Create a new Topic Alias and increment the counter
+					((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliasCount);
+					outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), outgoingTopicAliasCount);
+					outgoingTopicAliasCount++;
+				}
+			}
+		}
+		
 		if (token != null) {
 			try {
 				token.internalTok.setMessageID(message.getMessageId());
@@ -670,8 +674,8 @@ public class ClientState implements MqttState {
 		final String methodName = "undo";
 		synchronized (queueLock) {
 			// @TRACE 618=key={0} QoS={1}
-			log.fine(CLASS_NAME, methodName, "618",
-					new Object[] { Integer.valueOf(message.getMessageId()), Integer.valueOf(message.getMessage().getQos()) });
+			log.fine(CLASS_NAME, methodName, "618", new Object[] { Integer.valueOf(message.getMessageId()),
+					Integer.valueOf(message.getMessage().getQos()) });
 
 			if (message.getMessage().getQos() == 1) {
 				outboundQoS1.remove(Integer.valueOf(message.getMessageId()));
@@ -1039,7 +1043,8 @@ public class ClientState implements MqttState {
 			// PUBREL - the operation is not complete until a PUBCOMP
 			// is received
 			// Currently this client has no need of the properties, so this is left empty.
-			MqttPubRel rel = new MqttPubRel(MqttReturnCode.RETURN_CODE_SUCCESS, ack.getMessageId(), new MqttProperties());
+			MqttPubRel rel = new MqttPubRel(MqttReturnCode.RETURN_CODE_SUCCESS, ack.getMessageId(),
+					new MqttProperties());
 			this.send(rel, token);
 		} else if (ack instanceof MqttPubAck || ack instanceof MqttPubComp) {
 
@@ -1117,13 +1122,13 @@ public class ClientState implements MqttState {
 		if (!quiescing) {
 			if (message instanceof MqttPublish) {
 				MqttPublish send = (MqttPublish) message;
-				
+
 				// Do we have an incoming topic Alias?
-				if(send.getProperties().getTopicAlias() != null && send.getProperties().getTopicAlias() != 0) {
+				if (send.getProperties().getTopicAlias() != null && send.getProperties().getTopicAlias() != 0) {
 					int incomingTopicAlias = send.getProperties().getTopicAlias();
-					
+
 					// Are incoming Topic Aliases enabled / is it a valid Alias?
-					if(incomingTopicAlias > this.mqttSession.getIncomingTopicAliasMax() || incomingTopicAlias == 0) {
+					if (incomingTopicAlias > this.mqttSession.getIncomingTopicAliasMax() || incomingTopicAlias == 0) {
 						// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
 						log.severe(CLASS_NAME, methodName, "653",
 								new Object[] { Integer.valueOf(this.mqttSession.getIncomingTopicAliasMax()),
@@ -1132,18 +1137,18 @@ public class ClientState implements MqttState {
 							callback.mqttErrorOccured(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
 						}
 						throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
-						
+
 					}
-					
+
 					// Is this alias being sent with a topic string?
-					if(send.getTopicName() != null) {
+					if (send.getTopicName() != null) {
 						// @TRACE 652=Setting Incoming New Topic Alias alias={0}, topicName={1}
-						log.fine(CLASS_NAME, methodName, "652",
-								new Object[] { Integer.valueOf(send.getProperties().getTopicAlias()), send.getTopicName() });
+						log.fine(CLASS_NAME, methodName, "652", new Object[] {
+								Integer.valueOf(send.getProperties().getTopicAlias()), send.getTopicName() });
 						incomingTopicAliases.put(send.getProperties().getTopicAlias(), send.getTopicName());
 					} else {
 						// No Topic String, so must be in incomingTopicAliases.
-						if(incomingTopicAliases.contains(incomingTopicAlias)) {
+						if (incomingTopicAliases.contains(incomingTopicAlias)) {
 							send.setTopicName(incomingTopicAliases.get(incomingTopicAlias));
 						} else {
 							// @TRACE 654=Unknown Topic Alias: Incoming Alias={1}
@@ -1153,8 +1158,7 @@ public class ClientState implements MqttState {
 						}
 					}
 				}
-				
-				
+
 				switch (send.getMessage().getQos()) {
 				case 0:
 				case 1:
@@ -1166,7 +1170,8 @@ public class ClientState implements MqttState {
 					persistence.put(getReceivedPersistenceKey(message), (MqttPublish) message);
 					inboundQoS2.put(Integer.valueOf(send.getMessageId()), send);
 					// Currently this client has no need of the properties, so this is left empty.
-					this.send(new MqttPubRec(MqttReturnCode.RETURN_CODE_SUCCESS, send.getMessageId(), new MqttProperties()), null);
+					this.send(new MqttPubRec(MqttReturnCode.RETURN_CODE_SUCCESS, send.getMessageId(),
+							new MqttProperties()), null);
 					break;
 
 				default:
@@ -1181,7 +1186,8 @@ public class ClientState implements MqttState {
 				} else {
 					// Original publish has already been delivered.
 					// Currently this client has no need of the properties, so this is left empty.
-					MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, message.getMessageId(), new MqttProperties());
+					MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, message.getMessageId(),
+							new MqttProperties());
 					this.send(pubComp, null);
 				}
 			} else if (message instanceof MqttAuth) {
@@ -1190,7 +1196,6 @@ public class ClientState implements MqttState {
 			}
 		}
 	}
-
 
 	/**
 	 * Called when waiters and callbacks have processed the message. For messages
@@ -1424,8 +1429,9 @@ public class ClientState implements MqttState {
 					if (tokc > 0 || pendingFlows.size() > 0 || !callback.isQuiesced()) {
 						// @TRACE 639=wait for outstanding: actualInFlight={0} pendingFlows={1}
 						// inFlightPubRels={2} tokens={3}
-						log.fine(CLASS_NAME, methodName, "639", new Object[] { Integer.valueOf(actualInFlight),
-								Integer.valueOf(pendingFlows.size()), Integer.valueOf(inFlightPubRels), Integer.valueOf(tokc) });
+						log.fine(CLASS_NAME, methodName, "639",
+								new Object[] { Integer.valueOf(actualInFlight), Integer.valueOf(pendingFlows.size()),
+										Integer.valueOf(inFlightPubRels), Integer.valueOf(tokc) });
 
 						// wait for outstanding in flight messages to complete and
 						// any pending flows to complete

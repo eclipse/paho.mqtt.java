@@ -139,7 +139,7 @@ public class MqttV3Receiver implements MqttCallback {
     final String methodName = "validateReceipt";
     log.entering(className, methodName, new Object[]{sendTopic, expectedQos});
 
-    long waitMilliseconds = 40*30000;
+    long waitMilliseconds = 60000;
     ReceivedMessage receivedMessage = receiveNext(waitMilliseconds);
     if (receivedMessage == null) {
       report(" No message received in waitMilliseconds=" + waitMilliseconds);

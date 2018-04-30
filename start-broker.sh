@@ -14,7 +14,7 @@
 
 if [ "$BROKER" == "MOSQUITTO" ]; then
 	if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-		echo "Installing Starting Mosquitto Broker on Linux."
+		echo "Installing and starting Mosquitto Broker on Linux."
 		pwd
 		sudo service mosquitto stop
 		mosquitto -h
@@ -22,7 +22,7 @@ if [ "$BROKER" == "MOSQUITTO" ]; then
 	fi
 
 	if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-		echo "Installing Starting Mosquitto Broker on OSX."
+		echo "Installing and starting Mosquitto Broker on OSX."
 		pwd
 		brew update
 		brew install openssl mosquitto
@@ -31,7 +31,8 @@ if [ "$BROKER" == "MOSQUITTO" ]; then
 		/usr/local/sbin/mosquitto -c test/tls-testing/mosquitto.conf &
 	fi
 else 
-	echo "Installing Starting Python Interop Broker."
+	echo "Installing and starting Python Interop Broker."
+	sudo service mosquitto stop
 	git clone https://github.com/eclipse/paho.mqtt.testing.git
 	cd paho.mqtt.testing/interoperability
 	python3 startbroker.py -c client_testing.conf &

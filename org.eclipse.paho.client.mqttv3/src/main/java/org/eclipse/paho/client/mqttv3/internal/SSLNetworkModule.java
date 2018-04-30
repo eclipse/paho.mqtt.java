@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -137,7 +138,11 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		((SSLSocket) socket).startHandshake();
 		if (hostnameVerifier != null && !this.httpsHostnameVerificationEnabled) {
 			SSLSession session = ((SSLSocket) socket).getSession();
-			hostnameVerifier.verify(host, session);
+			if(!hostnameVerifier.verify(host, session)) {
+				session.invalidate();
+				socket.close();
+				throw new SSLPeerUnverifiedException("Host: " + host + ", Peer Host: " + session.getPeerHost());
+			}
 		}
 		// reset timeout to default value
 		socket.setSoTimeout(soTimeout);

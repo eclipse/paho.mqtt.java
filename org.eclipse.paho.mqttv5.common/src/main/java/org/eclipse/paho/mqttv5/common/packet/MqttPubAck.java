@@ -49,6 +49,8 @@ public class MqttPubAck extends MqttAck {
 		if (remainder > 2) {
 			reasonCode = dis.readUnsignedByte();
 			validateReturnCode(reasonCode, validReturnCodes);
+		} else {
+			reasonCode = 0;
 		}
 		 if( remainder >= 4) {
 			 this.properties.decodeProperties(dis);

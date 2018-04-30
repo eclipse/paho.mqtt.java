@@ -68,6 +68,7 @@ public class MqttConnectionOptions {
 	private int maxInflight = 10; // Max inflight messages
 	private int connectionTimeout = 30; // Connection timeout in seconds
 	private boolean httpsHostnameVerificationEnabled = true;
+	private int maxReconnectDelay = 128000;
 	
 	
 	public MqttProperties getConnectionProperties() {
@@ -141,13 +142,8 @@ public class MqttConnectionOptions {
 	 * 
 	 * @param userName
 	 *            The Username as a String
-	 * @throws IllegalArgumentException
-	 *             if the user name is blank or only contains whitespace characters.
 	 */
 	public void setUserName(String userName) {
-		if ((userName != null) && (userName.trim().equals(""))) {
-			throw new IllegalArgumentException();
-		}
 		this.userName = userName;
 	}
 
@@ -339,6 +335,23 @@ public class MqttConnectionOptions {
 		}
 		this.connectionTimeout = connectionTimeout;
 	}
+
+	/**
+	* Get the maximum time (in millis) to wait between reconnects
+	* @return Get the maximum time (in millis) to wait between reconnects
+	*/
+	public int getMaxReconnectDelay() {
+		return maxReconnectDelay;
+	}
+
+	/**
+	 * Set the maximum time to wait between reconnects
+	 * @param maxReconnectDelay the duration (in millis)
+	*/
+	public void setMaxReconnectDelay(int macReconnectDelay) {
+		this.maxReconnectDelay = macReconnectDelay;
+	}
+
 
 	/**
 	 * Return a list of serverURIs the client may connect to

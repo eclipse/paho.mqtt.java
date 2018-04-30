@@ -89,7 +89,7 @@ public class OfflineBufferingTest {
 		// Enable Proxy & Connect to server
 		proxy.enableProxy();
 		connectToken = client.connect(options);
-		connectToken.waitForCompletion();
+		connectToken.waitForCompletion(5000);
 		boolean isConnected = client.isConnected();
 		log.info("First Connection isConnected: " + isConnected);
 		Assert.assertTrue(isConnected);
@@ -106,7 +106,7 @@ public class OfflineBufferingTest {
 		Assert.assertFalse(pubToken.isComplete());
 		// Enable Proxy
 		proxy.enableProxy();
-		pubToken.waitForCompletion();
+		pubToken.waitForCompletion(5000);
 
 		// Check that we are connected
 		// give it some time to reconnect
@@ -128,7 +128,7 @@ public class OfflineBufferingTest {
 		log.info("Message Delivered: " + pubToken.isComplete());
 		Assert.assertTrue(pubToken.isComplete());
 		IMqttToken disconnectToken = client.disconnect();
-		disconnectToken.waitForCompletion();
+		disconnectToken.waitForCompletion(5000);
 		client.close();
 		client = null;
 		proxy.disableProxy();
@@ -161,14 +161,14 @@ public class OfflineBufferingTest {
 		MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(subClient, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
-		subConnectToken.waitForCompletion();
+		subConnectToken.waitForCompletion(5000);
 		// Subscribe to topic
 		subClient.subscribe(topicPrefix + methodName, 0);
 
 		// Enable Proxy & Connect to server
 		proxy.enableProxy();
 		connectToken = client.connect(options);
-		connectToken.waitForCompletion();
+		connectToken.waitForCompletion(5000);
 		boolean isConnected = client.isConnected();
 		log.info("First Connection isConnected: " + isConnected);
 		Assert.assertTrue(isConnected);
@@ -215,12 +215,12 @@ public class OfflineBufferingTest {
 		}
 		log.info("All messages sent and Recieved correctly.");
 		IMqttToken disconnectToken = client.disconnect();
-		disconnectToken.waitForCompletion();
+		disconnectToken.waitForCompletion(5000);
 		client.close();
 		client = null;
 
 		IMqttToken subClientDisconnectToken = subClient.disconnect();
-		subClientDisconnectToken.waitForCompletion();
+		subClientDisconnectToken.waitForCompletion(5000);
 		subClient.close();
 		subClient = null;
 
@@ -255,7 +255,7 @@ public class OfflineBufferingTest {
 		// Enable Proxy & Connect to server
 		proxy.enableProxy();
 		connectToken = client.connect(options);
-		connectToken.waitForCompletion();
+		connectToken.waitForCompletion(5000);
 		boolean isConnected = client.isConnected();
 		log.info("First Connection isConnected: " + isConnected);
 		Assert.assertTrue(isConnected);
@@ -311,7 +311,7 @@ public class OfflineBufferingTest {
 		// Enable Proxy & Connect to server
 		proxy.enableProxy();
 		connectToken = client.connect(options);
-		connectToken.waitForCompletion();
+		connectToken.waitForCompletion(5000);
 		boolean isConnected = client.isConnected();
 		log.info("First Connection isConnected: " + isConnected);
 		Assert.assertTrue(isConnected);
@@ -371,7 +371,7 @@ public class OfflineBufferingTest {
 		// Enable Proxy & Connect to server
 		proxy.enableProxy();
 		connectToken = client.connect(options);
-		connectToken.waitForCompletion();
+		connectToken.waitForCompletion(5000);
 		boolean isConnected = client.isConnected();
 		log.info("First Connection isConnected: " + isConnected);
 		Assert.assertTrue(isConnected);
@@ -434,10 +434,10 @@ public class OfflineBufferingTest {
 		MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(subClient, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
-		subConnectToken.waitForCompletion();
+		subConnectToken.waitForCompletion(5000);
 		Assert.assertTrue(subClient.isConnected());
 		IMqttToken subToken = subClient.subscribe(topicPrefix + methodName, qos);
-		subToken.waitForCompletion();
+		subToken.waitForCompletion(5000);
 
 		// Create Real client
 		log.info("Creating new client that uses existing persistence layer");
@@ -446,7 +446,7 @@ public class OfflineBufferingTest {
 		MqttAsyncClient newClient = new MqttAsyncClient(serverURIString, methodName + "new-client11", persistence);
 		// Connect Client with existing persistence layer
 		IMqttToken newClientConnectToken = newClient.connect(optionsNew);
-		newClientConnectToken.waitForCompletion();
+		newClientConnectToken.waitForCompletion(5000);
 		Assert.assertTrue(newClient.isConnected());
 
 		// Check that message is published / delivered
@@ -460,12 +460,12 @@ public class OfflineBufferingTest {
 		Assert.assertEquals(0, postConnectKeys.size());
 
 		IMqttToken newClientDisconnectToken = newClient.disconnect();
-		newClientDisconnectToken.waitForCompletion();
+		newClientDisconnectToken.waitForCompletion(5000);
 		newClient.close();
 		newClient = null;
 
 		IMqttToken subClientDisconnectToken = subClient.disconnect();
-		subClientDisconnectToken.waitForCompletion();
+		subClientDisconnectToken.waitForCompletion(5000);
 		subClient.close();
 		subClient = null;
 

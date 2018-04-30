@@ -379,8 +379,8 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 *            the persistence class to use to store in-flight message. If null
 	 *            then the default persistence mechanism is used
 	 * @param executorService
-	 *            used for managing threads. If null then a newFixedThreadPool is
-	 *            used.
+	 *            used for managing threads. If null then a newScheduledThreadPool
+	 *            is used.
 	 * @throws IllegalArgumentException
 	 *             if the URI does not start with "tcp://", "ssl://" or "local://"
 	 * @throws IllegalArgumentException
@@ -457,7 +457,8 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * long)
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
-		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties());
+		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS,
+				new MqttProperties());
 	}
 
 	/**
@@ -537,9 +538,9 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 
 	@Override
 	public void subscribe(String[] topicFilters, IMqttMessageListener messageListener) throws MqttException {
-		this.subscribe(topicFilters,  new IMqttMessageListener[] { messageListener });
+		this.subscribe(topicFilters, new IMqttMessageListener[] { messageListener });
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -563,10 +564,10 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
 		this.subscribe(new String[] { topicFilter }, new int[] { qos }, new IMqttMessageListener[] { messageListener });
 	}
-	
+
 	@Override
 	public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
-		this.subscribe(topicFilters, qos, new IMqttMessageListener[] {  });
+		this.subscribe(topicFilters, qos, new IMqttMessageListener[] {});
 	}
 
 	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
@@ -818,7 +819,5 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	public Debug getDebug() {
 		return (aClient.getDebug());
 	}
-
-	
 
 }

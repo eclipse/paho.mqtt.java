@@ -27,8 +27,21 @@ public abstract class MqttPersistableWireMessage extends MqttWireMessage
 	}
 	
 	public byte[] getHeaderBytes() throws MqttPersistenceException {
+		byte[] headerBytes = null;
 		try {
-			return getHeader();
+			if(this.getClass() == MqttPublish.class && this.getProperties().getTopicAlias() != null) {
+				// Remove the Topic Alias temporarily.
+				MqttProperties props = this.getProperties();
+				Integer topicAlias = props.getTopicAlias();
+				props.setTopicAlias(null);
+				headerBytes = getHeader();
+				// Re Set Topic Alias
+				props.setTopicAlias(topicAlias);
+				this.properties = props;
+			} else {
+				headerBytes = getHeader();
+			}
+			return headerBytes;
 		}
 		catch (MqttException ex) {
 			throw new MqttPersistenceException(ex.getCause());

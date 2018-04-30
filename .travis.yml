@@ -1,6 +1,6 @@
 sudo: true
 language: java
-
+install: true
 matrix:
   include:
     - os: linux
