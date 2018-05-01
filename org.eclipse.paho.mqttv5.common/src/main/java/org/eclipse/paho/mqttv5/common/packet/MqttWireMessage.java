@@ -317,6 +317,10 @@ public abstract class MqttWireMessage {
 	public MqttProperties getProperties() {
 		return properties;
 	}
+	
+	public void setProperties(MqttProperties properties) {
+		this.properties = properties;
+	}
 
 	@Override
 	public String toString() {

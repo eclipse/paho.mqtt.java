@@ -197,6 +197,12 @@ public class ClientComms {
 				// @TRACE 507=Client Connected, Offline Buffer available, but not empty. Adding
 				// message to buffer. message={0}
 				log.fine(CLASS_NAME, methodName, "507", new Object[] { message.getKey() });
+				// If the message is a publish, strip the topic alias:
+				if(message instanceof MqttPublish && message.getProperties().getTopicAlias()!= null) {
+					MqttProperties messageProps = message.getProperties();
+					messageProps.setTopicAlias(null);
+					message.setProperties(messageProps);
+				}
 				if (disconnectedMessageBuffer.isPersistBuffer()) {
 					this.clientState.persistBufferedMessage(message);
 				}

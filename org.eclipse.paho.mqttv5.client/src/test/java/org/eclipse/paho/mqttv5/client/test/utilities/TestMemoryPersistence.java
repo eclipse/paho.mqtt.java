@@ -99,8 +99,9 @@ public class TestMemoryPersistence implements MqttClientPersistence {
 
 	@Override
 	public void open(String clientId) throws MqttPersistenceException {
-		data = new Hashtable();
-		
+		if(this.data ==  null){
+			this.data = new Hashtable();
+		}
 	}
 
 	public Hashtable getData() {
