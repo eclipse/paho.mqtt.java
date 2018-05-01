@@ -14,7 +14,7 @@
  *    Dave Locke - initial API and implementation and/or initial documentation
  *    Ian Craggs - per subscription message handlers (bug 466579)
  *    Ian Craggs - ack control (bug 472172)
- *    James Sutton - Automatic Reconnect & Offline Buffering    
+ *    James Sutton - Automatic Reconnect & Offline Buffering
  */
 package org.eclipse.paho.mqttv5.client.internal;
 
@@ -105,8 +105,10 @@ public class CommsCallback implements Runnable {
 			if (!running) {
 				// Preparatory work before starting the background thread.
 				// For safety ensure any old events are cleared.
-				messageQueue.clear();
-				completeQueue.clear();
+				synchronized (workAvailable) {
+					messageQueue.clear();
+					completeQueue.clear();
+				}
 
 				running = true;
 				quiescing = false;
@@ -191,7 +193,7 @@ public class CommsCallback implements Runnable {
 				if (running) {
 					// Check for deliveryComplete callbacks...
 					MqttToken token = null;
-					synchronized (completeQueue) {
+					synchronized (workAvailable) {
 						if (!completeQueue.isEmpty()) {
 							// First call the delivery arrived callback if needed
 							token = completeQueue.get(0);
@@ -204,7 +206,7 @@ public class CommsCallback implements Runnable {
 
 					// Check for messageArrived callbacks...
 					MqttPublish message = null;
-					synchronized (messageQueue) {
+					synchronized (workAvailable) {
 						if (!messageQueue.isEmpty()) {
 							// Note, there is a window on connect where a publish
 							// could arrive before we've
@@ -373,9 +375,9 @@ public class CommsCallback implements Runnable {
 				}
 			}
 			if (!quiescing) {
-				messageQueue.add(sendMessage);
 				// Notify the CommsCallback thread that there's work to do...
 				synchronized (workAvailable) {
+					messageQueue.add(sendMessage);
 					// @TRACE 710=new msg avail, notify workAvailable
 					log.fine(CLASS_NAME, methodName, "710");
 					workAvailable.notifyAll();
@@ -425,9 +427,15 @@ public class CommsCallback implements Runnable {
 			spaceAvailable.notifyAll();
 		}
 	}
+	
+	boolean areQueuesEmpty() {
+	    synchronized (workAvailable) {
+	        return completeQueue.isEmpty() && messageQueue.isEmpty();    
+	    }
+	}
 
 	public boolean isQuiesced() {
-		return (quiescing && completeQueue.isEmpty() && messageQueue.isEmpty());
+		return (quiescing && areQueuesEmpty());
 	}
 
 	private void handleMessage(MqttPublish publishMessage) throws Exception {
@@ -470,8 +478,8 @@ public class CommsCallback implements Runnable {
 
 		if (running) {
 			// invoke callbacks on callback thread
-			completeQueue.add(token);
 			synchronized (workAvailable) {
+				completeQueue.add(token);
 				// @TRACE 715=new workAvailable. key={0}
 				log.fine(CLASS_NAME, methodName, "715", new Object[] { token.internalTok.getKey() });
 				workAvailable.notifyAll();
