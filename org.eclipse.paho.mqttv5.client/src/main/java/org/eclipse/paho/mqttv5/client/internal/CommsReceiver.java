@@ -162,7 +162,7 @@ public class CommsReceiver implements Runnable {
 					}
 				} else if (message != null && message instanceof MqttDisconnect) {
 					// This is a Disconnect Message
-						clientComms.shutdownConnection(null, new MqttException(MqttClientException.REASON_CODE_SERVER_DISCONNECTED), (MqttDisconnect) message);
+						clientComms.shutdownConnection(null, new MqttException(MqttClientException.REASON_CODE_SERVER_DISCONNECTED, (MqttDisconnect) message), (MqttDisconnect) message);
 				} else {
 					if (message != null) {
 						// A new message has arrived

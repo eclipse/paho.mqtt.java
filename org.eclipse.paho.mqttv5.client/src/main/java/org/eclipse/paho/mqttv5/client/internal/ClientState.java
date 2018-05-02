@@ -240,6 +240,17 @@ public class ClientState implements MqttState {
 		outboundQoS0.clear();
 		inboundQoS2.clear();
 		tokenStore.clear();
+		outgoingTopicAliases.clear();
+		incomingTopicAliases.clear();
+	}
+	
+	protected void clearConnectionState() throws MqttException {
+		final String methodName = "clearConnectionState";
+		// @TRACE=665=Clearing Connection State (Topic Aliases)
+		log.fine(CLASS_NAME, methodName, "665");
+		outgoingTopicAliases.clear();
+		incomingTopicAliases.clear();
+		
 	}
 
 	private MqttWireMessage restoreMessage(String key, MqttPersistable persistable) throws MqttException {
@@ -1350,6 +1361,8 @@ public class ClientState implements MqttState {
 			if (cleanSession) {
 				clearState();
 			}
+			
+			clearConnectionState();
 
 			pendingMessages.clear();
 			pendingFlows.clear();

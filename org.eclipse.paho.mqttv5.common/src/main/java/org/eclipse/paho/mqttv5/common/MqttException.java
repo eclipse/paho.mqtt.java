@@ -3,6 +3,8 @@ package org.eclipse.paho.mqttv5.common;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
+
 public class MqttException extends Exception {
 
 	private static final long serialVersionUID = 1L;
@@ -20,18 +22,16 @@ public class MqttException extends Exception {
 																	// the MQTTv5 specification
 	public static final int REASON_CODE_UNSUPPORTED_PROTOCOL_VERSION = 50003; // The CONNECT packet did not contain the
 																				// correct protocol name or version
-	
+
 	/**
 	 * The Server sent a publish message with an invalid topic alias.
 	 */
 	public static final int REASON_CODE_INVALID_TOPIC_ALAS = 50004;
 
-	
-
-	
-
 	private int reasonCode;
 	private Throwable cause;
+	private String disconnectReasonString;
+	private int disconnectReasonCode = 0;
 
 	/**
 	 * Constructs a new <code>MqttException</code> with the specified code as the
@@ -43,6 +43,25 @@ public class MqttException extends Exception {
 	public MqttException(int reasonCode) {
 		super();
 		this.reasonCode = reasonCode;
+	}
+
+	/**
+	 * Constructs a new <code>MqttException</code> with the specified code as the
+	 * underlying reason, with the disconnect reason if available. This is only
+	 * meant as a hint for the developer, as the
+	 * <code>MqttCallback.disconnected</code> callback is the intended disconnect
+	 * notification mechanism.
+	 */
+	public MqttException(int reasonCode, MqttDisconnect disconnect) {
+		super();
+		this.reasonCode = reasonCode;
+		if (disconnect != null) {
+			this.disconnectReasonCode = disconnect.getReturnCode();
+			if (disconnect.getProperties() != null) {
+				this.disconnectReasonString = disconnect.getProperties().getReasonString();
+			}
+		}
+
 	}
 
 	/**
@@ -101,11 +120,19 @@ public class MqttException extends Exception {
 	@Override
 	public String getMessage() {
 		ResourceBundle bundle = ResourceBundle.getBundle("org.eclipse.paho.mqttv5.common.nls.messages");
+		String message;
 		try {
-			return bundle.getString(Integer.toString(reasonCode));
+			message =  bundle.getString(Integer.toString(reasonCode));
 		} catch (MissingResourceException mre) {
-			return "MqttException";
+			message =  "Untranslated MqttException - RC: " + reasonCode;
 		}
+		if(this.disconnectReasonCode != 0) {
+			message += " Disconnect RC: " + disconnectReasonCode;
+		}
+		if(this.disconnectReasonString != null) {
+			message += " Disconnect Reason: " + disconnectReasonString;
+		}
+		return message;
 	}
 
 	/**
