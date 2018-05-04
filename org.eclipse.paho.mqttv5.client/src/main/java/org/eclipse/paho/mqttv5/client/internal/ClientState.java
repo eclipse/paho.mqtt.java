@@ -1048,6 +1048,9 @@ public class ClientState implements MqttState {
 			// @TRACE 662=no message found for ack id={0}
 			log.fine(CLASS_NAME, methodName, "662", new Object[] { Integer.valueOf(ack.getMessageId()) });
 		} else if (ack instanceof MqttPubRec) {
+			
+			// Update the token with the reason codes
+			updateResult(ack, token, mex);
 
 			// Complete the QoS 2 flow. Unlike all other
 			// flows, QoS is a 2 phase flow. The second phase sends a
@@ -1262,6 +1265,16 @@ public class ClientState implements MqttState {
 
 			checkQuiesceLock();
 		}
+	}
+	
+	/**
+	 * Updates a token with the latest reason codes, currently only used for PubRec messages.
+	 * @param msg -  The message that we are using for the update
+	 * @param token - The Token we are updating
+	 * @param ex - if there was a problem store the exception in the token.
+	 */
+	protected void updateResult(MqttWireMessage ack, MqttToken token, MqttException ex) {
+		token.internalTok.update(ack, ex);
 	}
 
 	protected void notifyResult(MqttWireMessage ack, MqttToken token, MqttException ex) {

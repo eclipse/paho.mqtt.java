@@ -46,7 +46,7 @@ public class MqttPubAck extends MqttAck {
 		DataInputStream dis = new DataInputStream(counter);
 		msgId = dis.readUnsignedShort();
 		long remainder = (long)data.length - counter.getCounter();
-		if (remainder > 2) {
+		if (remainder >= 2) {
 			reasonCode = dis.readUnsignedByte();
 			validateReturnCode(reasonCode, validReturnCodes);
 		} else {
