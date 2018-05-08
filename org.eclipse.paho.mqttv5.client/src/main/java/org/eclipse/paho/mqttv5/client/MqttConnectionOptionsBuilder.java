@@ -36,11 +36,6 @@ public class MqttConnectionOptionsBuilder {
 		mqttConnectionOptions.setKeepAliveInterval(keepAlive);
 		return this;
 	}
-
-	public MqttConnectionOptionsBuilder maxInFlight(int maxInflight) {
-		mqttConnectionOptions.setMaxInflight(maxInflight);
-		return this;
-	}
 	
 	public MqttConnectionOptionsBuilder connectionTimeout(int connectionTimeout) {
 		mqttConnectionOptions.setConnectionTimeout(connectionTimeout);

@@ -65,7 +65,6 @@ public class MqttConnectionOptions {
 	private int automaticReconnectMaxDelay = 120; // Max time to wait for automatic reconnection attempts in seconds.
 	private boolean useSubscriptionIdentifiers = true; // Whether to automatically assign subscription identifiers.
 	private int keepAliveInterval = 60; // Keep Alive Interval
-	private int maxInflight = 10; // Max inflight messages
 	private int connectionTimeout = 30; // Connection timeout in seconds
 	private boolean httpsHostnameVerificationEnabled = true;
 	private int maxReconnectDelay = 128000;
@@ -279,34 +278,6 @@ public class MqttConnectionOptions {
 			throw new IllegalArgumentException();
 		}
 		this.keepAliveInterval = keepAliveInterval;
-	}
-
-	/**
-	 * Returns the "max inflight". The max inflight limits to how many messages we
-	 * can send without receiving acknowledgments.
-	 * 
-	 * @see #setMaxInflight(int)
-	 * @return the max inflight
-	 */
-	public int getMaxInflight() {
-		return maxInflight;
-	}
-
-	/**
-	 * Sets the "max inflight". please increase this value in a high traffic
-	 * environment.
-	 * <p>
-	 * The default value is 10
-	 * </p>
-	 * 
-	 * @param maxInflight
-	 *            the number of maxInfligt messages
-	 */
-	public void setMaxInflight(int maxInflight) {
-		if (maxInflight < 0) {
-			throw new IllegalArgumentException();
-		}
-		this.maxInflight = maxInflight;
 	}
 
 	/**

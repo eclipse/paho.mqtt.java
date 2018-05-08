@@ -125,8 +125,7 @@ public class ClientState implements MqttState {
 	private long keepAlive;
 	private boolean cleanSession;
 	private MqttClientPersistence persistence;
-
-	private int maxInflight = 0;
+	
 	private int actualInFlight = 0;
 	private int inFlightPubRels = 0;
 
@@ -183,11 +182,6 @@ public class ClientState implements MqttState {
 		this.mqttSession = mqttSession;
 
 		restoreState();
-	}
-
-	protected void setMaxInflight(int maxInflight) {
-		this.maxInflight = maxInflight;
-		pendingMessages = new Vector<MqttWireMessage>(this.maxInflight);
 	}
 
 	protected void setKeepAliveSecs(long keepAliveSecs) {
@@ -469,7 +463,7 @@ public class ClientState implements MqttState {
 
 	private void restoreInflightMessages() {
 		final String methodName = "restoreInflightMessages";
-		pendingMessages = new Vector<MqttWireMessage>(this.maxInflight);
+		pendingMessages = new Vector<MqttWireMessage>(this.mqttSession.getReceiveMaximum());
 		pendingFlows = new Vector<MqttWireMessage>();
 
 		Enumeration<Integer> keys = outboundQoS2.keys();
@@ -560,7 +554,7 @@ public class ClientState implements MqttState {
 
 		if (message instanceof MqttPublish) {
 			synchronized (queueLock) {
-				if (actualInFlight >= this.maxInflight) {
+				if (actualInFlight >= this.mqttSession.getReceiveMaximum()) {
 					// @TRACE 613= sending {0} msgs at max inflight window
 					log.fine(CLASS_NAME, methodName, "613", new Object[] { Integer.valueOf(actualInFlight) });
 
@@ -846,7 +840,7 @@ public class ClientState implements MqttState {
 				// freed.
 				// In both cases queueLock will be notified.
 				if ((pendingMessages.isEmpty() && pendingFlows.isEmpty())
-						|| (pendingFlows.isEmpty() && actualInFlight >= this.maxInflight)) {
+						|| (pendingFlows.isEmpty() && actualInFlight >= this.mqttSession.getReceiveMaximum())) {
 					try {
 						// @TRACE 644=wait for new work or for space in the inflight window
 						log.fine(CLASS_NAME, methodName, "644");
@@ -892,7 +886,7 @@ public class ClientState implements MqttState {
 
 					// If the inflight window is full then messages are not
 					// processed until the inflight window has space.
-					if (actualInFlight < this.maxInflight) {
+					if (actualInFlight < this.mqttSession.getReceiveMaximum()) {
 						// The in flight window is not full so process the
 						// first message in the queue
 						result = (MqttWireMessage) pendingMessages.elementAt(0);
@@ -1526,16 +1520,6 @@ public class ClientState implements MqttState {
 		return actualInFlight;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#getMaxInFlight()
-	 */
-	@Override
-	public int getMaxInFlight() {
-		return maxInflight;
-	}
-
 	/**
 	 * Tidy up - ensure that tokens are released as they are maintained over a
 	 * disconnect / connect cycle.
@@ -1576,7 +1560,7 @@ public class ClientState implements MqttState {
 		props.put("In use msgids", inUseMsgIds);
 		props.put("pendingMessages", pendingMessages);
 		props.put("pendingFlows", pendingFlows);
-		props.put("maxInflight", Integer.valueOf(maxInflight));
+		props.put("serverReceiveMaximum", Integer.valueOf(this.mqttSession.getReceiveMaximum()));
 		props.put("nextMsgID", Integer.valueOf(nextMsgId));
 		props.put("actualInFlight", Integer.valueOf(actualInFlight));
 		props.put("inFlightPubRels", Integer.valueOf(inFlightPubRels));

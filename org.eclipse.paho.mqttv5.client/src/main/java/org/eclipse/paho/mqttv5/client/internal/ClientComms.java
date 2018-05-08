@@ -341,7 +341,6 @@ public class ClientComms {
 
 				this.clientState.setKeepAliveSecs(conOptions.getKeepAliveInterval());
 				this.clientState.setCleanSession(conOptions.isCleanSession());
-				this.clientState.setMaxInflight(conOptions.getMaxInflight());
 
 				tokenStore.open();
 				ConnectBG conbg = new ConnectBG(this, token, connect, executorService);
@@ -946,7 +945,7 @@ public class ClientComms {
 
 		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
 			if (isConnected()) {
-				while (clientState.getActualInFlight() >= (clientState.getMaxInFlight() - 1)) {
+				while (clientState.getActualInFlight() >= (mqttSession.getReceiveMaximum() - 1)) {
 					// We need to Yield to the other threads to allow the in flight messages to
 					// clear
 					Thread.yield();
