@@ -32,9 +32,9 @@ import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 /**
  * Listen for in bound messages and connection loss.
  */
-public class MqttV3Receiver implements MqttCallback {
+public class MqttV5Receiver implements MqttCallback {
 
-  static final String className = MqttV3Receiver.class.getName();
+  static final String className = MqttV5Receiver.class.getName();
   static final Logger log = Logger.getLogger(className);
 
   final static String TRACE_GROUP = "Test";
@@ -66,7 +66,7 @@ public class MqttV3Receiver implements MqttCallback {
    * @param mqttClient
    * @param reportStream
    */
-  public MqttV3Receiver(IMqttClient mqttClient, PrintStream reportStream) {
+  public MqttV5Receiver(IMqttClient mqttClient, PrintStream reportStream) {
     String methodName = Utility.getMethodName();
     log.entering(className, methodName);
 
@@ -82,7 +82,7 @@ public class MqttV3Receiver implements MqttCallback {
    * @param mqttClient
    * @param reportStream
    */
-  public MqttV3Receiver(MqttAsyncClient mqttClient, PrintStream reportStream) {
+  public MqttV5Receiver(MqttAsyncClient mqttClient, PrintStream reportStream) {
     String methodName = Utility.getMethodName();
     log.entering(className, methodName);
 

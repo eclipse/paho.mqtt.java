@@ -16,7 +16,7 @@ import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.ConnectionManipulationProxyServer;
-import org.eclipse.paho.mqttv5.client.test.utilities.MqttV3Receiver;
+import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.test.utilities.TestMemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.client.util.Debug;
@@ -160,7 +160,7 @@ public class OfflineBufferingTest {
 
 		// Create subscription client that won't be affected by proxy
 		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client");
-		MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(subClient, LoggingUtilities.getPrintStream());
+		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(subClient, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion(5000);
@@ -433,7 +433,7 @@ public class OfflineBufferingTest {
 		// as soon as the main client connects
 		log.info("Creating subscription client");
 		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client");
-		MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(subClient, LoggingUtilities.getPrintStream());
+		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(subClient, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion(5000);

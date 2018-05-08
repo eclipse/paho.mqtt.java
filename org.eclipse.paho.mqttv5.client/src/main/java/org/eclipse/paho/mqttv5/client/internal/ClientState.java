@@ -164,6 +164,7 @@ public class ClientState implements MqttState {
 
 		inUseMsgIds = new ConcurrentHashMap<>();
 		pendingFlows = new Vector<MqttWireMessage>();
+		pendingMessages = new Vector<MqttWireMessage>(mqttSession.getReceiveMaximum());
 		outboundQoS2 = new ConcurrentHashMap<>();
 		outboundQoS1 = new ConcurrentHashMap<>();
 		outboundQoS0 = new ConcurrentHashMap<>();
