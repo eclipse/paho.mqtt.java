@@ -775,7 +775,7 @@ public class ClientComms {
 
 			try {
 				// Reset an exception on existing delivery tokens.
-				// This will have been set if disconnect occured before delivery was
+				// This will have been set if disconnect occurred before delivery was
 				// fully processed.
 				MqttDeliveryToken[] toks = tokenStore.getOutstandingDelTokens();
 				for (int i = 0; i < toks.length; i++) {

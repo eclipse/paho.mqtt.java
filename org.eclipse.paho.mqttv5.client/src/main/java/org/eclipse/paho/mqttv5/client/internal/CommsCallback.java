@@ -404,11 +404,11 @@ public class CommsCallback implements Runnable {
 	 *            The exception that was thrown containing the cause for
 	 *            disconnection.
 	 */
-	public void mqttErrorOccured(MqttException exception) {
-		final String methodName = "mqttErrorOccured";
+	public void mqttErrorOccurred(MqttException exception) {
+		final String methodName = "mqttErrorOccurred";
 		log.warning(CLASS_NAME, methodName, "721", new Object[] { exception.getMessage() });
 		if (mqttCallback != null) {
-			mqttCallback.mqttErrorOccured(exception);
+			mqttCallback.mqttErrorOccurred(exception);
 		}
 	}
 

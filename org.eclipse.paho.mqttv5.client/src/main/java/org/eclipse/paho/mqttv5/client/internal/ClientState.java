@@ -1136,7 +1136,7 @@ public class ClientState implements MqttState {
 								new Object[] { Integer.valueOf(this.mqttSession.getIncomingTopicAliasMax()),
 										Integer.valueOf(incomingTopicAlias) });
 						if (callback != null) {
-							callback.mqttErrorOccured(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
+							callback.mqttErrorOccurred(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
 						}
 						throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
 

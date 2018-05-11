@@ -149,7 +149,7 @@ public class TopicAliasReconnectTest {
 			asyncClient.disconnect();
 			Assert.assertFalse(asyncClient.isConnected());
 		} catch (MqttException ex) {
-			Assert.fail("An unexpected exception occured during this test: " + ex.getMessage());
+			Assert.fail("An unexpected exception occurred during this test: " + ex.getMessage());
 		}
 	}
 

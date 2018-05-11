@@ -164,26 +164,32 @@ public class MqttDataTypes {
 	 *            the DataInputStream to decode a Variable Byte Integer From
 	 * @return a new VariableByteInteger
 	 * @throws IOException
-	 *             if an error occured whilst decoding the VBI
+	 *             if an error occurred whilst decoding the VBI
 	 */
 	public static VariableByteInteger readVariableByteInteger(DataInputStream in) throws IOException {
 		byte digit;
-		int msgLength = 0;
+		int value = 0;
 		int multiplier = 1;
 		int count = 0;
 
 		do {
 			digit = in.readByte();
 			count++;
-			msgLength += ((digit & 0x7F) * multiplier);
+			value += ((digit & 0x7F) * multiplier);
 			multiplier *= 128;
 		} while ((digit & 0x80) != 0);
+		
+		if (value < 0 || value > VARIABLE_BYTE_INT_MAX) {
+			throw new IOException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
+		}
+		
 
-		return new VariableByteInteger(msgLength, count);
+		return new VariableByteInteger(value, count);
 
 	}
 
-	public static byte[] encodeVariableByteInteger(int number) {
+	public static byte[] encodeVariableByteInteger(int number) throws IllegalArgumentException{
+		validateVariableByteInt(number);
 		int numBytes = 0;
 		long no = number;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

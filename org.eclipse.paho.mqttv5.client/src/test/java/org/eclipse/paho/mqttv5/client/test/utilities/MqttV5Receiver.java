@@ -461,7 +461,7 @@ public void disconnected(MqttDisconnectResponse disconnectResponse) {
 }
 
 @Override
-public void mqttErrorOccured(MqttException exception) {
+public void mqttErrorOccurred(MqttException exception) {
 	// TODO Auto-generated method stub
 	
 }

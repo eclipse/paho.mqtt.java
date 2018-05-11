@@ -169,7 +169,7 @@ public abstract class MqttWireMessage {
 	 * Create an MQTT Wire Message
 	 * 
 	 * @throws MqttException
-	 *             if an error occured whilst creating the WireMessage
+	 *             if an error occurred whilst creating the WireMessage
 	 * @param data the MqttPersistable to create the message from
 	 * @return MqttWireMessage the de-persisted message
 	 */

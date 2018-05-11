@@ -266,7 +266,7 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	 * Identifies any backup files in the specified directory and restores them
 	 * to their original file. This will overwrite any existing file of the same
 	 * name. This is safe as a stray backup file will only exist if a problem
-	 * occured whilst writing to the original file.
+	 * occurred whilst writing to the original file.
 	 * @param dir The directory in which to scan and restore backups
 	 */
 	private void restoreBackups(File dir) throws MqttPersistenceException {
