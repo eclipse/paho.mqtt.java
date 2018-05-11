@@ -95,5 +95,57 @@ public class PublishTests {
 		asyncClient.close();
 
 	}
+	
+	@Test
+	public void testPublishManyQoS0Messages() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		String clientId = methodName;
+		MqttAsyncClient asyncClient = new MqttAsyncClient(serverURI.toString(), clientId);
+
+		// Connect to the server
+		log.info("Connecting: [serverURI: " + serverURI + ", ClientId: " + clientId + "]");
+		IMqttToken connectToken = asyncClient.connect();
+		connectToken.waitForCompletion(5000);
+		String clientId2 = asyncClient.getClientId();
+		log.info("Client ID = " + clientId2);
+		boolean isConnected = asyncClient.isConnected();
+		log.info("isConnected: " + isConnected);
+		
+		MqttMessage testMessage = new MqttMessage("Test Payload".getBytes(), 0, false, new MqttProperties());
+		long lStartTime = System.nanoTime();
+		int messagesSentThisSecond = 0;
+		long lastExTime = lStartTime;
+		for(int i = 0; i < 70000; i++) {
+			IMqttDeliveryToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
+			deliveryToken.waitForCompletion(1000);
+			messagesSentThisSecond++;
+			long now = System.nanoTime();
+			if(((now - lastExTime) /1000000) > 1000) {
+				lastExTime = now;
+				
+				System.out.println("Have sent " + messagesSentThisSecond + " messages in the last second.");
+				messagesSentThisSecond = 0;
+			}
+			
+		}
+		
+		//end
+        long lEndTime = System.nanoTime();
+
+		//time elapsed
+        long output = lEndTime - lStartTime;
+
+        System.out.println("Sending lots of messages  took : " + output / 1000000 + " milliseconds.");
+
+	
+
+		log.info("Disconnecting...");
+		IMqttToken disconnectToken = asyncClient.disconnect();
+		disconnectToken.waitForCompletion(5000);
+		Assert.assertFalse(asyncClient.isConnected());
+		asyncClient.close();
+
+	}
 
 }

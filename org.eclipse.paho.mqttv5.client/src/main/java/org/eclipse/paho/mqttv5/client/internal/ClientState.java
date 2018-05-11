@@ -125,7 +125,7 @@ public class ClientState implements MqttState {
 	private long keepAlive;
 	private boolean cleanSession;
 	private MqttClientPersistence persistence;
-	
+
 	private int actualInFlight = 0;
 	private int inFlightPubRels = 0;
 
@@ -238,14 +238,14 @@ public class ClientState implements MqttState {
 		outgoingTopicAliases.clear();
 		incomingTopicAliases.clear();
 	}
-	
+
 	protected void clearConnectionState() throws MqttException {
 		final String methodName = "clearConnectionState";
 		// @TRACE=665=Clearing Connection State (Topic Aliases)
 		log.fine(CLASS_NAME, methodName, "665");
 		outgoingTopicAliases.clear();
 		incomingTopicAliases.clear();
-		
+
 	}
 
 	private MqttWireMessage restoreMessage(String key, MqttPersistable persistable) throws MqttException {
@@ -520,14 +520,7 @@ public class ClientState implements MqttState {
 		final String methodName = "send";
 		// Set Message ID if required
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
-			if (message instanceof MqttPublish && (((MqttPublish) message).getMessage().getQos() != 0)) {
-				message.setMessageId(getNextMessageId());
-			} else if (message instanceof MqttPubAck || message instanceof MqttPubRec || message instanceof MqttPubRel
-					|| message instanceof MqttPubComp || message instanceof MqttSubscribe
-					|| message instanceof MqttSubAck || message instanceof MqttUnsubscribe
-					|| message instanceof MqttUnsubAck) {
-				message.setMessageId(getNextMessageId());
-			}
+			message.setMessageId(getNextMessageId());
 		}
 		// Set Topic Alias if required
 		if (message instanceof MqttPublish && this.mqttSession.getOutgoingTopicAliasMaximum() > 0) {
@@ -545,7 +538,7 @@ public class ClientState implements MqttState {
 				}
 			}
 		}
-		
+
 		if (token != null) {
 			try {
 				token.internalTok.setMessageID(message.getMessageId());
@@ -1043,7 +1036,7 @@ public class ClientState implements MqttState {
 			// @TRACE 662=no message found for ack id={0}
 			log.fine(CLASS_NAME, methodName, "662", new Object[] { Integer.valueOf(ack.getMessageId()) });
 		} else if (ack instanceof MqttPubRec) {
-			
+
 			// Update the token with the reason codes
 			updateResult(ack, token, mex);
 
@@ -1261,12 +1254,17 @@ public class ClientState implements MqttState {
 			checkQuiesceLock();
 		}
 	}
-	
+
 	/**
-	 * Updates a token with the latest reason codes, currently only used for PubRec messages.
-	 * @param msg -  The message that we are using for the update
-	 * @param token - The Token we are updating
-	 * @param ex - if there was a problem store the exception in the token.
+	 * Updates a token with the latest reason codes, currently only used for PubRec
+	 * messages.
+	 * 
+	 * @param msg
+	 *            - The message that we are using for the update
+	 * @param token
+	 *            - The Token we are updating
+	 * @param ex
+	 *            - if there was a problem store the exception in the token.
 	 */
 	protected void updateResult(MqttWireMessage ack, MqttToken token, MqttException ex) {
 		token.internalTok.update(ack, ex);
@@ -1369,7 +1367,7 @@ public class ClientState implements MqttState {
 			if (cleanSession) {
 				clearState();
 			}
-			
+
 			clearConnectionState();
 
 			pendingMessages.clear();
