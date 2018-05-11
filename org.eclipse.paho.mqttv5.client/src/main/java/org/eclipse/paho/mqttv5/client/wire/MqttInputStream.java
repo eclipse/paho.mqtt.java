@@ -97,7 +97,7 @@ public class MqttInputStream extends InputStream {
 
 				byte type = (byte) ((first >>> 4) & 0x0F);
 				if ((type < MqttWireMessage.MESSAGE_TYPE_CONNECT) ||
-						(type > MqttWireMessage.MESSAGE_TYPE_DISCONNECT)) {
+						(type > MqttWireMessage.MESSAGE_TYPE_AUTH)) {
 					// Invalid MQTT message type...
 					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_INVALID_MESSAGE);
 				}
