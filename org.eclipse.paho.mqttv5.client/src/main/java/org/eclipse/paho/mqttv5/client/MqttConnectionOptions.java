@@ -319,8 +319,8 @@ public class MqttConnectionOptions {
 	 * Set the maximum time to wait between reconnects
 	 * @param maxReconnectDelay the duration (in millis)
 	*/
-	public void setMaxReconnectDelay(int macReconnectDelay) {
-		this.maxReconnectDelay = macReconnectDelay;
+	public void setMaxReconnectDelay(int maxReconnectDelay) {
+		this.maxReconnectDelay = maxReconnectDelay;
 	}
 
 
