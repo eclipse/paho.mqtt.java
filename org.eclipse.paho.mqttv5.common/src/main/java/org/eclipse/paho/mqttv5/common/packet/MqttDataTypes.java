@@ -5,6 +5,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.VariableByteInteger;
@@ -129,7 +131,7 @@ public class MqttDataTypes {
 		}
 	}
 
-	protected static final String STRING_ENCODING = "UTF-8";
+	protected static final Charset STRING_ENCODING = StandardCharsets.UTF_8;
 
 	/**
 	 * Decodes a UTF-8 string from the {@link DataInputStream} provided.
@@ -160,13 +162,17 @@ public class MqttDataTypes {
 		}
 	}
 
+	/**
+	 * Validate a UTF-8 String for suitability for MQTT.
+	 * @param input - The Input String
+	 * @throws IllegalArgumentException
+	 */
 	private static void validateUTF8String(String input) throws IllegalArgumentException {
 		for (byte sChar : input.getBytes()) {
 			if (Character.getType(sChar) == Character.CONTROL || Character.getType(sChar) == Character.UNASSIGNED) {
 				throw new IllegalArgumentException("Invalid UTF-8 character : " + sChar);
 			}
 		}
-
 	}
 
 	/**
