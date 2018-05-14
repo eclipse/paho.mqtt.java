@@ -20,7 +20,7 @@ public class MqttDataTypes {
 	}
 
 	public static void validateTwoByteInt(Integer value) throws IllegalArgumentException {
-		if(value == null) {
+		if (value == null) {
 			return;
 		}
 		if (value >= 0 && value <= TWO_BYTE_INT_MAX) {
@@ -31,7 +31,7 @@ public class MqttDataTypes {
 	}
 
 	public static void validateFourByteInt(Long value) throws IllegalArgumentException {
-		if(value == null) {
+		if (value == null) {
 			return;
 		}
 		if (value >= 0 && value <= FOUR_BYTE_INT_MAX) {
@@ -115,6 +115,7 @@ public class MqttDataTypes {
 	 *             the data to the stream.
 	 */
 	public static void encodeUTF8(DataOutputStream dos, String stringToEncode) throws MqttException {
+		validateUTF8String(stringToEncode);
 		try {
 			byte[] encodedString = stringToEncode.getBytes(STRING_ENCODING);
 			byte byte1 = (byte) ((encodedString.length >>> 8) & 0xFF);
@@ -150,11 +151,22 @@ public class MqttDataTypes {
 
 			byte[] encodedString = new byte[encodedLength];
 			input.readFully(encodedString);
+			String output = new String(encodedString, STRING_ENCODING);
+			validateUTF8String(output);
 
-			return new String(encodedString, STRING_ENCODING);
+			return output;
 		} catch (IOException ioe) {
 			throw new MqttException(MqttException.REASON_CODE_MALFORMED_PACKET, ioe);
 		}
+	}
+
+	private static void validateUTF8String(String input) throws IllegalArgumentException {
+		for (byte sChar : input.getBytes()) {
+			if (Character.getType(sChar) == Character.CONTROL || Character.getType(sChar) == Character.UNASSIGNED) {
+				throw new IllegalArgumentException("Invalid UTF-8 character : " + sChar);
+			}
+		}
+
 	}
 
 	/**
@@ -178,17 +190,17 @@ public class MqttDataTypes {
 			value += ((digit & 0x7F) * multiplier);
 			multiplier *= 128;
 		} while ((digit & 0x80) != 0);
-		
+
 		if (value < 0 || value > VARIABLE_BYTE_INT_MAX) {
-			throw new IOException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX + ". Read value was: " + value);
+			throw new IOException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX
+					+ ". Read value was: " + value);
 		}
-		
 
 		return new VariableByteInteger(value, count);
 
 	}
 
-	public static byte[] encodeVariableByteInteger(int number) throws IllegalArgumentException{
+	public static byte[] encodeVariableByteInteger(int number) throws IllegalArgumentException {
 		validateVariableByteInt(number);
 		int numBytes = 0;
 		long no = number;
