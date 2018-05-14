@@ -202,9 +202,10 @@ public class MqttConnect extends MqttWireMessage {
 
 			if (userName != null) {
 				connectFlags |= 0x80;
-				if (password != null) {
-					connectFlags |= 0x40;
-				}
+			}
+			
+			if (password != null) {
+				connectFlags |= 0x40;
 			}
 
 			dos.write(connectFlags);
@@ -242,9 +243,11 @@ public class MqttConnect extends MqttWireMessage {
 
 			if (userName != null) {
 				MqttDataTypes.encodeUTF8(dos, userName);
-				if (password != null) {
-					MqttDataTypes.encodeUTF8(dos, new String(password));
-				}
+			}
+			
+			if (password != null) {
+				dos.writeShort(password.length);
+				dos.write(password);
 			}
 			dos.flush();
 			return baos.toByteArray();
