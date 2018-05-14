@@ -180,7 +180,7 @@ public class MqttDataTypes {
 		} while ((digit & 0x80) != 0);
 		
 		if (value < 0 || value > VARIABLE_BYTE_INT_MAX) {
-			throw new IOException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
+			throw new IOException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX + ". Read value was: " + value);
 		}
 		
 

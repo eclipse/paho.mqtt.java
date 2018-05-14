@@ -263,7 +263,7 @@ public abstract class MqttWireMessage {
 	 */
 	protected static MultiByteInteger readMBI(DataInputStream in) throws IOException {
 		byte digit;
-		long msgLength = 0;
+		int msgLength = 0;
 		int multiplier = 1;
 		int count = 0;
 		

@@ -43,8 +43,8 @@ public class MqttInputStream extends InputStream {
 	private MqttState clientState = null;
 	private DataInputStream in;	
 	private ByteArrayOutputStream bais;
-	private long remLen;
-	private long packetLen;
+	private int remLen;
+	private int packetLen;
 	private byte[] packet;
 
 	public MqttInputStream(MqttState clientState, InputStream in) {
@@ -146,10 +146,12 @@ public class MqttInputStream extends InputStream {
     			packetLen += n;
     			throw e;
     		}
-    		clientState.notifyReceivedBytes(count);
+    		
 
-    		if (count < 0)
+    		if (count < 0) {
     			throw new EOFException();
+    		}
+    		clientState.notifyReceivedBytes(count);
     		n += count;
     	}
     }
