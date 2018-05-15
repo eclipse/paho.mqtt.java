@@ -502,6 +502,9 @@ public class MqttConnectionOptions {
 	 * @return the Receive Maximum
 	 */
 	public Integer getReceiveMaximum() {
+		if(receiveMaximum == null) {
+			return 65535;
+		}
 		return receiveMaximum;
 	}
 
