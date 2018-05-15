@@ -34,6 +34,7 @@ public class MqttSession {
 	private Boolean wildcardSubscriptionsAvailable = true;
 	private Boolean subscriptionIdentifiersAvailable = true;
 	private Boolean sharedSubscriptionsAvailable = true;
+	private boolean sendReasonMessages = false;
 
 	// ******* Session Specific Properties and counters ******//
 	private AtomicInteger nextSubscriptionIdentifier = new AtomicInteger(1);
@@ -135,6 +136,16 @@ public class MqttSession {
 
 	public void setIncomingTopicAliasMax(Integer incomingTopicAliasMax) {
 		this.incomingTopicAliasMax = incomingTopicAliasMax;
+	}
+
+
+	public boolean isSendReasonMessages() {
+		return sendReasonMessages;
+	}
+
+
+	public void setSendReasonMessages(boolean enableReasonMessages) {
+		this.sendReasonMessages = enableReasonMessages;
 	}
 
 }

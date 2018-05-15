@@ -68,6 +68,7 @@ public class MqttConnectionOptions {
 	private int connectionTimeout = 30; // Connection timeout in seconds
 	private boolean httpsHostnameVerificationEnabled = true;
 	private int maxReconnectDelay = 128000;
+	private boolean sendReasonMessages = false;
 	
 	
 	public MqttProperties getConnectionProperties() {
@@ -502,9 +503,6 @@ public class MqttConnectionOptions {
 	 * @return the Receive Maximum
 	 */
 	public Integer getReceiveMaximum() {
-		if(receiveMaximum == null) {
-			return 65535;
-		}
 		return receiveMaximum;
 	}
 
@@ -939,5 +937,15 @@ public class MqttConnectionOptions {
 
 	public static String generateClientId() {
 		return CLIENT_ID_PREFIX + System.nanoTime();
+	}
+
+
+	public boolean isSendReasonMessages() {
+		return sendReasonMessages;
+	}
+
+
+	public void setSendReasonMessages(boolean sendReasonMessages) {
+		this.sendReasonMessages = sendReasonMessages;
 	}
 }

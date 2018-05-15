@@ -892,6 +892,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 				userToken, userContext, callback, reconnecting, mqttSession);
 		userToken.setActionCallback(connectActionListener);
 		userToken.setUserContext(this);
+		
+		this.mqttSession.setSendReasonMessages(this.connOpts.isSendReasonMessages());
 
 		// If we are using the MqttCallbackExtended, set it on the
 		// connectActionListener

@@ -1032,10 +1032,16 @@ public class ClientState implements MqttState {
 		MqttException mex = null;
 
 		if (token == null) {
-
 			// @TRACE 662=no message found for ack id={0}
 			log.fine(CLASS_NAME, methodName, "662", new Object[] { Integer.valueOf(ack.getMessageId()) });
 		} else if (ack instanceof MqttPubRec) {
+			if(((MqttPubRec) ack).getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR ) {
+				// @TRACE 664=[MQTT-4.3.3-4] - A Reason code greater than 0x80 (128) was received in an incoming PUBREC id={0} rc={1} message={2}, halting QoS 2 flow.
+				log.severe(CLASS_NAME, methodName, "664",
+						new Object[] { ack.getMessageId(), ack.getReasonCodes()[0], ack.toString() });
+				throw new MqttException(((MqttPubRec) ack).getReasonCodes()[0]);
+			}
+			
 
 			// Update the token with the reason codes
 			updateResult(ack, token, mex);
@@ -1103,6 +1109,37 @@ public class ClientState implements MqttState {
 		}
 
 		checkQuiesceLock();
+	}
+
+	/**
+	 * Called by the CommsReceiver when an Ack has been received but cannot be
+	 * matched to a token. This method will generate the appropriate response with
+	 * an error code.
+	 * 
+	 * @param ack
+	 *            - The Orphaned Ack
+	 * @throws MqttException 
+	 */
+	protected void handleOrphanedAcks(MqttAck ack) throws MqttException {
+		final String methodName = "handleOrphanedAcks";
+		// @TRACE 666=Orphaned Ack key={0} message={1}
+		log.fine(CLASS_NAME, methodName, "666", new Object[] { Integer.valueOf(ack.getMessageId()), ack });
+
+		if (ack instanceof MqttPubAck) {
+			// MqttPubAck - This would be the end of a QoS 1 flow, so message can be ignored
+		} else if (ack instanceof MqttPubRec) {
+			// MqttPubRec - Send an MqttPubRel with the appropriate Reason Code
+			MqttProperties pubRelProperties = new MqttProperties();
+			if(this.mqttSession.isSendReasonMessages()) {
+				String reasonString = String.format("Message identifier [%d] was not found. Discontinuing QoS 2 flow.", ack.getMessageId() );
+				pubRelProperties.setReasonString(reasonString);
+			}
+			MqttPubRel rel = new MqttPubRel(MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND, ack.getMessageId(),
+					new MqttProperties());
+			this.send(rel, null);
+		} else if (ack instanceof MqttPubComp) {
+			// MqttPubComp
+		}
 	}
 
 	/**
@@ -1181,6 +1218,12 @@ public class ClientState implements MqttState {
 				}
 			} else if (message instanceof MqttPubRel) {
 				MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(Integer.valueOf(message.getMessageId()));
+				if(((MqttPubRel) message).getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR ) {
+					// @TRACE 667=MqttPubRel was received with an error code: key={0} message={1}, Reason Code={2}
+					log.severe(CLASS_NAME, methodName, "667",
+							new Object[] { message.getMessageId(), message.toString(), message.getReasonCodes()[0] });
+					throw new MqttException(((MqttPubRel) message).getReasonCodes()[0]);
+				}
 				if (sendMsg != null) {
 					if (callback != null) {
 						callback.messageArrived(sendMsg);
