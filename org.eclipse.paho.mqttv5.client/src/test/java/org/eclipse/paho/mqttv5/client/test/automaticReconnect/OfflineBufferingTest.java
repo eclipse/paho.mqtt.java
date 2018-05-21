@@ -145,6 +145,7 @@ public class OfflineBufferingTest {
 	public void testManyMessageBufferAndDeliver() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
+		String clientId = methodName + "sub-client";
 
 		// Tokens
 		IMqttToken connectToken;
@@ -160,7 +161,7 @@ public class OfflineBufferingTest {
 
 		// Create subscription client that won't be affected by proxy
 		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client");
-		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(subClient, LoggingUtilities.getPrintStream());
+		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(clientId, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion(5000);
@@ -414,6 +415,7 @@ public class OfflineBufferingTest {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
 		int qos = 2;
+		String clientId = methodName + "sub-client";
 
 		// Mock up an Mqtt Message to be stored in Persistence
 		MqttMessage mqttMessage = new MqttMessage(methodName.getBytes());
@@ -432,8 +434,8 @@ public class OfflineBufferingTest {
 		// Create Subscription client to watch for the message being published
 		// as soon as the main client connects
 		log.info("Creating subscription client");
-		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client");
-		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(subClient, LoggingUtilities.getPrintStream());
+		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, clientId);
+		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(clientId, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion(5000);

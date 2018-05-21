@@ -54,10 +54,6 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubRel;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
-import org.eclipse.paho.mqttv5.common.packet.MqttUnsubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
@@ -1035,13 +1031,13 @@ public class ClientState implements MqttState {
 			// @TRACE 662=no message found for ack id={0}
 			log.fine(CLASS_NAME, methodName, "662", new Object[] { Integer.valueOf(ack.getMessageId()) });
 		} else if (ack instanceof MqttPubRec) {
-			if(((MqttPubRec) ack).getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR ) {
-				// @TRACE 664=[MQTT-4.3.3-4] - A Reason code greater than 0x80 (128) was received in an incoming PUBREC id={0} rc={1} message={2}, halting QoS 2 flow.
+			if (((MqttPubRec) ack).getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR) {
+				// @TRACE 664=[MQTT-4.3.3-4] - A Reason code greater than 0x80 (128) was
+				// received in an incoming PUBREC id={0} rc={1} message={2}, halting QoS 2 flow.
 				log.severe(CLASS_NAME, methodName, "664",
 						new Object[] { ack.getMessageId(), ack.getReasonCodes()[0], ack.toString() });
 				throw new MqttException(((MqttPubRec) ack).getReasonCodes()[0]);
 			}
-			
 
 			// Update the token with the reason codes
 			updateResult(ack, token, mex);
@@ -1118,7 +1114,7 @@ public class ClientState implements MqttState {
 	 * 
 	 * @param ack
 	 *            - The Orphaned Ack
-	 * @throws MqttException 
+	 * @throws MqttException
 	 */
 	protected void handleOrphanedAcks(MqttAck ack) throws MqttException {
 		final String methodName = "handleOrphanedAcks";
@@ -1130,8 +1126,9 @@ public class ClientState implements MqttState {
 		} else if (ack instanceof MqttPubRec) {
 			// MqttPubRec - Send an MqttPubRel with the appropriate Reason Code
 			MqttProperties pubRelProperties = new MqttProperties();
-			if(this.mqttSession.isSendReasonMessages()) {
-				String reasonString = String.format("Message identifier [%d] was not found. Discontinuing QoS 2 flow.", ack.getMessageId() );
+			if (this.mqttSession.isSendReasonMessages()) {
+				String reasonString = String.format("Message identifier [%d] was not found. Discontinuing QoS 2 flow.",
+						ack.getMessageId());
 				pubRelProperties.setReasonString(reasonString);
 			}
 			MqttPubRel rel = new MqttPubRel(MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND, ack.getMessageId(),
@@ -1139,6 +1136,38 @@ public class ClientState implements MqttState {
 			this.send(rel, null);
 		} else if (ack instanceof MqttPubComp) {
 			// MqttPubComp
+		}
+	}
+
+	/**
+	 * Called by {@link ClientState#notifyReceivedMsg} when a PUBREL message is
+	 * received.
+	 * 
+	 * @param pubRel
+	 *            The in-bound PUBREL
+	 * @throws MqttException
+	 *             When an exception occurs whilst handling the PUBREL
+	 */
+	protected void handleInboundPubRel(MqttPubRel pubRel) throws MqttException {
+		final String methodName = "handleInboundPubRel";
+		MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(Integer.valueOf(pubRel.getMessageId()));
+		if (pubRel.getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR) {
+			// @TRACE 667=MqttPubRel was received with an error code: key={0} message={1},
+			// Reason Code={2}
+			log.severe(CLASS_NAME, methodName, "667",
+					new Object[] { pubRel.getMessageId(), pubRel.toString(), pubRel.getReasonCodes()[0] });
+			throw new MqttException(pubRel.getReasonCodes()[0]);
+		}
+		if (sendMsg != null) {
+			if (callback != null) {
+				callback.messageArrived(sendMsg);
+			}
+		} else {
+			// Original publish has already been delivered.
+			// Currently this client has no need of the properties, so this is left empty.
+			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, pubRel.getMessageId(),
+					new MqttProperties());
+			this.send(pubComp, null);
 		}
 	}
 
@@ -1208,6 +1237,9 @@ public class ClientState implements MqttState {
 				case 2:
 					persistence.put(getReceivedPersistenceKey(message), (MqttPublish) message);
 					inboundQoS2.put(Integer.valueOf(send.getMessageId()), send);
+					if (callback != null) {
+						callback.messageArrived(send);
+					}
 					// Currently this client has no need of the properties, so this is left empty.
 					this.send(new MqttPubRec(MqttReturnCode.RETURN_CODE_SUCCESS, send.getMessageId(),
 							new MqttProperties()), null);
@@ -1217,24 +1249,7 @@ public class ClientState implements MqttState {
 					// should NOT reach here
 				}
 			} else if (message instanceof MqttPubRel) {
-				MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(Integer.valueOf(message.getMessageId()));
-				if(((MqttPubRel) message).getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR ) {
-					// @TRACE 667=MqttPubRel was received with an error code: key={0} message={1}, Reason Code={2}
-					log.severe(CLASS_NAME, methodName, "667",
-							new Object[] { message.getMessageId(), message.toString(), message.getReasonCodes()[0] });
-					throw new MqttException(((MqttPubRel) message).getReasonCodes()[0]);
-				}
-				if (sendMsg != null) {
-					if (callback != null) {
-						callback.messageArrived(sendMsg);
-					}
-				} else {
-					// Original publish has already been delivered.
-					// Currently this client has no need of the properties, so this is left empty.
-					MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, message.getMessageId(),
-							new MqttProperties());
-					this.send(pubComp, null);
-				}
+				handleInboundPubRel((MqttPubRel) message);
 			} else if (message instanceof MqttAuth) {
 				MqttAuth authMsg = (MqttAuth) message;
 				callback.authMessageReceived(authMsg);

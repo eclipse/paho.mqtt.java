@@ -114,20 +114,9 @@ public class PublishTests {
 		
 		MqttMessage testMessage = new MqttMessage("Test Payload".getBytes(), 0, false, new MqttProperties());
 		long lStartTime = System.nanoTime();
-		int messagesSentThisSecond = 0;
-		long lastExTime = lStartTime;
 		for(int i = 0; i < 70000; i++) {
 			IMqttDeliveryToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
 			deliveryToken.waitForCompletion(1000);
-			messagesSentThisSecond++;
-			long now = System.nanoTime();
-			if(((now - lastExTime) /1000000) > 1000) {
-				lastExTime = now;
-				
-				System.out.println("Have sent " + messagesSentThisSecond + " messages in the last second.");
-				messagesSentThisSecond = 0;
-			}
-			
 		}
 		
 		//end
@@ -136,7 +125,7 @@ public class PublishTests {
 		//time elapsed
         long output = lEndTime - lStartTime;
 
-        System.out.println("Sending lots of messages  took : " + output / 1000000 + " milliseconds.");
+        log.info("Sending 70000 of messages  took : " + output / 1000000 + " milliseconds.");
 
 	
 

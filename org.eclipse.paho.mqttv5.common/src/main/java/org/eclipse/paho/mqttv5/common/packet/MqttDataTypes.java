@@ -168,9 +168,10 @@ public class MqttDataTypes {
 	 * @throws IllegalArgumentException
 	 */
 	private static void validateUTF8String(String input) throws IllegalArgumentException {
-		for (byte sChar : input.getBytes()) {
-			if (Character.getType(sChar) == Character.CONTROL || Character.getType(sChar) == Character.UNASSIGNED) {
-				throw new IllegalArgumentException("Invalid UTF-8 character : " + sChar);
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			if (Character.getType(c) == Character.CONTROL || Character.getType(c) == Character.UNASSIGNED) {
+				throw new IllegalArgumentException("Invalid UTF-8 character : " + c);
 			}
 		}
 	}

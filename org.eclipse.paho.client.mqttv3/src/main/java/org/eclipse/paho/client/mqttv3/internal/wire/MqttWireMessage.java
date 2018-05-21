@@ -53,6 +53,10 @@ public abstract class MqttWireMessage {
 	private static final String PACKET_NAMES[] = { "reserved", "CONNECT", "CONNACK", "PUBLISH", "PUBACK", "PUBREC",
 			"PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK", "UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP",
 			"DISCONNECT" };
+	
+
+	private static final long FOUR_BYTE_INT_MAX = 4294967295L;
+	private static final int VARIABLE_BYTE_INT_MAX = 268435455;
 
 	// The type of the message (e.g. CONNECT, PUBLISH, PUBACK)
 	private byte type;
@@ -225,7 +229,8 @@ public abstract class MqttWireMessage {
 		}
 	}
 
-	protected static byte[] encodeMBI(long number) {
+	public static byte[] encodeMBI(long number) {
+		validateVariableByteInt((int) number);
 		int numBytes = 0;
 		long no = number;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -252,7 +257,7 @@ public abstract class MqttWireMessage {
 	 * @throws IOException
 	 *             if an exception occurs when reading the input stream
 	 */
-	protected static MultiByteInteger readMBI(DataInputStream in) throws IOException {
+	public static MultiByteInteger readMBI(DataInputStream in) throws IOException {
 		byte digit;
 		int msgLength = 0;
 		int multiplier = 1;
@@ -264,6 +269,11 @@ public abstract class MqttWireMessage {
 			msgLength += ((digit & 0x7F) * multiplier);
 			multiplier *= 128;
 		} while ((digit & 0x80) != 0);
+		
+		if (msgLength < 0 || msgLength > VARIABLE_BYTE_INT_MAX) {
+			throw new IOException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX
+					+ ". Read value was: " + msgLength);
+		}
 
 		return new MultiByteInteger(msgLength, count);
 	}
@@ -304,7 +314,7 @@ public abstract class MqttWireMessage {
 	 *             Thrown when an error occurs with either the encoding or writing
 	 *             the data to the stream
 	 */
-	protected void encodeUTF8(DataOutputStream dos, String stringToEncode) throws MqttException {
+	public static void encodeUTF8(DataOutputStream dos, String stringToEncode) throws MqttException {
 		validateUTF8String(stringToEncode);
 		try {
 
@@ -335,7 +345,7 @@ public abstract class MqttWireMessage {
 	 *             thrown when an error occurs with either reading from the stream
 	 *             or decoding the encoded string.
 	 */
-	protected String decodeUTF8(DataInputStream input) throws MqttException {
+	public static String decodeUTF8(DataInputStream input) throws MqttException {
 		int encodedLength;
 		try {
 			encodedLength = input.readUnsignedShort();
@@ -359,11 +369,21 @@ public abstract class MqttWireMessage {
 	 * @throws IllegalArgumentException
 	 */
 	private static void validateUTF8String(String input) throws IllegalArgumentException {
-		for (byte sChar : input.getBytes()) {
-			if (Character.getType(sChar) == Character.CONTROL || Character.getType(sChar) == Character.UNASSIGNED) {
-				throw new IllegalArgumentException("Invalid UTF-8 character : " + sChar);
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			if (Character.getType(c) == Character.CONTROL || Character.getType(c) == Character.UNASSIGNED) {
+				throw new IllegalArgumentException("Invalid UTF-8 character : " + c);
 			}
 		}
+	}
+	
+	public static void validateVariableByteInt(int value) throws IllegalArgumentException {
+		if (value >= 0 && value <= VARIABLE_BYTE_INT_MAX) {
+			return;
+		} else {
+			throw new IllegalArgumentException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
+		}
+
 	}
 
 	public String toString() {

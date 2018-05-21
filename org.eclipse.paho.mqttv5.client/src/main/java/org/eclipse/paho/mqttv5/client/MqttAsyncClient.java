@@ -21,6 +21,8 @@
 
 package org.eclipse.paho.mqttv5.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,6 +58,7 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttAuth;
+import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
@@ -563,19 +566,20 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		log.setResourceName(clientId);
 
 		if (clientId != null) {
-			// Count characters, surrogate pairs count as one character.
-			int clientIdLength = 0;
-			for (int i = 0; i < clientId.length() - 1; i++) {
-				if (Character_isHighSurrogate(clientId.charAt(i)))
-					i++;
-				clientIdLength++;
-			}
-			if (clientIdLength > 65535) {
+			// Verify that the client ID is not too long
+			// Encode it ourselves to check
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(baos);
+			MqttDataTypes.encodeUTF8(dos, clientId);
+			// Remove the two size bytes.
+			if(dos.size() - 2 > 65535) {
 				throw new IllegalArgumentException("ClientId longer than 65535 characters");
 			}
+			
 		} else {
 			clientId = "";
 		}
+		
 
 		MqttConnectionOptions.validateURI(serverURI);
 
@@ -1194,6 +1198,19 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	@Override
 	public IMqttToken subscribe(String topicFilter, int qos) throws MqttException {
 		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, null, null,
+				new MqttProperties());
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.paho.mqttv5.client.IMqttAsyncClient#subscribe(java.lang.String,
+	 * int)
+	 */
+	@Override
+	public IMqttToken subscribe(MqttSubscription subscription) throws MqttException {
+		return this.subscribe(new MqttSubscription[] { subscription }, null, null,
 				new MqttProperties());
 	}
 

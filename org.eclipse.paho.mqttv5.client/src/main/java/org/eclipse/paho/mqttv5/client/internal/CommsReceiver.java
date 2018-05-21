@@ -29,9 +29,6 @@ import org.eclipse.paho.mqttv5.client.wire.MqttInputStream;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**

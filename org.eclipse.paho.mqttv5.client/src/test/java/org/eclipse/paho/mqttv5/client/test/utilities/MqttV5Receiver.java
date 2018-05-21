@@ -20,9 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
-import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -66,30 +64,14 @@ public class MqttV5Receiver implements MqttCallback {
    * @param mqttClient
    * @param reportStream
    */
-  public MqttV5Receiver(IMqttClient mqttClient, PrintStream reportStream) {
+  public MqttV5Receiver(String clientId, PrintStream reportStream) {
     String methodName = Utility.getMethodName();
     log.entering(className, methodName);
 
     this.reportStream = reportStream;
     connected = true;
 
-    clientId = mqttClient.getClientId();
-
-    log.exiting(className, methodName);
-  }
-
-  /**
-   * @param mqttClient
-   * @param reportStream
-   */
-  public MqttV5Receiver(MqttAsyncClient mqttClient, PrintStream reportStream) {
-    String methodName = Utility.getMethodName();
-    log.entering(className, methodName);
-
-    this.reportStream = reportStream;
-    connected = true;
-
-    clientId = mqttClient.getClientId();
+    this.clientId = clientId;
 
     log.exiting(className, methodName);
   }
@@ -129,6 +111,19 @@ public class MqttV5Receiver implements MqttCallback {
     return receivedMessage;
   }
 
+  /**
+   * @param sendTopic
+   * @param expectedQos
+   * @param sentBytes
+   * @return flag
+   * @throws MqttException
+   * @throws InterruptedException
+   */
+  public boolean validateReceipt(String sendTopic, int expectedQos, MqttMessage message) throws MqttException, InterruptedException {
+	  return validateReceipt(sendTopic, expectedQos, message.getPayload());
+  }
+  
+  
   /**
    * @param sendTopic
    * @param expectedQos

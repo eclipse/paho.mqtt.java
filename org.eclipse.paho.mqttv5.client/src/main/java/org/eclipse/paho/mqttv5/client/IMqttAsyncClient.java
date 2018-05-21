@@ -1125,4 +1125,6 @@ public interface IMqttAsyncClient {
 	 */
 	Debug getDebug();
 
+	IMqttToken subscribe(MqttSubscription subscription) throws MqttException;
+
 }
