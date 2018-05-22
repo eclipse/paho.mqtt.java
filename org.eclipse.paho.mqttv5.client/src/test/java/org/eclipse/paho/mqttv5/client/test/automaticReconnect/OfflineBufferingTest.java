@@ -457,6 +457,9 @@ public class OfflineBufferingTest {
 		boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, qos, methodName.getBytes());
 		Assert.assertTrue(recieved);
 		log.info("Message was successfully delivered after connect");
+		
+		// Allow a few seconds for the QoS 2 flow to complete
+		Thread.sleep(2000);
 
 		@SuppressWarnings("unchecked")
 		List<String> postConnectKeys = Collections.list(persistence.keys());
