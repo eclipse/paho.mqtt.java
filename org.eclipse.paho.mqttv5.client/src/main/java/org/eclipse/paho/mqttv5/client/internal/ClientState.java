@@ -1317,7 +1317,7 @@ public class ClientState implements MqttState {
 	 * Updates a token with the latest reason codes, currently only used for PubRec
 	 * messages.
 	 * 
-	 * @param msg
+	 * @param ack
 	 *            - The message that we are using for the update
 	 * @param token
 	 *            - The Token we are updating
