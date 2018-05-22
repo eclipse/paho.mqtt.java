@@ -34,8 +34,9 @@ else
 	echo "Installing and starting Python Interop Broker."
 	sudo service mosquitto stop
 	git clone https://github.com/eclipse/paho.mqtt.testing.git
+	cp java_client_testing.conf paho.mqtt.testing/interoperability/.
 	cd paho.mqtt.testing/interoperability
-	python3 startbroker.py -c client_testing.conf &
+	python3 startbroker.py -c java_client_testing.conf &
 fi
 
 
