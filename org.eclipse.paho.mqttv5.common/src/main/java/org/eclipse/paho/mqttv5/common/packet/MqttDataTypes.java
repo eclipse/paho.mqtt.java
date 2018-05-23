@@ -171,7 +171,7 @@ public class MqttDataTypes {
 		for (int i = 0; i < input.length(); i++) {
 			char c = input.charAt(i);
 			if (Character.getType(c) == Character.CONTROL || Character.getType(c) == Character.UNASSIGNED) {
-				throw new IllegalArgumentException("Invalid UTF-8 character : " + c);
+				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: %s [%s]", c, (int) c));
 			}
 		}
 	}

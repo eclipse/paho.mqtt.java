@@ -8,7 +8,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
 import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.junit.Assert;
 import org.junit.Test;
@@ -115,8 +114,9 @@ public class MqttDataTypesTest {
 	}
 
 	/**
-	 * Tests that a large number of complex UTF-8 strings can be encoded and decoded successfully.
-	 * Uses "i_can_eat_glass.txt" as a source of strings that are in the Language:testString format
+	 * Tests that a large number of complex UTF-8 strings can be encoded and decoded
+	 * successfully. Uses "i_can_eat_glass.txt" as a source of strings that are in
+	 * the Language:testString format
 	 * 
 	 * @throws IOException
 	 * @throws MqttException
@@ -137,7 +137,5 @@ public class MqttDataTypesTest {
 
 			}
 		}
-
 	}
-
 }
