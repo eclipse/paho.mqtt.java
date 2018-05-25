@@ -26,7 +26,7 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
  * Persistence that uses memory
  * 
  * In cases where reliability is not required across client or device 
- * restarts memory this memory peristence can be used. In cases where
+ * restarts memory this memory persistence can be used. In cases where
  * reliability is required like when clean session is set to false
  * then a non-volatile form of persistence should be used. 
  * 
@@ -39,8 +39,9 @@ public class MemoryPersistence implements MqttClientPersistence {
 	 * @see org.eclipse.paho.mqttv5.client.MqttClientPersistence#close()
 	 */
 	public void close() throws MqttPersistenceException {
-		checkIsOpen();
-		data.clear();
+		if (data != null) {
+			data.clear();
+		}	
 	}
 
 	/* (non-Javadoc)
