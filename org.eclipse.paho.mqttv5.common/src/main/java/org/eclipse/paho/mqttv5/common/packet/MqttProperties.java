@@ -1358,13 +1358,13 @@ public class MqttProperties {
 		if (serverReference != null) {
 			sb.append(", serverReference=" + serverReference);
 		}
-		if (wildcardSubscriptionsAvailable) {
+		if (wildcardSubscriptionsAvailable != null) {
 			sb.append(", wildcardSubscriptionsAvailable=" + wildcardSubscriptionsAvailable);
 		}
-		if (subscriptionIdentifiersAvailable) {
+		if (subscriptionIdentifiersAvailable != null) {
 			sb.append(", subscriptionIdentifiersAvailable=" + subscriptionIdentifiersAvailable);
 		}
-		if (sharedSubscriptionAvailable) {
+		if (sharedSubscriptionAvailable != null) {
 			sb.append(", sharedSubscriptionAvailable=" + sharedSubscriptionAvailable);
 		}
 		if (sessionExpiryInterval != null) {
