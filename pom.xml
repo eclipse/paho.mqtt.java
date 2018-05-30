@@ -16,6 +16,7 @@
 		<tycho.version>1.1.0</tycho.version>
 		<junit.version>4.12</junit.version>
 		<javadoc.version>3.0.1</javadoc.version>
+		<mvnsource.version>3.0.1</mvnsource.version>
 		<test.exclude>**/*ConformantTest.java</test.exclude>
 		<download.location>/home/data/httpd/download.eclipse.org/paho/releases/${project.version}/Java</download.location>
 	</properties>
