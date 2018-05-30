@@ -453,12 +453,16 @@ public class CommsCallback implements Runnable {
 				this.clientComms.internalSend(
 						new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, publishMessage.getMessageId(), new MqttProperties()),
 						new MqttToken(clientComms.getClient().getClientId()));
-			} else if (publishMessage.getMessage().getQos() == 2) {
+			} 
+			
+			/*else if (publishMessage.getMessage().getQos() == 2) {
 				this.clientComms.deliveryComplete(publishMessage);
 				MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS,
 						publishMessage.getMessageId(), new MqttProperties());
+				log.info(CLASS_NAME, methodName, "Creating MqttPubComp due to handleMessage: " + pubComp.toString());
+
 				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
-			}
+			}*/
 		}
 	}
 
@@ -469,6 +473,8 @@ public class CommsCallback implements Runnable {
 		} else if (qos == 2) {
 			this.clientComms.deliveryComplete(messageId);
 			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, messageId, new MqttProperties());
+			log.info(CLASS_NAME, "messageArrivedComplete", "Creating MqttPubComp due to messageArrivedComplete: " + pubComp.toString());
+
 			this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 		}
 	}

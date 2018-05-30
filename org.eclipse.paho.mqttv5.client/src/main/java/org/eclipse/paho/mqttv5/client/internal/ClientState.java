@@ -1167,6 +1167,8 @@ public class ClientState implements MqttState {
 			// Currently this client has no need of the properties, so this is left empty.
 			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, pubRel.getMessageId(),
 					new MqttProperties());
+			// TODO - Fix Trace
+			log.info(CLASS_NAME, methodName, "Creating MqttPubComp due to pubRel: " + pubComp.toString());
 			this.send(pubComp, null);
 		}
 	}

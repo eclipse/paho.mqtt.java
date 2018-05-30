@@ -52,8 +52,6 @@ public class BasicTest {
 		}
 	}
 
-	
-
 	/**
 	 * Very simple test case that validates that the client can connect and then
 	 * disconnect cleanly.
@@ -116,6 +114,60 @@ public class BasicTest {
 			unsubscribeToken.waitForCompletion(timeout);
 		}
 		TestClientUtilities.disconnectAndCloseClient(asyncClient, timeout);
+	}
+
+	/**
+	 * @throws MqttException,
+	 *             InterruptedException
+	 * 
+	 */
+	@Test
+	public void testQoS2DuplicateIssue() throws MqttException, InterruptedException {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		String subTopic = "a/+/c";
+
+		int timeout = 5000;
+
+		MqttV5Receiver mqttV5Receiver = new MqttV5Receiver(methodName, LoggingUtilities.getPrintStream());
+		MqttAsyncClient asyncClient = TestClientUtilities.connectAndGetClient(serverURI.toString(), methodName,
+				mqttV5Receiver, null, timeout);
+
+		int qos = 2;
+		log.info("Testing Publish and Receive at QoS: " + qos);
+		// Subscribe to a topic
+		log.info(String.format("Subscribing to: %s at QoS %d", subTopic, qos));
+		MqttSubscription subscription = new MqttSubscription(subTopic, qos);
+		IMqttToken subscribeToken = asyncClient.subscribe(subscription);
+		subscribeToken.waitForCompletion(timeout);
+		
+		String samplePayload = "Hello World";
+
+		log.info("Publishing messages on topics.");
+		//publishMessage(samplePayload, 0, "a/b/c", asyncClient, timeout);
+		//publishMessage(samplePayload, 0, "a/0/c", asyncClient, timeout);
+		//publishMessage(samplePayload, 1, "a/1/c", asyncClient, timeout);
+		publishMessage(samplePayload, 2, "a/2/c", asyncClient, timeout);
+		
+		
+		log.info("Waiting for delivery and validating message.");
+		//Assert.assertTrue(mqttV5Receiver.validateReceipt("a/b/c", 0, samplePayload.getBytes()));
+		//Assert.assertTrue(mqttV5Receiver.validateReceipt("a/0/c", 0, samplePayload.getBytes()));
+		//Assert.assertTrue(mqttV5Receiver.validateReceipt("a/1/c", 1, samplePayload.getBytes()));
+		Assert.assertTrue(mqttV5Receiver.validateReceipt("a/2/c", 2, samplePayload.getBytes()));
+		
+		Thread.sleep(10000);
+
+
+		TestClientUtilities.disconnectAndCloseClient(asyncClient, timeout);
+	}
+
+	private void publishMessage(String payload, int qos, String topic, MqttAsyncClient client, int timeout) throws MqttException {
+		MqttMessage testMessage = new MqttMessage(payload.getBytes(), qos, false, null);
+		log.info(String.format("Publishing Message %s to: %s at QoS: %d", testMessage.toDebugString(), topic,
+				qos));
+		IMqttDeliveryToken deliveryToken = client.publish(topic, testMessage);
+		deliveryToken.waitForCompletion(timeout);
 	}
 
 }

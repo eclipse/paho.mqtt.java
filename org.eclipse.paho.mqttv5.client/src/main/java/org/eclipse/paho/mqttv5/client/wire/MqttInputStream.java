@@ -121,8 +121,8 @@ public class MqttInputStream extends InputStream {
 				byte[] header = bais.toByteArray();
 				System.arraycopy(header,0,packet,0, header.length);
 				message = MqttWireMessage.createWireMessage(packet);
-				// @TRACE 501= received {0} 
-				log.fine(CLASS_NAME, methodName, "501",new Object[] {message});
+				// @TRACE 530= Received {0} 
+				log.fine(CLASS_NAME, methodName, "530",new Object[] {message});
 			}
 		} catch (SocketTimeoutException e) {
 			// ignore socket read timeout
