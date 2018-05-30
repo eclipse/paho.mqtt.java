@@ -80,6 +80,7 @@ public class TCPNetworkModule implements NetworkModule {
 				socket = factory.createSocket();
 				socket.connect(sockaddr, conTimeout*1000);
 			}
+			socket.setSoTimeout(1000);
 		}
 		catch (ConnectException ex) {
 			//@TRACE 250=Failed to create TCP socket
