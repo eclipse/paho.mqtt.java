@@ -1,0 +1,8 @@
+MIDlet-Version: 1.0
+MIDlet-Vendor: IBM
+MIDlet-Jar-URL: GPIOSampleAsyncWait.jar
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: GPIOSampleAsyncWait,,org.eclipse.paho.jmeclient.mqttv3.sampleGPIO.AsyncWait.GPIOSampleAsyncWait
+MicroEdition-Profile: IMP-NG
+MIDlet-Jar-Size: 7251
+MIDlet-Name: GPIOSampleAsyncWait

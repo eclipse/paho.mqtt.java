@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-Name: MQTTv3_JMEClient Plug-in
+Bundle-SymbolicName: org.eclipse.paho.jmeclient.mqttv3;singleton:=true
+Bundle-Version: 1.2.1.qualifier
+Bundle-ManifestVersion: 2
+Import-Package: javax.net;resolution:=optional,
+ javax.net.ssl;resolution:=optional
+Bundle-Classpath: ., bin
+Export-Package: org.eclipse.paho.jmeclient.mqttv3

@@ -1,0 +1,8 @@
+MIDlet-Version: 1.0
+MIDlet-Vendor: IBM
+MIDlet-Jar-URL: GPIOSampleAsyncCallback.jar
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: GPIOSampleAsyncCallback,,org.eclipse.paho.jmeclient.mqttv3.sampleGPIO.AsyncCallback.GPIOSampleAsyncCallback
+MicroEdition-Profile: IMP-NG
+MIDlet-Jar-Size: 198726
+MIDlet-Name: GPIOSampleAsyncCallback

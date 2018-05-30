@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+	id="org.eclipse.paho.client.eclipse.feature"
+	label="%featureName"
+	provider-name="%providerName"
+	version="1.2.1.qualifier">
+
+	<description url="http://www.eclipse.org/paho/">
+		%description
+	</description>
+
+	<copyright url="http://www.eclipse.org/legal/copyright.php">
+		%copyright
+	</copyright>
+
+	<license url="%licenseURL">
+		%license
+	</license>
+
+	<plugin
+		id="org.eclipse.paho.client.eclipse.view"
+		download-size="0"
+		install-size="0"
+		version="0.0.0"
+		unpack="false"/>
+
+	<plugin
+		id="org.eclipse.paho.client.mqttv3"
+		download-size="0"
+		install-size="0"
+		version="0.0.0"
+		unpack="false"/>
+
+</feature>

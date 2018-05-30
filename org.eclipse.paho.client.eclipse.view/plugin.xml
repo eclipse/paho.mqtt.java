@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+	<extension point="org.eclipse.ui.views">
+		<category 
+			id="org.eclipse.ui.paho"
+			name="M2M">
+		</category>
+
+		<view id="org.eclipse.paho.client.eclipse.view.mqttclientview"
+			name="Paho MQTT Exerciser"
+			category="org.eclipse.ui.paho" 
+			class="org.eclipse.paho.client.eclipse.view.MqttClientView" 
+			icon="icons/mqtt_view.png"/>
+	</extension>
+</plugin>

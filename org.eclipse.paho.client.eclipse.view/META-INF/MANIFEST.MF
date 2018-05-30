@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundle.name
+Bundle-SymbolicName: org.eclipse.paho.client.eclipse.view;singleton:=true
+Bundle-Version: 1.2.1.qualifier
+Bundle-Activator: org.eclipse.paho.client.eclipse.view.Activator
+Bundle-Vendor: %bundle.provider
+Bundle-Localization: plugin
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.paho.client.mqttv3
