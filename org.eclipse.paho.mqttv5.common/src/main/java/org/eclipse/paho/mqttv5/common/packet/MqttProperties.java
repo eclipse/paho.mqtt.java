@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
 /**
  * MQTT v5 Properties Class. This Class contains all of the available MQTTv5
@@ -1225,6 +1226,7 @@ public class MqttProperties {
 	 *            The Response Topic.
 	 */
 	public void setResponseTopic(String responseTopic) {
+		MqttTopicValidator.validate(responseTopic, false);
 		this.responseTopic = responseTopic;
 	}
 

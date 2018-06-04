@@ -11,117 +11,78 @@
  *
  *******************************************************************************/
 
-package org.eclipse.paho.mqttv5.client.test;
+package org.eclipse.paho.mqttv5.common.utils;
 
-import java.util.logging.Logger;
-
-import org.eclipse.paho.mqttv5.client.MqttTopic;
-import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
-import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.junit.AfterClass;
+import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Tests mqtt topic wildcards
+ * Tests MQTT topic wildcards
  */
 public class MqttTopicTest {
 
-	static final Class<?> cclass = MqttTopicTest.class;
-	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-	}
 
 	@Test
 	public void testValidTopicFilterWildcards() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
 		String[] topics = new String[] { "+", "+/+", "+/foo", "+/tennis/#", "foo/+", "foo/+/bar", "/+",
 				"/+/sport/+/player1", "#", "/#", "sport/#", "sport/tennis/#" };
 
 		for (String topic : topics) {
-			MqttTopic.validate(topic, true);
+			MqttTopicValidator.validate(topic, true);
 		}
 	}
 
 	@Test
 	public void testMatchedTopicFilterWildcards() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
 		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player1" },
 				{ "sport/tennis/player1/#", "sport/tennis/player1/ranking" },
 				{ "sport/tennis/player1/#", "sport/tennis/player1/score/wimbledon" }, { "sport/#", "sport" },
 				{ "#", "sport/tennis/player1" } };
 
 		for (String[] pair : matchingTopics) {
-			Assert.assertTrue(pair[0] + " should match " + pair[1], MqttTopic.isMatched(pair[0], pair[1]));
+			Assert.assertTrue(pair[0] + " should match " + pair[1], MqttTopicValidator.isMatched(pair[0], pair[1]));
 		}
 	}
 
 	@Test
 	public void testNonMatchedTopicFilterWildcards() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
 		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player2" },
 				{ "sport1/#", "sport2" }, { "sport/tennis1/player/#", "sport/tennis2/player" } };
 
 		for (String[] pair : matchingTopics) {
-			Assert.assertFalse(pair[0] + " should NOT match " + pair[1], MqttTopic.isMatched(pair[0], pair[1]));
+			Assert.assertFalse(pair[0] + " should NOT match " + pair[1], MqttTopicValidator.isMatched(pair[0], pair[1]));
 		}
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards1() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-		MqttTopic.validate("sport/tennis#", true);
+		MqttTopicValidator.validate("sport/tennis#", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards2() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-		MqttTopic.validate("sport/tennis/#/ranking", true);
+		MqttTopicValidator.validate("sport/tennis/#/ranking", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards3() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-		MqttTopic.validate("sport+", true);
+		MqttTopicValidator.validate("sport+", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards4() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-		MqttTopic.validate("sport/+aa", true);
+		MqttTopicValidator.validate("sport/+aa", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards5() throws Exception {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-		MqttTopic.validate("sport/#/ball/+/aa", true);
+		MqttTopicValidator.validate("sport/#/ball/+/aa", true);
 	}
 	
 	@Test
 	public void testValidG11NTopic() {
-		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log,  cclass,  methodName);
-		MqttTopic.validate("$shared/葛渚噓/GVTDurTopic02/葛渚噓", true);
+		MqttTopicValidator.validate("$shared/葛渚噓/GVTDurTopic02/葛渚噓", true);
 	}
 
 }

@@ -65,6 +65,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
 import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
+import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
 /**
  * Lightweight client for talking to an MQTT server using non-blocking methods
@@ -1134,7 +1135,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 *             if the topic contains a '+' or '#' wildcard character.
 	 */
 	protected MqttTopic getTopic(String topic) {
-		MqttTopic.validate(topic, false/* wildcards NOT allowed */);
+		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */);
 
 		MqttTopic result = (MqttTopic) topics.get(topic);
 		if (result == null) {
@@ -1255,7 +1256,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 				subs.append(subscriptions[i].toString());
 
 				// Check if the topic filter is valid before subscribing
-				MqttTopic.validate(subscriptions[i].getTopic(), true/* allow wildcards */);
+				MqttTopicValidator.validate(subscriptions[i].getTopic(), true/* allow wildcards */);
 			}
 			// @TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
 			log.fine(CLASS_NAME, methodName, "106", new Object[] { subs.toString(), userContext, callback });
@@ -1459,7 +1460,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			// Although we already checked when subscribing, but invalid
 			// topic filter is meanless for unsubscribing, just prohibit it
 			// to reduce unnecessary control packet send to broker.
-			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
+			MqttTopicValidator.validate(topicFilters[i], true/* allow wildcards */);
 		}
 
 		// remove message handlers from the list for this client
@@ -1588,7 +1589,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		log.fine(CLASS_NAME, methodName, "111", new Object[] { topic, userContext, callback });
 
 		// Checks if a topic is valid when publishing a message.
-		MqttTopic.validate(topic, false/* wildcards NOT allowed */);
+		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */);
 
 		MqttDeliveryToken token = new MqttDeliveryToken(getClientId());
 		token.setActionCallback(callback);

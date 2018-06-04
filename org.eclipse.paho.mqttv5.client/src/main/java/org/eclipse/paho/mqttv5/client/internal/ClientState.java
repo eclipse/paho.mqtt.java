@@ -1115,6 +1115,7 @@ public class ClientState implements MqttState {
 	 * @param ack
 	 *            - The Orphaned Ack
 	 * @throws MqttException
+	 *             if an exception occurs whilst handling orphaned Acks
 	 */
 	protected void handleOrphanedAcks(MqttAck ack) throws MqttException {
 		final String methodName = "handleOrphanedAcks";
@@ -1161,7 +1162,7 @@ public class ClientState implements MqttState {
 			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, pubRel.getMessageId(),
 					new MqttProperties());
 			// @TRACE 668=Creating MqttPubComp: {0}
-			log.info(CLASS_NAME, methodName, "668", new Object[] { pubComp.toString()});
+			log.info(CLASS_NAME, methodName, "668", new Object[] { pubComp.toString() });
 			this.send(pubComp, null);
 		}
 	}

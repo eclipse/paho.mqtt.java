@@ -32,7 +32,6 @@ import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
-import org.eclipse.paho.mqttv5.client.MqttTopic;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -45,6 +44,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
+import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
 /**
  * Bridge between Receiver and the external API. This class gets called by
@@ -596,7 +596,7 @@ public class CommsCallback implements Runnable {
 		if (aMessage.getProperties().getSubscriptionIdentifiers().isEmpty()) {
 			// No Subscription IDs, use topic filter matching
 			for (Map.Entry<String, Integer> entry : this.callbackTopicMap.entrySet()) {
-				if (MqttTopic.isMatched(entry.getKey(), topicName)) {
+				if (MqttTopicValidator.isMatched(entry.getKey(), topicName)) {
 					aMessage.setId(messageId);
 					this.callbackMap.get(entry.getValue()).messageArrived(topicName, aMessage);
 					delivered = true;

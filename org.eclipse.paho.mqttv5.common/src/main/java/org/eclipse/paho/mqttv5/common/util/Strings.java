@@ -13,7 +13,7 @@
  * Contributors:
  *    Bin Zhang - initial API and implementation and/or initial documentation
  */
-package org.eclipse.paho.mqttv5.client.util;
+package org.eclipse.paho.mqttv5.common.util;
 
 /**
  * String helper

@@ -30,6 +30,7 @@ import org.eclipse.paho.mqttv5.client.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
+import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
 /**
  * Holds the set of options that control how the client connects to a server.
@@ -201,7 +202,7 @@ public class MqttConnectionOptions {
 		if (topic == null || message == null || message.getPayload() == null) {
 			throw new IllegalArgumentException();
 		}
-		MqttTopic.validate(topic, false); // Wildcards are not allowed
+		MqttTopicValidator.validate(topic, false); // Wildcards are not allowed
 		this.willDestination = topic;
 		this.willMessage = message;
 		// Prevent any more changes to the will message
