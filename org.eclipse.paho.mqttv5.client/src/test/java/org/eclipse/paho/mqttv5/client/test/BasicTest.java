@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
+import org.eclipse.paho.mqttv5.client.MqttCallback;
+import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
@@ -16,6 +18,7 @@ import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -144,20 +147,14 @@ public class BasicTest {
 		String samplePayload = "Hello World";
 
 		log.info("Publishing messages on topics.");
-		//publishMessage(samplePayload, 0, "a/b/c", asyncClient, timeout);
-		//publishMessage(samplePayload, 0, "a/0/c", asyncClient, timeout);
-		//publishMessage(samplePayload, 1, "a/1/c", asyncClient, timeout);
 		publishMessage(samplePayload, 2, "a/2/c", asyncClient, timeout);
 		
 		
 		log.info("Waiting for delivery and validating message.");
-		//Assert.assertTrue(mqttV5Receiver.validateReceipt("a/b/c", 0, samplePayload.getBytes()));
-		//Assert.assertTrue(mqttV5Receiver.validateReceipt("a/0/c", 0, samplePayload.getBytes()));
-		//Assert.assertTrue(mqttV5Receiver.validateReceipt("a/1/c", 1, samplePayload.getBytes()));
 		Assert.assertTrue(mqttV5Receiver.validateReceipt("a/2/c", 2, samplePayload.getBytes()));
+		log.info("Number of received message: " + mqttV5Receiver.receivedMessageCount());
+				
 		
-		Thread.sleep(10000);
-
 
 		TestClientUtilities.disconnectAndCloseClient(asyncClient, timeout);
 	}

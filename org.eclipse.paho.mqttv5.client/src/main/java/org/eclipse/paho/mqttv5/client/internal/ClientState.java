@@ -1150,25 +1150,18 @@ public class ClientState implements MqttState {
 	 */
 	protected void handleInboundPubRel(MqttPubRel pubRel) throws MqttException {
 		final String methodName = "handleInboundPubRel";
-		MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(Integer.valueOf(pubRel.getMessageId()));
 		if (pubRel.getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR) {
 			// @TRACE 667=MqttPubRel was received with an error code: key={0} message={1},
 			// Reason Code={2}
 			log.severe(CLASS_NAME, methodName, "667",
 					new Object[] { pubRel.getMessageId(), pubRel.toString(), pubRel.getReasonCodes()[0] });
 			throw new MqttException(pubRel.getReasonCodes()[0]);
-		}
-		if (sendMsg != null) {
-			if (callback != null) {
-				callback.messageArrived(sendMsg);
-			}
 		} else {
-			// Original publish has already been delivered.
 			// Currently this client has no need of the properties, so this is left empty.
 			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, pubRel.getMessageId(),
 					new MqttProperties());
-			// TODO - Fix Trace
-			log.info(CLASS_NAME, methodName, "Creating MqttPubComp due to pubRel: " + pubComp.toString());
+			// @TRACE 668=Creating MqttPubComp: {0}
+			log.info(CLASS_NAME, methodName, "668", new Object[] { pubComp.toString()});
 			this.send(pubComp, null);
 		}
 	}

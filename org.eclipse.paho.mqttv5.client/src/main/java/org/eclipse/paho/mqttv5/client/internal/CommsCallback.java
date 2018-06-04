@@ -302,7 +302,8 @@ public class CommsCallback implements Runnable {
 				// @TRACE 722=Server initiated disconnect, connection closed. Disconnect={0}
 				log.fine(CLASS_NAME, methodName, "722", new Object[] { message.toString() });
 				MqttDisconnectResponse disconnectResponse = new MqttDisconnectResponse(message.getReturnCode(),
-						message.getProperties().getReasonString(), (ArrayList<UserProperty>) message.getProperties().getUserProperties(),
+						message.getProperties().getReasonString(),
+						(ArrayList<UserProperty>) message.getProperties().getUserProperties(),
 						message.getProperties().getServerReference());
 				mqttCallback.disconnected(disconnectResponse);
 			} else if (mqttCallback != null && cause != null) {
@@ -385,13 +386,15 @@ public class CommsCallback implements Runnable {
 			}
 		}
 	}
-	
+
 	/**
 	 * This method is called when an Auth Message is received.
-	 * @param authMessage The {@link MqttAuth} message.
+	 * 
+	 * @param authMessage
+	 *            The {@link MqttAuth} message.
 	 */
 	public void authMessageReceived(MqttAuth authMessage) {
-		if(mqttCallback != null) {
+		if (mqttCallback != null) {
 			mqttCallback.authPacketArrived(authMessage.getReturnCode(), authMessage.getProperties());
 		}
 	}
@@ -427,11 +430,11 @@ public class CommsCallback implements Runnable {
 			spaceAvailable.notifyAll();
 		}
 	}
-	
+
 	boolean areQueuesEmpty() {
-	    synchronized (workAvailable) {
-	        return completeQueue.isEmpty() && messageQueue.isEmpty();    
-	    }
+		synchronized (workAvailable) {
+			return completeQueue.isEmpty() && messageQueue.isEmpty();
+		}
 	}
 
 	public boolean isQuiesced() {
@@ -441,39 +444,30 @@ public class CommsCallback implements Runnable {
 	private void handleMessage(MqttPublish publishMessage) throws Exception {
 		final String methodName = "handleMessage";
 		// If quisecing process any pending messages.
-
 		String destName = publishMessage.getTopicName();
 
 		// @TRACE 713=call messageArrived key={0} topic={1}
 		log.fine(CLASS_NAME, methodName, "713", new Object[] { new Integer(publishMessage.getMessageId()), destName });
 		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage());
 
-		if (!this.manualAcks) {
-			if (publishMessage.getMessage().getQos() == 1) {
-				this.clientComms.internalSend(
-						new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, publishMessage.getMessageId(), new MqttProperties()),
-						new MqttToken(clientComms.getClient().getClientId()));
-			} 
-			
-			/*else if (publishMessage.getMessage().getQos() == 2) {
-				this.clientComms.deliveryComplete(publishMessage);
-				MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS,
-						publishMessage.getMessageId(), new MqttProperties());
-				log.info(CLASS_NAME, methodName, "Creating MqttPubComp due to handleMessage: " + pubComp.toString());
-
-				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
-			}*/
+		// If we are not in manual ACK mode:
+		if (!this.manualAcks && publishMessage.getMessage().getQos() == 1) {
+			this.clientComms.internalSend(new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS,
+					publishMessage.getMessageId(), new MqttProperties()),
+					new MqttToken(clientComms.getClient().getClientId()));
 		}
 	}
 
 	public void messageArrivedComplete(int messageId, int qos) throws MqttException {
 		if (qos == 1) {
-			this.clientComms.internalSend(new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, messageId, new MqttProperties()),
+			this.clientComms.internalSend(
+					new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, messageId, new MqttProperties()),
 					new MqttToken(clientComms.getClient().getClientId()));
 		} else if (qos == 2) {
 			this.clientComms.deliveryComplete(messageId);
 			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, messageId, new MqttProperties());
-			log.info(CLASS_NAME, "messageArrivedComplete", "Creating MqttPubComp due to messageArrivedComplete: " + pubComp.toString());
+			// @TRACE 723=Creating MqttPubComp due to manual ACK: {0}
+			log.info(CLASS_NAME, "messageArrivedComplete", "723", new Object[] {pubComp.toString()});
 
 			this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 		}

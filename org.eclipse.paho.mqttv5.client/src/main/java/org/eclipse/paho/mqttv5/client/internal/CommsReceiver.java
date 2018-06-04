@@ -51,7 +51,7 @@ public class CommsReceiver implements Runnable {
 	private Future<?> receiverFuture;
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, InputStream in) {
-		this.in = new MqttInputStream(clientState, in);
+		this.in = new MqttInputStream(clientState, in, clientComms.getClient().getClientId());
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;

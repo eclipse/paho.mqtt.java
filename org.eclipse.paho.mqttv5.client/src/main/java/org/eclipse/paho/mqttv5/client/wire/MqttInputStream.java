@@ -47,11 +47,12 @@ public class MqttInputStream extends InputStream {
 	private int packetLen;
 	private byte[] packet;
 
-	public MqttInputStream(MqttState clientState, InputStream in) {
+	public MqttInputStream(MqttState clientState, InputStream in, String clientId) {
 		this.clientState = clientState;
 		this.in = new DataInputStream(in);		
 		this.bais = new ByteArrayOutputStream();
 		this.remLen = -1;
+		log.setResourceName(clientId);
 	}
 	
 	public int read() throws IOException {
