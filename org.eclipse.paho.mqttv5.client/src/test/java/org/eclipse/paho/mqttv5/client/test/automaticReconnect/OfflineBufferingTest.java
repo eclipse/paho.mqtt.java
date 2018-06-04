@@ -81,7 +81,7 @@ public class OfflineBufferingTest {
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
@@ -152,7 +152,7 @@ public class OfflineBufferingTest {
 
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
@@ -245,7 +245,7 @@ public class OfflineBufferingTest {
 
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
@@ -302,7 +302,7 @@ public class OfflineBufferingTest {
 
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
@@ -361,7 +361,7 @@ public class OfflineBufferingTest {
 
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		final MemoryPersistence persistence = new MemoryPersistence();
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName,
@@ -446,7 +446,7 @@ public class OfflineBufferingTest {
 		// Create Real client
 		log.info("Creating new client that uses existing persistence layer");
 		MqttConnectionOptions optionsNew = new MqttConnectionOptions();
-		optionsNew.setCleanSession(false);
+		optionsNew.setCleanStart(false);
 		MqttAsyncClient newClient = new MqttAsyncClient(serverURIString, methodName + "new-client11", persistence);
 		// Connect Client with existing persistence layer
 		IMqttToken newClientConnectToken = newClient.connect(optionsNew);
@@ -494,7 +494,7 @@ public class OfflineBufferingTest {
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		options.setTopicAliasMaximum(10);
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);

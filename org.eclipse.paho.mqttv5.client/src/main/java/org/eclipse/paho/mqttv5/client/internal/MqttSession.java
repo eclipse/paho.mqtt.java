@@ -44,7 +44,7 @@ public class MqttSession {
 
 	/**
 	 * Clears the session and resets. This would be called when the connection has
-	 * been lost and cleanSession = True.
+	 * been lost and cleanStart = True.
 	 */
 	public void clearSession() {
 		nextSubscriptionIdentifier.set(1);

@@ -28,7 +28,7 @@ public class MqttConnectTest {
 
 	private static final String clientId = "testClientId";
 	private static final int mqttVersion = 5;
-	private static final boolean cleanSession = true;
+	private static final boolean cleanStart = true;
 	private static final int keepAliveInterval = 60;
 	private static final String userName = "username";
 	private static final byte[] password = "password".getBytes();
@@ -92,7 +92,7 @@ public class MqttConnectTest {
 
 		Assert.assertEquals(clientId, decodedConnectPacket.getClientId());
 		Assert.assertEquals(mqttVersion, decodedConnectPacket.getMqttVersion());
-		Assert.assertEquals(cleanSession, decodedConnectPacket.isCleanSession());
+		Assert.assertEquals(cleanStart, decodedConnectPacket.isCleanStart());
 		Assert.assertEquals(keepAliveInterval, decodedConnectPacket.getKeepAliveInterval());
 		Assert.assertEquals(userName, decodedConnectPacket.getUserName());
 		Assert.assertArrayEquals(password, decodedConnectPacket.getPassword());
@@ -155,7 +155,7 @@ public class MqttConnectTest {
 		willProperties.setCorrelationData(willCorrelationData);
 
 		willProperties.setUserProperties(userDefinedProperties);
-		MqttConnect mqttConnectPacket = new MqttConnect(clientId, mqttVersion, cleanSession, keepAliveInterval,
+		MqttConnect mqttConnectPacket = new MqttConnect(clientId, mqttVersion, cleanStart, keepAliveInterval,
 				properties, willProperties);
 
 		mqttConnectPacket.setUserName(userName);

@@ -316,7 +316,7 @@ public class ClientComms {
 				conOptions = options;
 
 				MqttConnect connect = new MqttConnect(client.getClientId(), conOptions.getMqttVersion(),
-						conOptions.isCleanSession(), conOptions.getKeepAliveInterval(),
+						conOptions.isCleanStart(), conOptions.getKeepAliveInterval(),
 						conOptions.getConnectionProperties(), conOptions.getWillMessageProperties());
 
 				if (conOptions.getWillDestination() != null) {
@@ -340,7 +340,7 @@ public class ClientComms {
 				 */
 
 				this.clientState.setKeepAliveSecs(conOptions.getKeepAliveInterval());
-				this.clientState.setCleanSession(conOptions.isCleanSession());
+				this.clientState.setCleanStart(conOptions.isCleanStart());
 
 				tokenStore.open();
 				ConnectBG conbg = new ConnectBG(this, token, connect, executorService);
@@ -456,7 +456,7 @@ public class ClientComms {
 		try {
 			// Clean session handling and tidy up
 			clientState.disconnected(reason);
-			if (clientState.getCleanSession())
+			if (clientState.getCleanStart())
 				callback.removeMessageListeners();
 		} catch (Exception ex) {
 			// Ignore as we are shutting down

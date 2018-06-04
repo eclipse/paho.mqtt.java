@@ -128,7 +128,7 @@ public class ConnectActionListener implements MqttActionListener {
 			try {
 				persistence.open(myToken.getMessageProperties().getAssignedClientIdentifier());
 
-				if (options.isCleanSession()) {
+				if (options.isCleanStart()) {
 					persistence.clear();
 				}
 			} catch (MqttPersistenceException exception) {
@@ -225,7 +225,7 @@ public class ConnectActionListener implements MqttActionListener {
 		if (!client.getClientId().equals("")) {
 			persistence.open(client.getClientId());
 
-			if (options.isCleanSession()) {
+			if (options.isCleanStart()) {
 				persistence.clear();
 			}
 		}

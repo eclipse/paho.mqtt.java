@@ -99,7 +99,7 @@ public class MqttConnectionOptions {
 
 	// Connection packet properties
 	private int mqttVersion = 5; // MQTT Version 5
-	private boolean cleanSession = true; // Clean Session
+	private boolean cleanStart = true; // Clean Session
 	private String willDestination = null; // Will Topic
 	private MqttMessage willMessage = null; // Will Message
 	private String userName; // Username
@@ -215,8 +215,8 @@ public class MqttConnectionOptions {
 	 * 
 	 * @return the clean session flag
 	 */
-	public boolean isCleanSession() {
-		return this.cleanSession;
+	public boolean isCleanStart() {
+		return this.cleanStart;
 	}
 
 	/**
@@ -240,11 +240,11 @@ public class MqttConnectionOptions {
 	 * </ul>
 	 * </ul>
 	 * 
-	 * @param cleanSession
+	 * @param cleanStart
 	 *            Set to True to enable cleanSession
 	 */
-	public void setCleanSession(boolean cleanSession) {
-		this.cleanSession = cleanSession;
+	public void setCleanStart(boolean cleanStart) {
+		this.cleanStart = cleanStart;
 	}
 
 	/**
@@ -368,7 +368,7 @@ public class MqttConnectionOptions {
 	 * connects to.
 	 * </p>
 	 * <p>
-	 * The cleansession flag must be set to false if durable subscriptions and/or
+	 * The cleanStart flag must be set to false if durable subscriptions and/or
 	 * reliable message delivery is required.
 	 * </p>
 	 * </li>
@@ -376,7 +376,7 @@ public class MqttConnectionOptions {
 	 * <p>
 	 * A set of servers may be specified that are not "equal" (as in the high
 	 * availability option). As no state is shared across the servers reliable
-	 * message delivery and durable subscriptions are not valid. The cleansession
+	 * message delivery and durable subscriptions are not valid. The cleanStart
 	 * flag must be set to true if the hunt list mode is used
 	 * </p>
 	 * </li>
@@ -914,7 +914,7 @@ public class MqttConnectionOptions {
 		final String strNull = "null";
 		Properties p = new Properties();
 		p.put("MqttVersion", getMqttVersion());
-		p.put("CleanSession", Boolean.valueOf(isCleanSession()));
+		p.put("CleanStart", Boolean.valueOf(isCleanStart()));
 		p.put("ConTimeout", getConnectionTimeout());
 		p.put("KeepAliveInterval", getKeepAliveInterval());
 		p.put("UserName", (getUserName() == null) ? strNull : getUserName());

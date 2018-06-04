@@ -175,7 +175,7 @@ public interface IMqttAsyncClient {
 	 * messages being accepted and does not send any messages that have been
 	 * accepted but not yet started delivery across the network to the server. When
 	 * work has completed or after the quiesce timeout, the client will disconnect
-	 * from the server. If the cleanSession flag was set to false and is set to
+	 * from the server. If the cleanStart flag was set to false and is set to
 	 * false the next time a connection is made QoS 1 and 2 messages that were not
 	 * previously delivered will be delivered.
 	 * </p>
@@ -429,7 +429,7 @@ public interface IMqttAsyncClient {
 	 * method, otherwise any received messages will be discarded.
 	 * </p>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to true when
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true when
 	 * when connecting to the server then the subscription remains in place until
 	 * either:
 	 * </p>
@@ -440,15 +440,15 @@ public interface IMqttAsyncClient {
 	 * </ul>
 	 *
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false when
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false when
 	 * connecting to the server then the subscription remains in place until either:
 	 * </p>
 	 * <ul>
 	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The next time the client connects with cleanSession set to true</li>
+	 * <li>The next time the client connects with cleanStart set to true</li>
 	 * </ul>
 	 * <p>
-	 * With cleanSession set to false the MQTT server will store messages on behalf
+	 * With cleanStart set to false the MQTT server will store messages on behalf
 	 * of the client when the client is not connected. The next time the client
 	 * connects with the <b>same client ID</b> the server will deliver the stored
 	 * messages to the client.
@@ -834,9 +834,9 @@ public interface IMqttAsyncClient {
 	 * callback can be used to track the delivery of outstanding messages.
 	 * </p>
 	 * <p>
-	 * If a client connects with cleanSession true then there will be no delivery
-	 * tokens as the cleanSession option deletes all earlier state. For state to be
-	 * remembered the client must connect with cleanSession set to false
+	 * If a client connects with cleanStart true then there will be no delivery
+	 * tokens as the cleanStart option deletes all earlier state. For state to be
+	 * remembered the client must connect with cleanStart set to false
 	 * </P>
 	 *
 	 * @return zero or more delivery tokens
@@ -946,9 +946,9 @@ public interface IMqttAsyncClient {
 	 * <ul>
 	 * <li>The connection is re-established with the same clientID
 	 * <li>The original connection was made with (@link
-	 * MqttConnectOptions#setCleanSession(boolean)} set to false
+	 * MqttConnectOptions#setCleanStart(boolean)} set to false
 	 * <li>The connection is re-established with (@link
-	 * MqttConnectOptions#setCleanSession(boolean)} set to false
+	 * MqttConnectOptions#setCleanStart(boolean)} set to false
 	 * <li>Depending when the failure occurs QoS 0 messages may not be delivered.
 	 * </ul>
 	 *

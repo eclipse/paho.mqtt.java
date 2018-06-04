@@ -97,9 +97,9 @@ import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
  * hence can be lost if the client, Java runtime or device shuts down.
  * </p>
  * <p>
- * If connecting with {@link MqttConnectionOptions#setCleanSession(boolean)} set
+ * If connecting with {@link MqttConnectionOptions#setCleanStart(boolean)} set
  * to true it is safe to use memory persistence as all state is cleared when a
- * client disconnects. If connecting with cleanSession set to false in order to
+ * client disconnects. If connecting with cleanStart set to false in order to
  * provide reliable message delivery then a persistent message store such as the
  * default one should be used.
  * </p>
@@ -422,8 +422,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * {@link MqttClientPersistence} interface. An implementer of this interface
 	 * that safely stores messages must be specified in order for delivery of
 	 * messages to be reliable. In addition
-	 * {@link MqttConnectionOptions#setCleanSession(boolean)} must be set to false.
-	 * In the event that only QoS 0 messages are sent or received or cleanSession is
+	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false.
+	 * In the event that only QoS 0 messages are sent or received or cleanStart is
 	 * set to true then a safe store is not needed.
 	 * </p>
 	 * <p>
@@ -525,8 +525,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * {@link MqttClientPersistence} interface. An implementer of this interface
 	 * that safely stores messages must be specified in order for delivery of
 	 * messages to be reliable. In addition
-	 * {@link MqttConnectionOptions#setCleanSession(boolean)} must be set to false.
-	 * In the event that only QoS 0 messages are sent or received or cleanSession is
+	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false.
+	 * In the event that only QoS 0 messages are sent or received or cleanStart is
 	 * set to true then a safe store is not needed.
 	 * </p>
 	 * <p>
@@ -880,10 +880,10 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		this.userContext = userContext;
 		final boolean automaticReconnect = options.isAutomaticReconnect();
 
-		// @TRACE 103=cleanSession={0} connectionTimeout={1} TimekeepAlive={2}
+		// @TRACE 103=cleanStart={0} connectionTimeout={1} TimekeepAlive={2}
 		// userName={3} password={4} will={5} userContext={6} callback={7}
 		log.fine(CLASS_NAME, methodName, "103",
-				new Object[] { Boolean.valueOf(options.isCleanSession()), new Integer(options.getConnectionTimeout()),
+				new Object[] { Boolean.valueOf(options.isCleanStart()), new Integer(options.getConnectionTimeout()),
 						new Integer(options.getKeepAliveInterval()), options.getUserName(),
 						((null == options.getPassword()) ? "[null]" : "[notnull]"),
 						((null == options.getWillMessage()) ? "[null]" : "[notnull]"), userContext, callback });
@@ -906,11 +906,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			connectActionListener.setMqttCallbackExtended((MqttCallback) this.mqttCallback);
 		}
 
-		if (this.connOpts.isCleanSession()) {
+		if (this.connOpts.isCleanStart()) {
 			this.mqttSession.clearSession();
 		}
 
-		if (this.connOpts.isCleanSession()) {
+		if (this.connOpts.isCleanStart()) {
 			this.mqttSession.clearSession();
 		}
 

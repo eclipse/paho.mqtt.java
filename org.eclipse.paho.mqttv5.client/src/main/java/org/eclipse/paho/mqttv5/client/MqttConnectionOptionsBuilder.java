@@ -42,8 +42,8 @@ public class MqttConnectionOptionsBuilder {
 		return this;
 	}
 	
-	public MqttConnectionOptionsBuilder cleanSession(boolean cleanSession) {
-		mqttConnectionOptions.setCleanSession(cleanSession);
+	public MqttConnectionOptionsBuilder cleanStart(boolean cleanStart) {
+		mqttConnectionOptions.setCleanStart(cleanStart);
 		return this;
 	}
 	

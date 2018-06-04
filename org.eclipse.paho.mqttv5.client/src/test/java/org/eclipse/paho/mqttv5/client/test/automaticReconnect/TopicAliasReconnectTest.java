@@ -87,7 +87,7 @@ public class TopicAliasReconnectTest {
 
 			// 1. Client connects with Clean session=false, session expiry=Max (no expiry)
 			MqttConnectionOptions options = new MqttConnectionOptions();
-			options.setCleanSession(false);
+			options.setCleanStart(false);
 			options.setSessionExpiryInterval(null);
 			options.setAutomaticReconnect(true);
 			options.setTopicAliasMaximum(1);

@@ -67,7 +67,7 @@ public class AutomaticReconnectTest {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
 		MqttConnectionOptions options = new MqttConnectionOptions();
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		final MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(),
 				clientId, DATA_STORE);
@@ -112,7 +112,7 @@ public class AutomaticReconnectTest {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
 		MqttConnectionOptions options = new MqttConnectionOptions();
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 
 		final MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(),
@@ -150,7 +150,7 @@ public class AutomaticReconnectTest {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
 		MqttConnectionOptions options = new MqttConnectionOptions();
-		options.setCleanSession(true);
+		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		options.setConnectionTimeout(15);
 		final MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(),

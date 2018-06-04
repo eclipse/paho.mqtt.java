@@ -119,7 +119,7 @@ public class ClientState implements MqttState {
 	private ClientComms clientComms = null;
 	private CommsCallback callback = null;
 	private long keepAlive;
-	private boolean cleanSession;
+	private boolean cleanStart;
 	private MqttClientPersistence persistence;
 
 	private int actualInFlight = 0;
@@ -189,12 +189,12 @@ public class ClientState implements MqttState {
 		return this.keepAlive;
 	}
 
-	protected void setCleanSession(boolean cleanSession) {
-		this.cleanSession = cleanSession;
+	protected void setCleanStart(boolean cleanStart) {
+		this.cleanStart = cleanStart;
 	}
 
-	protected boolean getCleanSession() {
-		return this.cleanSession;
+	protected boolean getCleanStart() {
+		return this.cleanStart;
 	}
 
 	private String getSendPersistenceKey(MqttWireMessage message) {
@@ -1073,7 +1073,7 @@ public class ClientState implements MqttState {
 			int rc = ((MqttConnAck) ack).getReturnCode();
 			if (rc == 0) {
 				synchronized (queueLock) {
-					if (cleanSession) {
+					if (cleanStart) {
 						clearState();
 						// Add the connect token back in so that users can be
 						// notified when connect completes.
@@ -1418,7 +1418,7 @@ public class ClientState implements MqttState {
 		this.connected = false;
 
 		try {
-			if (cleanSession) {
+			if (cleanStart) {
 				clearState();
 			}
 

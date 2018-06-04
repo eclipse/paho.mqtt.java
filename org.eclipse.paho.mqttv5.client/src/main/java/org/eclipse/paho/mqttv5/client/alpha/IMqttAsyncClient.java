@@ -240,7 +240,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * prevents new messages being accepted and does not send any messages that have
 	 * been accepted but not yet started delivery across the network to the server. When
 	 * work has completed or after the quiesce timeout, the client will disconnect from
-	 * the server. If the cleanSession flag was set to false and is set to false the
+	 * the server. If the cleanStart flag was set to false and is set to false the
 	 * next time a connection is made QoS 1 and 2 messages that
 	 * were not previously delivered will be delivered.</p>
 	 * <p>This method must not be called from inside callback methods.</p>
@@ -379,9 +379,9 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * </p>
 	 * <ul>
 	 * <li>The connection is re-established with the same clientID
-	 * <li>The original connection was made with (@link MqttConnectOptions#setCleanSession(boolean)}
+	 * <li>The original connection was made with (@link MqttConnectOptions#setCleanStart(boolean)}
 	 * set to false
-	 * <li>The connection is re-established with (@link MqttConnectOptions#setCleanSession(boolean)}
+	 * <li>The connection is re-established with (@link MqttConnectOptions#setCleanStart(boolean)}
 	 * set to false
 	 * <li>Depending when the failure occurs QoS 0 messages may not be delivered.
 	 * </ul>
@@ -491,7 +491,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
  	 * <p>Provides an optimized way to subscribe to multiple topics compared to
 	 * subscribing to each one individually.</p>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to true
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * 
@@ -502,16 +502,16 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * </ul>
 	 * 
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
 	 * when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
 	 * <li>The stream returned by {@link IMqttSubscriptionToken#getStream()} is closed</li>
 	 * <li>Any part of the stream pipeline returns negative backpressure to close the stream</li>
-	 * <li>The next time the client connects with cleanSession set to true</li>
+	 * <li>The next time the client connects with cleanStart set to true</li>
 	 * </ul>
 	 * <p>
-	 * With cleanSession set to false the MQTT server will store messages on
+	 * With cleanStart set to false the MQTT server will store messages on
 	 * behalf of the client when the client is not connected. The next time the
 	 * client connects with the <b>same client ID</b> the server will
 	 * deliver the stored messages to the client.

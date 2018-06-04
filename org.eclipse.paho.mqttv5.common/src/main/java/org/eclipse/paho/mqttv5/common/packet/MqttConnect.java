@@ -38,7 +38,7 @@ public class MqttConnect extends MqttWireMessage {
 	private byte info;
 	private String clientId;
 	private boolean reservedByte;
-	private boolean cleanSession;
+	private boolean cleanStart;
 	private MqttMessage willMessage;
 	private String userName;
 	private byte[] password;
@@ -90,7 +90,7 @@ public class MqttConnect extends MqttWireMessage {
 
 		byte connectFlags = dis.readByte();
 		reservedByte = (connectFlags & 0x01) != 0;
-		cleanSession = (connectFlags & 0x02) != 0;
+		cleanStart = (connectFlags & 0x02) != 0;
 		boolean willFlag = (connectFlags & 0x04) != 0;
 		int willQoS = (connectFlags >> 3) & 0x03;
 		boolean willRetain = (connectFlags & 0x20) != 0;
@@ -137,7 +137,7 @@ public class MqttConnect extends MqttWireMessage {
 	 *            - The Client Identifier
 	 * @param mqttVersion
 	 *            - The MQTT Protocol version
-	 * @param cleanSession
+	 * @param cleanStart
 	 *            - The Clean Session Identifier
 	 * @param keepAliveInterval
 	 *            - The Keep Alive Interval
@@ -147,12 +147,12 @@ public class MqttConnect extends MqttWireMessage {
 	 *            - The {@link MqttProperties} for the will message.
 	 *
 	 */
-	public MqttConnect(String clientId, int mqttVersion, boolean cleanSession, int keepAliveInterval,
+	public MqttConnect(String clientId, int mqttVersion, boolean cleanStart, int keepAliveInterval,
 			MqttProperties properties, MqttProperties willProperties) {
 		super(MqttWireMessage.MESSAGE_TYPE_CONNECT);
 		this.clientId = clientId;
 		this.mqttVersion = mqttVersion;
-		this.cleanSession = cleanSession;
+		this.cleanStart = cleanStart;
 		this.keepAliveInterval = keepAliveInterval;
 		if (properties != null) {
 			this.properties = properties;
@@ -170,8 +170,8 @@ public class MqttConnect extends MqttWireMessage {
 		return (byte) 0;
 	}
 
-	public boolean isCleanSession() {
-		return cleanSession;
+	public boolean isCleanStart() {
+		return cleanStart;
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class MqttConnect extends MqttWireMessage {
 
 			byte connectFlags = 0;
 
-			if (cleanSession) {
+			if (cleanStart) {
 				connectFlags |= 0x02;
 			}
 
@@ -329,7 +329,7 @@ public class MqttConnect extends MqttWireMessage {
 	@Override
 	public String toString() {
 		return "MqttConnect [properties=" + properties + ", willProperties=" + willProperties + ", info=" + info
-				+ ", clientId=" + clientId + ", reservedByte=" + reservedByte + ", cleanSession=" + cleanSession
+				+ ", clientId=" + clientId + ", reservedByte=" + reservedByte + ", cleanStart=" + cleanStart
 				+ ", willMessage=" + willMessage + ", userName=" + userName + ", password=" + Arrays.toString(password)
 				+ ", keepAliveInterval=" + keepAliveInterval + ", willDestination=" + willDestination + ", mqttVersion="
 				+ mqttVersion + "]";
