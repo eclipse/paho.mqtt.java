@@ -264,7 +264,13 @@ public class CommsCallback implements Runnable {
 				// If a callback is registered and delivery has finished
 				// call delivery complete callback.
 				if (mqttCallback != null && token instanceof MqttDeliveryToken && token.isComplete()) {
-					mqttCallback.deliveryComplete((MqttDeliveryToken) token);
+					try {
+						mqttCallback.deliveryComplete((MqttDeliveryToken) token);
+					} catch (Throwable ex) {
+						// Just log the fact that an exception was thrown
+						// @TRACE 726=Ignoring Exception thrown from deliveryComplete {0}
+						log.fine(CLASS_NAME, methodName, "726", new Object[] { ex });
+					}
 				}
 				// Now call async action completion callbacks
 				fireActionEvent(token);
@@ -318,9 +324,8 @@ public class CommsCallback implements Runnable {
 				reconnectInternalCallback.disconnected(disconnectResponse);
 			}
 		} catch (Throwable t) {
-			// Just log the fact that a throwable has caught connection lost
-			// is called during shutdown processing so no need to do anything else
-			// @TRACE 720=exception from connectionLost {0}
+			// Just log the fact that an exception was thrown
+			// @TRACE 720=Ignoring Exception thrown from connectionLost {0}
 			log.fine(CLASS_NAME, methodName, "720", new Object[] { t });
 		}
 	}
@@ -394,8 +399,15 @@ public class CommsCallback implements Runnable {
 	 *            The {@link MqttAuth} message.
 	 */
 	public void authMessageReceived(MqttAuth authMessage) {
+		String methodName = "authMessageReceived";
 		if (mqttCallback != null) {
-			mqttCallback.authPacketArrived(authMessage.getReturnCode(), authMessage.getProperties());
+			try {
+				mqttCallback.authPacketArrived(authMessage.getReturnCode(), authMessage.getProperties());
+			} catch (Throwable ex) {
+				// Just log the fact that an exception was thrown
+				// @TRACE 727=Ignoring Exception thrown from authPacketArrived {0}
+				log.fine(CLASS_NAME, methodName, "727", new Object[] { ex });
+			}
 		}
 	}
 
@@ -411,7 +423,13 @@ public class CommsCallback implements Runnable {
 		final String methodName = "mqttErrorOccurred";
 		log.warning(CLASS_NAME, methodName, "721", new Object[] { exception.getMessage() });
 		if (mqttCallback != null) {
-			mqttCallback.mqttErrorOccurred(exception);
+			try {
+				mqttCallback.mqttErrorOccurred(exception);
+			} catch (Exception ex) {
+				// Just log the fact that an exception was thrown
+				// @TRACE 724=Ignoring Exception thrown from mqttErrorOccurred: {0}
+				log.fine(CLASS_NAME, methodName, "724", new Object[] { ex });
+			}
 		}
 	}
 
@@ -467,7 +485,7 @@ public class CommsCallback implements Runnable {
 			this.clientComms.deliveryComplete(messageId);
 			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, messageId, new MqttProperties());
 			// @TRACE 723=Creating MqttPubComp due to manual ACK: {0}
-			log.info(CLASS_NAME, "messageArrivedComplete", "723", new Object[] {pubComp.toString()});
+			log.info(CLASS_NAME, "messageArrivedComplete", "723", new Object[] { pubComp.toString() });
 
 			this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
 		}
@@ -573,6 +591,7 @@ public class CommsCallback implements Runnable {
 
 	protected boolean deliverMessage(String topicName, int messageId, MqttMessage aMessage) throws Exception {
 		boolean delivered = false;
+		String methodName = "deliverMessage";
 
 		if (aMessage.getProperties().getSubscriptionIdentifiers().isEmpty()) {
 			// No Subscription IDs, use topic filter matching
@@ -602,7 +621,13 @@ public class CommsCallback implements Runnable {
 		 */
 		if (mqttCallback != null && !delivered) {
 			aMessage.setId(messageId);
-			mqttCallback.messageArrived(topicName, aMessage);
+			try {
+				mqttCallback.messageArrived(topicName, aMessage);
+			} catch (Exception ex) {
+				// Just log the fact that an exception was thrown
+				// @TRACE 725=Ignoring Exception thrown from messageArrived: {0}
+				log.fine(CLASS_NAME, methodName, "725", new Object[] { ex });
+			}
 			delivered = true;
 		}
 

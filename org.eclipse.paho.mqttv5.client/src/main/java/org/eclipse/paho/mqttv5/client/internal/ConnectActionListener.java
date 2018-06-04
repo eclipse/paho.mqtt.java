@@ -159,7 +159,12 @@ public class ConnectActionListener implements MqttActionListener {
 
 		if (mqttCallback != null) {
 			String serverURI = comms.getNetworkModules()[comms.getNetworkModuleIndex()].getServerURI();
-			mqttCallback.connectComplete(reconnect, serverURI);
+			try {
+				mqttCallback.connectComplete(reconnect, serverURI);
+			} catch (Throwable ex) {
+				// Just catch any exceptions thrown here and ignore.
+			}
+
 		}
 
 	}
