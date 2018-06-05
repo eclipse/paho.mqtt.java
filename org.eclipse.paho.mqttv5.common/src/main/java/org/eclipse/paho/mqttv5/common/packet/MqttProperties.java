@@ -1226,7 +1226,9 @@ public class MqttProperties {
 	 *            The Response Topic.
 	 */
 	public void setResponseTopic(String responseTopic) {
-		MqttTopicValidator.validate(responseTopic, false);
+		if(responseTopic != null) {
+			MqttTopicValidator.validate(responseTopic, false);
+		}
 		this.responseTopic = responseTopic;
 	}
 
