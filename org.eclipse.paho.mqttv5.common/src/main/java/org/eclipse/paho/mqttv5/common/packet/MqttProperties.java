@@ -426,8 +426,6 @@ public class MqttProperties {
 						// This property can only be included once
 						throw new MqttException(MqttException.REASON_CODE_DUPLICATE_PROPERTY);
 					}
-					
-					
 
 					if (identifier == PAYLOAD_FORMAT_INDICATOR_IDENTIFIER) {
 						payloadFormat = (boolean) inputStream.readBoolean();
@@ -497,13 +495,11 @@ public class MqttProperties {
 
 						// Unidentified Identifier
 						inputStream.close();
-						System.err.println("Invalid Identifier: " + identifier);
 						throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
 					}
 				} else {
 					// Unidentified Identifier
 					inputStream.close();
-					System.err.println("Identifier not in valid list: " + identifier);
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
 				}
 
