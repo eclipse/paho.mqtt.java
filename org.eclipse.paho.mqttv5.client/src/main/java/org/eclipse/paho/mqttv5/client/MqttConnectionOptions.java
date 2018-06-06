@@ -35,8 +35,8 @@ import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 /**
  * Holds the set of options that control how the client connects to a server.
  * 
- * Constructs a new {@link MqttConnectionOptions} object using the
- * default values.
+ * Constructs a new {@link MqttConnectionOptions} object using the default
+ * values.
  *
  * The defaults are:
  * <ul>
@@ -70,8 +70,7 @@ public class MqttConnectionOptions {
 	private boolean httpsHostnameVerificationEnabled = true;
 	private int maxReconnectDelay = 128000;
 	private boolean sendReasonMessages = false;
-	
-	
+
 	public MqttProperties getConnectionProperties() {
 		MqttProperties connectionProperties = new MqttProperties();
 		connectionProperties.setSessionExpiryInterval(sessionExpiryInterval);
@@ -85,7 +84,6 @@ public class MqttConnectionOptions {
 		connectionProperties.setAuthenticationData(authData);
 		return connectionProperties;
 	}
-
 
 	public MqttProperties getWillMessageProperties() {
 		return willMessageProperties;
@@ -105,7 +103,7 @@ public class MqttConnectionOptions {
 	private String userName; // Username
 	private byte[] password; // Password
 	private Long sessionExpiryInterval = null; // The Session expiry Interval in seconds, null is the default of
-													// never.
+												// never.
 	private Integer receiveMaximum = null; // The Receive Maximum, null defaults to 65,535, cannot be 0.
 	private Long maximumPacketSize = null; // The Maximum packet size, null defaults to no limit.
 	private Integer topicAliasMaximum = null; // The Topic Alias Maximum, null defaults to 0.
@@ -221,24 +219,55 @@ public class MqttConnectionOptions {
 
 	/**
 	 * Sets whether the client and server should remember state across restarts and
-	 * reconnects.
+	 * reconnects. If set to false, the server will retain the session state until
+	 * either:
 	 * <ul>
-	 * <li>If set to false both the client and server will maintain state across
-	 * restarts of the client, the server and the connection. As state is
-	 * maintained:
+	 * <li>A new connection is made with the client and with the cleanStart flag set
+	 * to true.</li>
+	 * <li>The Session expiry interval is exceeded after the network connection is
+	 * closed, see {@link MqttConnectionOptions#setSessionExpiryInterval}</li>
+	 * </ul>
+	 * 
+	 * If set to true, the server will immediately drop any existing session state
+	 * for the given client and will initiate a new session.
+	 * 
+	 * In order to implement QoS 1 and QoS 2 protocol flows the Client and Server
+	 * need to associate state with the Client Identifier, this is referred to as
+	 * the Session State. The Server also stores the subscriptions as part of the
+	 * Session State.
+	 * 
+	 * The session can continue across a sequence of Network Connections. It lasts
+	 * as long as the latest Network Connection plus the Session Expiry Interval.
+	 * 
+	 * The Session State in the Client consists of:
+	 * 
 	 * <ul>
-	 * <li>Message delivery will be reliable meeting the specified QOS even if the
-	 * client, server or connection are restarted.
-	 * <li>The server will treat a subscription as durable.
+	 * <li>QoS 1 and QoS 2 messages which have been sent to the Server, but have not
+	 * been completely acknowledged.</li>
+	 * <li>QoS 2 messages which have been received from the Server, but have not
+	 * been completely acknowledged.</li>
 	 * </ul>
-	 * <li>If set to true the client and server will not maintain state across
-	 * restarts of the client, the server or the connection. This means
+	 * 
+	 * The Session State in the Server consists of:
 	 * <ul>
-	 * <li>Message delivery to the specified QOS cannot be maintained if the client,
-	 * server or connection are restarted
-	 * <li>The server will treat a subscription as non-durable
+	 * <li>The existence of a Session, even if the rest of the Session State is
+	 * empty.</li>
+	 * <li>The Clients subscriptions, including any Subscription Identifiers.</li>
+	 * <li>QoS 1 and QoS 2 messages which have been sent to the Client, but have not
+	 * been completely acknowledged.</li>
+	 * <li>QoS 1 and QoS 2 messages pending transmission to the Client and
+	 * OPTIONALLY QoS 0 messages pending transmission to the Client.</li>
+	 * <li>QoS 2 messages which have been received from the Client, but have not
+	 * been completely acknowledged.The Will Message and the Will Delay
+	 * Interval</li>
+	 * <li>If the Session is currently not connected, the time at which the Session
+	 * will end and Session State will be discarded.</li>
 	 * </ul>
-	 * </ul>
+	 * 
+	 * Retained messages do not form part of the Session State in the Server, they
+	 * are not deleted as a result of a Session ending.
+	 * 
+	 * 
 	 * 
 	 * @param cleanStart
 	 *            Set to True to enable cleanSession
@@ -275,7 +304,7 @@ public class MqttConnectionOptions {
 	 * @throws IllegalArgumentException
 	 *             if the keepAliveInterval was invalid
 	 */
-	public void setKeepAliveInterval(int keepAliveInterval){
+	public void setKeepAliveInterval(int keepAliveInterval) {
 		if (keepAliveInterval < 0) {
 			throw new IllegalArgumentException();
 		}
@@ -310,21 +339,23 @@ public class MqttConnectionOptions {
 	}
 
 	/**
-	* Get the maximum time (in millis) to wait between reconnects
-	* @return Get the maximum time (in millis) to wait between reconnects
-	*/
+	 * Get the maximum time (in millis) to wait between reconnects
+	 * 
+	 * @return Get the maximum time (in millis) to wait between reconnects
+	 */
 	public int getMaxReconnectDelay() {
 		return maxReconnectDelay;
 	}
 
 	/**
 	 * Set the maximum time to wait between reconnects
-	 * @param maxReconnectDelay the duration (in millis)
-	*/
+	 * 
+	 * @param maxReconnectDelay
+	 *            the duration (in millis)
+	 */
 	public void setMaxReconnectDelay(int maxReconnectDelay) {
 		this.maxReconnectDelay = maxReconnectDelay;
 	}
-
 
 	/**
 	 * Return a list of serverURIs the client may connect to
@@ -376,8 +407,8 @@ public class MqttConnectionOptions {
 	 * <p>
 	 * A set of servers may be specified that are not "equal" (as in the high
 	 * availability option). As no state is shared across the servers reliable
-	 * message delivery and durable subscriptions are not valid. The cleanStart
-	 * flag must be set to true if the hunt list mode is used
+	 * message delivery and durable subscriptions are not valid. The cleanStart flag
+	 * must be set to true if the hunt list mode is used
 	 * </p>
 	 * </li>
 	 * </ol>
@@ -495,7 +526,6 @@ public class MqttConnectionOptions {
 	public void setSessionExpiryInterval(Long sessionExpiryInterval) {
 		this.sessionExpiryInterval = sessionExpiryInterval;
 	}
-
 
 	/**
 	 * Returns the Receive Maximum value. If <code>null</code>, it will default to
@@ -901,11 +931,9 @@ public class MqttConnectionOptions {
 		return httpsHostnameVerificationEnabled;
 	}
 
-
 	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
 		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
 	}
-
 
 	/**
 	 * @return The Debug Properties
@@ -940,11 +968,9 @@ public class MqttConnectionOptions {
 		return CLIENT_ID_PREFIX + System.nanoTime();
 	}
 
-
 	public boolean isSendReasonMessages() {
 		return sendReasonMessages;
 	}
-
 
 	public void setSendReasonMessages(boolean sendReasonMessages) {
 		this.sendReasonMessages = sendReasonMessages;
