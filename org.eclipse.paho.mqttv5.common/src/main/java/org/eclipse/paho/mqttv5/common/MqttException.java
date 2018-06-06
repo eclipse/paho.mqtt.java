@@ -22,11 +22,17 @@ public class MqttException extends Exception {
 																	// the MQTTv5 specification
 	public static final int REASON_CODE_UNSUPPORTED_PROTOCOL_VERSION = 50003; // The CONNECT packet did not contain the
 																				// correct protocol name or version
+	
 
 	/**
 	 * The Server sent a publish message with an invalid topic alias.
 	 */
 	public static final int REASON_CODE_INVALID_TOPIC_ALAS = 50004;
+	
+	/**
+	 * The client attempted to decode a property that had already been decoded, and can only be included once.
+	 */
+	public static final int REASON_CODE_DUPLICATE_PROPERTY = 50005;
 
 	private int reasonCode;
 	private Throwable cause;

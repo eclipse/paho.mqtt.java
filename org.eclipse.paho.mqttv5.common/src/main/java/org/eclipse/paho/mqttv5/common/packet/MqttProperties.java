@@ -412,11 +412,22 @@ public class MqttProperties {
 			byte[] identifierValueByteArray = new byte[length];
 			dis.read(identifierValueByteArray, 0, length);
 			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
+			ArrayList<Byte> decodedProperties = new ArrayList<Byte>();
 			DataInputStream inputStream = new DataInputStream(bais);
 			while (inputStream.available() > 0) {
 				// Get the first Byte
 				byte identifier = inputStream.readByte();
 				if (validProperties.contains(identifier)) {
+					
+					// Verify that certain properties are not included more than once
+					if(!decodedProperties.contains(identifier)) {
+						decodedProperties.add(identifier);
+					} else if(identifier!= SUBSCRIPTION_IDENTIFIER && identifier != USER_DEFINED_PAIR_IDENTIFIER) {
+						// This property can only be included once
+						throw new MqttException(MqttException.REASON_CODE_DUPLICATE_PROPERTY);
+					}
+					
+					
 
 					if (identifier == PAYLOAD_FORMAT_INDICATOR_IDENTIFIER) {
 						payloadFormat = (boolean) inputStream.readBoolean();

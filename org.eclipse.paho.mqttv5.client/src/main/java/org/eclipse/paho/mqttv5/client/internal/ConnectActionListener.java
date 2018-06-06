@@ -83,6 +83,8 @@ public class ConnectActionListener implements MqttActionListener {
 	 * @param userCallback
 	 *            the {@link MqttActionListener} as the callback for the user
 	 * @param mqttSession
+	 *            the {@link MqttSessionState}
+	 * @param mqttConnection
 	 *            the {@link MqttConnectionState}
 	 * @param reconnect
 	 *            If true, this is a reconnect attempt

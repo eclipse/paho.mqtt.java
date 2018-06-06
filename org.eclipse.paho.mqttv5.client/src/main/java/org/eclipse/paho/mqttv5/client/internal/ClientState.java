@@ -1188,7 +1188,7 @@ public class ClientState implements MqttState {
 				MqttPublish send = (MqttPublish) message;
 
 				// Do we have an incoming topic Alias?
-				if (send.getProperties().getTopicAlias() != null && send.getProperties().getTopicAlias() != 0) {
+				if (send.getProperties().getTopicAlias() != null) {
 					int incomingTopicAlias = send.getProperties().getTopicAlias();
 
 					// Are incoming Topic Aliases enabled / is it a valid Alias?

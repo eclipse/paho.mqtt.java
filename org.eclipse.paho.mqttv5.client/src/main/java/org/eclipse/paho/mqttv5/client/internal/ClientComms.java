@@ -101,6 +101,8 @@ public class ClientComms {
 	 * @param executorService
 	 *            the {@link ExecutorService}
 	 * @param mqttSession
+	 *            the {@link MqttSessionState}
+	 * @param mqttConnection
 	 *            the {@link MqttConnectionState}
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
