@@ -101,6 +101,7 @@ public class ConnectActionListener implements MqttActionListener {
 		this.userCallback = userCallback;
 		this.reconnect = reconnect;
 		this.mqttSession = mqttSession;
+		this.mqttConnection = mqttConnection;
 
 	}
 
