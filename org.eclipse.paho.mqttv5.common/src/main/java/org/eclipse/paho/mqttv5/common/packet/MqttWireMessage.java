@@ -59,11 +59,13 @@ public abstract class MqttWireMessage {
 			"PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK", "UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP", "DISCONNECT",
 			"AUTH" };
 
+	private static final byte[] PACKET_RESERVED_MASKS = { 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 2, 0, 0, 0, 0, 0 };
+
 	// The type of the message (e.g CONNECT, PUBLISH, SUBSCRIBE)
 	private byte type;
 
 	MqttProperties properties = new MqttProperties();
-	
+
 	// The MQTT Message ID
 	protected int msgId;
 	protected int[] reasonCodes = null; // Multiple Reason Codes (SUBACK, UNSUBACK)
@@ -92,7 +94,7 @@ public abstract class MqttWireMessage {
 	 * @throws MqttException
 	 *             if an exception occurs whilst getting the payload.
 	 */
-	public byte[] getPayload() throws MqttException{
+	public byte[] getPayload() throws MqttException {
 		return new byte[0];
 	}
 
@@ -170,7 +172,8 @@ public abstract class MqttWireMessage {
 	 * 
 	 * @throws MqttException
 	 *             if an error occurred whilst creating the WireMessage
-	 * @param data the MqttPersistable to create the message from
+	 * @param data
+	 *            the MqttPersistable to create the message from
 	 * @return MqttWireMessage the de-persisted message
 	 */
 	public static MqttWireMessage createWireMessage(MqttPersistable data) throws MqttException {
@@ -238,7 +241,7 @@ public abstract class MqttWireMessage {
 				result = new MqttPubComp(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE:
-				result = new MqttSubscribe( data);
+				result = new MqttSubscribe(data);
 				break;
 			case MqttWireMessage.MESSAGE_TYPE_SUBACK:
 				result = new MqttSubAck(data);
@@ -288,7 +291,31 @@ public abstract class MqttWireMessage {
 		return baos.toByteArray();
 	}
 
-	
+	/**
+	 * Validates that the reserved bits set on an MQTT packet conform to the MQTT
+	 * specification.
+	 * 
+	 * @param type
+	 *            - The Message Type
+	 * @param reserved
+	 *            - The Reserved Bits
+	 * @throws MqttException
+	 *             If the set reserved bits do not match the specification.
+	 * @throws IllegalArgumentException
+	 *             If the message type does not exist.
+	 */
+	public static void validateReservedBits(byte type, byte reserved) throws MqttException, IllegalArgumentException {
+		if (type == MESSAGE_TYPE_PUBLISH) {
+			// Publish can vary, but will be parsed separately.
+			return;
+		}
+		if (type > MESSAGE_TYPE_AUTH) {
+			throw new IllegalArgumentException("Unrecognised Message Type.");
+		}
+		if (reserved != PACKET_RESERVED_MASKS[type]) {
+			throw new MqttException(MqttException.REASON_CODE_MALFORMED_PACKET);
+		}
+	}
 
 	protected byte[] encodeMessageId() throws MqttException {
 		try {
@@ -317,7 +344,7 @@ public abstract class MqttWireMessage {
 	public MqttProperties getProperties() {
 		return properties;
 	}
-	
+
 	public void setProperties(MqttProperties properties) {
 		this.properties = properties;
 	}
@@ -345,11 +372,11 @@ public abstract class MqttWireMessage {
 		}
 		throw new MqttException(MqttException.REASON_CODE_INVALID_RETURN_CODE);
 	}
-	
+
 	/**
 	 * 
-	 * Returns the reason codes from the MqttWireMessage.
-	 * These will be present if the messages is of the following types:
+	 * Returns the reason codes from the MqttWireMessage. These will be present if
+	 * the messages is of the following types:
 	 * <ul>
 	 * <li>CONNACK - 1 Reason Code Max.</li>
 	 * <li>PUBACK - 1 Reason Code Max.</li>
@@ -364,16 +391,17 @@ public abstract class MqttWireMessage {
 	 * Warning: This method may be removed in favour of Token.getReasonCodes()
 	 * 
 	 * May be null if this message does not contain any Reason Codes.
+	 * 
 	 * @return An array of return codes, or null.
 	 */
 	public int[] getReasonCodes() {
-		if(this.reasonCodes != null) {
+		if (this.reasonCodes != null) {
 			return this.reasonCodes;
 		} else if (this.reasonCode != -1) {
-			return new int[] {this.reasonCode};
+			return new int[] { this.reasonCode };
 		} else {
 			return null;
 		}
 	}
-	
+
 }

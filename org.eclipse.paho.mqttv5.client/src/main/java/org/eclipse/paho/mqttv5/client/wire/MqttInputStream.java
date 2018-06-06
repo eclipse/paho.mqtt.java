@@ -102,10 +102,12 @@ public class MqttInputStream extends InputStream {
 					// Invalid MQTT message type...
 					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_INVALID_MESSAGE);
 				}
+				
+				byte reserved = (byte) (first & 0x0F);
+				MqttWireMessage.validateReservedBits(type, reserved);
+				
 				remLen = MqttDataTypes.readVariableByteInteger(in).getValue();
 				bais.write(first);
-				// bit silly, we decode it then encode it
-				// TODO - Should this be a long or an int?
 				bais.write(MqttWireMessage.encodeVariableByteInteger((int)remLen));
 				packet = new byte[(int)(bais.size()+remLen)];
 				packetLen = 0;
