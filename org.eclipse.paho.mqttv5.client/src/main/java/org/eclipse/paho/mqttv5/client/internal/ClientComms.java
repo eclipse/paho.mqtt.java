@@ -86,7 +86,7 @@ public class ClientComms {
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
 	private ExecutorService executorService;
-	private MqttSession mqttSession;
+	private MqttConnectionState mqttConnection;
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
@@ -101,23 +101,23 @@ public class ClientComms {
 	 * @param executorService
 	 *            the {@link ExecutorService}
 	 * @param mqttSession
-	 *            the {@link MqttSession}
+	 *            the {@link MqttConnectionState}
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
 	 */
 	public ClientComms(MqttClientInterface client, MqttClientPersistence persistence, MqttPingSender pingSender,
-			ExecutorService executorService, MqttSession mqttSession) throws MqttException {
+			ExecutorService executorService, MqttSessionState mqttSession, MqttConnectionState mqttConnection) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client = client;
 		this.persistence = persistence;
 		this.pingSender = pingSender;
 		this.pingSender.init(this);
 		this.executorService = executorService;
-		this.mqttSession = mqttSession;
+		this.mqttConnection = mqttConnection;
 
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback = new CommsCallback(this);
-		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, this.mqttSession);
+		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, this.mqttConnection);
 
 		callback.setClientState(clientState);
 		log.setResourceName(getClient().getClientId());
@@ -211,17 +211,17 @@ public class ClientComms {
 
 				if (message instanceof MqttPublish) {
 					// Override the QoS if the server has set a maximum
-					if (this.mqttSession.getMaximumQoS() != null
-							&& ((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
+					if (this.mqttConnection.getMaximumQoS() != null
+							&& ((MqttPublish) message).getMessage().getQos() > this.mqttConnection.getMaximumQoS()) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
-						mqttMessage.setQos(this.mqttSession.getMaximumQoS());
+						mqttMessage.setQos(this.mqttConnection.getMaximumQoS());
 						((MqttPublish) message).setMessage(mqttMessage);
 					}
 
 					// Override the Retain flag if the server has disabled it
-					if (this.mqttSession.isRetainAvailable() != null
+					if (this.mqttConnection.isRetainAvailable() != null
 							&& ((MqttPublish) message).getMessage().isRetained()
-							&& (this.mqttSession.isRetainAvailable() == false)) {
+							&& (this.mqttConnection.isRetainAvailable() == false)) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setRetained(false);
 						((MqttPublish) message).setMessage(mqttMessage);
@@ -945,7 +945,7 @@ public class ClientComms {
 
 		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
 			if (isConnected()) {
-				while (clientState.getActualInFlight() >= (mqttSession.getReceiveMaximum() - 1)) {
+				while (clientState.getActualInFlight() >= (mqttConnection.getReceiveMaximum() - 1)) {
 					// We need to Yield to the other threads to allow the in flight messages to
 					// clear
 					Thread.yield();

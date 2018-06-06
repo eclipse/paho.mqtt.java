@@ -39,7 +39,8 @@ import javax.net.ssl.SSLSocketFactory;
 import org.eclipse.paho.mqttv5.client.internal.ClientComms;
 import org.eclipse.paho.mqttv5.client.internal.ConnectActionListener;
 import org.eclipse.paho.mqttv5.client.internal.DisconnectedMessageBuffer;
-import org.eclipse.paho.mqttv5.client.internal.MqttSession;
+import org.eclipse.paho.mqttv5.client.internal.MqttConnectionState;
+import org.eclipse.paho.mqttv5.client.internal.MqttSessionState;
 import org.eclipse.paho.mqttv5.client.internal.NetworkModule;
 import org.eclipse.paho.mqttv5.client.internal.SSLNetworkModule;
 import org.eclipse.paho.mqttv5.client.internal.TCPNetworkModule;
@@ -252,7 +253,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 												// second
 	private boolean reconnecting = false;
 	private static Object clientLock = new Object(); // Simple lock
-	private MqttSession mqttSession = new MqttSession();
+	private MqttSessionState mqttSession = new MqttSessionState(); // Variables that exist within the life of an MQTT session
+	private MqttConnectionState mqttConnection = new MqttConnectionState(); // Variables that exist within the life of an MQTT connection.
 	private ScheduledExecutorService executorService;
 	private MqttPingSender pingSender;
 
@@ -606,7 +608,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
 
 		this.persistence.open(clientId);
-		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService, this.mqttSession);
+		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService, this.mqttSession, this.mqttConnection);
 		this.persistence.close();
 		this.topics = new Hashtable<String, MqttTopic>();
 
@@ -894,11 +896,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		// succeeds
 		MqttToken userToken = new MqttToken(getClientId());
 		ConnectActionListener connectActionListener = new ConnectActionListener(this, persistence, comms, options,
-				userToken, userContext, callback, reconnecting, mqttSession);
+				userToken, userContext, callback, reconnecting, mqttSession, mqttConnection);
 		userToken.setActionCallback(connectActionListener);
 		userToken.setUserContext(this);
 		
-		this.mqttSession.setSendReasonMessages(this.connOpts.isSendReasonMessages());
+		this.mqttConnection.setSendReasonMessages(this.connOpts.isSendReasonMessages());
 
 		// If we are using the MqttCallbackExtended, set it on the
 		// connectActionListener
@@ -907,14 +909,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		}
 
 		if (this.connOpts.isCleanStart()) {
-			this.mqttSession.clearSession();
+			this.mqttSession.clearSessionState();
 		}
+		this.mqttConnection.clearConnectionState();
 
-		if (this.connOpts.isCleanStart()) {
-			this.mqttSession.clearSession();
-		}
-
-		this.mqttSession.setIncomingTopicAliasMax(this.connOpts.getTopicAliasMaximum());
+		this.mqttConnection.setIncomingTopicAliasMax(this.connOpts.getTopicAliasMaximum());
 
 		comms.setNetworkModuleIndex(0);
 		connectActionListener.connect();
@@ -1373,7 +1372,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 				// Check that we are not already using this ID, else throw Illegal Argument
 				// Exception
 				if (this.comms.doesSubscriptionIdentifierExist(subId)) {
-					throw new IllegalArgumentException("The Subscription Identifier " + subId + " already exists.");
+					throw new IllegalArgumentException(String.format("The Subscription Identifier %s already exists.", subId));
 				}
 
 			} else {

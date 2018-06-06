@@ -63,7 +63,8 @@ public class ConnectActionListener implements MqttActionListener {
 	private Object userContext;
 	private MqttActionListener userCallback;
 	private MqttCallback mqttCallback;
-	private MqttSession mqttSession;
+	private MqttSessionState mqttSession;
+	private MqttConnectionState mqttConnection;
 	private boolean reconnect;
 
 	/**
@@ -82,13 +83,13 @@ public class ConnectActionListener implements MqttActionListener {
 	 * @param userCallback
 	 *            the {@link MqttActionListener} as the callback for the user
 	 * @param mqttSession
-	 *            the {@link MqttSession}
+	 *            the {@link MqttConnectionState}
 	 * @param reconnect
 	 *            If true, this is a reconnect attempt
 	 */
 	public ConnectActionListener(MqttAsyncClient client, MqttClientPersistence persistence, ClientComms comms,
 			MqttConnectionOptions options, MqttToken userToken, Object userContext, MqttActionListener userCallback,
-			boolean reconnect, MqttSession mqttSession) {
+			boolean reconnect, MqttSessionState mqttSession, MqttConnectionState mqttConnection) {
 		this.persistence = persistence;
 		this.client = client;
 		this.comms = comms;
@@ -110,16 +111,16 @@ public class ConnectActionListener implements MqttActionListener {
 	public void onSuccess(IMqttToken token) {
 		// Set properties imposed on us by the Server
 		MqttToken myToken = (MqttToken) token;
-		mqttSession.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
-		mqttSession.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
-		mqttSession.setRetainAvailable(myToken.getMessageProperties().isRetainAvailable());
-		mqttSession.setMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
-		mqttSession.setOutgoingTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
-		mqttSession
+		mqttConnection.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
+		mqttConnection.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
+		mqttConnection.setRetainAvailable(myToken.getMessageProperties().isRetainAvailable());
+		mqttConnection.setMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
+		mqttConnection.setOutgoingTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
+		mqttConnection
 				.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
-		mqttSession.setSubscriptionIdentifiersAvailable(
+		mqttConnection.setSubscriptionIdentifiersAvailable(
 				myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
-		mqttSession.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
+		mqttConnection.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
 
 		// If we are assigning the client ID post connect, then we need to re-initialise
 		// our persistence layer.

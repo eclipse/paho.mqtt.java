@@ -148,19 +148,19 @@ public class ClientState implements MqttState {
 	// Topic Alias Maps
 	private Hashtable<String, Integer> outgoingTopicAliases;
 	private Hashtable<Integer, String> incomingTopicAliases;
-	private int outgoingTopicAliasCount = 1;
 
-	private MqttSession mqttSession;
+	private MqttConnectionState mqttConnection;
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, CommsCallback callback,
-			ClientComms clientComms, MqttPingSender pingSender, MqttSession mqttSession) throws MqttException {
+			ClientComms clientComms, MqttPingSender pingSender, MqttConnectionState mqttConnection)
+			throws MqttException {
 
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "");
 
 		inUseMsgIds = new ConcurrentHashMap<>();
 		pendingFlows = new Vector<MqttWireMessage>();
-		pendingMessages = new Vector<MqttWireMessage>(mqttSession.getReceiveMaximum());
+		pendingMessages = new Vector<MqttWireMessage>(mqttConnection.getReceiveMaximum());
 		outboundQoS2 = new ConcurrentHashMap<>();
 		outboundQoS1 = new ConcurrentHashMap<>();
 		outboundQoS0 = new ConcurrentHashMap<>();
@@ -176,7 +176,7 @@ public class ClientState implements MqttState {
 		this.tokenStore = tokenStore;
 		this.clientComms = clientComms;
 		this.pingSender = pingSender;
-		this.mqttSession = mqttSession;
+		this.mqttConnection = mqttConnection;
 
 		restoreState();
 	}
@@ -460,7 +460,7 @@ public class ClientState implements MqttState {
 
 	private void restoreInflightMessages() {
 		final String methodName = "restoreInflightMessages";
-		pendingMessages = new Vector<MqttWireMessage>(this.mqttSession.getReceiveMaximum());
+		pendingMessages = new Vector<MqttWireMessage>(this.mqttConnection.getReceiveMaximum());
 		pendingFlows = new Vector<MqttWireMessage>();
 
 		Enumeration<Integer> keys = outboundQoS2.keys();
@@ -519,18 +519,18 @@ public class ClientState implements MqttState {
 			message.setMessageId(getNextMessageId());
 		}
 		// Set Topic Alias if required
-		if (message instanceof MqttPublish && this.mqttSession.getOutgoingTopicAliasMaximum() > 0) {
+		if (message instanceof MqttPublish && this.mqttConnection.getOutgoingTopicAliasMaximum() > 0) {
 			String topic = ((MqttPublish) message).getTopicName();
 			if (outgoingTopicAliases.containsKey(topic)) {
 				// Existing Topic Alias, Assign it and remove the topic string
 				((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliases.get(topic));
 				((MqttPublish) message).setTopicName(null);
 			} else {
-				if (outgoingTopicAliasCount <= this.mqttSession.getOutgoingTopicAliasMaximum()) {
+				int nextOutgoingTopicAlias = this.mqttConnection.getNextOutgoingTopicAlias();
+				if (nextOutgoingTopicAlias <= this.mqttConnection.getOutgoingTopicAliasMaximum()) {
 					// Create a new Topic Alias and increment the counter
-					((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliasCount);
-					outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), outgoingTopicAliasCount);
-					outgoingTopicAliasCount++;
+					((MqttPublish) message).getProperties().setTopicAlias(nextOutgoingTopicAlias);
+					outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), nextOutgoingTopicAlias);
 				}
 			}
 		}
@@ -544,7 +544,7 @@ public class ClientState implements MqttState {
 
 		if (message instanceof MqttPublish) {
 			synchronized (queueLock) {
-				if (actualInFlight >= this.mqttSession.getReceiveMaximum()) {
+				if (actualInFlight >= this.mqttConnection.getReceiveMaximum()) {
 					// @TRACE 613= sending {0} msgs at max inflight window
 					log.fine(CLASS_NAME, methodName, "613", new Object[] { Integer.valueOf(actualInFlight) });
 
@@ -830,7 +830,7 @@ public class ClientState implements MqttState {
 				// freed.
 				// In both cases queueLock will be notified.
 				if ((pendingMessages.isEmpty() && pendingFlows.isEmpty())
-						|| (pendingFlows.isEmpty() && actualInFlight >= this.mqttSession.getReceiveMaximum())) {
+						|| (pendingFlows.isEmpty() && actualInFlight >= this.mqttConnection.getReceiveMaximum())) {
 					try {
 						// @TRACE 644=wait for new work or for space in the inflight window
 						log.fine(CLASS_NAME, methodName, "644");
@@ -876,7 +876,7 @@ public class ClientState implements MqttState {
 
 					// If the inflight window is full then messages are not
 					// processed until the inflight window has space.
-					if (actualInFlight < this.mqttSession.getReceiveMaximum()) {
+					if (actualInFlight < this.mqttConnection.getReceiveMaximum()) {
 						// The in flight window is not full so process the
 						// first message in the queue
 						result = (MqttWireMessage) pendingMessages.elementAt(0);
@@ -1127,7 +1127,7 @@ public class ClientState implements MqttState {
 		} else if (ack instanceof MqttPubRec) {
 			// MqttPubRec - Send an MqttPubRel with the appropriate Reason Code
 			MqttProperties pubRelProperties = new MqttProperties();
-			if (this.mqttSession.isSendReasonMessages()) {
+			if (this.mqttConnection.isSendReasonMessages()) {
 				String reasonString = String.format("Message identifier [%d] was not found. Discontinuing QoS 2 flow.",
 						ack.getMessageId());
 				pubRelProperties.setReasonString(reasonString);
@@ -1192,10 +1192,11 @@ public class ClientState implements MqttState {
 					int incomingTopicAlias = send.getProperties().getTopicAlias();
 
 					// Are incoming Topic Aliases enabled / is it a valid Alias?
-					if (incomingTopicAlias > this.mqttSession.getIncomingTopicAliasMax() || incomingTopicAlias == 0) {
+					if (incomingTopicAlias > this.mqttConnection.getIncomingTopicAliasMax()
+							|| incomingTopicAlias == 0) {
 						// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
 						log.severe(CLASS_NAME, methodName, "653",
-								new Object[] { Integer.valueOf(this.mqttSession.getIncomingTopicAliasMax()),
+								new Object[] { Integer.valueOf(this.mqttConnection.getIncomingTopicAliasMax()),
 										Integer.valueOf(incomingTopicAlias) });
 						if (callback != null) {
 							callback.mqttErrorOccurred(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
@@ -1613,7 +1614,7 @@ public class ClientState implements MqttState {
 		props.put("In use msgids", inUseMsgIds);
 		props.put("pendingMessages", pendingMessages);
 		props.put("pendingFlows", pendingFlows);
-		props.put("serverReceiveMaximum", Integer.valueOf(this.mqttSession.getReceiveMaximum()));
+		props.put("serverReceiveMaximum", Integer.valueOf(this.mqttConnection.getReceiveMaximum()));
 		props.put("nextMsgID", Integer.valueOf(nextMsgId));
 		props.put("actualInFlight", Integer.valueOf(actualInFlight));
 		props.put("inFlightPubRels", Integer.valueOf(inFlightPubRels));

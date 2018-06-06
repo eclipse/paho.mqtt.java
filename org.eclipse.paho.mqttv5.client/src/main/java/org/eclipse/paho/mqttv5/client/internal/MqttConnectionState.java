@@ -4,25 +4,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is used as a store for client information that should be preserved
- * for a single session. If the client connects with Clean start = false, and
- * then looses connection and reconnects, then this information will be
- * preserved and used in the subsequent connections. Currently there are no
- * plans to persist this information, however that could be added at a later
- * date.
- *
+ * for a single connection. 
  * Properties returned in subsequent connect packets will override existing properties
  * here as well.
  *
- * Session variables that this class holds:
+ * Connection variables that this class holds:
  *
  * <ul>
- * <li>Next Subscription Identifier - Used when automatic subscription
- * Identifier assignment is enabled</li>
- *
+ * <li>Receive Maximum</li>
+ * <li>Maximum QoS</li>
+ * <li>Retain Available</li>
+ * <li>Maximum Packet Size</li>
+ * <li>Outgoing Topic Alias Maximum</li>
+ * <li>Incoming Topic Alias Maximum</li>
+ * <li>Wildcard Subscriptions Available</li>
+ * <li>Subscription Identifiers Available</li>
+ * <li>Shared Subscriptions Available</li>
+ * <li>Send Reason Messages</li>
  * </ul>
- *
  */
-public class MqttSession {
+public class MqttConnectionState {
 
 	// ******* Connection properties ******//
 	private Integer receiveMaximum = 65535;
@@ -36,18 +37,16 @@ public class MqttSession {
 	private Boolean sharedSubscriptionsAvailable = true;
 	private boolean sendReasonMessages = false;
 
-	// ******* Session Specific Properties and counters ******//
-	private AtomicInteger nextSubscriptionIdentifier = new AtomicInteger(1);
-	private String clientId;
-
+	// ******* Counters ******//
+	private AtomicInteger nextOutgoingTopicAlias = new AtomicInteger(1);
 
 
 	/**
 	 * Clears the session and resets. This would be called when the connection has
 	 * been lost and cleanStart = True.
 	 */
-	public void clearSession() {
-		nextSubscriptionIdentifier.set(1);
+	public void clearConnectionState() {
+		nextOutgoingTopicAlias.set(1);
 	}
 
 
@@ -115,17 +114,8 @@ public class MqttSession {
 		this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
 	}
 	
-	public Integer getNextSubscriptionIdentifier() {
-		return nextSubscriptionIdentifier.getAndIncrement();
-	}
-
-
-	public String getClientId() {
-		return clientId;
-	}
-
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
+	public Integer getNextOutgoingTopicAlias() {
+		return nextOutgoingTopicAlias.getAndIncrement();
 	}
 
 
