@@ -386,7 +386,6 @@ public class OfflineBufferingTest {
 		Assert.assertFalse(isConnected);
 
 		// Make Sure persistence is empty before publish
-		@SuppressWarnings("unchecked")
 		List<String> keys = Collections.list(persistence.keys());
 		Assert.assertEquals(0, keys.size());
 
@@ -396,7 +395,6 @@ public class OfflineBufferingTest {
 		Assert.assertFalse(pubToken.isComplete());
 		// Check that message is now in persistence layer
 
-		@SuppressWarnings("unchecked")
 		List<String> keysNew = Collections.list(persistence.keys());
 		log.info("There are now: " + keysNew.size() + " keys in persistence");
 		Assert.assertEquals(1, keysNew.size());
@@ -426,7 +424,6 @@ public class OfflineBufferingTest {
 		final TestMemoryPersistence persistence = new TestMemoryPersistence();
 		persistence.open(null, null);
 		persistence.put("sb-1", (MqttPublish) pubMessage);
-		@SuppressWarnings("unchecked")
 		List<String> persistedKeys = Collections.list(persistence.keys());
 		log.info("There are now: " + persistedKeys.size() + " keys in persistence");
 		Assert.assertEquals(1, persistedKeys.size());
@@ -461,7 +458,6 @@ public class OfflineBufferingTest {
 		// Allow a few seconds for the QoS 2 flow to complete
 		Thread.sleep(2000);
 
-		@SuppressWarnings("unchecked")
 		List<String> postConnectKeys = Collections.list(persistence.keys());
 		log.info("There are now: " + postConnectKeys.size() + " keys in persistence");
 		Assert.assertEquals(0, postConnectKeys.size());

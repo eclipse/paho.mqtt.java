@@ -16,7 +16,6 @@
 package org.eclipse.paho.client.mqttv3.persist;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -237,10 +236,10 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	 * @return all of the persistent data from the persistence directory.
 	 * @throws MqttPersistenceException if an exception is thrown whilst getting the keys
 	 */
-	public Enumeration keys() throws MqttPersistenceException {
+	public Enumeration<String> keys() throws MqttPersistenceException {
 		checkIsOpen();
 		File[] files = getFiles();
-		Vector result = new Vector(files.length);
+		Vector<String> result = new Vector<String>(files.length);
 		for (int i=0;i<files.length;i++) {
 			String filename = files[i].getName();
 			String key = filename.substring(0,filename.length()-MESSAGE_FILE_EXTENSION.length());

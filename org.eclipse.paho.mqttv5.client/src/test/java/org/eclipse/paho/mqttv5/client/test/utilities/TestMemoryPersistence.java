@@ -26,14 +26,14 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
  * Persistence that uses memory
  * 
  * In cases where reliability is not required across client or device 
- * restarts memory this memory peristence can be used. In cases where
+ * restarts memory this memory persistence can be used. In cases where
  * reliability is required like when clean session is set to false
  * then a non-volatile form of persistence should be used. 
  * 
  */
 public class TestMemoryPersistence implements MqttClientPersistence {
 
-	private Hashtable data;
+	private Hashtable<String, MqttPersistable> data;
 	private String clientId;
 	private String serverURI;
 	
@@ -47,7 +47,7 @@ public class TestMemoryPersistence implements MqttClientPersistence {
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.MqttClientPersistence#keys()
 	 */
-	public Enumeration keys() throws MqttPersistenceException {
+	public Enumeration<String> keys() throws MqttPersistenceException {
 		return data.keys();
 	}
 
@@ -65,7 +65,7 @@ public class TestMemoryPersistence implements MqttClientPersistence {
 		this.clientId = clientId;
 		this.serverURI = serverURI;
 		if(this.data ==  null){
-			this.data = new Hashtable();
+			this.data = new Hashtable<String, MqttPersistable>();
 		}
 	}
 
@@ -100,15 +100,15 @@ public class TestMemoryPersistence implements MqttClientPersistence {
 	@Override
 	public void open(String clientId) throws MqttPersistenceException {
 		if(this.data ==  null){
-			this.data = new Hashtable();
+			this.data = new Hashtable<String, MqttPersistable>();
 		}
 	}
 
-	public Hashtable getData() {
+	public Hashtable<String, MqttPersistable> getData() {
 		return data;
 	}
 
-	public void setData(Hashtable data) {
+	public void setData(Hashtable<String, MqttPersistable> data) {
 		this.data = data;
 	}
 

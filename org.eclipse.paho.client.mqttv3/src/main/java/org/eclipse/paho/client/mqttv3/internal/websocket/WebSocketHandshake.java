@@ -127,7 +127,7 @@ public class WebSocketHandshake {
 	 */
 	private void receiveHandshakeResponse(String key) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(input));
-		ArrayList responseLines = new ArrayList();
+		ArrayList<String> responseLines = new ArrayList<String>();
 		String line = in.readLine();
 		if(line == null){
 			throw new IOException("WebSocket Response header: Invalid response from Server, It may not support WebSockets.");
@@ -136,7 +136,7 @@ public class WebSocketHandshake {
 			responseLines.add(line);
 			line = in.readLine();
 		}
-		Map headerMap = getHeaders(responseLines);
+		Map<String, String> headerMap = getHeaders(responseLines);
 
 		String connectionHeader = (String) headerMap.get(HTTP_HEADER_CONNECTION);
 		if (connectionHeader == null || connectionHeader.equalsIgnoreCase(HTTP_HEADER_CONNECTION_VALUE)) {
@@ -172,8 +172,8 @@ public class WebSocketHandshake {
 	 * @param ArrayList<String> of headers
 	 * @return A Hashmap<String, String> of the headers
 	 */
-	private Map getHeaders(ArrayList headers){
-		Map headerMap = new HashMap();
+	private Map<String, String> getHeaders(ArrayList<String> headers){
+		Map<String, String> headerMap = new HashMap<String, String>();
 		for(int i = 1; i < headers.size(); i++){
 			String headerPre = (String) headers.get(i);
 			String[] header =  headerPre.split(":");
