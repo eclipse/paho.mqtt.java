@@ -38,7 +38,7 @@ public class MqttTopicValidator {
 	private static final int MIN_TOPIC_LEN = 1;
 	private static final int MAX_TOPIC_LEN = 65535;
 	private static final char NUL = '\u0000';
-	
+
 	/**
 	 * Validate the topic name or topic filter
 	 *
@@ -49,7 +49,8 @@ public class MqttTopicValidator {
 	 * @throws IllegalArgumentException
 	 *             if the topic is invalid
 	 */
-	public static void validate(String topicString, boolean wildcardAllowed) throws IllegalArgumentException {
+	public static void validate(String topicString, boolean wildcardAllowed, boolean sharedSubAllowed)
+			throws IllegalArgumentException {
 		int topicLen = 0;
 		try {
 			topicLen = topicString.getBytes("UTF-8").length;
@@ -103,12 +104,18 @@ public class MqttTopicValidator {
 			return;
 		}
 
+		// Validate Shared Subscriptions
+		if (!sharedSubAllowed && topicString.startsWith("$share/")) {
+			throw new IllegalArgumentException("Shared Subscriptions are not allowed.");
+		}
+
 		// *******************************************************************************
 		// 2) This is a topic name string that MUST NOT contains any wildcard characters
 		// *******************************************************************************
 		if (Strings.containsAny(topicString, TOPIC_WILDCARDS)) {
 			throw new IllegalArgumentException("The topic name MUST NOT contain any wildcard characters (#+)");
 		}
+
 	}
 
 	private static void validateSingleLevelWildcard(String topicString) {
@@ -133,7 +140,7 @@ public class MqttTopicValidator {
 			}
 		}
 	}
-	
+
 	/**
 	 * Check the supplied topic name and filter match
 	 *
@@ -151,8 +158,8 @@ public class MqttTopicValidator {
 		int topicLen = topicName.length();
 		int filterLen = topicFilter.length();
 
-		MqttTopicValidator.validate(topicFilter, true);
-		MqttTopicValidator.validate(topicName, false);
+		MqttTopicValidator.validate(topicFilter, true, true);
+		MqttTopicValidator.validate(topicName, false, true);
 
 		if (topicFilter.equals(topicName)) {
 			return true;
@@ -179,11 +186,11 @@ public class MqttTopicValidator {
 			return true;
 		} else {
 			/*
-			 * https://github.com/eclipse/paho.mqtt.java/issues/418
-			 * Covers edge case to match sport/# to sport
+			 * https://github.com/eclipse/paho.mqtt.java/issues/418 Covers edge case to
+			 * match sport/# to sport
 			 */
-			if ((topicFilter.length() - topicName.length()) == 2 &&
-					topicFilter.substring(topicFilter.length() -2, topicFilter.length()).equals("/#")) {
+			if ((topicFilter.length() - topicName.length()) == 2
+					&& topicFilter.substring(topicFilter.length() - 2, topicFilter.length()).equals("/#")) {
 				String filterSub = topicFilter.substring(0, topicFilter.length() - 2);
 				if (filterSub.equals(topicName)) {
 					System.err.println("filterSub equals topicName: " + filterSub + " == " + topicName);
@@ -193,5 +200,5 @@ public class MqttTopicValidator {
 		}
 		return false;
 	}
-	
+
 }

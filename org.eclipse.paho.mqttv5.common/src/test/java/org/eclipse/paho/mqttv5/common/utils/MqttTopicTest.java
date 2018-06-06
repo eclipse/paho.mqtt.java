@@ -29,7 +29,7 @@ public class MqttTopicTest {
 				"/+/sport/+/player1", "#", "/#", "sport/#", "sport/tennis/#" };
 
 		for (String topic : topics) {
-			MqttTopicValidator.validate(topic, true);
+			MqttTopicValidator.validate(topic, true, true);
 		}
 	}
 
@@ -57,32 +57,32 @@ public class MqttTopicTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards1() throws Exception {
-		MqttTopicValidator.validate("sport/tennis#", true);
+		MqttTopicValidator.validate("sport/tennis#", true, true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards2() throws Exception {
-		MqttTopicValidator.validate("sport/tennis/#/ranking", true);
+		MqttTopicValidator.validate("sport/tennis/#/ranking", true, true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards3() throws Exception {
-		MqttTopicValidator.validate("sport+", true);
+		MqttTopicValidator.validate("sport+", true, true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards4() throws Exception {
-		MqttTopicValidator.validate("sport/+aa", true);
+		MqttTopicValidator.validate("sport/+aa", true, true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards5() throws Exception {
-		MqttTopicValidator.validate("sport/#/ball/+/aa", true);
+		MqttTopicValidator.validate("sport/#/ball/+/aa", true, true);
 	}
 	
 	@Test
 	public void testValidG11NTopic() {
-		MqttTopicValidator.validate("$shared/葛渚噓/GVTDurTopic02/葛渚噓", true);
+		MqttTopicValidator.validate("$shared/葛渚噓/GVTDurTopic02/葛渚噓", true, true);
 	}
 
 }

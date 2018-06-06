@@ -9,7 +9,7 @@ public class StringValidationTest {
 	
 	@Test
 	public void testInvalidTopicFilterWildcards1() throws Exception {
-		MqttTopicValidator.validate(testString, true);
+		MqttTopicValidator.validate(testString, true, true);
 	}
 
 }

@@ -253,8 +253,13 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 												// second
 	private boolean reconnecting = false;
 	private static Object clientLock = new Object(); // Simple lock
-	private MqttSessionState mqttSession = new MqttSessionState(); // Variables that exist within the life of an MQTT session
-	private MqttConnectionState mqttConnection = new MqttConnectionState(); // Variables that exist within the life of an MQTT connection.
+
+	// Variables that exist within the life of an MQTT session
+	private MqttSessionState mqttSession = new MqttSessionState();
+
+	// Variables that exist within the life of an MQTT connection.
+	private MqttConnectionState mqttConnection = new MqttConnectionState(); 
+	
 	private ScheduledExecutorService executorService;
 	private MqttPingSender pingSender;
 
@@ -424,9 +429,9 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * {@link MqttClientPersistence} interface. An implementer of this interface
 	 * that safely stores messages must be specified in order for delivery of
 	 * messages to be reliable. In addition
-	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false.
-	 * In the event that only QoS 0 messages are sent or received or cleanStart is
-	 * set to true then a safe store is not needed.
+	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false. In
+	 * the event that only QoS 0 messages are sent or received or cleanStart is set
+	 * to true then a safe store is not needed.
 	 * </p>
 	 * <p>
 	 * An implementation of file-based persistence is provided in class
@@ -527,9 +532,9 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * {@link MqttClientPersistence} interface. An implementer of this interface
 	 * that safely stores messages must be specified in order for delivery of
 	 * messages to be reliable. In addition
-	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false.
-	 * In the event that only QoS 0 messages are sent or received or cleanStart is
-	 * set to true then a safe store is not needed.
+	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false. In
+	 * the event that only QoS 0 messages are sent or received or cleanStart is set
+	 * to true then a safe store is not needed.
 	 * </p>
 	 * <p>
 	 * An implementation of file-based persistence is provided in class
@@ -575,14 +580,13 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			DataOutputStream dos = new DataOutputStream(baos);
 			MqttDataTypes.encodeUTF8(dos, clientId);
 			// Remove the two size bytes.
-			if(dos.size() - 2 > 65535) {
+			if (dos.size() - 2 > 65535) {
 				throw new IllegalArgumentException("ClientId longer than 65535 characters");
 			}
-			
+
 		} else {
 			clientId = "";
 		}
-		
 
 		MqttConnectionOptions.validateURI(serverURI);
 
@@ -608,7 +612,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
 
 		this.persistence.open(clientId);
-		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService, this.mqttSession, this.mqttConnection);
+		this.comms = new ClientComms(this, this.persistence, this.pingSender, this.executorService, this.mqttSession,
+				this.mqttConnection);
 		this.persistence.close();
 		this.topics = new Hashtable<String, MqttTopic>();
 
@@ -899,7 +904,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 				userToken, userContext, callback, reconnecting, mqttSession, mqttConnection);
 		userToken.setActionCallback(connectActionListener);
 		userToken.setUserContext(this);
-		
+
 		this.mqttConnection.setSendReasonMessages(this.connOpts.isSendReasonMessages());
 
 		// If we are using the MqttCallbackExtended, set it on the
@@ -1134,7 +1139,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 *             if the topic contains a '+' or '#' wildcard character.
 	 */
 	protected MqttTopic getTopic(String topic) {
-		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */);
+		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */, true);
 
 		MqttTopic result = (MqttTopic) topics.get(topic);
 		if (result == null) {
@@ -1200,7 +1205,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, null, null,
 				new MqttProperties());
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1210,8 +1215,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 */
 	@Override
 	public IMqttToken subscribe(MqttSubscription subscription) throws MqttException {
-		return this.subscribe(new MqttSubscription[] { subscription }, null, null,
-				new MqttProperties());
+		return this.subscribe(new MqttSubscription[] { subscription }, null, null, new MqttProperties());
 	}
 
 	/*
@@ -1240,9 +1244,13 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			MqttProperties subscriptionProperties) throws MqttException {
 		final String methodName = "subscribe";
 
-		// remove any message handlers for individual topics
+		// remove any message handlers for individual topics and validate Topics
 		for (int i = 0; i < subscriptions.length; ++i) {
 			this.comms.removeMessageListener(subscriptions[i].getTopic());
+			// Check if the topic filter is valid before subscribing
+			MqttTopicValidator.validate(subscriptions[i].getTopic(),
+					this.mqttConnection.isWildcardSubscriptionsAvailable(),
+					this.mqttConnection.isSharedSubscriptionsAvailable());
 		}
 
 		// Only Generate Log string if we are logging at FINE level
@@ -1253,9 +1261,6 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 					subs.append(", ");
 				}
 				subs.append(subscriptions[i].toString());
-
-				// Check if the topic filter is valid before subscribing
-				MqttTopicValidator.validate(subscriptions[i].getTopic(), true/* allow wildcards */);
 			}
 			// @TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
 			log.fine(CLASS_NAME, methodName, "106", new Object[] { subs.toString(), userContext, callback });
@@ -1365,14 +1370,15 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		int subId = subscriptionProperties.getSubscriptionIdentifiers().get(0);
 
 		// Automatic Subscription Identifier Assignment is enabled
-		if (connOpts.useSubscriptionIdentifiers()) {
+		if (connOpts.useSubscriptionIdentifiers() && this.mqttConnection.isSubscriptionIdentifiersAvailable()) {
 
 			// Application is overriding the subscription Identifier
 			if (subId != 0) {
 				// Check that we are not already using this ID, else throw Illegal Argument
 				// Exception
 				if (this.comms.doesSubscriptionIdentifierExist(subId)) {
-					throw new IllegalArgumentException(String.format("The Subscription Identifier %s already exists.", subId));
+					throw new IllegalArgumentException(
+							String.format("The Subscription Identifier %s already exists.", subId));
 				}
 
 			} else {
@@ -1459,7 +1465,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			// Although we already checked when subscribing, but invalid
 			// topic filter is meanless for unsubscribing, just prohibit it
 			// to reduce unnecessary control packet send to broker.
-			MqttTopicValidator.validate(topicFilters[i], true/* allow wildcards */);
+			MqttTopicValidator.validate(topicFilters[i], true/* allow wildcards */, this.mqttConnection.isSharedSubscriptionsAvailable());
 		}
 
 		// remove message handlers from the list for this client
@@ -1588,7 +1594,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		log.fine(CLASS_NAME, methodName, "111", new Object[] { topic, userContext, callback });
 
 		// Checks if a topic is valid when publishing a message.
-		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */);
+		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */, true);
 
 		MqttDeliveryToken token = new MqttDeliveryToken(getClientId());
 		token.setActionCallback(callback);

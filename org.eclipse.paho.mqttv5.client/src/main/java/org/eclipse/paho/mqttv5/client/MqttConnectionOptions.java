@@ -200,7 +200,7 @@ public class MqttConnectionOptions {
 		if (topic == null || message == null || message.getPayload() == null) {
 			throw new IllegalArgumentException();
 		}
-		MqttTopicValidator.validate(topic, false); // Wildcards are not allowed
+		MqttTopicValidator.validate(topic, false, true); // Wildcards are not allowed
 		this.willDestination = topic;
 		this.willMessage = message;
 		// Prevent any more changes to the will message
