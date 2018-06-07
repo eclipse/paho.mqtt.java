@@ -135,6 +135,22 @@ public class MqttConnectOptions {
 	}
 
 	/**
+	 * Get the maximum time (in millis) to wait between reconnects
+	 * @return Get the maximum time (in millis) to wait between reconnects
+	 */
+	public int getMaxReconnectDelay() {
+	    return maxReconnectDelay;
+	}
+
+	/**
+	 * Set the maximum time to wait between reconnects
+	 * @param maxReconnectDelay the duration (in millis)
+	 */
+	public void setMaxReconnectDelay(int maxReconnectDelay) {
+	    this.maxReconnectDelay = maxReconnectDelay;
+	}
+
+	/**
 	 * Sets the "Last Will and Testament" (LWT) for the connection.
 	 * In the event that this client unexpectedly loses its connection to the
 	 * server, the server will publish a message to itself using the supplied
@@ -632,6 +648,20 @@ public class MqttConnectOptions {
 			p.put("SSLProperties", getSSLProperties());
 		}
 		return p;
+	}
+
+	/**
+	 * Sets the Custom WebSocket Headers for the WebSocket Connection.
+	 *
+	 * @param props The custom websocket headers {@link Properties}
+	 */
+
+	public void setCustomWebSocketHeaders(Properties props) {
+		this.customWebSocketHeaders = props;
+	}
+
+	public Properties getCustomWebSocketHeaders() {
+		return customWebSocketHeaders;
 	}
 
 	public String toString() {
