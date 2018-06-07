@@ -352,17 +352,13 @@ public class MqttConnectionOptions {
 
 	/**
 	 * Set the maximum time to wait between reconnects
-	 *
-	 * @param maxReconnectDelay
-	 *            the duration (in millis)
-	 */
-	public void setMaxReconnectDelay(int maxReconnectDelay) {
-		this.maxReconnectDelay = maxReconnectDelay;
-	 * @param maxReconnectDelay the duration (in millis)
-	*/
+     * @param maxReconnectDelay
+     *            the duration (in millis)
+     */
 	public void setMaxReconnectDelay(int maxReconnectDelay) {
 		this.maxReconnectDelay = maxReconnectDelay;
 	}
+
 
 	/**
 	 * Return a list of serverURIs the client may connect to
