@@ -83,7 +83,8 @@ public class TCPNetworkModule implements NetworkModule {
 				socket = factory.createSocket();
 				socket.connect(sockaddr, conTimeout*1000);
 			}
-		
+			socket.setSoTimeout(1000);
+
 			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm.
 			// This should not be required.
 //			socket.setTcpNoDelay(true);	// TCP_NODELAY on, which means we do not use Nagle's algorithm

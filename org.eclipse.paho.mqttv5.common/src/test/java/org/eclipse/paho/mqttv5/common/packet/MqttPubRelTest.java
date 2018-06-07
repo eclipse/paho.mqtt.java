@@ -60,9 +60,35 @@ public class MqttPubRelTest {
 		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
 		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
 		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
-
-		
-		
+	}
+	
+	@Test
+	public void testDecodingSmallMqttPubrel() throws MqttException, IOException {
+		MqttPubRel mqttPubackPacket = new MqttPubRel(MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND, 1, new MqttProperties());
+		byte[] header = mqttPubackPacket.getHeader();
+		byte[] payload = mqttPubackPacket.getPayload();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(header);
+		outputStream.write(payload);
+		// Total Packet should be 5 bytes long
+		Assert.assertEquals(5, outputStream.size());
+		MqttPubRel decodedPubackPacket = (MqttPubRel) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		Assert.assertEquals(MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND, decodedPubackPacket.getReturnCode());
+	
+	}
+	
+	@Test
+	public void testDecodingVerySmallMqttPubrel() throws MqttException, IOException {
+		MqttPubRel mqttPubackPacket = new MqttPubRel(MqttReturnCode.RETURN_CODE_SUCCESS, 1, new MqttProperties());
+		byte[] header = mqttPubackPacket.getHeader();
+		byte[] payload = mqttPubackPacket.getPayload();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(header);
+		outputStream.write(payload);
+		// Total Packet should be 4 bytes long
+		Assert.assertEquals(4, outputStream.size());
+		MqttPubRel decodedPubackPacket = (MqttPubRel) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		Assert.assertEquals(MqttReturnCode.RETURN_CODE_SUCCESS, decodedPubackPacket.getReturnCode());
 	}
 	
 	public MqttPubRel generateMqttPubRelPacket() throws MqttException{

@@ -36,19 +36,14 @@ public class MqttConnectionOptionsBuilder {
 		mqttConnectionOptions.setKeepAliveInterval(keepAlive);
 		return this;
 	}
-
-	public MqttConnectionOptionsBuilder maxInFlight(int maxInflight) {
-		mqttConnectionOptions.setMaxInflight(maxInflight);
-		return this;
-	}
 	
 	public MqttConnectionOptionsBuilder connectionTimeout(int connectionTimeout) {
 		mqttConnectionOptions.setConnectionTimeout(connectionTimeout);
 		return this;
 	}
 	
-	public MqttConnectionOptionsBuilder cleanSession(boolean cleanSession) {
-		mqttConnectionOptions.setCleanSession(cleanSession);
+	public MqttConnectionOptionsBuilder cleanStart(boolean cleanStart) {
+		mqttConnectionOptions.setCleanStart(cleanStart);
 		return this;
 	}
 	

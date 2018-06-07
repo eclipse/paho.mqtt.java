@@ -62,9 +62,9 @@ import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
  * hence can be lost if the client, Java runtime or device shuts down.
  * </p>
  * <p>
- * If connecting with {@link MqttConnectionOptions#setCleanSession(boolean)} set
+ * If connecting with {@link MqttConnectionOptions#setCleanStart(boolean)} set
  * to true it is safe to use memory persistence as all state it cleared when a
- * client disconnects. If connecting with cleanSession set to false, to provide
+ * client disconnects. If connecting with cleanStart set to false, to provide
  * reliable message delivery then a persistent message store should be used such
  * as the default one.
  * </p>
@@ -248,8 +248,8 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * {@link MqttClientPersistence} interface. An implementer of this interface
 	 * that safely stores messages must be specified in order for delivery of
 	 * messages to be reliable. In addition
-	 * {@link MqttConnectionOptions#setCleanSession(boolean)} must be set to false.
-	 * In the event that only QoS 0 messages are sent or received or cleanSession is
+	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false.
+	 * In the event that only QoS 0 messages are sent or received or cleanStart is
 	 * set to true then a safe store is not needed.
 	 * </p>
 	 * <p>
@@ -357,8 +357,8 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * {@link MqttClientPersistence} interface. An implementer of this interface
 	 * that safely stores messages must be specified in order for delivery of
 	 * messages to be reliable. In addition
-	 * {@link MqttConnectionOptions#setCleanSession(boolean)} must be set to false.
-	 * In the event that only QoS 0 messages are sent or received or cleanSession is
+	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false.
+	 * In the event that only QoS 0 messages are sent or received or cleanStart is
 	 * set to true then a safe store is not needed.
 	 * </p>
 	 * <p>
@@ -789,13 +789,13 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * Returns a randomly generated client identifier based on the current user's
 	 * login name and the system time.
 	 * <p>
-	 * When cleanSession is set to false, an application must ensure it uses the
+	 * When cleanStart is set to false, an application must ensure it uses the
 	 * same client identifier when it reconnects to the server to resume state and
 	 * maintain assured message delivery.
 	 * </p>
 	 * 
 	 * @return a generated client identifier
-	 * @see MqttConnectionOptions#setCleanSession(boolean)
+	 * @see MqttConnectionOptions#setCleanStart(boolean)
 	 */
 	public static String generateClientId() {
 		return MqttConnectionOptions.generateClientId();

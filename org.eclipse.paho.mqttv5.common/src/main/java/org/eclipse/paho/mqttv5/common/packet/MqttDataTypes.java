@@ -5,6 +5,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.VariableByteInteger;
@@ -20,7 +22,7 @@ public class MqttDataTypes {
 	}
 
 	public static void validateTwoByteInt(Integer value) throws IllegalArgumentException {
-		if(value == null) {
+		if (value == null) {
 			return;
 		}
 		if (value >= 0 && value <= TWO_BYTE_INT_MAX) {
@@ -31,7 +33,7 @@ public class MqttDataTypes {
 	}
 
 	public static void validateFourByteInt(Long value) throws IllegalArgumentException {
-		if(value == null) {
+		if (value == null) {
 			return;
 		}
 		if (value >= 0 && value <= FOUR_BYTE_INT_MAX) {
@@ -115,6 +117,7 @@ public class MqttDataTypes {
 	 *             the data to the stream.
 	 */
 	public static void encodeUTF8(DataOutputStream dos, String stringToEncode) throws MqttException {
+		validateUTF8String(stringToEncode);
 		try {
 			byte[] encodedString = stringToEncode.getBytes(STRING_ENCODING);
 			byte byte1 = (byte) ((encodedString.length >>> 8) & 0xFF);
@@ -128,7 +131,7 @@ public class MqttDataTypes {
 		}
 	}
 
-	protected static final String STRING_ENCODING = "UTF-8";
+	protected static final Charset STRING_ENCODING = StandardCharsets.UTF_8;
 
 	/**
 	 * Decodes a UTF-8 string from the {@link DataInputStream} provided.
@@ -150,10 +153,26 @@ public class MqttDataTypes {
 
 			byte[] encodedString = new byte[encodedLength];
 			input.readFully(encodedString);
+			String output = new String(encodedString, STRING_ENCODING);
+			validateUTF8String(output);
 
-			return new String(encodedString, STRING_ENCODING);
+			return output;
 		} catch (IOException ioe) {
 			throw new MqttException(MqttException.REASON_CODE_MALFORMED_PACKET, ioe);
+		}
+	}
+
+	/**
+	 * Validate a UTF-8 String for suitability for MQTT.
+	 * @param input - The Input String
+	 * @throws IllegalArgumentException
+	 */
+	private static void validateUTF8String(String input) throws IllegalArgumentException {
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			if (Character.getType(c) == Character.CONTROL || Character.getType(c) == Character.UNASSIGNED) {
+				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: %s [%s]", c, (int) c));
+			}
 		}
 	}
 
@@ -164,26 +183,32 @@ public class MqttDataTypes {
 	 *            the DataInputStream to decode a Variable Byte Integer From
 	 * @return a new VariableByteInteger
 	 * @throws IOException
-	 *             if an error occured whilst decoding the VBI
+	 *             if an error occurred whilst decoding the VBI
 	 */
 	public static VariableByteInteger readVariableByteInteger(DataInputStream in) throws IOException {
 		byte digit;
-		int msgLength = 0;
+		int value = 0;
 		int multiplier = 1;
 		int count = 0;
 
 		do {
 			digit = in.readByte();
 			count++;
-			msgLength += ((digit & 0x7F) * multiplier);
+			value += ((digit & 0x7F) * multiplier);
 			multiplier *= 128;
 		} while ((digit & 0x80) != 0);
 
-		return new VariableByteInteger(msgLength, count);
+		if (value < 0 || value > VARIABLE_BYTE_INT_MAX) {
+			throw new IOException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX
+					+ ". Read value was: " + value);
+		}
+
+		return new VariableByteInteger(value, count);
 
 	}
 
-	public static byte[] encodeVariableByteInteger(int number) {
+	public static byte[] encodeVariableByteInteger(int number) throws IllegalArgumentException {
+		validateVariableByteInt(number);
 		int numBytes = 0;
 		long no = number;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

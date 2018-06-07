@@ -29,9 +29,6 @@ import org.eclipse.paho.mqttv5.client.wire.MqttInputStream;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
-import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
@@ -54,7 +51,7 @@ public class CommsReceiver implements Runnable {
 	private Future<?> receiverFuture;
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, InputStream in) {
-		this.in = new MqttInputStream(clientState, in);
+		this.in = new MqttInputStream(clientState, in, clientComms.getClient().getClientId());
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
@@ -147,22 +144,14 @@ public class CommsReceiver implements Runnable {
 							// can occur before request processing is complete if not!
 							clientState.notifyReceivedAck((MqttAck) message);
 						}
-					} else if (message instanceof MqttPubRec || message instanceof MqttPubComp
-							|| message instanceof MqttPubAck) {
-						// This is an ack for a message we no longer have a ticket for.
-						// This probably means we already received this message and it's being send
-						// again
-						// because of timeouts, crashes, disconnects, restarts etc.
-						// It should be safe to ignore these unexpected messages.
-						log.fine(CLASS_NAME, methodName, "857");
 					} else {
-						// It its an ack and there is no token then something is not right.
-						// An ack should always have a token assoicated with it.
-						throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
-					}
+						// This is an ack for a message we no longer have a ticket for.
+						log.fine(CLASS_NAME, methodName, "857");
+						clientState.handleOrphanedAcks((MqttAck) message);
+					} 
 				} else if (message != null && message instanceof MqttDisconnect) {
 					// This is a Disconnect Message
-						clientComms.shutdownConnection(null, new MqttException(MqttClientException.REASON_CODE_SERVER_DISCONNECTED), (MqttDisconnect) message);
+						clientComms.shutdownConnection(null, new MqttException(MqttClientException.REASON_CODE_SERVER_DISCONNECTED, (MqttDisconnect) message), (MqttDisconnect) message);
 				} else {
 					if (message != null) {
 						// A new message has arrived

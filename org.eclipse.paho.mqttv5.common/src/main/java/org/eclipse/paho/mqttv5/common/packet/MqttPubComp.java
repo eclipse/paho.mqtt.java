@@ -44,7 +44,7 @@ public class MqttPubComp extends MqttAck {
 		DataInputStream dis = new DataInputStream(counter);
 		msgId = dis.readUnsignedShort();
 		long remainder = (long) data.length - counter.getCounter();
-		if (remainder > 2) {
+		if (remainder >= 1) {
 			reasonCode = dis.readUnsignedByte();
 			validateReturnCode(reasonCode, validReturnCodes);
 		} else {
@@ -53,7 +53,6 @@ public class MqttPubComp extends MqttAck {
 		if (remainder >= 4) {
 			this.properties.decodeProperties(dis);
 		}
-
 		dis.close();
 	}
 
@@ -81,10 +80,12 @@ public class MqttPubComp extends MqttAck {
 
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 
-			if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
+			if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS && identifierValueFieldsByteArray.length == 1) {
 				// Encode the Return Code
 				outputStream.write((byte) reasonCode);
-
+			} else if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length > 1) {
+				// Encode the Return Code
+				outputStream.write((byte) reasonCode);
 				// Write Identifier / Value Fields
 				outputStream.write(identifierValueFieldsByteArray);
 			}

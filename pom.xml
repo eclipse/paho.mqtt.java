@@ -15,7 +15,8 @@
 		<build.level>${maven.build.timestamp}</build.level>
 		<tycho.version>1.1.0</tycho.version>
 		<junit.version>4.12</junit.version>
-		<mars.repo.url>http://download.eclipse.org/releases/mars</mars.repo.url>
+		<javadoc.version>3.0.1</javadoc.version>
+		<mvnsource.version>3.0.1</mvnsource.version>
 		<test.exclude>**/*ConformantTest.java</test.exclude>
 		<download.location>/home/data/httpd/download.eclipse.org/paho/releases/${project.version}/Java</download.location>
 	</properties>
@@ -55,14 +56,6 @@
 			<url>https://repo.eclipse.org/content/repositories/paho-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>eclipse-mars</id>
-			<url>${mars.repo.url}</url>
-			<layout>p2</layout>
-		</repository>
-	</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
@@ -309,13 +302,9 @@
 	<modules>
 		<module>org.eclipse.paho.client.mqttv3</module>
 		<module>org.eclipse.paho.client.mqttv3.test</module>
-		<module>org.eclipse.paho.client.eclipse.feature</module>
-		<module>org.eclipse.paho.client.eclipse.view</module>
 		<module>org.eclipse.paho.client.mqttv3.repository</module>
 		<module>org.eclipse.paho.sample.utility</module>
-		<module>org.eclipse.paho.ui</module>
 		<module>org.eclipse.paho.mqttv5.common</module>
     	<module>org.eclipse.paho.mqttv5.client</module>
-    	<module>org.eclipse.paho.mqttv5.testclient</module>
 	</modules>
 </project>

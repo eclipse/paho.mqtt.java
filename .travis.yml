@@ -14,13 +14,13 @@ before_install:
   - ./start-broker.sh
 
 script:
-  - mvn clean
-  - mvn --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test
-  - mvn --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client test
+  - mvn -B clean -q
+  - mvn -B --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test -q
+  - mvn -B --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client test -q
 
-addons:
-  apt:
-    sources:
-      - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
-    packages:
-      - mosquitto
+#addons:
+#  apt:
+#    sources:
+#      - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
+#    packages:
+#      - mosquitto

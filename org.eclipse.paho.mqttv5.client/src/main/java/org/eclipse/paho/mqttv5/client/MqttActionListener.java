@@ -20,7 +20,7 @@ public interface MqttActionListener {
 	 * This method is invoked when an action fails.  
 	 * If a client is disconnected while an action is in progress 
 	 * onFailure will be called. For connections
-	 * that use cleanSession set to false, any QoS 1 and 2 messages that 
+	 * that use cleanStart set to false, any QoS 1 and 2 messages that 
 	 * are in the process of being delivered will be delivered to the requested
 	 * quality of service next time the client connects.  
 	 * @param asyncActionToken associated with the action that has failed

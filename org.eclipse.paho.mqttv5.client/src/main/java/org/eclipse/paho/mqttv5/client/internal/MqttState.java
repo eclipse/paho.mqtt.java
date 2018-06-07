@@ -107,8 +107,6 @@ public interface MqttState {
 
 	int getActualInFlight();
 
-	int getMaxInFlight();
-
 	Properties getDebug();
 
 }

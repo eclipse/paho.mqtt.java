@@ -54,10 +54,6 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPubRec;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubRel;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttSubscribe;
-import org.eclipse.paho.mqttv5.common.packet.MqttUnsubAck;
-import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
@@ -123,10 +119,9 @@ public class ClientState implements MqttState {
 	private ClientComms clientComms = null;
 	private CommsCallback callback = null;
 	private long keepAlive;
-	private boolean cleanSession;
+	private boolean cleanStart;
 	private MqttClientPersistence persistence;
 
-	private int maxInflight = 0;
 	private int actualInFlight = 0;
 	private int inFlightPubRels = 0;
 
@@ -153,18 +148,19 @@ public class ClientState implements MqttState {
 	// Topic Alias Maps
 	private Hashtable<String, Integer> outgoingTopicAliases;
 	private Hashtable<Integer, String> incomingTopicAliases;
-	private int outgoingTopicAliasCount = 1;
 
-	private MqttSession mqttSession;
+	private MqttConnectionState mqttConnection;
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, CommsCallback callback,
-			ClientComms clientComms, MqttPingSender pingSender, MqttSession mqttSession) throws MqttException {
+			ClientComms clientComms, MqttPingSender pingSender, MqttConnectionState mqttConnection)
+			throws MqttException {
 
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "");
 
 		inUseMsgIds = new ConcurrentHashMap<>();
 		pendingFlows = new Vector<MqttWireMessage>();
+		pendingMessages = new Vector<MqttWireMessage>(mqttConnection.getReceiveMaximum());
 		outboundQoS2 = new ConcurrentHashMap<>();
 		outboundQoS1 = new ConcurrentHashMap<>();
 		outboundQoS0 = new ConcurrentHashMap<>();
@@ -180,14 +176,9 @@ public class ClientState implements MqttState {
 		this.tokenStore = tokenStore;
 		this.clientComms = clientComms;
 		this.pingSender = pingSender;
-		this.mqttSession = mqttSession;
+		this.mqttConnection = mqttConnection;
 
 		restoreState();
-	}
-
-	protected void setMaxInflight(int maxInflight) {
-		this.maxInflight = maxInflight;
-		pendingMessages = new Vector<MqttWireMessage>(this.maxInflight);
 	}
 
 	protected void setKeepAliveSecs(long keepAliveSecs) {
@@ -198,12 +189,12 @@ public class ClientState implements MqttState {
 		return this.keepAlive;
 	}
 
-	protected void setCleanSession(boolean cleanSession) {
-		this.cleanSession = cleanSession;
+	protected void setCleanStart(boolean cleanStart) {
+		this.cleanStart = cleanStart;
 	}
 
-	protected boolean getCleanSession() {
-		return this.cleanSession;
+	protected boolean getCleanStart() {
+		return this.cleanStart;
 	}
 
 	private String getSendPersistenceKey(MqttWireMessage message) {
@@ -240,6 +231,17 @@ public class ClientState implements MqttState {
 		outboundQoS0.clear();
 		inboundQoS2.clear();
 		tokenStore.clear();
+		outgoingTopicAliases.clear();
+		incomingTopicAliases.clear();
+	}
+
+	protected void clearConnectionState() throws MqttException {
+		final String methodName = "clearConnectionState";
+		// @TRACE=665=Clearing Connection State (Topic Aliases)
+		log.fine(CLASS_NAME, methodName, "665");
+		outgoingTopicAliases.clear();
+		incomingTopicAliases.clear();
+
 	}
 
 	private MqttWireMessage restoreMessage(String key, MqttPersistable persistable) throws MqttException {
@@ -458,7 +460,7 @@ public class ClientState implements MqttState {
 
 	private void restoreInflightMessages() {
 		final String methodName = "restoreInflightMessages";
-		pendingMessages = new Vector<MqttWireMessage>(this.maxInflight);
+		pendingMessages = new Vector<MqttWireMessage>(this.mqttConnection.getReceiveMaximum());
 		pendingFlows = new Vector<MqttWireMessage>();
 
 		Enumeration<Integer> keys = outboundQoS2.keys();
@@ -514,32 +516,25 @@ public class ClientState implements MqttState {
 		final String methodName = "send";
 		// Set Message ID if required
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
-			if (message instanceof MqttPublish && (((MqttPublish) message).getMessage().getQos() != 0)) {
-				message.setMessageId(getNextMessageId());
-			} else if (message instanceof MqttPubAck || message instanceof MqttPubRec || message instanceof MqttPubRel
-					|| message instanceof MqttPubComp || message instanceof MqttSubscribe
-					|| message instanceof MqttSubAck || message instanceof MqttUnsubscribe
-					|| message instanceof MqttUnsubAck) {
-				message.setMessageId(getNextMessageId());
-			}
+			message.setMessageId(getNextMessageId());
 		}
 		// Set Topic Alias if required
-		if (message instanceof MqttPublish && this.mqttSession.getOutgoingTopicAliasMaximum() > 0) {
+		if (message instanceof MqttPublish && this.mqttConnection.getOutgoingTopicAliasMaximum() > 0) {
 			String topic = ((MqttPublish) message).getTopicName();
 			if (outgoingTopicAliases.containsKey(topic)) {
 				// Existing Topic Alias, Assign it and remove the topic string
 				((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliases.get(topic));
 				((MqttPublish) message).setTopicName(null);
 			} else {
-				if (outgoingTopicAliasCount <= this.mqttSession.getOutgoingTopicAliasMaximum()) {
+				int nextOutgoingTopicAlias = this.mqttConnection.getNextOutgoingTopicAlias();
+				if (nextOutgoingTopicAlias <= this.mqttConnection.getOutgoingTopicAliasMaximum()) {
 					// Create a new Topic Alias and increment the counter
-					((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliasCount);
-					outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), outgoingTopicAliasCount);
-					outgoingTopicAliasCount++;
+					((MqttPublish) message).getProperties().setTopicAlias(nextOutgoingTopicAlias);
+					outgoingTopicAliases.put(((MqttPublish) message).getTopicName(), nextOutgoingTopicAlias);
 				}
 			}
 		}
-		
+
 		if (token != null) {
 			try {
 				token.internalTok.setMessageID(message.getMessageId());
@@ -549,7 +544,7 @@ public class ClientState implements MqttState {
 
 		if (message instanceof MqttPublish) {
 			synchronized (queueLock) {
-				if (actualInFlight >= this.maxInflight) {
+				if (actualInFlight >= this.mqttConnection.getReceiveMaximum()) {
 					// @TRACE 613= sending {0} msgs at max inflight window
 					log.fine(CLASS_NAME, methodName, "613", new Object[] { Integer.valueOf(actualInFlight) });
 
@@ -835,7 +830,7 @@ public class ClientState implements MqttState {
 				// freed.
 				// In both cases queueLock will be notified.
 				if ((pendingMessages.isEmpty() && pendingFlows.isEmpty())
-						|| (pendingFlows.isEmpty() && actualInFlight >= this.maxInflight)) {
+						|| (pendingFlows.isEmpty() && actualInFlight >= this.mqttConnection.getReceiveMaximum())) {
 					try {
 						// @TRACE 644=wait for new work or for space in the inflight window
 						log.fine(CLASS_NAME, methodName, "644");
@@ -881,7 +876,7 @@ public class ClientState implements MqttState {
 
 					// If the inflight window is full then messages are not
 					// processed until the inflight window has space.
-					if (actualInFlight < this.maxInflight) {
+					if (actualInFlight < this.mqttConnection.getReceiveMaximum()) {
 						// The in flight window is not full so process the
 						// first message in the queue
 						result = (MqttWireMessage) pendingMessages.elementAt(0);
@@ -1033,10 +1028,19 @@ public class ClientState implements MqttState {
 		MqttException mex = null;
 
 		if (token == null) {
-
 			// @TRACE 662=no message found for ack id={0}
 			log.fine(CLASS_NAME, methodName, "662", new Object[] { Integer.valueOf(ack.getMessageId()) });
 		} else if (ack instanceof MqttPubRec) {
+			if (((MqttPubRec) ack).getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR) {
+				// @TRACE 664=[MQTT-4.3.3-4] - A Reason code greater than 0x80 (128) was
+				// received in an incoming PUBREC id={0} rc={1} message={2}, halting QoS 2 flow.
+				log.severe(CLASS_NAME, methodName, "664",
+						new Object[] { ack.getMessageId(), ack.getReasonCodes()[0], ack.toString() });
+				throw new MqttException(((MqttPubRec) ack).getReasonCodes()[0]);
+			}
+
+			// Update the token with the reason codes
+			updateResult(ack, token, mex);
 
 			// Complete the QoS 2 flow. Unlike all other
 			// flows, QoS is a 2 phase flow. The second phase sends a
@@ -1069,7 +1073,7 @@ public class ClientState implements MqttState {
 			int rc = ((MqttConnAck) ack).getReturnCode();
 			if (rc == 0) {
 				synchronized (queueLock) {
-					if (cleanSession) {
+					if (cleanStart) {
 						clearState();
 						// Add the connect token back in so that users can be
 						// notified when connect completes.
@@ -1104,6 +1108,66 @@ public class ClientState implements MqttState {
 	}
 
 	/**
+	 * Called by the CommsReceiver when an Ack has been received but cannot be
+	 * matched to a token. This method will generate the appropriate response with
+	 * an error code.
+	 * 
+	 * @param ack
+	 *            - The Orphaned Ack
+	 * @throws MqttException
+	 *             if an exception occurs whilst handling orphaned Acks
+	 */
+	protected void handleOrphanedAcks(MqttAck ack) throws MqttException {
+		final String methodName = "handleOrphanedAcks";
+		// @TRACE 666=Orphaned Ack key={0} message={1}
+		log.fine(CLASS_NAME, methodName, "666", new Object[] { Integer.valueOf(ack.getMessageId()), ack });
+
+		if (ack instanceof MqttPubAck) {
+			// MqttPubAck - This would be the end of a QoS 1 flow, so message can be ignored
+		} else if (ack instanceof MqttPubRec) {
+			// MqttPubRec - Send an MqttPubRel with the appropriate Reason Code
+			MqttProperties pubRelProperties = new MqttProperties();
+			if (this.mqttConnection.isSendReasonMessages()) {
+				String reasonString = String.format("Message identifier [%d] was not found. Discontinuing QoS 2 flow.",
+						ack.getMessageId());
+				pubRelProperties.setReasonString(reasonString);
+			}
+			MqttPubRel rel = new MqttPubRel(MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND, ack.getMessageId(),
+					new MqttProperties());
+			this.send(rel, null);
+		} else if (ack instanceof MqttPubComp) {
+			// MqttPubComp
+		}
+	}
+
+	/**
+	 * Called by {@link ClientState#notifyReceivedMsg} when a PUBREL message is
+	 * received.
+	 * 
+	 * @param pubRel
+	 *            The in-bound PUBREL
+	 * @throws MqttException
+	 *             When an exception occurs whilst handling the PUBREL
+	 */
+	protected void handleInboundPubRel(MqttPubRel pubRel) throws MqttException {
+		final String methodName = "handleInboundPubRel";
+		if (pubRel.getReasonCodes()[0] > MqttReturnCode.RETURN_CODE_UNSPECIFIED_ERROR) {
+			// @TRACE 667=MqttPubRel was received with an error code: key={0} message={1},
+			// Reason Code={2}
+			log.severe(CLASS_NAME, methodName, "667",
+					new Object[] { pubRel.getMessageId(), pubRel.toString(), pubRel.getReasonCodes()[0] });
+			throw new MqttException(pubRel.getReasonCodes()[0]);
+		} else {
+			// Currently this client has no need of the properties, so this is left empty.
+			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, pubRel.getMessageId(),
+					new MqttProperties());
+			// @TRACE 668=Creating MqttPubComp: {0}
+			log.info(CLASS_NAME, methodName, "668", new Object[] { pubComp.toString() });
+			this.send(pubComp, null);
+		}
+	}
+
+	/**
 	 * Called by the CommsReceiver when a message has been received. Handles inbound
 	 * messages and other flows such as PUBREL.
 	 * 
@@ -1124,17 +1188,18 @@ public class ClientState implements MqttState {
 				MqttPublish send = (MqttPublish) message;
 
 				// Do we have an incoming topic Alias?
-				if (send.getProperties().getTopicAlias() != null && send.getProperties().getTopicAlias() != 0) {
+				if (send.getProperties().getTopicAlias() != null) {
 					int incomingTopicAlias = send.getProperties().getTopicAlias();
 
 					// Are incoming Topic Aliases enabled / is it a valid Alias?
-					if (incomingTopicAlias > this.mqttSession.getIncomingTopicAliasMax() || incomingTopicAlias == 0) {
+					if (incomingTopicAlias > this.mqttConnection.getIncomingTopicAliasMax()
+							|| incomingTopicAlias == 0) {
 						// @TRACE 653=Invalid Topic Alias: topicAliasMax={0}, publishTopicAlias={1}
 						log.severe(CLASS_NAME, methodName, "653",
-								new Object[] { Integer.valueOf(this.mqttSession.getIncomingTopicAliasMax()),
+								new Object[] { Integer.valueOf(this.mqttConnection.getIncomingTopicAliasMax()),
 										Integer.valueOf(incomingTopicAlias) });
 						if (callback != null) {
-							callback.mqttErrorOccured(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
+							callback.mqttErrorOccurred(new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_ALAS));
 						}
 						throw new MqttException(MqttClientException.REASON_CODE_INVALID_TOPIC_ALAS);
 
@@ -1169,6 +1234,9 @@ public class ClientState implements MqttState {
 				case 2:
 					persistence.put(getReceivedPersistenceKey(message), (MqttPublish) message);
 					inboundQoS2.put(Integer.valueOf(send.getMessageId()), send);
+					if (callback != null) {
+						callback.messageArrived(send);
+					}
 					// Currently this client has no need of the properties, so this is left empty.
 					this.send(new MqttPubRec(MqttReturnCode.RETURN_CODE_SUCCESS, send.getMessageId(),
 							new MqttProperties()), null);
@@ -1178,18 +1246,7 @@ public class ClientState implements MqttState {
 					// should NOT reach here
 				}
 			} else if (message instanceof MqttPubRel) {
-				MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(Integer.valueOf(message.getMessageId()));
-				if (sendMsg != null) {
-					if (callback != null) {
-						callback.messageArrived(sendMsg);
-					}
-				} else {
-					// Original publish has already been delivered.
-					// Currently this client has no need of the properties, so this is left empty.
-					MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, message.getMessageId(),
-							new MqttProperties());
-					this.send(pubComp, null);
-				}
+				handleInboundPubRel((MqttPubRel) message);
 			} else if (message instanceof MqttAuth) {
 				MqttAuth authMsg = (MqttAuth) message;
 				callback.authMessageReceived(authMsg);
@@ -1251,6 +1308,21 @@ public class ClientState implements MqttState {
 
 			checkQuiesceLock();
 		}
+	}
+
+	/**
+	 * Updates a token with the latest reason codes, currently only used for PubRec
+	 * messages.
+	 * 
+	 * @param ack
+	 *            - The message that we are using for the update
+	 * @param token
+	 *            - The Token we are updating
+	 * @param ex
+	 *            - if there was a problem store the exception in the token.
+	 */
+	protected void updateResult(MqttWireMessage ack, MqttToken token, MqttException ex) {
+		token.internalTok.update(ack, ex);
 	}
 
 	protected void notifyResult(MqttWireMessage ack, MqttToken token, MqttException ex) {
@@ -1347,9 +1419,11 @@ public class ClientState implements MqttState {
 		this.connected = false;
 
 		try {
-			if (cleanSession) {
+			if (cleanStart) {
 				clearState();
 			}
+
+			clearConnectionState();
 
 			pendingMessages.clear();
 			pendingFlows.clear();
@@ -1500,16 +1574,6 @@ public class ClientState implements MqttState {
 		return actualInFlight;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.paho.mqttv5.client.internal.MqttState#getMaxInFlight()
-	 */
-	@Override
-	public int getMaxInFlight() {
-		return maxInflight;
-	}
-
 	/**
 	 * Tidy up - ensure that tokens are released as they are maintained over a
 	 * disconnect / connect cycle.
@@ -1550,7 +1614,7 @@ public class ClientState implements MqttState {
 		props.put("In use msgids", inUseMsgIds);
 		props.put("pendingMessages", pendingMessages);
 		props.put("pendingFlows", pendingFlows);
-		props.put("maxInflight", Integer.valueOf(maxInflight));
+		props.put("serverReceiveMaximum", Integer.valueOf(this.mqttConnection.getReceiveMaximum()));
 		props.put("nextMsgID", Integer.valueOf(nextMsgId));
 		props.put("actualInFlight", Integer.valueOf(actualInFlight));
 		props.put("inFlightPubRels", Integer.valueOf(inFlightPubRels));

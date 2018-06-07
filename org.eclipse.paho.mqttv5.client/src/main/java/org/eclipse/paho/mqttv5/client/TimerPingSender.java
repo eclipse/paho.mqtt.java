@@ -53,6 +53,7 @@ public class TimerPingSender implements MqttPingSender{
 		}
 		this.comms = comms;
 		clientid = comms.getClient().getClientId();
+		log.setResourceName(clientid);
 	}
 
 	public void start() {

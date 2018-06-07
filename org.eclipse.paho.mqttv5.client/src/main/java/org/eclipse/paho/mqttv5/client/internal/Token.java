@@ -181,6 +181,45 @@ public class Token {
 		log.fine(CLASS_NAME, methodName, "402", new Object[] { getKey(), this.response });
 		return this.response;
 	}
+	
+	/**
+	 * Update the token with any new reason codes, currently only used for PubRec
+	 * 
+	 * @param msg
+	 *            response message. 
+	 * @param ex
+	 *            if there was a problem store the exception in the token.
+	 */
+	protected void update(MqttWireMessage msg, MqttException ex) {
+		final String methodName = "markComplete";
+		// @TRACE 411=>key={0} response={1} excep={2}
+		log.fine(CLASS_NAME, methodName, "411", new Object[] { getKey(), msg, ex });
+		
+		synchronized (responseLock){
+			if(msg instanceof MqttPubRec) {
+				if(msg.getReasonCodes() != null) {
+					updateReasonCodes(msg.getReasonCodes());
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * Updates the reasonCodes Array and extends it with any new reason codes.
+	 * This allows message flows like Qos 2 to combine reason codes together across multiple messages e.g. PubRec and PubComp
+	 * @param newReasonCodes - The additional Reason Codes.
+	 */
+	protected void updateReasonCodes(int[] newReasonCodes) {
+		if(this.reasonCodes == null) {
+			this.reasonCodes = newReasonCodes;
+		} else {
+			int[] updatedReasonCodes = new int[this.reasonCodes.length + newReasonCodes.length];
+			System.arraycopy(this.reasonCodes, 0, updatedReasonCodes, 0, this.reasonCodes.length);
+			System.arraycopy(newReasonCodes, 0, updatedReasonCodes, this.reasonCodes.length, newReasonCodes.length);
+			this.reasonCodes = updatedReasonCodes;
+		}
+	}
 
 	/**
 	 * Mark the token as complete and ready for users to be notified.
@@ -202,7 +241,7 @@ public class Token {
 			if (msg instanceof MqttPubAck || msg instanceof MqttPubComp || msg instanceof MqttPubRec
 					|| msg instanceof MqttPubRel || msg instanceof MqttSubAck || msg instanceof MqttUnsubAck) {
 				if (msg.getReasonCodes() != null) {
-					this.reasonCodes = msg.getReasonCodes();
+					updateReasonCodes(msg.getReasonCodes());
 				}
 			}
 

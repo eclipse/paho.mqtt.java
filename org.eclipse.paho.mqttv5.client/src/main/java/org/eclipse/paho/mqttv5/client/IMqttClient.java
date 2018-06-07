@@ -24,7 +24,6 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 /**
  * Enables an application to communicate with an MQTT server using blocking methods.
@@ -134,7 +133,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * work which has already been initiated to complete - for example, it will
 	 * wait for the QoS 2 flows from earlier publications to complete. When work has
 	 * completed or after the quiesce timeout, the client will disconnect from
-	 * the server. If the cleanSession flag was set to false and is set to false the
+	 * the server. If the cleanStart flag was set to false and is set to false the
 	 * next time a connection is made QoS 1 and 2 messages that
 	 * were not previously delivered will be delivered.</p>
 	 *
@@ -227,7 +226,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * will be discarded.
 	 * </p>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to true
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:
 	 * </p>
@@ -236,15 +235,15 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
 	 * </ul>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
 	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The client connects with cleanSession set to true</li>
+	 * <li>The client connects with cleanStart set to true</li>
 	 * </ul>
 	 * <p>
-	 * With cleanSession set to false the MQTT server will store messages on
+	 * With cleanStart set to false the MQTT server will store messages on
 	 * behalf of the client when the client is not connected. The next time the
 	 * client connects with the <b>same client ID</b> the server will
 	 * deliver the stored messages to the client.
@@ -363,7 +362,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * will be discarded.
 	 * </p>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to true
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
@@ -371,15 +370,15 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
 	 * </ul>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
 	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The client connects with cleanSession set to true</li>
+	 * <li>The client connects with cleanStart set to true</li>
 	 * </ul>
 	 * <p>
-	 * With cleanSession set to false the MQTT server will store messages on
+	 * With cleanStart set to false the MQTT server will store messages on
 	 * behalf of the client when the client is not connected. The next time the
 	 * client connects with the <b>same client ID</b> the server will
 	 * deliver the stored messages to the client.
@@ -471,7 +470,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * will be discarded.
 	 * </p>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to true
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
@@ -479,15 +478,15 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
 	 * </ul>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
 	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The client connects with cleanSession set to true</li>
+	 * <li>The client connects with cleanStart set to true</li>
 	 * </ul>
 	 * <p>
-	 * With cleanSession set to false the MQTT server will store messages on
+	 * With cleanStart set to false the MQTT server will store messages on
 	 * behalf of the client when the client is not connected. The next time the
 	 * client connects with the <b>same client ID</b> the server will
 	 * deliver the stored messages to the client.
@@ -564,7 +563,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * will be discarded.
 	 * </p>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to true
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
@@ -573,15 +572,15 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * </ul>
 	 * 
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
 	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The client connects with cleanSession set to true</li>
+	 * <li>The client connects with cleanStart set to true</li>
 	 * </ul>
 	 * <p>
-	 * With cleanSession set to false the MQTT server will store messages on
+	 * With cleanStart set to false the MQTT server will store messages on
 	 * behalf of the client when the client is not connected. The next time the
 	 * client connects with the <b>same client ID</b> the server will
 	 * deliver the stored messages to the client.
@@ -715,9 +714,9 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * a connection is re-established to the server on condition that:</p>
 	 * <ul>
 	 * <li>The connection is re-established with the same clientID</li>
-	 * <li>The original connection was made with (@link MqttConnectOptions#setCleanSession(boolean)}
+	 * <li>The original connection was made with (@link MqttConnectOptions#setCleanStart(boolean)}
 	 * set to false</li>
-	 * <li>The connection is re-established with (@link MqttConnectOptions#setCleanSession(boolean)}
+	 * <li>The connection is re-established with (@link MqttConnectOptions#setCleanStart(boolean)}
 	 * set to false</li>
 	 * </ul>
 	 * <p>In the event that the connection breaks or the client stops it is still possible to determine
@@ -860,9 +859,9 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)}
 	 * callback can be used to track the delivery of outstanding messages.
 	 * </p>
-	 * <p>If a client connects with cleanSession true then there will be no
-	 * delivery tokens as the cleanSession option deletes all earlier state.
-	 * For state to be remembered the client must connect with cleanSession
+	 * <p>If a client connects with cleanStart true then there will be no
+	 * delivery tokens as the cleanStart option deletes all earlier state.
+	 * For state to be remembered the client must connect with cleanStart
 	 * set to false</P>
 	 * @return zero or more delivery tokens
 	 */

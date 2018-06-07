@@ -60,8 +60,35 @@ public class MqttPubCompTest {
 		Assert.assertTrue(new UserProperty(userKey1, userValue1).equals(properties.getUserProperties().get(0)));
 		Assert.assertTrue(new UserProperty(userKey2, userValue2).equals(properties.getUserProperties().get(1)));
 		Assert.assertTrue(new UserProperty(userKey3, userValue3).equals(properties.getUserProperties().get(2)));
-
-		
+	}
+	
+	@Test
+	public void testDecodingSmallMqttPubcomp() throws MqttException, IOException {
+		MqttPubComp mqttPubackPacket = new MqttPubComp(MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND, 1, new MqttProperties());
+		byte[] header = mqttPubackPacket.getHeader();
+		byte[] payload = mqttPubackPacket.getPayload();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(header);
+		outputStream.write(payload);
+		// Total Packet should be 5 bytes long
+		Assert.assertEquals(5, outputStream.size());
+		MqttPubComp decodedPubackPacket = (MqttPubComp) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		Assert.assertEquals(MqttReturnCode.RETURN_CODE_PACKET_ID_NOT_FOUND, decodedPubackPacket.getReturnCode());
+	
+	}
+	
+	@Test
+	public void testDecodingVerySmallMqttPubcomp() throws MqttException, IOException {
+		MqttPubComp mqttPubackPacket = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, 1, new MqttProperties());
+		byte[] header = mqttPubackPacket.getHeader();
+		byte[] payload = mqttPubackPacket.getPayload();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(header);
+		outputStream.write(payload);
+		// Total Packet should be 4 bytes long
+		Assert.assertEquals(4, outputStream.size());
+		MqttPubComp decodedPubackPacket = (MqttPubComp) MqttWireMessage.createWireMessage(outputStream.toByteArray());
+		Assert.assertEquals(MqttReturnCode.RETURN_CODE_SUCCESS, decodedPubackPacket.getReturnCode());
 	}
 	
 	public MqttPubComp generateMqttPubCompPacket() throws MqttException{

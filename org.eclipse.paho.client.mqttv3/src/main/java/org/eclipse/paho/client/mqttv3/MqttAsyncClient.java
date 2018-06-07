@@ -1009,7 +1009,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		// @TRACE 117=>
 		log.fine(CLASS_NAME, methodName, "117");
 
-		token = comms.checkForActivity();
+		token = comms.checkForActivity(callback);
 		// @TRACE 118=<
 		log.fine(CLASS_NAME, methodName, "118");
 
@@ -1063,8 +1063,10 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			throw new IllegalArgumentException();
 		}
 
-		// remove any message handlers for individual topics
+		// remove any message handlers for individual topics and validate topicFilter
 		for (int i = 0; i < topicFilters.length; ++i) {
+			// Check if the topic filter is valid before subscribing
+			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
 			this.comms.removeMessageListener(topicFilters[i]);
 		}
 
@@ -1077,8 +1079,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				}
 				subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);
 
-				// Check if the topic filter is valid before subscribing
-				MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
+				
 			}
 			// @TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
 			log.fine(CLASS_NAME, methodName, "106", new Object[] { subs.toString(), userContext, callback });
@@ -1512,7 +1513,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 			// @Trace 502=Automatic Reconnect failed, rescheduling: {0}
 			log.fine(CLASS_NAME, methodName, "502", new Object[] { asyncActionToken.getClient().getClientId() });
-			if (reconnectDelay < 128000) {
+			if (reconnectDelay < connOpts.getMaxReconnectDelay()) {
 				reconnectDelay = reconnectDelay * 2;
 			}
 			rescheduleReconnectCycle(reconnectDelay);

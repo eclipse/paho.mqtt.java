@@ -37,9 +37,10 @@ public class MqttOutputStream extends OutputStream {
 	private MqttState clientState = null;
 	private BufferedOutputStream out;
 	
-	public MqttOutputStream(MqttState clientState, OutputStream out) {
+	public MqttOutputStream(MqttState clientState, OutputStream out, String clientId) {
 		this.clientState = clientState;
 		this.out = new BufferedOutputStream(out);
+		log.setResourceName(clientId);
 	}
 	
 	public void close() throws IOException {
