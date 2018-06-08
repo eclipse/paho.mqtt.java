@@ -29,7 +29,8 @@ public class MqttConnectionState {
 	private Integer receiveMaximum = 65535;
 	private Integer maximumQoS = 2;
 	private Boolean retainAvailable = true;
-	private Long maximumPacketSize = -1L;
+	private Long outgoingMaximumPacketSize = null;
+	private Long incomingMaximumPacketSize = null;
 	private Integer outgoingTopicAliasMaximum = 0;
 	private Integer incomingTopicAliasMax = 0;
 	private Boolean wildcardSubscriptionsAvailable = true;
@@ -75,13 +76,23 @@ public class MqttConnectionState {
 		this.retainAvailable = retainAvailable;
 	}
 
-	public Long getMaximumPacketSize() {
-		return maximumPacketSize;
+	public Long getOutgoingMaximumPacketSize() {
+		return outgoingMaximumPacketSize;
 	}
 
-	public void setMaximumPacketSize(Long maximumPacketSize) {
-		this.maximumPacketSize = maximumPacketSize;
+	public void setOutgoingMaximumPacketSize(Long maximumPacketSize) {
+		this.outgoingMaximumPacketSize = maximumPacketSize;
 	}
+	
+	public Long getIncomingMaximumPacketSize() {
+		return incomingMaximumPacketSize;
+	}
+
+
+	public void setIncomingMaximumPacketSize(Long incomingMaximumPacketSize) {
+		this.incomingMaximumPacketSize = incomingMaximumPacketSize;
+	}
+
 
 	public Integer getOutgoingTopicAliasMaximum() {
 		return outgoingTopicAliasMaximum;
@@ -149,4 +160,6 @@ public class MqttConnectionState {
 		this.keepAlive = keepAlive * 1000;
 	}
 
+
+	
 }

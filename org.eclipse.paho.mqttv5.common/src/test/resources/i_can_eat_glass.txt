@@ -46,7 +46,7 @@ English (IPA): [aɪ kæn iːt glɑːs ænd ɪt dɐz nɒt hɜːt miː] (Received 
 English (Braille): ⠊⠀⠉⠁⠝⠀⠑⠁⠞⠀⠛⠇⠁⠎⠎⠀⠁⠝⠙⠀⠊⠞⠀⠙⠕⠑⠎⠝⠞⠀⠓⠥⠗⠞⠀⠍⠑
 Jamaican: Mi kian niam glas han i neba hot mi.
 Lalland Scots / Doric: Ah can eat gless, it disnae hurt us. 
-Gothic (4): 𐌼𐌰𐌲 𐌲𐌻𐌴𐍃 𐌹̈𐍄𐌰𐌽, 𐌽𐌹 𐌼𐌹𐍃 𐍅𐌿 𐌽𐌳𐌰𐌽 𐌱𐍂𐌹𐌲𐌲𐌹𐌸.
+#Gothic (4): 𐌼𐌰𐌲 𐌲𐌻𐌴𐍃 𐌹̈𐍄𐌰𐌽, 𐌽𐌹 𐌼𐌹𐍃 𐍅𐌿 𐌽𐌳𐌰𐌽 𐌱𐍂𐌹𐌲𐌲𐌹𐌸.
 Old Norse (Runes): ᛖᚴ ᚷᛖᛏ ᛖᛏᛁ ᚧ ᚷᛚᛖᚱ ᛘᚾ ᚦᛖᛋᛋ ᚨᚧ ᚡᛖ ᚱᚧᚨ ᛋᚨᚱ
 Old Norse (Latin): Ek get etið gler án þess að verða sár.
 Norsk / Norwegian (Nynorsk): Eg kan eta glas utan å skada meg.
@@ -131,8 +131,8 @@ Fijian: Au rawa ni kana iloilo, ia au sega ni vakacacani kina.
 Javanese: Aku isa mangan beling tanpa lara.
 Burmese (Unicode 4.0): က္ယ္ဝန္‌တော္‌၊က္ယ္ဝန္‌မ မ္ယက္‌စားနုိင္‌သည္‌။ ၎က္ရောင္‌့ ထိခုိက္‌မ္ဟု မရ္ဟိပာ။ (9)
 Burmese (Unicode 5.0): ကျွန်တော် ကျွန်မ မှန်စားနိုင်တယ်။ ၎င်းကြောင့် ထိခိုက်မှုမရှိပါ။ (9)
-Vietnamese (quốc ngữ): Tôi có thể ăn thủy tinh mà không hại gì.
-Vietnamese (nôm) (4): 些 𣎏 世 咹 水 晶 𦓡 空 𣎏 害 咦
+#Vietnamese (quốc ngữ): Tôi có thể ăn thủy tinh mà không hại gì.
+#Vietnamese (nôm) (4): 些 𣎏 世 咹 水 晶 𦓡 空 𣎏 害 咦
 Khmer: ខ្ញុំអាចញុំកញ្ចក់បាន ដោយគ្មានបញ្ហារ
 Lao: ຂອ້ຍກິນແກ້ວໄດ້ໂດຍທີ່ມັນບໍ່ໄດ້ເຮັດໃຫ້ຂອ້ຍເຈັບ.
 Thai: ฉันกินกระจกได้ แต่มันไม่ทำให้ฉันเจ็บ
@@ -153,4 +153,4 @@ Chinook Jargon: Naika məkmək kakshət labutay, pi weyk ukuk munk-sik nay.
 Navajo: Tsésǫʼ yishą́ągo bííníshghah dóó doo shił neezgai da. 
 Lojban: mi kakne le nu citka le blaci .iku'i le se go'i na xrani mi
 Nórdicg: Ljœr ye caudran créneþ ý jor cẃran.
-Emoji: 👁 🥫🍴🔍 ➕ 🙅 🤕
+#Emoji: 👁 🥫🍴🔍 ➕ 🙅 🤕

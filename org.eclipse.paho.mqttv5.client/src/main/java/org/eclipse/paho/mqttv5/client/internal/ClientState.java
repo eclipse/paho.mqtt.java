@@ -1555,6 +1555,14 @@ public class ClientState implements MqttState {
 	public int getActualInFlight() {
 		return actualInFlight;
 	}
+	
+	public Long getOutgoingMaximumPacketSize() {
+		return this.mqttConnection.getIncomingMaximumPacketSize();
+	}
+	
+	public Long getIncomingMaximumPacketSize() {
+		return this.mqttConnection.getOutgoingMaximumPacketSize();
+	}
 
 	/**
 	 * Tidy up - ensure that tokens are released as they are maintained over a

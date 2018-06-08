@@ -107,4 +107,8 @@ public interface MqttState {
 
 	Properties getDebug();
 
+	Long getOutgoingMaximumPacketSize();
+
+	Long getIncomingMaximumPacketSize();
+
 }

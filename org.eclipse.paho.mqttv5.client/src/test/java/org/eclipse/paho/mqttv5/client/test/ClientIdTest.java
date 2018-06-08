@@ -44,7 +44,7 @@ public class ClientIdTest {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
 		new MqttAsyncClient(serverURI.toString(), "葛渚噓");
-		new MqttAsyncClient(serverURI.toString(), "👁🐝Ⓜ");
+		//new MqttAsyncClient(serverURI.toString(), "👁🐝Ⓜ");
 	}
 
 	@Test

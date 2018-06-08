@@ -93,7 +93,7 @@ public class MqttDataTypesTest {
 
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void TestEncodeAndDecodeEmojiString() throws MqttException {
 		String testString = "👁🐝Ⓜ️️";
 		// System.out.println(String.format("'%s' is %d bytes, %d chars long",
@@ -128,13 +128,13 @@ public class MqttDataTypesTest {
 
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 			for (String line; (line = br.readLine()) != null;) {
-				String[] parts = line.split(":");
-				Assert.assertEquals(2, parts.length);
-				String decodedUTF8 = encodeAndDecodeString(parts[1]);
-				// System.out.println(String.format("Language: %s => [%s], %d chars, Decoded:
-				// [%s]", parts[0], parts[1], parts[1].length(), decodedUTF8));
-				Assert.assertEquals(parts[1], decodedUTF8);
-
+				if(!line.startsWith("#")) {
+					String[] parts = line.split(":");
+					Assert.assertEquals(2, parts.length);
+					String decodedUTF8 = encodeAndDecodeString(parts[1]);
+					System.out.println(String.format("Language: %s => [%s], %d chars, Decoded:  [%s]", parts[0], parts[1], parts[1].length(), decodedUTF8));
+					Assert.assertEquals(parts[1], decodedUTF8);
+				}
 			}
 		}
 	}

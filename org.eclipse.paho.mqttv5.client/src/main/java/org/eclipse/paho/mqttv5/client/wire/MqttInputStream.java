@@ -110,6 +110,11 @@ public class MqttInputStream extends InputStream {
 				bais.write(first);
 				bais.write(MqttWireMessage.encodeVariableByteInteger((int)remLen));
 				packet = new byte[(int)(bais.size()+remLen)];
+				if(this.clientState.getIncomingMaximumPacketSize() != null && 
+						bais.size()+remLen > this.clientState.getIncomingMaximumPacketSize() ) {
+					// Incoming packet is too large
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_INCOMING_PACKET_TOO_LARGE);
+				}
 				packetLen = 0;
 			}
 			
