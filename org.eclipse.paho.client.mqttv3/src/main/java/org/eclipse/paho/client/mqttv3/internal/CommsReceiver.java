@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
@@ -39,7 +40,7 @@ public class CommsReceiver implements Runnable {
 	private static final String CLASS_NAME = CommsReceiver.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
-	private boolean running = false;
+	private volatile boolean running = false;
 	private Object lifecycle = new Object();
 	private ClientState clientState = null;
 	private ClientComms clientComms = null;
@@ -49,7 +50,7 @@ public class CommsReceiver implements Runnable {
 	private volatile boolean receiving;
 	private final Semaphore runningSemaphore = new Semaphore(1);
 	private String threadName;
-	private Future receiverFuture;
+	private Future<?> receiverFuture;
 
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
@@ -95,7 +96,22 @@ public class CommsReceiver implements Runnable {
 				if (!Thread.currentThread().equals(recThread)) {
 					try {
 						// Wait for the thread to finish.
-						runningSemaphore.acquire();
+						// We need to set a certain timeout since there is no universal way
+						// to wake up the worker thread from blocking read.
+						// If network module is websocket, the worker thread returns from read with InterruptedIOException
+						// in response to receiverFuture.cancel(true) above.
+						//
+						// If network module is tcp or ssl, however, InterruptedIOException is not thrown on read.
+						// In normal cases, the worker thread returns from read with EOFException when
+						// the connection is terminated from the broker side in response to DISCONNECT packet.
+						// In this case, the SSL session is preserved and available for reuse in later connections.
+						//
+						// If stop is called because the broker connection is unexpectedly lost,
+						// the worker thread will keep waiting on read, and tryAcquire below will return on timeout expiration.
+						// The worker thread wakes up with SocketException when the socket is closed later.
+						// In this case, the SSL session is invalidated by SSLSocket implementation.
+						// 
+						runningSemaphore.tryAcquire(3000, TimeUnit.MILLISECONDS);
 					}
 					catch (InterruptedException ex) {
 					} finally {
@@ -124,67 +140,70 @@ public class CommsReceiver implements Runnable {
 			running = false;
 			return;
 		}
+		
+		try {
+			while (running && (in != null)) {
+				try {
+					//@TRACE 852=network read message
+					log.fine(CLASS_NAME,methodName,"852");
+					receiving = in.available() > 0;
+					MqttWireMessage message = in.readMqttWireMessage();
+					receiving = false;
 
-		while (running && (in != null)) {
-			try {
-				//@TRACE 852=network read message
-				log.fine(CLASS_NAME,methodName,"852");
-				receiving = in.available() > 0;
-				MqttWireMessage message = in.readMqttWireMessage();
-				receiving = false;
-
-				// instanceof checks if message is null
-				if (message instanceof MqttAck) {
-					token = tokenStore.getToken(message);
-					if (token!=null) {
-						synchronized (token) {
-							// Ensure the notify processing is done under a lock on the token
-							// This ensures that the send processing can complete  before the
-							// receive processing starts! ( request and ack and ack processing
-							// can occur before request processing is complete if not!
-							clientState.notifyReceivedAck((MqttAck)message);
+					// instanceof checks if message is null
+					if (message instanceof MqttAck) {
+						token = tokenStore.getToken(message);
+						if (token!=null) {
+							synchronized (token) {
+								// Ensure the notify processing is done under a lock on the token
+								// This ensures that the send processing can complete  before the
+								// receive processing starts! ( request and ack and ack processing
+								// can occur before request processing is complete if not!
+								clientState.notifyReceivedAck((MqttAck)message);
+							}
+						} else if(message instanceof MqttPubRec || message instanceof MqttPubComp || message instanceof MqttPubAck) {
+							//This is an ack for a message we no longer have a ticket for.
+							//This probably means we already received this message and it's being send again
+							//because of timeouts, crashes, disconnects, restarts etc.
+							//It should be safe to ignore these unexpected messages.
+							log.fine(CLASS_NAME, methodName, "857");
+						} else {
+							// It its an ack and there is no token then something is not right.
+							// An ack should always have a token assoicated with it.
+							throw new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
 						}
-					} else if(message instanceof MqttPubRec || message instanceof MqttPubComp || message instanceof MqttPubAck) {
-						//This is an ack for a message we no longer have a ticket for.
-						//This probably means we already received this message and it's being send again
-						//because of timeouts, crashes, disconnects, restarts etc.
-						//It should be safe to ignore these unexpected messages.
-						log.fine(CLASS_NAME, methodName, "857");
 					} else {
-						// It its an ack and there is no token then something is not right.
-						// An ack should always have a token assoicated with it.
-						throw new MqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
-					}
-				} else {
-					if (message != null) {
-						// A new message has arrived
-						clientState.notifyReceivedMsg(message);
+						if (message != null) {
+							// A new message has arrived
+							clientState.notifyReceivedMsg(message);
+						}
 					}
 				}
-			}
-			catch (MqttException ex) {
-				//@TRACE 856=Stopping, MQttException
-				log.fine(CLASS_NAME,methodName,"856",null,ex);
-				running = false;
-				// Token maybe null but that is handled in shutdown
-				clientComms.shutdownConnection(token, ex);
-			}
-			catch (IOException ioe) {
-				//@TRACE 853=Stopping due to IOException
-				log.fine(CLASS_NAME,methodName,"853");
+				catch (MqttException ex) {
+					//@TRACE 856=Stopping, MQttException
+					log.fine(CLASS_NAME,methodName,"856",null,ex);
+					running = false;
+					// Token maybe null but that is handled in shutdown
+					clientComms.shutdownConnection(token, ex);
+				}
+				catch (IOException ioe) {
+					//@TRACE 853=Stopping due to IOException
+					log.fine(CLASS_NAME,methodName,"853");
 
-				running = false;
-				// An EOFException could be raised if the broker processes the
-				// DISCONNECT and ends the socket before we complete. As such,
-				// only shutdown the connection if we're not already shutting down.
-				if (!clientComms.isDisconnecting()) {
-					clientComms.shutdownConnection(token, new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
+					running = false;
+					// An EOFException could be raised if the broker processes the
+					// DISCONNECT and ends the socket before we complete. As such,
+					// only shutdown the connection if we're not already shutting down.
+					if (!clientComms.isDisconnecting()) {
+						clientComms.shutdownConnection(token, new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
+					}
+				}
+				finally {
+					receiving = false;
 				}
 			}
-			finally {
-				receiving = false;
-				runningSemaphore.release();
-			}
+		} finally {
+			runningSemaphore.release();
 		}
 
 		//@TRACE 854=<

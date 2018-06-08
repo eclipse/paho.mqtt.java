@@ -72,6 +72,7 @@ public class MqttConnectOptions {
 	private String[] serverURIs = null;
 	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
+	private int maxReconnectDelay = 128000;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
@@ -119,14 +120,25 @@ public class MqttConnectOptions {
 	/**
 	 * Sets the user name to use for the connection.
 	 * @param userName The Username as a String
-	 * @throws IllegalArgumentException if the user name is blank or only
-	 * contains whitespace characters.
 	 */
 	public void setUserName(String userName) {
-		if ((userName != null) && (userName.trim().equals(""))) {
-			throw new IllegalArgumentException();
-		}
 		this.userName = userName;
+	}
+
+	/**
+	 * Get the maximum time (in millis) to wait between reconnects
+	 * @return Get the maximum time (in millis) to wait between reconnects
+	 */
+	public int getMaxReconnectDelay() {
+	    return maxReconnectDelay;
+	}
+
+	/**
+	 * Set the maximum time to wait between reconnects
+	 * @param maxReconnectDelay the duration (in millis)
+	 */
+	public void setMaxReconnectDelay(int maxReconnectDelay) {
+	    this.maxReconnectDelay = maxReconnectDelay;
 	}
 
 	/**
@@ -533,7 +545,7 @@ public class MqttConnectOptions {
 		if (mqttVersion != MQTT_VERSION_DEFAULT && 
 			mqttVersion != MQTT_VERSION_3_1 && 
 			mqttVersion != MQTT_VERSION_3_1_1) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("An incorrect version was used \"" + mqttVersion + "\". Acceptable version options are " + MQTT_VERSION_DEFAULT + ", " + MQTT_VERSION_3_1 + " and " + MQTT_VERSION_3_1_1 + ".");
 		}
 		this.mqttVersion = mqttVersion;
 	}

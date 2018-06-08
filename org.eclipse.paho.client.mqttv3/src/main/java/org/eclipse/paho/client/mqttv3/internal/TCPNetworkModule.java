@@ -80,6 +80,7 @@ public class TCPNetworkModule implements NetworkModule {
 				socket = factory.createSocket();
 				socket.connect(sockaddr, conTimeout*1000);
 			}
+			socket.setSoTimeout(1000);
 		}
 		catch (ConnectException ex) {
 			//@TRACE 250=Failed to create TCP socket
@@ -102,25 +103,6 @@ public class TCPNetworkModule implements NetworkModule {
 	 */
 	public void stop() throws IOException {
 		if (socket != null) {
-			// CDA: an attempt is made to stop the receiver cleanly before closing the socket.
-			// If the socket is forcibly closed too early, the blocking socket read in
-			// the receiver thread throws a SocketException.
-			// While this causes the receiver thread to exit, it also invalidates the
-			// SSL session preventing to perform an accelerated SSL handshake in the
-			// next connection.
-			//
-			// Also note that due to the blocking socket reads in the receiver thread,
-			// it's not possible to interrupt the thread. Using non blocking reads in
-			// combination with a socket timeout (see setSoTimeout()) would be a better approach.
-			//
-			// Please note that the Javadoc only says that an EOF is returned on
-			// subsequent reads of the socket stream.
-			// Anyway, at least with Oracle Java SE 7 on Linux systems, this causes a blocked read
-			// to return EOF immediately.
-			// This workaround should not cause any harm in general but you might
-			// want to move it in SSLNetworkModule.
-
-			socket.shutdownInput();
 			socket.close();
 		}
 	}

@@ -530,6 +530,7 @@ public class ClientComms {
 	 * @throws MqttException if an error occurs whilst disconnecting
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
+		conState = DISCONNECTING;
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
 			clientState.quiesce(quiesceTimeout);
@@ -696,7 +697,7 @@ public class ClientComms {
 
 			try {
 				// Reset an exception on existing delivery tokens.
-				// This will have been set if disconnect occured before delivery was
+				// This will have been set if disconnect occurred before delivery was
 				// fully processed.
 				MqttDeliveryToken[] toks = tokenStore.getOutstandingDelTokens();
 				for (int i=0; i<toks.length; i++) {

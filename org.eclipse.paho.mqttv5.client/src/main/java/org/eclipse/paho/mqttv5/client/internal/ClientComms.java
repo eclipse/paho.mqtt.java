@@ -86,7 +86,7 @@ public class ClientComms {
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
 	private ExecutorService executorService;
-	private MqttSession mqttSession;
+	private MqttConnectionState mqttConnection;
 
 	/**
 	 * Creates a new ClientComms object, using the specified module to handle the
@@ -101,23 +101,25 @@ public class ClientComms {
 	 * @param executorService
 	 *            the {@link ExecutorService}
 	 * @param mqttSession
-	 *            the {@link MqttSession}
+	 *            the {@link MqttSessionState}
+	 * @param mqttConnection
+	 *            the {@link MqttConnectionState}
 	 * @throws MqttException
 	 *             if an exception occurs whilst communicating with the server
 	 */
 	public ClientComms(MqttClientInterface client, MqttClientPersistence persistence, MqttPingSender pingSender,
-			ExecutorService executorService, MqttSession mqttSession) throws MqttException {
+			ExecutorService executorService, MqttSessionState mqttSession, MqttConnectionState mqttConnection) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client = client;
 		this.persistence = persistence;
 		this.pingSender = pingSender;
 		this.pingSender.init(this);
 		this.executorService = executorService;
-		this.mqttSession = mqttSession;
+		this.mqttConnection = mqttConnection;
 
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback = new CommsCallback(this);
-		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, this.mqttSession);
+		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, this.mqttConnection);
 
 		callback.setClientState(clientState);
 		log.setResourceName(getClient().getClientId());
@@ -197,6 +199,12 @@ public class ClientComms {
 				// @TRACE 507=Client Connected, Offline Buffer available, but not empty. Adding
 				// message to buffer. message={0}
 				log.fine(CLASS_NAME, methodName, "507", new Object[] { message.getKey() });
+				// If the message is a publish, strip the topic alias:
+				if(message instanceof MqttPublish && message.getProperties().getTopicAlias()!= null) {
+					MqttProperties messageProps = message.getProperties();
+					messageProps.setTopicAlias(null);
+					message.setProperties(messageProps);
+				}
 				if (disconnectedMessageBuffer.isPersistBuffer()) {
 					this.clientState.persistBufferedMessage(message);
 				}
@@ -205,17 +213,17 @@ public class ClientComms {
 
 				if (message instanceof MqttPublish) {
 					// Override the QoS if the server has set a maximum
-					if (this.mqttSession.getMaximumQoS() != null
-							&& ((MqttPublish) message).getMessage().getQos() > this.mqttSession.getMaximumQoS()) {
+					if (this.mqttConnection.getMaximumQoS() != null
+							&& ((MqttPublish) message).getMessage().getQos() > this.mqttConnection.getMaximumQoS()) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
-						mqttMessage.setQos(this.mqttSession.getMaximumQoS());
+						mqttMessage.setQos(this.mqttConnection.getMaximumQoS());
 						((MqttPublish) message).setMessage(mqttMessage);
 					}
 
 					// Override the Retain flag if the server has disabled it
-					if (this.mqttSession.isRetainAvailable() != null
+					if (this.mqttConnection.isRetainAvailable() != null
 							&& ((MqttPublish) message).getMessage().isRetained()
-							&& (this.mqttSession.isRetainAvailable() == false)) {
+							&& (this.mqttConnection.isRetainAvailable() == false)) {
 						MqttMessage mqttMessage = ((MqttPublish) message).getMessage();
 						mqttMessage.setRetained(false);
 						((MqttPublish) message).setMessage(mqttMessage);
@@ -310,7 +318,7 @@ public class ClientComms {
 				conOptions = options;
 
 				MqttConnect connect = new MqttConnect(client.getClientId(), conOptions.getMqttVersion(),
-						conOptions.isCleanSession(), conOptions.getKeepAliveInterval(),
+						conOptions.isCleanStart(), conOptions.getKeepAliveInterval(),
 						conOptions.getConnectionProperties(), conOptions.getWillMessageProperties());
 
 				if (conOptions.getWillDestination() != null) {
@@ -332,10 +340,8 @@ public class ClientComms {
 				 * conOptions.getUserName(), conOptions.getPassword(),
 				 * conOptions.getWillMessage(), conOptions.getWillDestination()
 				 */
-
-				this.clientState.setKeepAliveSecs(conOptions.getKeepAliveInterval());
-				this.clientState.setCleanSession(conOptions.isCleanSession());
-				this.clientState.setMaxInflight(conOptions.getMaxInflight());
+				this.mqttConnection.setKeepAliveSeconds(conOptions.getKeepAliveInterval());
+				this.clientState.setCleanStart(conOptions.isCleanStart());
 
 				tokenStore.open();
 				ConnectBG conbg = new ConnectBG(this, token, connect, executorService);
@@ -451,7 +457,7 @@ public class ClientComms {
 		try {
 			// Clean session handling and tidy up
 			clientState.disconnected(reason);
-			if (clientState.getCleanSession())
+			if (clientState.getCleanStart())
 				callback.removeMessageListeners();
 		} catch (Exception ex) {
 			// Ignore as we are shutting down
@@ -602,6 +608,7 @@ public class ClientComms {
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket,
 			int reasonCode, MqttProperties disconnectProperties) throws MqttException {
+		conState = DISCONNECTING;
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
 			clientState.quiesce(quiesceTimeout);
@@ -720,7 +727,7 @@ public class ClientComms {
 	}
 
 	public long getKeepAlive() {
-		return this.clientState.getKeepAlive();
+		return this.mqttConnection.getKeepAlive();
 	}
 
 	public MqttState getClientState() {
@@ -769,7 +776,7 @@ public class ClientComms {
 
 			try {
 				// Reset an exception on existing delivery tokens.
-				// This will have been set if disconnect occured before delivery was
+				// This will have been set if disconnect occurred before delivery was
 				// fully processed.
 				MqttDeliveryToken[] toks = tokenStore.getOutstandingDelTokens();
 				for (int i = 0; i < toks.length; i++) {
@@ -939,7 +946,7 @@ public class ClientComms {
 
 		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
 			if (isConnected()) {
-				while (clientState.getActualInFlight() >= (clientState.getMaxInFlight() - 1)) {
+				while (clientState.getActualInFlight() >= (mqttConnection.getReceiveMaximum() - 1)) {
 					// We need to Yield to the other threads to allow the in flight messages to
 					// clear
 					Thread.yield();

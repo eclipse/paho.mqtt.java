@@ -119,7 +119,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * work which has already been initiated to complete - for example, it will
 	 * wait for the QoS 2 flows from earlier publications to complete. When work has
 	 * completed or after the quiesce timeout, the client will disconnect from
-	 * the server. If the cleanSession flag was set to false and is set to false the
+	 * the server. If the cleanStart flag was set to false and is set to false the
 	 * next time a connection is made QoS 1 and 2 messages that
 	 * were not previously delivered will be delivered.</p>
 	 *
@@ -211,7 +211,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to true
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:
 	 * </p>
@@ -220,15 +220,15 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
 	 * </ul>
 	 * <p>
-	 * If (@link MqttConnectOptions#setCleanSession(boolean)} was set to false
+	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
 	 * when when connecting to the server then the subscription remains in place
 	 * until either:</p>
 	 * <ul>
 	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The client connects with cleanSession set to true</li>
+	 * <li>The client connects with cleanStart set to true</li>
 	 * </ul>
 	 * <p>
-	 * With cleanSession set to false the MQTT server will store messages on
+	 * With cleanStart set to false the MQTT server will store messages on
 	 * behalf of the client when the client is not connected. The next time the
 	 * client connects with the <b>same client ID</b> the server will
 	 * deliver the stored messages to the client.

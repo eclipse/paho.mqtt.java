@@ -35,17 +35,19 @@ public class TimerPingSender implements MqttPingSender {
 
 	private ClientComms comms;
 	private Timer timer;
+	private String clientid;
 
 	public void init(ClientComms comms) {
 		if (comms == null) {
 			throw new IllegalArgumentException("ClientComms cannot be null.");
 		}
 		this.comms = comms;
+		clientid = comms.getClient().getClientId();
+		log.setResourceName(clientid);
 	}
 
 	public void start() {
 		final String methodName = "start";		
-		String clientid = comms.getClient().getClientId();
 		
 		//@Trace 659=start timer for client:{0}
 		log.fine(CLASS_NAME, methodName, "659", new Object[]{clientid});

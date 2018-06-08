@@ -110,7 +110,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 				deleteMessage(0);
 				} catch (MqttException ex) {
 					// Error occurred attempting to publish buffered message likely because the client is not connected
-					// @TRACE 517=Error occured attempting to publish buffered message due to disconnect.
+					// @TRACE 517=Error occurred attempting to publish buffered message due to disconnect.
 					log.warning(CLASS_NAME, methodName, "517");
 					break;
 				}

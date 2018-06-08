@@ -62,9 +62,9 @@ public interface IMqttCommonClient {
 	 * process of being delivered when the client stopped this method
 	 * returns a token for each in-flight message enabling the delivery to be tracked
 	 * </p>
-	 * <p>If a client connects with cleanSession true then there will be no
-	 * delivery tokens as the cleanSession option deletes all earlier state.
-	 * For state to be remembered the client must connect with cleanSession
+	 * <p>If a client connects with cleanStart true then there will be no
+	 * delivery tokens as the cleanStart option deletes all earlier state.
+	 * For state to be remembered the client must connect with cleanStart
 	 * set to false</P>
 	 * @return zero or more delivery tokens
 	 */

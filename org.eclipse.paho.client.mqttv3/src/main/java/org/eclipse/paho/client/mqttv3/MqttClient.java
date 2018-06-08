@@ -309,7 +309,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @param clientId a client identifier that is unique on the server being connected to
 	 * @param persistence the persistence class to use to store in-flight message. If null then the
 	 * default persistence mechanism is used
-	 * @param executorService used for managing threads. If null then a newFixedThreadPool is used.
+	 * @param executorService used for managing threads. If null then a newScheduledThreadPool is used.
 	 * @throws IllegalArgumentException if the URI does not start with
 	 * "tcp://", "ssl://" or "local://"
 	 * @throws IllegalArgumentException if the clientId is null or is greater than 65535 characters in length
@@ -468,9 +468,14 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException {
 		this.subscribe(topicFilters, qos);
 
-		// add message handlers to the list for this client
+		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
-			aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            if (messageListeners[i] == null) {
+                aClient.comms.removeMessageListener(topicFilters[i]);
+            }
+            else {
+                aClient.comms.setMessageListener(topicFilters[i], messageListeners[i]);
+            }
 		}
 	}
 

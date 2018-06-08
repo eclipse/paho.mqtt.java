@@ -52,7 +52,7 @@ public interface MqttCallback {
 	 * @param exception
 	 *            - The exception thrown causing the error.
 	 */
-	public void mqttErrorOccured(MqttException exception);
+	public void mqttErrorOccurred(MqttException exception);
 
 	/**
 	 * This method is called when a message arrives from the server.

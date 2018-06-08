@@ -19,9 +19,11 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.internal.MqttState;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
+import org.eclipse.paho.mqttv5.common.ExceptionHelper;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
@@ -37,9 +39,10 @@ public class MqttOutputStream extends OutputStream {
 	private MqttState clientState = null;
 	private BufferedOutputStream out;
 	
-	public MqttOutputStream(MqttState clientState, OutputStream out) {
+	public MqttOutputStream(MqttState clientState, OutputStream out, String clientId) {
 		this.clientState = clientState;
 		this.out = new BufferedOutputStream(out);
+		log.setResourceName(clientId);
 	}
 	
 	public void close() throws IOException {
@@ -74,6 +77,11 @@ public class MqttOutputStream extends OutputStream {
 		final String methodName = "write";
 		byte[] bytes = message.getHeader();
 		byte[] pl = message.getPayload();
+		if(this.clientState.getOutgoingMaximumPacketSize() != null && 
+				bytes.length+pl.length > this.clientState.getOutgoingMaximumPacketSize() ) {
+			// Outgoing packet is too large
+			throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_OUTGOING_PACKET_TOO_LARGE);
+		}
 		out.write(bytes,0,bytes.length);
 		clientState.notifySentBytes(bytes.length);
 		

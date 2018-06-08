@@ -32,27 +32,29 @@ public class MqttPubAck extends MqttAck {
 			MqttReturnCode.RETURN_CODE_IMPLEMENTATION_SPECIFIC_ERROR, MqttReturnCode.RETURN_CODE_NOT_AUTHORIZED,
 			MqttReturnCode.RETURN_CODE_TOPIC_NAME_INVALID, MqttReturnCode.RETURN_CODE_QUOTA_EXCEEDED,
 			MqttReturnCode.RETURN_CODE_PAYLOAD_FORMAT_INVALID };
-	
-	private static final Byte[] validProperties = {MqttProperties.REASON_STRING_IDENTIFIER, MqttProperties.USER_DEFINED_PAIR_IDENTIFIER};
-	
-	private MqttProperties properties;
-	
 
-	public MqttPubAck( byte[] data) throws IOException, MqttException {
+	private static final Byte[] validProperties = { MqttProperties.REASON_STRING_IDENTIFIER,
+			MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
+
+	private MqttProperties properties;
+
+	public MqttPubAck(byte[] data) throws IOException, MqttException {
 		super(MqttWireMessage.MESSAGE_TYPE_PUBACK);
 		properties = new MqttProperties(validProperties);
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		CountingInputStream counter = new CountingInputStream(bais);
 		DataInputStream dis = new DataInputStream(counter);
 		msgId = dis.readUnsignedShort();
-		long remainder = (long)data.length - counter.getCounter();
-		if (remainder > 2) {
+		long remainder = (long) data.length - counter.getCounter();
+		if (remainder >= 1) {
 			reasonCode = dis.readUnsignedByte();
 			validateReturnCode(reasonCode, validReturnCodes);
+		} else {
+			reasonCode = 0;
 		}
-		 if( remainder >= 4) {
-			 this.properties.decodeProperties(dis);
-		 }
+		if (remainder >= 4) {
+			this.properties.decodeProperties(dis);
+		}
 		dis.close();
 	}
 
@@ -80,11 +82,12 @@ public class MqttPubAck extends MqttAck {
 
 			byte[] identifierValueFieldsByteArray = this.properties.encodeProperties();
 
-			if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length != 0) {
-
+			if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS && identifierValueFieldsByteArray.length == 1) {
 				// Encode the Return Code
 				outputStream.write((byte) reasonCode);
-
+			} else if (reasonCode != MqttReturnCode.RETURN_CODE_SUCCESS || identifierValueFieldsByteArray.length > 1) {
+				// Encode the Return Code
+				outputStream.write((byte) reasonCode);
 				// Write Identifier / Value Fields
 				outputStream.write(identifierValueFieldsByteArray);
 			}
@@ -95,11 +98,11 @@ public class MqttPubAck extends MqttAck {
 			throw new MqttException(ioe);
 		}
 	}
-	
+
 	public int getReturnCode() {
 		return reasonCode;
 	}
-	
+
 	@Override
 	public MqttProperties getProperties() {
 		return this.properties;

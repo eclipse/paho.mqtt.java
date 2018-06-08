@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
 /**
  * MQTT v5 Properties Class. This Class contains all of the available MQTTv5
@@ -125,10 +126,10 @@ public class MqttProperties {
 	private Boolean requestProblemInfo;
 	private Boolean requestResponseInfo;
 	private Integer maximumQoS;
-	private Boolean retainAvailable;
-	private Boolean wildcardSubscriptionsAvailable = false;
-	private Boolean subscriptionIdentifiersAvailable = false;
-	private Boolean sharedSubscriptionAvailable = false;
+	private Boolean retainAvailable = null;
+	private Boolean wildcardSubscriptionsAvailable = null;
+	private Boolean subscriptionIdentifiersAvailable = null;
+	private Boolean sharedSubscriptionAvailable = null;
 
 	// Two Byte Integer
 	private Integer serverKeepAlive;
@@ -341,6 +342,7 @@ public class MqttProperties {
 			// Retain Available
 			if (retainAvailable != null && validProperties.contains(RETAIN_AVAILABLE_IDENTIFIER)) {
 				outputStream.write(RETAIN_AVAILABLE_IDENTIFIER);
+				outputStream.writeBoolean(retainAvailable);
 			}
 
 			// User Defined Properties
@@ -363,18 +365,21 @@ public class MqttProperties {
 			// Wildcard Subscription Available flag
 			if (wildcardSubscriptionsAvailable != null && validProperties.contains(WILDCARD_SUB_AVAILABLE_IDENTIFIER)) {
 				outputStream.write(WILDCARD_SUB_AVAILABLE_IDENTIFIER);
+				outputStream.writeBoolean(wildcardSubscriptionsAvailable);
 			}
 
 			// Subscription Identifiers Available flag
 			if (subscriptionIdentifiersAvailable != null
 					&& validProperties.contains(SUBSCRIPTION_AVAILABLE_IDENTIFIER)) {
 				outputStream.write(SUBSCRIPTION_AVAILABLE_IDENTIFIER);
+				outputStream.writeBoolean(subscriptionIdentifiersAvailable);
 			}
 
 			// Shared Subscription Available flag
 			if (sharedSubscriptionAvailable != null
 					&& validProperties.contains(SHARED_SUBSCRIPTION_AVAILABLE_IDENTIFIER)) {
 				outputStream.write(SHARED_SUBSCRIPTION_AVAILABLE_IDENTIFIER);
+				outputStream.writeBoolean(sharedSubscriptionAvailable);
 			}
 
 			int length = outputStream.size();
@@ -407,11 +412,20 @@ public class MqttProperties {
 			byte[] identifierValueByteArray = new byte[length];
 			dis.read(identifierValueByteArray, 0, length);
 			ByteArrayInputStream bais = new ByteArrayInputStream(identifierValueByteArray);
+			ArrayList<Byte> decodedProperties = new ArrayList<Byte>();
 			DataInputStream inputStream = new DataInputStream(bais);
 			while (inputStream.available() > 0) {
 				// Get the first Byte
 				byte identifier = inputStream.readByte();
 				if (validProperties.contains(identifier)) {
+					
+					// Verify that certain properties are not included more than once
+					if(!decodedProperties.contains(identifier)) {
+						decodedProperties.add(identifier);
+					} else if(identifier!= SUBSCRIPTION_IDENTIFIER && identifier != USER_DEFINED_PAIR_IDENTIFIER) {
+						// This property can only be included once
+						throw new MqttException(MqttException.REASON_CODE_DUPLICATE_PROPERTY);
+					}
 
 					if (identifier == PAYLOAD_FORMAT_INDICATOR_IDENTIFIER) {
 						payloadFormat = (boolean) inputStream.readBoolean();
@@ -464,7 +478,7 @@ public class MqttProperties {
 					} else if (identifier == MAXIMUM_QOS_IDENTIFIER) {
 						maximumQoS = (int) inputStream.readShort();
 					} else if (identifier == RETAIN_AVAILABLE_IDENTIFIER) {
-						retainAvailable = true;
+						retainAvailable = inputStream.readBoolean();
 					} else if (identifier == USER_DEFINED_PAIR_IDENTIFIER) {
 						String key = MqttDataTypes.decodeUTF8(inputStream);
 						String value = MqttDataTypes.decodeUTF8(inputStream);
@@ -472,22 +486,20 @@ public class MqttProperties {
 					} else if (identifier == MAXIMUM_PACKET_SIZE_IDENTIFIER) {
 						maximumPacketSize = MqttDataTypes.readUnsignedFourByteInt(inputStream);
 					} else if (identifier == WILDCARD_SUB_AVAILABLE_IDENTIFIER) {
-						wildcardSubscriptionsAvailable = true;
+						wildcardSubscriptionsAvailable = inputStream.readBoolean();
 					} else if (identifier == SUBSCRIPTION_AVAILABLE_IDENTIFIER) {
-						subscriptionIdentifiersAvailable = true;
+						subscriptionIdentifiersAvailable = inputStream.readBoolean();
 					} else if (identifier == SHARED_SUBSCRIPTION_AVAILABLE_IDENTIFIER) {
-						sharedSubscriptionAvailable = true;
+						sharedSubscriptionAvailable = inputStream.readBoolean();
 					} else {
 
 						// Unidentified Identifier
 						inputStream.close();
-						System.err.println("Invalid Identifier: " + identifier);
 						throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
 					}
 				} else {
 					// Unidentified Identifier
 					inputStream.close();
-					System.err.println("Identifier not in valid list: " + identifier);
 					throw new MqttException(MqttException.REASON_CODE_INVALID_IDENTIFIER);
 				}
 
@@ -715,7 +727,11 @@ public class MqttProperties {
 	 * @return Retain Available Flag. May be Null.
 	 */
 	public Boolean isRetainAvailable() {
-		return retainAvailable;
+		if(retainAvailable == null || retainAvailable == true) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -912,7 +928,11 @@ public class MqttProperties {
 	 * @return A boolean defining whether Wildcard Subscriptions are supported.
 	 */
 	public boolean isWildcardSubscriptionsAvailable() {
-		return wildcardSubscriptionsAvailable;
+		if(wildcardSubscriptionsAvailable == null || wildcardSubscriptionsAvailable == true) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -940,7 +960,11 @@ public class MqttProperties {
 	 * @return A boolean defining whether Subscription Identifiers are supported.
 	 */
 	public boolean isSubscriptionIdentifiersAvailable() {
-		return subscriptionIdentifiersAvailable;
+		if(subscriptionIdentifiersAvailable == null || subscriptionIdentifiersAvailable == true) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -967,7 +991,11 @@ public class MqttProperties {
 	 * @return A boolean defining whether Shared Subscriptions are supported.
 	 */
 	public boolean isSharedSubscriptionAvailable() {
-		return sharedSubscriptionAvailable;
+		if(sharedSubscriptionAvailable == null || sharedSubscriptionAvailable == true) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -1205,6 +1233,9 @@ public class MqttProperties {
 	 *            The Response Topic.
 	 */
 	public void setResponseTopic(String responseTopic) {
+		if(responseTopic != null) {
+			MqttTopicValidator.validate(responseTopic, false, true);
+		}
 		this.responseTopic = responseTopic;
 	}
 
@@ -1338,13 +1369,13 @@ public class MqttProperties {
 		if (serverReference != null) {
 			sb.append(", serverReference=" + serverReference);
 		}
-		if (wildcardSubscriptionsAvailable) {
+		if (wildcardSubscriptionsAvailable != null) {
 			sb.append(", wildcardSubscriptionsAvailable=" + wildcardSubscriptionsAvailable);
 		}
-		if (subscriptionIdentifiersAvailable) {
+		if (subscriptionIdentifiersAvailable != null) {
 			sb.append(", subscriptionIdentifiersAvailable=" + subscriptionIdentifiersAvailable);
 		}
-		if (sharedSubscriptionAvailable) {
+		if (sharedSubscriptionAvailable != null) {
 			sb.append(", sharedSubscriptionAvailable=" + sharedSubscriptionAvailable);
 		}
 		if (sessionExpiryInterval != null) {

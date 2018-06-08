@@ -4,17 +4,18 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 public class MqttClientException {
-	
+
 	/**
 	 * The Server sent a publish message with an invalid topic alias.
 	 */
 	public static final short REASON_CODE_INVALID_TOPIC_ALAS = 32301;
-	
+
 	/**
-	 * The Server sent a publish message with an unknown topic alias and no topic string.
+	 * The Server sent a publish message with an unknown topic alias and no topic
+	 * string.
 	 */
 	public static final short REASON_CODE_UNKNOWN_TOPIC_ALIAS = 32302;
-	
+
 	/**
 	 * Client timed out while waiting for a response from the server. The server is
 	 * no longer responding to keep-alive messages.
@@ -129,8 +130,15 @@ public class MqttClientException {
 	 * message manually.
 	 */
 	public static final short REASON_CODE_DISCONNECTED_BUFFER_FULL = 32203;
-	
+
 	public static final short REASON_CODE_SERVER_DISCONNECTED = 32204;
+
+	/**
+	 * The server has been sent an MQTT packet that was larger than the client
+	 * defined value.
+	 */
+	public static final int REASON_CODE_INCOMING_PACKET_TOO_LARGE = 51001;
+	public static final int REASON_CODE_OUTGOING_PACKET_TOO_LARGE = 51001;
 
 	// CONNACK return codes
 	/** The protocol version requested is not supported by the server. */

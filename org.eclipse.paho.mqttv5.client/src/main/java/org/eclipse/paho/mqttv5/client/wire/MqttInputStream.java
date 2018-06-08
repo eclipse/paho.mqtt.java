@@ -43,15 +43,16 @@ public class MqttInputStream extends InputStream {
 	private MqttState clientState = null;
 	private DataInputStream in;	
 	private ByteArrayOutputStream bais;
-	private long remLen;
-	private long packetLen;
+	private int remLen;
+	private int packetLen;
 	private byte[] packet;
 
-	public MqttInputStream(MqttState clientState, InputStream in) {
+	public MqttInputStream(MqttState clientState, InputStream in, String clientId) {
 		this.clientState = clientState;
 		this.in = new DataInputStream(in);		
 		this.bais = new ByteArrayOutputStream();
 		this.remLen = -1;
+		log.setResourceName(clientId);
 	}
 	
 	public int read() throws IOException {
@@ -97,16 +98,23 @@ public class MqttInputStream extends InputStream {
 
 				byte type = (byte) ((first >>> 4) & 0x0F);
 				if ((type < MqttWireMessage.MESSAGE_TYPE_CONNECT) ||
-						(type > MqttWireMessage.MESSAGE_TYPE_DISCONNECT)) {
+						(type > MqttWireMessage.MESSAGE_TYPE_AUTH)) {
 					// Invalid MQTT message type...
 					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_INVALID_MESSAGE);
 				}
+				
+				byte reserved = (byte) (first & 0x0F);
+				MqttWireMessage.validateReservedBits(type, reserved);
+				
 				remLen = MqttDataTypes.readVariableByteInteger(in).getValue();
 				bais.write(first);
-				// bit silly, we decode it then encode it
-				// TODO - Should this be a long or an int?
 				bais.write(MqttWireMessage.encodeVariableByteInteger((int)remLen));
 				packet = new byte[(int)(bais.size()+remLen)];
+				if(this.clientState.getIncomingMaximumPacketSize() != null && 
+						bais.size()+remLen > this.clientState.getIncomingMaximumPacketSize() ) {
+					// Incoming packet is too large
+					throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_INCOMING_PACKET_TOO_LARGE);
+				}
 				packetLen = 0;
 			}
 			
@@ -121,8 +129,8 @@ public class MqttInputStream extends InputStream {
 				byte[] header = bais.toByteArray();
 				System.arraycopy(header,0,packet,0, header.length);
 				message = MqttWireMessage.createWireMessage(packet);
-				// @TRACE 501= received {0} 
-				log.fine(CLASS_NAME, methodName, "501",new Object[] {message});
+				// @TRACE 530= Received {0} 
+				log.fine(CLASS_NAME, methodName, "530",new Object[] {message});
 			}
 		} catch (SocketTimeoutException e) {
 			// ignore socket read timeout
@@ -146,10 +154,12 @@ public class MqttInputStream extends InputStream {
     			packetLen += n;
     			throw e;
     		}
-    		clientState.notifyReceivedBytes(count);
+    		
 
-    		if (count < 0)
+    		if (count < 0) {
     			throw new EOFException();
+    		}
+    		clientState.notifyReceivedBytes(count);
     		n += count;
     	}
     }

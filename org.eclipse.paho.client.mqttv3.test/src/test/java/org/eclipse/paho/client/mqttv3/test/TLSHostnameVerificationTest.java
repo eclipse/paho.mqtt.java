@@ -16,22 +16,13 @@
 
 package org.eclipse.paho.client.mqttv3.test;
 
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
+import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -50,7 +41,6 @@ public class TLSHostnameVerificationTest {
 	private static String serverHost;
 	private static int serverPort;
 	private static String serverIP;
-	private static String certificateName;
 	private static int websocketPort;
 
 	/**
@@ -62,14 +52,16 @@ public class TLSHostnameVerificationTest {
 		try {
 			String methodName = Utility.getMethodName();
 			LoggingUtilities.banner(log, cclass, methodName);
-			// Overriding with iot.eclipse.org for the time being.
-			
-			serverHost = "iot.eclipse.org";
-			serverIP = "198.41.30.241";
-			serverPort = 8883;
-			websocketPort = 443;
-			
-			certificateName = "iot.eclipse.org.crt";
+			// Configured to use the Paho Testing server localhost certificate
+			serverHost = "localhost";
+			serverIP = "127.0.0.1";
+			serverPort = TestProperties.getServerSSLPort();
+			websocketPort = TestProperties.getServerSSLPort();
+			// certificateName = "server.crt";
+			log.info("Setting SSL properties...");
+			System.setProperty("javax.net.ssl.keyStore", TestProperties.getClientKeyStore());
+			System.setProperty("javax.net.ssl.keyStorePassword", TestProperties.getClientKeyStorePassword());
+			System.setProperty("javax.net.ssl.trustStore", TestProperties.getClientTrustStore());
 
 		} catch (Exception exception) {
 			log.log(Level.SEVERE, "caught exception:", exception);
@@ -86,13 +78,10 @@ public class TLSHostnameVerificationTest {
 	 */
 	@Test(timeout = 10000)
 	public void testValidHTTPSStyleHostnameVerification() throws Exception {
-		
-		SSLSocketFactory socketFactory = getSocketFactory(certificateName);
 
 		MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setHttpsHostnameVerificationEnabled(true);
-        connOpts.setSocketFactory(socketFactory);
-        String serverURI = "ssl://" + serverHost + ":" + serverPort;
+		connOpts.setHttpsHostnameVerificationEnabled(true);
+		String serverURI = "ssl://" + serverHost + ":" + serverPort;
 
 		MqttClient mqttClient = new MqttClient(serverURI, MqttClient.generateClientId());
 
@@ -106,7 +95,7 @@ public class TLSHostnameVerificationTest {
 		mqttClient.close();
 
 	}
-	
+
 	/**
 	 * This test checks that the Java 7 HTTPS Style Hostname Verification works with
 	 * the Paho Client. This will verify that when connecting to a server via the IP
@@ -116,19 +105,16 @@ public class TLSHostnameVerificationTest {
 	 */
 	@Test(timeout = 10000)
 	public void testInvalidHTTPSStyleHostnameVerification() throws Exception {
-		
-		SSLSocketFactory socketFactory = getSocketFactory(certificateName);
 
 		MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setHttpsHostnameVerificationEnabled(true);
-        connOpts.setSocketFactory(socketFactory);
-        String serverIPURI =  "ssl://" + serverIP + ":" + serverPort;
+		connOpts.setHttpsHostnameVerificationEnabled(true);
+		String serverIPURI = "ssl://" + serverIP + ":" + serverPort;
 
 		MqttClient mqttClient = new MqttClient(serverIPURI, MqttClient.generateClientId());
 
 		log.info("Connecting to: " + serverIPURI);
 		try {
-		mqttClient.connect(connOpts);
+			mqttClient.connect(connOpts);
 		} catch (Exception ex) {
 			// We want to make sure that the returned exception is an SSLHandshakeException
 			Assert.assertEquals(SSLHandshakeException.class, ex.getCause().getClass());
@@ -137,8 +123,7 @@ public class TLSHostnameVerificationTest {
 			mqttClient.close();
 		}
 	}
-	
-	
+
 	/**
 	 * This test checks that the Java 7 HTTPS Style Hostname Verification works with
 	 * the Paho Client. This will verify that the Hostname we are connecting to
@@ -148,13 +133,10 @@ public class TLSHostnameVerificationTest {
 	 */
 	@Test(timeout = 10000)
 	public void testValidWebSocketHTTPSStyleHostnameVerification() throws Exception {
-		
-		SSLSocketFactory socketFactory = getSocketFactory(certificateName);
 
 		MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setHttpsHostnameVerificationEnabled(true);
-        connOpts.setSocketFactory(socketFactory);
-        String serverURI = "wss://" + serverHost + ":" + websocketPort + "/ws";
+		connOpts.setHttpsHostnameVerificationEnabled(true);
+		String serverURI = "wss://" + serverHost + ":" + websocketPort + "/ws";
 
 		MqttClient mqttClient = new MqttClient(serverURI, MqttClient.generateClientId());
 
@@ -168,7 +150,7 @@ public class TLSHostnameVerificationTest {
 		mqttClient.close();
 
 	}
-	
+
 	/**
 	 * This test checks that the Java 7 HTTPS Style Hostname Verification works with
 	 * the Paho Client. This will verify that when connecting to a server via the IP
@@ -178,20 +160,16 @@ public class TLSHostnameVerificationTest {
 	 */
 	@Test(timeout = 10000)
 	public void testInvalidWebSocketHTTPSStyleHostnameVerification() throws Exception {
-		
-		SSLSocketFactory socketFactory = getSocketFactory(certificateName);
 
 		MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setHttpsHostnameVerificationEnabled(true);
-        connOpts.setSocketFactory(socketFactory);
-        String serverIPURI =  "wss://" + serverIP + ":" + websocketPort + "/ws";
+		connOpts.setHttpsHostnameVerificationEnabled(true);
+		String serverIPURI = "wss://" + serverIP + ":" + websocketPort + "/ws";
 
-        
 		MqttClient mqttClient = new MqttClient(serverIPURI, MqttClient.generateClientId());
 
 		log.info("Connecting to: " + serverIPURI);
 		try {
-		mqttClient.connect(connOpts);
+			mqttClient.connect(connOpts);
 		} catch (Exception ex) {
 			// We want to make sure that the returned exception is an SSLHandshakeException
 			Assert.assertEquals(SSLHandshakeException.class, ex.getCause().getClass());
@@ -201,20 +179,4 @@ public class TLSHostnameVerificationTest {
 		}
 	}
 
-	
-
-	 private static SSLSocketFactory getSocketFactory(String certificateName) throws Exception {
-	      // Load the certificate from src/test/resources and create a Certificate object
-	  		InputStream certStream = cclass.getClassLoader().getResourceAsStream(certificateName);
-	  		CertificateFactory certFactory = CertificateFactory.getInstance("X509");
-	      Certificate certificate =  certFactory.generateCertificate(certStream);
-	      SSLContext sslContext = SSLContext.getInstance("TLS");
-	      TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-	  		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-	  		keyStore.load(null);
-	  		keyStore.setCertificateEntry("alias", certificate);
-	  		trustManagerFactory.init(keyStore);
-	  		sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
-	  		return sslContext.getSocketFactory();
-	    }
 }
