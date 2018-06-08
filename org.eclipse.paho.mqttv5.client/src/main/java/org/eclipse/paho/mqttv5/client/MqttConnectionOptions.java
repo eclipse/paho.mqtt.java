@@ -20,7 +20,9 @@ package org.eclipse.paho.mqttv5.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
@@ -118,6 +120,7 @@ public class MqttConnectionOptions {
 	private Properties sslClientProps = null; // SSL Client Properties
 	private HostnameVerifier sslHostnameVerifier = null; // SSL Hostname Verifier
 
+	private Map<String, String> customWebSocketHeaders;
 	/**
 	 * Returns the MQTT version.
 	 * 
@@ -227,27 +230,27 @@ public class MqttConnectionOptions {
 	 * <li>The Session expiry interval is exceeded after the network connection is
 	 * closed, see {@link MqttConnectionOptions#setSessionExpiryInterval}</li>
 	 * </ul>
-	 * 
+	 *
 	 * If set to true, the server will immediately drop any existing session state
 	 * for the given client and will initiate a new session.
-	 * 
+	 *
 	 * In order to implement QoS 1 and QoS 2 protocol flows the Client and Server
 	 * need to associate state with the Client Identifier, this is referred to as
 	 * the Session State. The Server also stores the subscriptions as part of the
 	 * Session State.
-	 * 
+	 *
 	 * The session can continue across a sequence of Network Connections. It lasts
 	 * as long as the latest Network Connection plus the Session Expiry Interval.
-	 * 
+	 *
 	 * The Session State in the Client consists of:
-	 * 
+	 *
 	 * <ul>
 	 * <li>QoS 1 and QoS 2 messages which have been sent to the Server, but have not
 	 * been completely acknowledged.</li>
 	 * <li>QoS 2 messages which have been received from the Server, but have not
 	 * been completely acknowledged.</li>
 	 * </ul>
-	 * 
+	 *
 	 * The Session State in the Server consists of:
 	 * <ul>
 	 * <li>The existence of a Session, even if the rest of the Session State is
@@ -266,9 +269,9 @@ public class MqttConnectionOptions {
 	 * 
 	 * Retained messages do not form part of the Session State in the Server, they
 	 * are not deleted as a result of a Session ending.
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 * @param cleanStart
 	 *            Set to True to enable cleanSession
 	 */
@@ -340,7 +343,7 @@ public class MqttConnectionOptions {
 
 	/**
 	 * Get the maximum time (in millis) to wait between reconnects
-	 * 
+	 *
 	 * @return Get the maximum time (in millis) to wait between reconnects
 	 */
 	public int getMaxReconnectDelay() {
@@ -349,7 +352,7 @@ public class MqttConnectionOptions {
 
 	/**
 	 * Set the maximum time to wait between reconnects
-	 * 
+	 *
 	 * @param maxReconnectDelay
 	 *            the duration (in millis)
 	 */
@@ -933,6 +936,19 @@ public class MqttConnectionOptions {
 
 	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
 		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
+	}
+
+	/**
+	 * Sets the Custom WebSocket Headers for the WebSocket Connection.
+	 *
+	 * @param headers The custom websocket headers {@link Properties}
+	 */
+	public void setCustomWebSocketHeaders(Map<String, String> headers) {
+		this.customWebSocketHeaders = Collections.unmodifiableMap(headers);
+	}
+
+	public Map<String, String> getCustomWebSocketHeaders() {
+		return customWebSocketHeaders;
 	}
 
 	/**
