@@ -21,7 +21,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
-
+import java.util.Collections;
+import java.util.Map;
 import javax.net.SocketFactory;
 
 import org.eclipse.paho.mqttv5.client.internal.TCPNetworkModule;
@@ -40,7 +41,8 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	private PipedInputStream pipedInputStream;
 	private WebSocketReceiver webSocketReceiver;
 	ByteBuffer recievedPayload;
-	
+	Map<String, String> customWebSocketHeaders;
+
 	/**
 	 * Overrides the flush method.
 	 * This allows us to encode the MQTT payload into a WebSocket
@@ -60,7 +62,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	
 	public void start() throws IOException, MqttException {
 		super.start();
-		WebSocketHandshake handshake = new WebSocketHandshake(getSocketInputStream(), getSocketOutputStream(), uri, host, port);
+		WebSocketHandshake handshake = new WebSocketHandshake(getSocketInputStream(), getSocketOutputStream(), uri, host, port, customWebSocketHeaders);
 		handshake.execute();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("webSocketReceiver");
@@ -81,7 +83,11 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	public OutputStream getOutputStream() throws IOException {
 		return outputStream;
 	}
-	
+
+	public void setCustomWebSocketHeaders(Map<String, String> customWebSocketHeaders) {
+		this.customWebSocketHeaders = customWebSocketHeaders;
+	}
+
 	/**
 	 * Stops the module, by closing the TCP socket.
 	 */

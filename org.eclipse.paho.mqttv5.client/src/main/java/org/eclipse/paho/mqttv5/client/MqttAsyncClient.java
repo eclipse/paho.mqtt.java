@@ -773,6 +773,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			}
 			netModule = new WebSocketNetworkModule(factory, address, host, port, this.mqttSession.getClientId());
 			((WebSocketNetworkModule) netModule).setConnectTimeout(options.getConnectionTimeout());
+			((WebSocketNetworkModule) netModule).setCustomWebSocketHeaders(options.getCustomWebSocketHeaders());
 			break;
 		case WSS:
 			if (port == -1) {
@@ -794,6 +795,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory, address, host, port,
 					this.mqttSession.getClientId());
 			((WebSocketSecureNetworkModule) netModule).setSSLhandshakeTimeout(options.getConnectionTimeout());
+			((WebSocketSecureNetworkModule) netModule).setCustomWebSocketHeaders(options.getCustomWebSocketHeaders());
 			// Ciphers suites need to be set, if they are available
 			if (wSSFactoryFactory != null) {
 				String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);
