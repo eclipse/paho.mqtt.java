@@ -36,6 +36,7 @@ public class MqttConnectionState {
 	private Boolean subscriptionIdentifiersAvailable = true;
 	private Boolean sharedSubscriptionsAvailable = true;
 	private boolean sendReasonMessages = false;
+	private long keepAlive = 60;
 
 	// ******* Counters ******//
 	private AtomicInteger nextOutgoingTopicAlias = new AtomicInteger(1);
@@ -136,6 +137,16 @@ public class MqttConnectionState {
 
 	public void setSendReasonMessages(boolean enableReasonMessages) {
 		this.sendReasonMessages = enableReasonMessages;
+	}
+
+
+	public long getKeepAlive() {
+		return keepAlive;
+	}
+
+
+	public void setKeepAliveSeconds(long keepAlive) {
+		this.keepAlive = keepAlive * 1000;
 	}
 
 }

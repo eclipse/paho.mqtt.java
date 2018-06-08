@@ -340,8 +340,7 @@ public class ClientComms {
 				 * conOptions.getUserName(), conOptions.getPassword(),
 				 * conOptions.getWillMessage(), conOptions.getWillDestination()
 				 */
-
-				this.clientState.setKeepAliveSecs(conOptions.getKeepAliveInterval());
+				this.mqttConnection.setKeepAliveSeconds(conOptions.getKeepAliveInterval());
 				this.clientState.setCleanStart(conOptions.isCleanStart());
 
 				tokenStore.open();
@@ -728,7 +727,7 @@ public class ClientComms {
 	}
 
 	public long getKeepAlive() {
-		return this.clientState.getKeepAlive();
+		return this.mqttConnection.getKeepAlive();
 	}
 
 	public MqttState getClientState() {

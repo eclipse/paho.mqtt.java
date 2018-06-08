@@ -118,7 +118,7 @@ public class ClientState implements MqttState {
 	private CommsTokenStore tokenStore;
 	private ClientComms clientComms = null;
 	private CommsCallback callback = null;
-	private long keepAlive;
+	//private long keepAlive;
 	private boolean cleanStart;
 	private MqttClientPersistence persistence;
 
@@ -179,14 +179,6 @@ public class ClientState implements MqttState {
 		this.mqttConnection = mqttConnection;
 
 		restoreState();
-	}
-
-	protected void setKeepAliveSecs(long keepAliveSecs) {
-		this.keepAlive = keepAliveSecs * 1000;
-	}
-
-	protected long getKeepAlive() {
-		return this.keepAlive;
 	}
 
 	protected void setCleanStart(boolean cleanStart) {
@@ -712,9 +704,10 @@ public class ClientState implements MqttState {
 		}
 
 		MqttToken token = null;
-		long nextPingTime = getKeepAlive();
+		long nextPingTime = this.mqttConnection.getKeepAlive();
+		long keepAlive = this.mqttConnection.getKeepAlive();
 
-		if (connected && this.keepAlive > 0) {
+		if (connected && this.mqttConnection.getKeepAlive() > 0) {
 			long time = System.currentTimeMillis();
 			// Reduce schedule frequency since System.currentTimeMillis is no accurate, add
 			// a buffer
@@ -733,7 +726,7 @@ public class ClientState implements MqttState {
 					// @TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1}
 					// lastInboundActivity={2} time={3} lastPing={4}
 					log.severe(CLASS_NAME, methodName, "619",
-							new Object[] { Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity),
+							new Object[] { Long.valueOf(keepAlive), Long.valueOf(lastOutboundActivity),
 									Long.valueOf(lastInboundActivity), Long.valueOf(time), Long.valueOf(lastPing) });
 
 					// A ping has already been sent. At this point, assume that the
@@ -748,7 +741,7 @@ public class ClientState implements MqttState {
 					// I am probably blocked on a write operations as I should have been able to
 					// write at least a ping message
 					log.severe(CLASS_NAME, methodName, "642",
-							new Object[] { Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity),
+							new Object[] { Long.valueOf(keepAlive), Long.valueOf(lastOutboundActivity),
 									Long.valueOf(lastInboundActivity), Long.valueOf(time), Long.valueOf(lastPing) });
 
 					// A ping has not been sent but I am not progressing on the current write
@@ -776,7 +769,7 @@ public class ClientState implements MqttState {
 
 					// @TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1}
 					// lastInboundActivity={2}
-					log.fine(CLASS_NAME, methodName, "620", new Object[] { Long.valueOf(this.keepAlive),
+					log.fine(CLASS_NAME, methodName, "620", new Object[] { Long.valueOf(keepAlive),
 							Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity) });
 
 					// pingOutstanding++; // it will be set after the ping has been written on the
@@ -790,13 +783,13 @@ public class ClientState implements MqttState {
 					tokenStore.saveToken(token, pingCommand);
 					pendingFlows.insertElementAt(pingCommand, 0);
 
-					nextPingTime = getKeepAlive();
+					nextPingTime = this.mqttConnection.getKeepAlive();
 
 					// Wake sender thread since it may be in wait state (in ClientState.get())
 					notifyQueueLock();
 				} else {
 					log.fine(CLASS_NAME, methodName, "634", null);
-					nextPingTime = Math.max(1, getKeepAlive() - (time - lastOutboundActivity));
+					nextPingTime = Math.max(1, this.mqttConnection.getKeepAlive() - (time - lastOutboundActivity));
 				}
 			}
 			// @TRACE 624=Schedule next ping at {0}
@@ -893,17 +886,6 @@ public class ClientState implements MqttState {
 			}
 		}
 		return result;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.paho.mqttv5.client.internal.MqttState#setKeepAliveInterval(long)
-	 */
-	@Override
-	public void setKeepAliveInterval(long interval) {
-		this.keepAlive = interval;
 	}
 
 	/*
