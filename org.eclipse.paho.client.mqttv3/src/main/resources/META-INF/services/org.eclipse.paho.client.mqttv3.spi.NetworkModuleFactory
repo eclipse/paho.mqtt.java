@@ -1,0 +1,5 @@
+# build in NetworkModules
+org.eclipse.paho.client.mqttv3.internal.TCPNetworkModuleFactory
+org.eclipse.paho.client.mqttv3.internal.SSLNetworkModuleFactory
+org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModuleFactory
+org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModuleFactory

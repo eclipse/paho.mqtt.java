@@ -18,14 +18,12 @@
  */
 package org.eclipse.paho.mqttv5.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
-
+import org.eclipse.paho.mqttv5.client.internal.NetworkModuleService;
 import org.eclipse.paho.mqttv5.client.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
@@ -52,10 +50,6 @@ import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
  * More information about these values can be found in the setter methods.
  */
 public class MqttConnectionOptions {
-
-	enum UriType {
-		TCP, SSL, WS, WSS
-	}
 
 	private static final String CLIENT_ID_PREFIX = "paho";
 
@@ -413,14 +407,13 @@ public class MqttConnectionOptions {
 	 * </li>
 	 * </ol>
 	 * 
-	 * @param array
-	 *            of serverURIs
+	 * @param serverURIs to be used by the client
 	 */
-	public void setServerURIs(String[] array) {
-		for (int i = 0; i < array.length; i++) {
-			validateURI(array[i]);
+	public void setServerURIs(String[] serverURIs) {
+		for (String serverURI:serverURIs) {
+			NetworkModuleService.validateURI(serverURI);
 		}
-		this.serverURIs = array;
+		this.serverURIs = serverURIs.clone();
 	}
 
 	/**
@@ -732,39 +725,6 @@ public class MqttConnectionOptions {
 	 */
 	public void setAuthData(byte[] authData) {
 		this.authData = authData;
-	}
-
-	/**
-	 * Validate a URI
-	 * 
-	 * @param srvURI
-	 *            The Server URI
-	 * @return the URI type
-	 */
-	public static UriType validateURI(String srvURI) {
-		try {
-			URI vURI = new URI(srvURI);
-			if ("ws".equals(vURI.getScheme())) {
-				return UriType.WS;
-			} else if ("wss".equals(vURI.getScheme())) {
-				return UriType.WSS;
-			}
-
-			if ((vURI.getPath() == null) || vURI.getPath().isEmpty()) {
-				// No op path must be empty
-			} else {
-				throw new IllegalArgumentException(srvURI);
-			}
-			if ("tcp".equals(vURI.getScheme())) {
-				return UriType.TCP;
-			} else if ("ssl".equals(vURI.getScheme())) {
-				return UriType.SSL;
-			} else {
-				throw new IllegalArgumentException(srvURI);
-			}
-		} catch (URISyntaxException ex) {
-			throw new IllegalArgumentException(srvURI);
-		}
 	}
 
 	/**
