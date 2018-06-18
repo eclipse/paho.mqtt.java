@@ -538,7 +538,9 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		// @TRACE 115=URI={0}
 		log.fine(CLASS_NAME,methodName, "115", new Object[] {address});
 
+
 		NetworkModule netModule = NetworkModuleService.createInstance(address, options, clientId);
+
 		return netModule;
 	}
 

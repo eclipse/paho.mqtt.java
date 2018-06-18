@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -40,7 +41,8 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	private String host;
 	private int port;
 	ByteBuffer recievedPayload;
-	
+	Map<String, String> customWebSocketHeaders;
+
 	/**
 	 * Overrides the flush method.
 	 * This allows us to encode the MQTT payload into a WebSocket
@@ -59,7 +61,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 
 	public void start() throws IOException, MqttException {
 		super.start();
-		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port);
+		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port, customWebSocketHeaders);
 		handshake.execute();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("WssSocketReceiver");
@@ -80,6 +82,10 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	
 	public OutputStream getOutputStream() throws IOException {
 		return outputStream;
+	}
+
+	public void setCustomWebSocketHeaders(Map<String, String> customWebSocketHeaders) {
+		this.customWebSocketHeaders = customWebSocketHeaders;
 	}
 
 	public void stop() throws IOException {

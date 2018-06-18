@@ -69,6 +69,7 @@ public class WebSocketSecureNetworkModuleFactory implements NetworkModuleFactory
 		netModule.setSSLhandshakeTimeout(options.getConnectionTimeout());
 		netModule.setSSLHostnameVerifier(options.getSSLHostnameVerifier());
 		netModule.setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());
+		netModule.setCustomWebSocketHeaders(options.getCustomWebSocketHeaders());
 		// Ciphers suites need to be set, if they are available
 		if (wSSFactoryFactory != null) {
 			String[] enabledCiphers = wSSFactoryFactory.getEnabledCipherSuites(null);

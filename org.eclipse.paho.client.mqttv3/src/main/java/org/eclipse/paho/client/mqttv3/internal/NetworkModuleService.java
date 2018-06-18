@@ -115,10 +115,10 @@ public class NetworkModuleService {
 	 * This workaround tries to detect such a parsing failure and does tokenize the authority parts according to
 	 * RFC3986, but does not enforce any character restrictions (for sake of simplicity).
 	 *
-	 * @param toPatch
-	 * @see https://tools.ietf.org/html/rfc3986#section-3.2
+	 * @param toPatch - The URI To patch
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.2">rfc3986 - section-3.2</a>
 	 */
-	static void applyRFC3986AuthorityPatch(URI toPatch) {
+	public static void applyRFC3986AuthorityPatch(URI toPatch) {
 		if (toPatch == null
 				|| toPatch.getHost() != null // already successfully parsed
 				|| toPatch.getAuthority() == null
