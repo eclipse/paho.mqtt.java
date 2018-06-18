@@ -98,3 +98,20 @@ public class MqttPublishSample {
 }
 ```
 
+## Adding custom headers for Websocket connection
+
+The included code below is a extended basic sample that connects to a server with custom headers.
+
+```
+MqttClient client = new MqttClient("wss://<BROKER_URI>", "MyClient");
+
+MqttConnectOptions connectOptions = new MqttConnectOptions();
+Properties properties = new Properties();
+properties.setProperty("X-Amz-CustomAuthorizer-Name", <SOME_VALUE>);
+properties.setProperty("X-Amz-CustomAuthorizer-Signature", <SOME_VALUE>);
+properties.setProperty(<SOME_VALUE>, <SOME_VALUE>);
+connectOptions.setCustomWebSocketHeaders(properties);
+
+client.connect(connectOptions);
+
+```

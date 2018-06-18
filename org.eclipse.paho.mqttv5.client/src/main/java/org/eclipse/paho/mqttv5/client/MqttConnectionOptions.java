@@ -18,11 +18,14 @@
  */
 package org.eclipse.paho.mqttv5.client;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
+
 import org.eclipse.paho.mqttv5.client.internal.NetworkModuleService;
 import org.eclipse.paho.mqttv5.client.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -111,7 +114,7 @@ public class MqttConnectionOptions {
 	private SocketFactory socketFactory; // SocketFactory to be used to connect
 	private Properties sslClientProps = null; // SSL Client Properties
 	private HostnameVerifier sslHostnameVerifier = null; // SSL Hostname Verifier
-
+	private Map<String, String> customWebSocketHeaders;
 	/**
 	 * Returns the MQTT version.
 	 * 
@@ -918,6 +921,19 @@ public class MqttConnectionOptions {
 			p.put("SSLProperties", getSSLProperties());
 		}
 		return p;
+	}
+
+	/**
+	 * Sets the Custom WebSocket Headers for the WebSocket Connection.
+	 *
+	 * @param headers The custom websocket headers {@link Properties}
+	 */
+	public void setCustomWebSocketHeaders(Map<String, String> headers) {
+		this.customWebSocketHeaders = Collections.unmodifiableMap(headers);
+	}
+
+	public Map<String, String> getCustomWebSocketHeaders() {
+		return customWebSocketHeaders;
 	}
 
 	public String toString() {

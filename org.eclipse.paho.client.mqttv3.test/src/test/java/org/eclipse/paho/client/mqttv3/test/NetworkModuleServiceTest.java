@@ -1,16 +1,19 @@
-package org.eclipse.paho.client.mqttv3.internal;
+package org.eclipse.paho.client.mqttv3.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
+import org.eclipse.paho.client.mqttv3.internal.NetworkModuleService;
+import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class NetworkModuleServiceTest {
 

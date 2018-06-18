@@ -52,13 +52,15 @@ public class WebSocketHandshake {
 	String uri;
 	String host;
 	int port;
+	Map<String, String> customWebSocketHeaders;
 
-	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port) {
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Map<String, String> customWebSocketHeaders) {
 		this.input = input;
 		this.output = output;
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
+		this.customWebSocketHeaders = customWebSocketHeaders;
 	}
 
 	/**
@@ -107,6 +109,12 @@ public class WebSocketHandshake {
 			pw.print("Sec-WebSocket-Key: " + key + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Protocol: mqtt" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
+
+			if (customWebSocketHeaders != null) {
+				customWebSocketHeaders.entrySet().forEach(entry ->
+					pw.print(entry.getKey() + ": " + entry.getValue() + LINE_SEPARATOR)
+				);
+			}
 
 			String userInfo = srvUri.getUserInfo();
 			if (userInfo != null) {
