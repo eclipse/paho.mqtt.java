@@ -87,8 +87,7 @@ public class TLSHostnameVerificationTest {
 
 		log.info("Connecting to: " + serverURI);
 		mqttClient.connect(connOpts);
-
-		Thread.sleep(2000);
+		Assert.assertTrue(mqttClient.isConnected());
 
 		log.info("Disconnetting...");
 		mqttClient.disconnect();
@@ -142,8 +141,9 @@ public class TLSHostnameVerificationTest {
 
 		log.info("Connecting to: " + serverURI);
 		mqttClient.connect(connOpts);
+		Assert.assertTrue(mqttClient.isConnected());
+		log.info("Client is connected.");
 
-		Thread.sleep(2000);
 
 		log.info("Disconnetting...");
 		mqttClient.disconnect();
