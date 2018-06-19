@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
-import java.util.Properties;
+import java.util.Map;
 
 import javax.net.SocketFactory;
 
@@ -38,7 +38,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	private String uri;
 	private String host;
 	private int port;
-	private Properties customWebsocketHeaders;
+	private Map<String, String> customWebsocketHeaders;
 	private PipedInputStream pipedInputStream;
 	private WebSocketReceiver webSocketReceiver;
 	ByteBuffer recievedPayload;
@@ -50,7 +50,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	 */
 	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
 
-	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext, Properties customWebsocketHeaders){
+	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext, Map<String, String> customWebsocketHeaders){
 		super(factory, host, port, resourceContext);
 		this.uri = uri;
 		this.host = host;
