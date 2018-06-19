@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
-import java.util.Properties;
+import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -39,7 +39,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	private String uri;
 	private String host;
 	private int port;
-	private Properties customWebSocketHeaders;
+	private Map<String, String> customWebSocketHeaders;
 	ByteBuffer recievedPayload;
 	
 	/**
@@ -49,7 +49,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	 */
 	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
 
-	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, Properties customWebSocketHeaders) {
+	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, Map<String, String> customWebSocketHeaders) {
 		super(factory, host, port, clientId);
 		this.uri = uri;
 		this.host = host;

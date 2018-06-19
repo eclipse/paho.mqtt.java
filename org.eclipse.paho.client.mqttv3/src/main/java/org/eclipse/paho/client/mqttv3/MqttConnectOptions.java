@@ -17,6 +17,7 @@
  */
 package org.eclipse.paho.client.mqttv3;
 
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
@@ -73,7 +74,7 @@ public class MqttConnectOptions {
 	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
 	private int maxReconnectDelay = 128000;
-	private Properties customWebSocketHeaders = null;
+	private Map<String, String> customWebSocketHeaders = null;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the
@@ -606,14 +607,14 @@ public class MqttConnectOptions {
 	/**
 	 * Sets the Custom WebSocket Headers for the WebSocket Connection.
 	 *
-	 * @param props The custom websocket headers {@link Properties}
+	 * @param props The custom WebSocket headers {@link Map<String, String>}
 	 */
 
-	public void setCustomWebSocketHeaders(Properties props) {
+	public void setCustomWebSocketHeaders(Map<String, String> props) {
 		this.customWebSocketHeaders = props;
 	}
 
-	public Properties getCustomWebSocketHeaders() {
+	public Map<String, String> getCustomWebSocketHeaders() {
 		return customWebSocketHeaders;
 	}
 
