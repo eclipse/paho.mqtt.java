@@ -164,16 +164,49 @@ public class MqttDataTypes {
 
 	/**
 	 * Validate a UTF-8 String for suitability for MQTT.
-	 * @param input - The Input String
+	 * 
+	 * @param input
+	 *            - The Input String
 	 * @throws IllegalArgumentException
 	 */
+	/*
+	 * private static void validateUTF8String(String input) throws
+	 * IllegalArgumentException { for (int i = 0; i < input.length(); i++) { char c
+	 * = input.charAt(i); if (Character.getType(c) == Character.CONTROL ||
+	 * Character.getType(c) == Character.UNASSIGNED || Character.getType(c) ==
+	 * Character.SURROGATE) { throw new
+	 * IllegalArgumentException(String.format("Invalid UTF-8 char: %s [%s]", c,
+	 * (int) c)); } } }
+	 */
+
 	private static void validateUTF8String(String input) throws IllegalArgumentException {
 		for (int i = 0; i < input.length(); i++) {
+			boolean isBad = false;
 			char c = input.charAt(i);
-			if (Character.getType(c) == Character.CONTROL ||
-					Character.getType(c) == Character.UNASSIGNED ||
-					Character.getType(c) == Character.SURROGATE) {
-				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: %s [%s]", c, (int) c));
+			/* Check for mismatched surrogates */
+			if (Character.isHighSurrogate(c)) {
+				if (++i == input.length()) {
+					isBad = true; /* Trailing high surrogate */
+				} else {
+					char c2 = input.charAt(i);
+					if (Character.isLowSurrogate(c2)) {
+						isBad = true; /* No low surrogate */
+					} else {
+						int ch = ((((int) c) & 0x3ff) << 10) | (c2 & 0x3ff);
+						if ((ch & 0xffff) == 0xffff || (ch & 0xffff) == 0xfffe) {
+							isBad = true; /* Noncharacter in base plane */
+						}
+					}
+				}
+			} else {
+				if (Character.isISOControl(c) || Character.isLowSurrogate(c)) {
+					isBad = true; /* Control character or no high surrogate */
+				} else if (c >= 0xfdd0 && (c == 0xfffe || c >= 0xfdd0 || c <= 0xfddf)) {
+					isBad = true; /* Noncharacter in other nonbase plane */
+				}
+			}
+			if (isBad) {
+				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: [%x]", (int) c));
 			}
 		}
 	}
