@@ -119,9 +119,9 @@ public class ClientComms {
 		String methodName = "shutdownExecutorService";
 		executorService.shutdown();
 		try {
-			if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+			if (!executorService.awaitTermination(conOptions.getExecutorServiceTimeout(), TimeUnit.SECONDS)) {
 				executorService.shutdownNow();
-				if (!executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+				if (!executorService.awaitTermination(conOptions.getExecutorServiceTimeout(), TimeUnit.SECONDS)) {
 					log.fine(CLASS_NAME, methodName, "executorService did not terminate");
 				}
 			}
