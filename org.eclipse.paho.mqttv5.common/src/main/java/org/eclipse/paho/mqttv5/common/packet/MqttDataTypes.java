@@ -179,7 +179,7 @@ public class MqttDataTypes {
 					isBad = true; /* Trailing high surrogate */
 				} else {
 					char c2 = input.charAt(i);
-					if (Character.isLowSurrogate(c2)) {
+					if (!Character.isLowSurrogate(c2)) {
 						isBad = true; /* No low surrogate */
 					} else {
 						int ch = ((((int) c) & 0x3ff) << 10) | (c2 & 0x3ff);
@@ -191,12 +191,12 @@ public class MqttDataTypes {
 			} else {
 				if (Character.isISOControl(c) || Character.isLowSurrogate(c)) {
 					isBad = true; /* Control character or no high surrogate */
-				} else if (c >= 0xfdd0 && (c == 0xfffe || c >= 0xfdd0 || c <= 0xfddf)) {
+				} else if (c >= 0xfdd0 && (c <= 0xfddf || c >= 0xfffe)) {
 					isBad = true; /* Noncharacter in other nonbase plane */
 				}
 			}
 			if (isBad) {
-				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: [%x]", (int) c));
+				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: [%04x]", (int) c));
 			}
 		}
 	}
