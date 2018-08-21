@@ -5,11 +5,17 @@ import org.junit.Test;
 
 public class StringValidationTest {
 	
-	String testString="葛渚噓";
-	
 	@Test
-	public void testInvalidTopicFilterWildcards1() throws Exception {
+	public void testValidTopicString1() throws Exception {
+	    String testString="葛渚噓";
 		MqttTopicValidator.validate(testString, true, true);
 	}
+	
+	@Test
+    public void testValidTopicString2() throws Exception {
+	    String testString = "\u2000\u00d6\u2600\u00E0\u0444\uFF5E\uFF7B\uEE72\uD869\uDeD6";
+        MqttTopicValidator.validate(testString, true, true);
+    }
+	
 
 }

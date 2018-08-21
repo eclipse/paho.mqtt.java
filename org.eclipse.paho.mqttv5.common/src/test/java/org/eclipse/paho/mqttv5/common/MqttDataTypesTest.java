@@ -38,6 +38,7 @@ public class MqttDataTypesTest {
 		String decodedUTF8 = MqttDataTypes.decodeUTF8(input);
 		return decodedUTF8;
 	}
+	
 
 	@Test(expected = IllegalArgumentException.class)
 	public void TestEncodeNegativeVBI() {
@@ -47,7 +48,7 @@ public class MqttDataTypesTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void TestEncodeOversizeVBI() {
-		// Attempt to encode a negative number
+		// Attempt to encode a value which is too big
 		MqttDataTypes.encodeVariableByteInteger(268435456);
 	}
 
@@ -62,17 +63,92 @@ public class MqttDataTypesTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void TestEncodeInvalidUTF8String() throws MqttException {
-		final char invalid = '\u0001';
-		String invalidString = "" + invalid;
+		String invalidString = "abc\u0001def";
 		encodeAndDecodeString(invalidString);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void TestEncodeInvalidUTF8StringInDifferentRange() throws MqttException {
-		final char invalid = '\u008C';
-		String invalidString = "" + invalid;
+		String invalidString = "a\u008Cd";
 		encodeAndDecodeString(invalidString);
 	}
+	
+	@Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringInDifferentRange2() throws MqttException {
+	    /* ControlChar U+007F , smallest of the C1 range */
+        String invalidString = "abc\u007F";
+        encodeAndDecodeString(invalidString);
+    }
+	
+	@Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringZero() throws MqttException {
+        /* ControlChar U+007F , smallest of the C1 range */
+        String invalidString = "abc\u0000";
+        encodeAndDecodeString(invalidString);
+    }
+	
+	@Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringNonChar1() throws MqttException {
+	    /* Nonchar U+FDD0 */
+        String invalidString = "\uFDD0";
+        encodeAndDecodeString(invalidString);
+    }
+	
+	@Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringNonChar2() throws MqttException {
+	    /* Nonchar U+FDDF */
+        String invalidString = "\uFDDF";
+        encodeAndDecodeString(invalidString);
+    }
+	
+	@Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringNonChar3() throws MqttException {
+	    /* Nonchar *+FFFE */
+        String invalidString = "\uFFFE";
+        encodeAndDecodeString(invalidString);
+    }
+	
+	@Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringNonChar4() throws MqttException {
+	    /* Nonchar U+FFFF */
+        String invalidString = "\uFFFF";
+        encodeAndDecodeString(invalidString);
+    }
+	
+	@Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringNonChar5() throws MqttException {
+	    /* Nonchar U+1FFFE */
+        String invalidString = "\uD83F\uDFFE";
+        encodeAndDecodeString(invalidString);
+    }
+	
+	   
+    @Test(expected = IllegalArgumentException.class)
+    public void TestEncodeInvalidUTF8StringNonChar6() throws MqttException {
+        /* Nonchar U+1FFFF */
+        String invalidString = "\uD83F\uDFFF";
+        encodeAndDecodeString(invalidString);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void TestEncodeMismatchSurrogates1() throws MqttException {
+        String invalidString = "abc\uD869\uD869";   /* Two high surrogates */
+        encodeAndDecodeString(invalidString);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void TestEncodeMismatchSurrogates2() throws MqttException {
+        String invalidString = "abc\uD869";   /* trailing high surrogates */
+        encodeAndDecodeString(invalidString);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void TestEncodeMismatchSurrogates3() throws MqttException {
+        String invalidString = "abc\uDFFF";   /* low surrogate */
+        encodeAndDecodeString(invalidString);
+    }
+    
+   
 
 	@Test
 	public void TestEncodeAndDecodeUTF8String() throws MqttException {
@@ -93,11 +169,9 @@ public class MqttDataTypesTest {
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void TestEncodeAndDecodeEmojiString() throws MqttException {
 		String testString = "👁🐝Ⓜ️️";
-		// System.out.println(String.format("'%s' is %d bytes, %d chars long",
-		// testString, testString.getBytes().length, testString.length()));
 		String decodedUTF8 = encodeAndDecodeString(testString);
 		Assert.assertEquals(testString, decodedUTF8);
 
@@ -112,6 +186,13 @@ public class MqttDataTypesTest {
 		Assert.assertEquals(testString, decodedUTF8);
 
 	}
+	
+	@Test
+    public void TestEncodeAndDecodeComplexUTF8String2() throws MqttException {
+        String testString = "\u2000\u00d6\u2600\u00E0\u0444\uFF5E\uFF7B\uEE72\uD869\uDeD6";
+        String decodedUTF8 = encodeAndDecodeString(testString);
+        Assert.assertEquals(testString, decodedUTF8);
+    }
 
 	/**
 	 * Tests that a large number of complex UTF-8 strings can be encoded and decoded
