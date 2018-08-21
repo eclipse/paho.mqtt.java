@@ -53,7 +53,7 @@ public class NetworkModuleService {
 	 * @throws IllegalArgumentException is case the URI is invalid or there is no {@link NetworkModule} installed for
 	 * the URI scheme
 	 */
-	public static void validateURI(String brokerUri) throws IllegalArgumentException {
+	public synchronized static void validateURI(String brokerUri) throws IllegalArgumentException {
 		try {
 			URI uri = new URI(brokerUri);
 			String scheme = uri.getScheme();
