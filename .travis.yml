@@ -15,8 +15,8 @@ before_install:
 
 script:
   - mvn -B clean -q
-  - mvn -B --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test compile -DskipTests -q
-  - mvn -B --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client compile -q
+  - mvn -B --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test -q
+  - mvn -B --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client test -q
 
 #addons:
 #  apt:
