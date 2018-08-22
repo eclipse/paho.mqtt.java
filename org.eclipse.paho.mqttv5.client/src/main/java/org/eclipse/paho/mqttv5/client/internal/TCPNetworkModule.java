@@ -24,7 +24,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
@@ -74,16 +73,8 @@ public class TCPNetworkModule implements NetworkModule {
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
 			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
-			if (factory instanceof SSLSocketFactory) {
-				// SNI support
-				Socket tempsocket = new Socket();
-				tempsocket.connect(sockaddr, conTimeout*1000);
-				socket = ((SSLSocketFactory)factory).createSocket(tempsocket, host, port, true);
-			} else {
-				socket = factory.createSocket();
-				socket.connect(sockaddr, conTimeout*1000);
-			}
-			socket.setSoTimeout(1000);
+			socket = factory.createSocket();
+			socket.connect(sockaddr, conTimeout*1000);
 
 			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm.
 			// This should not be required.

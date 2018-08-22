@@ -35,6 +35,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	private static final String CLASS_NAME = SSLNetworkModule.class.getName();
 	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
+	private SSLSocketFactory factory;
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
 	private HostnameVerifier hostnameVerifier;
@@ -60,6 +61,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	 */
 	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext) {
 		super(factory, host, port, resourceContext);
+		this.factory = factory;
 		this.host = host;
 		this.port = port;
 		log.setResourceName(resourceContext);
@@ -124,6 +126,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 
 	public void start() throws IOException, MqttException {
 		super.start();
+		socket = ((SSLSocketFactory)factory).createSocket(socket, host, port, true);
 		setEnabledCiphers(enabledCiphers);
 		int soTimeout = socket.getSoTimeout();
 		// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
