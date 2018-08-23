@@ -119,10 +119,12 @@ public class ClientComms {
 		String methodName = "shutdownExecutorService";
 		executorService.shutdown();
 		try {
-			if (!executorService.awaitTermination(conOptions.getExecutorServiceTimeout(), TimeUnit.SECONDS)) {
-				executorService.shutdownNow();
+			if (executorService != null && conOptions != null ) {
 				if (!executorService.awaitTermination(conOptions.getExecutorServiceTimeout(), TimeUnit.SECONDS)) {
-					log.fine(CLASS_NAME, methodName, "executorService did not terminate");
+					executorService.shutdownNow();
+					if (!executorService.awaitTermination(conOptions.getExecutorServiceTimeout(), TimeUnit.SECONDS)) {
+						log.fine(CLASS_NAME, methodName, "executorService did not terminate");
+					}
 				}
 			}
 		} catch (InterruptedException ie) {
