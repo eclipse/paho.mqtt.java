@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corp.
+ * Copyright (c) 2016, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,7 +28,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class DisconnectedMessageBuffer implements Runnable {
 	
 	private static final String CLASS_NAME = "DisconnectedMessageBuffer";
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	private DisconnectedBufferOptions bufferOpts;
 	private ArrayList buffer;
 	private Object	bufLock = new Object();  	// Used to synchronise the buffer

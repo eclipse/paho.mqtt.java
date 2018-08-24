@@ -1,7 +1,7 @@
 package org.eclipse.paho.mqttv5.client.internal;
 
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -59,7 +59,7 @@ public class ClientComms {
 	public static String VERSION = "${project.version}";
 	public static String BUILD_LEVEL = "L${build.level}";
 	private static final String CLASS_NAME = ClientComms.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private static final byte CONNECTED = 0;
 	private static final byte CONNECTING = 1;
