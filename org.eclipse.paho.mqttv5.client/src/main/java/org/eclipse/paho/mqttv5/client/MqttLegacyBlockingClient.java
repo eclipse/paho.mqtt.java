@@ -121,8 +121,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * connecting to a server if durable subscriptions or reliable messaging are
 	 * required.
 	 * <p>
-	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link #generateClientId()}. As the client identifier
+	 * As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client
 	 * must use the same identifier between connections if durable subscriptions or
 	 * reliable delivery of messages is required.
@@ -213,8 +212,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * connecting to a server if durable subscriptions or reliable messaging are
 	 * required.
 	 * <p>
-	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link #generateClientId()}. As the client identifier
+	 * As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client
 	 * must use the same identifier between connections if durable subscriptions or
 	 * reliable delivery of messages is required.
@@ -322,8 +320,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * connecting to a server if durable subscriptions or reliable messaging are
 	 * required.
 	 * <p>
-	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link #generateClientId()}. As the client identifier
+	 * As the client identifier
 	 * is used by the server to identify a client when it reconnects, the client
 	 * must use the same identifier between connections if durable subscriptions or
 	 * reliable delivery of messages is required.
@@ -783,22 +780,6 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 
 	public void messageArrivedComplete(int messageId, int qos) throws MqttException {
 		aClient.messageArrivedComplete(messageId, qos);
-	}
-
-	/**
-	 * Returns a randomly generated client identifier based on the current user's
-	 * login name and the system time.
-	 * <p>
-	 * When cleanStart is set to false, an application must ensure it uses the
-	 * same client identifier when it reconnects to the server to resume state and
-	 * maintain assured message delivery.
-	 * </p>
-	 * 
-	 * @return a generated client identifier
-	 * @see MqttConnectionOptions#setCleanStart(boolean)
-	 */
-	public static String generateClientId() {
-		return MqttConnectionOptions.generateClientId();
 	}
 
 	/**

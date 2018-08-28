@@ -946,10 +946,6 @@ public class MqttConnectionOptions {
 		return Debug.dumpProperties(getDebug(), "Connection options");
 	}
 
-	public static String generateClientId() {
-		return CLIENT_ID_PREFIX + System.nanoTime();
-	}
-
 	public boolean isSendReasonMessages() {
 		return sendReasonMessages;
 	}

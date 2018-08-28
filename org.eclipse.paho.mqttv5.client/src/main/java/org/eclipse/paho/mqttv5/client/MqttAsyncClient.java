@@ -294,9 +294,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * connecting to a server if durable subscriptions or reliable messaging are
 	 * required.
 	 * <p>
-	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As
-	 * the client identifier is used by the server to identify a client when it
+	 * As the client identifier is used by the server to identify a client when it
 	 * reconnects, the client must use the same identifier between connections if
 	 * durable subscriptions or reliable delivery of messages is required.
 	 * </p>
@@ -385,9 +383,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * connecting to a server if durable subscriptions or reliable messaging are
 	 * required.
 	 * <p>
-	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As
-	 * the client identifier is used by the server to identify a client when it
+	 * As the client identifier is used by the server to identify a client when it
 	 * reconnects, the client must use the same identifier between connections if
 	 * durable subscriptions or reliable delivery of messages is required.
 	 * </p>
@@ -488,9 +484,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * connecting to a server if durable subscriptions or reliable messaging are
 	 * required.
 	 * <p>
-	 * A convenience method is provided to generate a random client id that should
-	 * satisfy this criteria - {@link MqttConnectionOptions#generateClientId()}. As
-	 * the client identifier is used by the server to identify a client when it
+	 * As the client identifier is used by the server to identify a client when it
 	 * reconnects, the client must use the same identifier between connections if
 	 * durable subscriptions or reliable delivery of messages is required.
 	 * </p>
