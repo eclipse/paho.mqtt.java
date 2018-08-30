@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
@@ -704,15 +705,15 @@ public class ClientState implements MqttState {
 		}
 
 		MqttToken token = null;
-		long nextPingTime = this.mqttConnection.getKeepAlive();
-		long keepAlive = this.mqttConnection.getKeepAlive();
+		
+		long nextPingTime, keepAlive = TimeUnit.MILLISECONDS.toNanos(this.mqttConnection.getKeepAlive());
 
 		if (connected && this.mqttConnection.getKeepAlive() > 0) {
-			long time = System.currentTimeMillis();
+			long time = System.nanoTime();
 			// Reduce schedule frequency since System.currentTimeMillis is no accurate, add
-			// a buffer
+			// a buffer (This might not be needed since we moved to nanoTime)
 			// It is 1/10 in minimum keepalive unit.
-			int delta = 100;
+			int delta = 1000;
 
 			// ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=446663
 			synchronized (pingOutstandingLock) {
@@ -721,6 +722,7 @@ public class ClientState implements MqttState {
 				if (pingOutstanding > 0 && (time - lastInboundActivity >= keepAlive + delta)) {
 					// lastInboundActivity will be updated once receiving is done.
 					// Add a delta, since the timer and System.currentTimeMillis() is not accurate.
+					// (This might not be needed since we moved to nanoTime)
 					// A ping is outstanding but no packet has been received in KA so connection is
 					// deemed broken
 					// @TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1}
@@ -783,18 +785,18 @@ public class ClientState implements MqttState {
 					tokenStore.saveToken(token, pingCommand);
 					pendingFlows.insertElementAt(pingCommand, 0);
 
-					nextPingTime = this.mqttConnection.getKeepAlive();
+					nextPingTime = keepAlive;
 
 					// Wake sender thread since it may be in wait state (in ClientState.get())
 					notifyQueueLock();
 				} else {
 					log.fine(CLASS_NAME, methodName, "634", null);
-					nextPingTime = Math.max(1, this.mqttConnection.getKeepAlive() - (time - lastOutboundActivity));
+					nextPingTime = Math.max(1, keepAlive - (time - lastOutboundActivity));
 				}
 			}
 			// @TRACE 624=Schedule next ping at {0}
 			log.fine(CLASS_NAME, methodName, "624", new Object[] { Long.valueOf(nextPingTime) });
-			pingSender.schedule(nextPingTime);
+			pingSender.schedule(TimeUnit.NANOSECONDS.toMillis(nextPingTime));
 		}
 
 		return token;
@@ -897,7 +899,7 @@ public class ClientState implements MqttState {
 	public void notifySentBytes(int sentBytesCount) {
 		final String methodName = "notifySentBytes";
 		if (sentBytesCount > 0) {
-			this.lastOutboundActivity = System.currentTimeMillis();
+			this.lastOutboundActivity = System.nanoTime();
 		}
 		// @TRACE 643=sent bytes count={0}
 		log.fine(CLASS_NAME, methodName, "643", new Object[] { Integer.valueOf(sentBytesCount) });
@@ -912,7 +914,7 @@ public class ClientState implements MqttState {
 	protected void notifySent(MqttWireMessage message) {
 		final String methodName = "notifySent";
 
-		this.lastOutboundActivity = System.currentTimeMillis();
+		this.lastOutboundActivity = System.nanoTime();
 		// @TRACE 625=key={0}
 		log.fine(CLASS_NAME, methodName, "625", new Object[] { message.getKey() });
 
@@ -920,7 +922,7 @@ public class ClientState implements MqttState {
 		token.internalTok.notifySent();
 		if (message instanceof MqttPingReq) {
 			synchronized (pingOutstandingLock) {
-				long time = System.currentTimeMillis();
+				long time = System.nanoTime();
 				synchronized (pingOutstandingLock) {
 					lastPing = time;
 					pingOutstanding++;
@@ -985,7 +987,7 @@ public class ClientState implements MqttState {
 	public void notifyReceivedBytes(int receivedBytesCount) {
 		final String methodName = "notifyReceivedBytes";
 		if (receivedBytesCount > 0) {
-			this.lastInboundActivity = System.currentTimeMillis();
+			this.lastInboundActivity = System.nanoTime();
 		}
 		// @TRACE 630=received bytes count={0}
 		log.fine(CLASS_NAME, methodName, "630", new Object[] { Integer.valueOf(receivedBytesCount) });
@@ -1001,7 +1003,7 @@ public class ClientState implements MqttState {
 	 */
 	protected void notifyReceivedAck(MqttAck ack) throws MqttException {
 		final String methodName = "notifyReceivedAck";
-		this.lastInboundActivity = System.currentTimeMillis();
+		this.lastInboundActivity = System.nanoTime();
 
 		// @TRACE 627=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "627", new Object[] { Integer.valueOf(ack.getMessageId()), ack });
@@ -1160,7 +1162,7 @@ public class ClientState implements MqttState {
 	 */
 	protected void notifyReceivedMsg(MqttWireMessage message) throws MqttException {
 		final String methodName = "notifyReceivedMsg";
-		this.lastInboundActivity = System.currentTimeMillis();
+		this.lastInboundActivity = System.nanoTime();
 
 		// @TRACE 651=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "651", new Object[] { Integer.valueOf(message.getMessageId()), message });

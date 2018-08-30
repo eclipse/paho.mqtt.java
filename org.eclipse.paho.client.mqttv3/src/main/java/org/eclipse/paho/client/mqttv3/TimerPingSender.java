@@ -75,7 +75,7 @@ public class TimerPingSender implements MqttPingSender {
 		
 		public void run() {
 			//@Trace 660=Check schedule at {0}
-			log.fine(CLASS_NAME, methodName, "660", new Object[]{Long.valueOf(System.currentTimeMillis())});
+			log.fine(CLASS_NAME, methodName, "660", new Object[]{Long.valueOf(System.nanoTime())});
 			comms.checkForActivity();			
 		}
 	}

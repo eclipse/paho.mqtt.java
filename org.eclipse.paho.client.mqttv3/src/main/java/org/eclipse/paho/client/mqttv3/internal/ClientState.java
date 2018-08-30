@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -176,10 +177,14 @@ public class ClientState {
         pendingMessages = new Vector(this.maxInflight);
     }
     protected void setKeepAliveSecs(long keepAliveSecs) {
-		this.keepAlive = keepAliveSecs*1000;
+		this.keepAlive = TimeUnit.SECONDS.toNanos(keepAliveSecs);
 	}
+    /**
+     * Returns the keepAlive in Milliseconds
+     * @return The KeepAlive value in Milliseconds
+     */
 	protected long getKeepAlive() {
-		return this.keepAlive;
+		return TimeUnit.NANOSECONDS.toMillis(this.keepAlive);
 	}
 	protected void setCleanSession(boolean cleanSession) {
 		this.cleanSession = cleanSession;
@@ -708,13 +713,14 @@ public class ClientState {
         }
 
 		MqttToken token = null;
-		long nextPingTime = getKeepAlive();
+		long nextPingTime = this.keepAlive;
 		
 		if (connected && this.keepAlive > 0) {
-			long time = System.currentTimeMillis();
+			long time = System.nanoTime();
+			// Below might not be necessary since move to nanoTime (Issue #278)
 			//Reduce schedule frequency since System.currentTimeMillis is no accurate, add a buffer
 			//It is 1/10 in minimum keepalive unit.
-			int delta = 100;
+			int delta = 1000;
 			
 			// ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=446663
             synchronized (pingOutstandingLock) {
@@ -722,7 +728,8 @@ public class ClientState {
                 // Is the broker connection lost because the broker did not reply to my ping?                                                                                                                                 
                 if (pingOutstanding > 0 && (time - lastInboundActivity >= keepAlive + delta)) {
                     // lastInboundActivity will be updated once receiving is done.                                                                                                                                        
-                    // Add a delta, since the timer and System.currentTimeMillis() is not accurate.                                                                                                                        
+                    // Add a delta, since the timer and System.currentTimeMillis() is not accurate.     
+                		// TODO - Remove Delta, maybe?
                 	// A ping is outstanding but no packet has been received in KA so connection is deemed broken                                                                                                         
                     //@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}                                                                           
                     log.severe(CLASS_NAME,methodName,"619", new Object[]{ Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity),  Long.valueOf(time),  Long.valueOf(lastPing)});
@@ -879,7 +886,7 @@ public class ClientState {
     public void notifySentBytes(int sentBytesCount) {
         final String methodName = "notifySentBytes";
         if (sentBytesCount > 0) {
-        	this.lastOutboundActivity = System.currentTimeMillis();
+        	this.lastOutboundActivity = System.nanoTime();
         }
         // @TRACE 643=sent bytes count={0}                                                                                                                                                                                            
         log.fine(CLASS_NAME, methodName, "643", new Object[] {
@@ -894,7 +901,7 @@ public class ClientState {
 	protected void notifySent(MqttWireMessage message) {
 		final String methodName = "notifySent";
 		
-		this.lastOutboundActivity = System.currentTimeMillis();
+		this.lastOutboundActivity = System.nanoTime();
 		//@TRACE 625=key={0}
 		log.fine(CLASS_NAME,methodName,"625",new Object[]{message.getKey()});
 		
@@ -903,7 +910,7 @@ public class ClientState {
 		token.internalTok.notifySent();
         if (message instanceof MqttPingReq) {
             synchronized (pingOutstandingLock) {
-            	long time = System.currentTimeMillis();
+            	long time = System.nanoTime();
                 synchronized (pingOutstandingLock) {
                 	lastPing = time;
                 	pingOutstanding++;
@@ -957,7 +964,7 @@ public class ClientState {
     public void notifyReceivedBytes(int receivedBytesCount) {
         final String methodName = "notifyReceivedBytes";
         if (receivedBytesCount > 0) {
-            this.lastInboundActivity = System.currentTimeMillis();
+            this.lastInboundActivity = System.nanoTime();
         }
         // @TRACE 630=received bytes count={0}                                                                                                                                                                                        
         log.fine(CLASS_NAME, methodName, "630", new Object[] {
@@ -972,7 +979,7 @@ public class ClientState {
 	 */
 	protected void notifyReceivedAck(MqttAck ack) throws MqttException {
 		final String methodName = "notifyReceivedAck";
-		this.lastInboundActivity = System.currentTimeMillis();
+		this.lastInboundActivity = System.nanoTime();
 
 		// @TRACE 627=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "627", new Object[] {
@@ -1054,7 +1061,7 @@ public class ClientState {
 	 */
 	protected void notifyReceivedMsg(MqttWireMessage message) throws MqttException {
 		final String methodName = "notifyReceivedMsg";
-		this.lastInboundActivity = System.currentTimeMillis();
+		this.lastInboundActivity = System.nanoTime();
 
 		// @TRACE 651=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "651", new Object[] {

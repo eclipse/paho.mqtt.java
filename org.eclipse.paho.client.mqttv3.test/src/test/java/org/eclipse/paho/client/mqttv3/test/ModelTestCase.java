@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -91,7 +91,7 @@ public class ModelTestCase implements MqttCallback {
     logDirectory = new File(LOGDIR);
     if (logDirectory.exists()) {
       deleteLogFiles();
-      logFilename = "mqttv3.ModelTestCase." + System.currentTimeMillis() + ".log";
+      logFilename = "mqttv3.ModelTestCase." + System.nanoTime() + ".log";
 
       File logfile = new File(logDirectory, logFilename);
       try {
