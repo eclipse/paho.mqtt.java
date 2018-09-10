@@ -178,7 +178,7 @@ public class OfflineBufferingTest {
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion(5000);
 		// Subscribe to topic
-		subClient.subscribe(topicPrefix + methodName, 0);
+		subClient.subscribe(topicPrefix + methodName, 1);
 
 		// Enable Proxy & Connect to server
 		proxy.enableProxy();
@@ -225,7 +225,7 @@ public class OfflineBufferingTest {
 
 		// Check that all messages have been delivered
 		for (int x = 0; x < 100; x++) {
-			boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 0, Integer.toString(x).getBytes());
+			boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 1, Integer.toString(x).getBytes());
 			Assert.assertTrue(recieved);
 		}
 		log.info("All messages sent and Recieved correctly.");
