@@ -38,6 +38,7 @@ import org.eclipse.paho.client.mqttv3.test.utilities.MqttV3Receiver;
 import org.eclipse.paho.client.mqttv3.test.utilities.TestMemoryPersistence;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -76,6 +77,11 @@ public class OfflineBufferingTest {
 			throw exception;
 		}
 
+	}
+	
+	@After
+	public void clearUpAfterTest() {
+		proxy.disableProxy();
 	}
 
 	/**
