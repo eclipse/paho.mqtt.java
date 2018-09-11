@@ -47,7 +47,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class CommsCallback implements Runnable {
 	private static final String CLASS_NAME = CommsCallback.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;

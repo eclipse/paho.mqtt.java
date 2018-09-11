@@ -720,7 +720,7 @@ public class ClientState {
 			// Below might not be necessary since move to nanoTime (Issue #278)
 			//Reduce schedule frequency since System.currentTimeMillis is no accurate, add a buffer
 			//It is 1/10 in minimum keepalive unit.
-			int delta = 1000;
+			int delta = 100000;
 			
 			// ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=446663
             synchronized (pingOutstandingLock) {
@@ -774,14 +774,15 @@ public class ClientState {
                     tokenStore.saveToken(token, pingCommand);
                     pendingFlows.insertElementAt(pingCommand, 0);
 
-                    nextPingTime = getKeepAlive();
+                    nextPingTime = this.keepAlive;
 
                     //Wake sender thread since it may be in wait state (in ClientState.get())                                                                                                                             
                     notifyQueueLock();
                 }
                 else {
+                		//@TRACE 634=ping not needed yet. Schedule next ping.
                     log.fine(CLASS_NAME, methodName, "634", null);
-                    nextPingTime = Math.max(1, getKeepAlive() - (time - lastOutboundActivity));
+                    nextPingTime = Math.max(1, this.keepAlive - (time - lastOutboundActivity));
                 }
             }
             //@TRACE 624=Schedule next ping at {0}                                                                                                                                                                                

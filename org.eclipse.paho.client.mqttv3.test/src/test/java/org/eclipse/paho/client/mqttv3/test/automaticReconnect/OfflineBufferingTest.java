@@ -63,7 +63,7 @@ public class OfflineBufferingTest {
 			LoggingUtilities.banner(log, cclass, methodName);
 			serverURI = TestProperties.getServerURI();
 			serverURIString = "tcp://" + serverURI.getHost() + ":" + serverURI.getPort();
-		    topicPrefix = "OfflineBufferingTest-" + UUID.randomUUID().toString() + "-";
+			topicPrefix = "OfflineBufferingTest-" + UUID.randomUUID().toString() + "-";
 
 			// Use 0 for the first time.
 			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 2883);
@@ -78,16 +78,15 @@ public class OfflineBufferingTest {
 		}
 
 	}
-	
+
 	@After
 	public void clearUpAfterTest() {
 		proxy.disableProxy();
 	}
 
 	/**
-	 * Tests that A message can be buffered whilst the client is in a
-	 * disconnected state and is then delivered once the client has reconnected
-	 * automatically.
+	 * Tests that A message can be buffered whilst the client is in a disconnected
+	 * state and is then delivered once the client has reconnected automatically.
 	 */
 	@Test
 	public void testSingleMessageBufferAndDeliver() throws Exception {
@@ -157,8 +156,8 @@ public class OfflineBufferingTest {
 
 	/**
 	 * Tests that multiple messages can be buffered whilst the client is in a
-	 * disconnected state and that they are all then delivered once the client
-	 * has connected automatically.
+	 * disconnected state and that they are all then delivered once the client has
+	 * connected automatically.
 	 */
 	@Test
 	public void testManyMessageBufferAndDeliver() throws Exception {
@@ -172,13 +171,18 @@ public class OfflineBufferingTest {
 		MqttConnectOptions options = new MqttConnectOptions();
 		options.setCleanSession(true);
 		options.setAutomaticReconnect(true);
+		
+		// Workaround for Issue #582 - Remove once fixed.
+		options.setMaxInflight(100);
+		
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		client.setBufferOpts(disconnectedOpts);
 
 		// Create subscription client that won't be affected by proxy
-		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client");
+		MemoryPersistence persistence = new MemoryPersistence();
+		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client", persistence);
 		MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(subClient, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
@@ -226,12 +230,13 @@ public class OfflineBufferingTest {
 		isConnected = client.isConnected();
 		log.info("Proxy Re-Enabled isConnected: " + isConnected);
 		Assert.assertTrue(isConnected);
-		
+
 		Thread.sleep(5000);
 
 		// Check that all messages have been delivered
 		for (int x = 0; x < 100; x++) {
-			boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 1, Integer.toString(x).getBytes());
+			boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 1,
+					Integer.toString(x).getBytes());
 			Assert.assertTrue(recieved);
 		}
 		log.info("All messages sent and Recieved correctly.");
@@ -447,7 +452,7 @@ public class OfflineBufferingTest {
 		List<String> persistedKeys = Collections.list(persistence.keys());
 		log.info("There are now: " + persistedKeys.size() + " keys in persistence");
 		Assert.assertEquals(1, persistedKeys.size());
-	
+
 		// Create Subscription client to watch for the message being published
 		// as soon as the main client connects
 		log.info("Creating subscription client");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -56,8 +56,8 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class ClientComms {
 	public static String 		VERSION = "${project.version}";
 	public static String 		BUILD_LEVEL = "L${build.level}";
-	private static final String CLASS_NAME = ClientComms.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private final String CLASS_NAME = ClientComms.class.getName();
+	private final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
 	private static final byte CONNECTED	= 0;
 	private static final byte CONNECTING	= 1;
@@ -854,7 +854,7 @@ public class ClientComms {
 		final String methodName = "notifyConnect";
 		if(disconnectedMessageBuffer != null){
 			//@TRACE 509=Client Connected, Offline Buffer Available. Sending Buffered Messages.
-			log.fine(CLASS_NAME, methodName, "509");
+			log.fine(CLASS_NAME, methodName, "509", null);
 
 			disconnectedMessageBuffer.setPublishCallback(new ReconnectDisconnectedBufferCallback(methodName));
 			executorService.execute(disconnectedMessageBuffer);
@@ -871,14 +871,16 @@ public class ClientComms {
 		
 		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
 			if (isConnected()) {
-				while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-1)){
+				// First pass at making sure that we don't flood the in-flight messages
+				while(clientState.getActualInFlight() >= (clientState.getMaxInFlight()-3)){
 					// We need to Yield to the other threads to allow the in flight messages to clear
 					Thread.yield();
 					
 				}
-				//@TRACE 510=Publising Buffered message message={0}
+				//@TRACE 510=Publishing Buffered message message={0}
 				log.fine(CLASS_NAME, methodName, "510", new Object[] {bufferedMessage.getMessage().getKey()});
 				internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());
+				
 				// Delete from persistence if in there
 				clientState.unPersistBufferedMessage(bufferedMessage.getMessage());
 			} else {

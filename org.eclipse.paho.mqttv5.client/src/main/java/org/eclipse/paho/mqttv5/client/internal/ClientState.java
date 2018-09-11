@@ -713,7 +713,7 @@ public class ClientState implements MqttState {
 			// Reduce schedule frequency since System.currentTimeMillis is no accurate, add
 			// a buffer (This might not be needed since we moved to nanoTime)
 			// It is 1/10 in minimum keepalive unit.
-			int delta = 1000;
+			int delta = 100000;
 
 			// ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=446663
 			synchronized (pingOutstandingLock) {
