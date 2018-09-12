@@ -24,6 +24,7 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -63,6 +64,12 @@ public class OfflineBufferingTest {
 		}
 
 	}
+	
+	@After
+	public void clearUpAfterTest() {
+		proxy.disableProxy();
+	}
+
 
 	/**
 	 * Tests that A message can be buffered whilst the client is in a

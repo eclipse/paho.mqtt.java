@@ -774,7 +774,7 @@ public class ClientState {
                     tokenStore.saveToken(token, pingCommand);
                     pendingFlows.insertElementAt(pingCommand, 0);
 
-                    nextPingTime = this.keepAlive;
+                    nextPingTime = getKeepAlive();
 
                     //Wake sender thread since it may be in wait state (in ClientState.get())                                                                                                                             
                     notifyQueueLock();
@@ -782,7 +782,7 @@ public class ClientState {
                 else {
                 		//@TRACE 634=ping not needed yet. Schedule next ping.
                     log.fine(CLASS_NAME, methodName, "634", null);
-                    nextPingTime = Math.max(1, this.keepAlive - (time - lastOutboundActivity));
+                    nextPingTime = Math.max(1,  getKeepAlive() - (time - lastOutboundActivity));
                 }
             }
             //@TRACE 624=Schedule next ping at {0}                                                                                                                                                                                

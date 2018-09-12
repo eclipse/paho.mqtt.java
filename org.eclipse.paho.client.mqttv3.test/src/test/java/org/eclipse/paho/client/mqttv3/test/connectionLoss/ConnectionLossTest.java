@@ -33,6 +33,7 @@ import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.ConnectionManipulationProxyServer;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -90,8 +91,14 @@ public class ConnectionLossTest implements MqttCallback
 	public static void tearDownAfterClass() throws Exception {
 		log.info("Tests finished, stopping proxy");
 		proxy.stopProxy();
-		
 	}
+	
+	@After
+	public void afterTest() {
+		log.info("Disabling Proxy");
+		proxy.disableProxy();
+	}
+	
 	/**
 	 * Tests whether paho can detect a connection loss with the server even if it has outbound activity by publishing messages with QoS 0.
 	 * @throws Exception
