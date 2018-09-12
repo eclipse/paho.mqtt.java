@@ -184,6 +184,10 @@ public class MqttPublish extends MqttPersistableWireMessage {
 	public String getTopicName() {
 		return topicName;
 	}
+	
+	public int getQoS() {
+		return qos;
+	}
 
 	public void setTopicName(String topicName) {
 		this.topicName = topicName;

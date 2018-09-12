@@ -7,10 +7,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.client.mqttv3.test.automaticReconnect.AutomaticReconnectTest;
-
 public class ConnectionManipulationProxyServer implements Runnable {
-	static final Class<?> cclass = AutomaticReconnectTest.class;
+	static final Class<?> cclass = ConnectionManipulationProxyServer.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 	private int localPort;
@@ -34,7 +32,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void startProxy(){
-		log.info("[CPMS Proxy] - Starting Proxy");
+		log.info("[CMPS Proxy] - Starting Proxy");
 		synchronized (enableLock) {
 			enableProxy = true;
 		}
@@ -43,7 +41,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void enableProxy(){
-		log.info("[CPMS Proxy] - Enabling Proxy");
+		log.info("[CMPS Proxy] - Enabling Proxy");
 		synchronized (enableLock) {
 			enableProxy = true;
 		}
@@ -54,7 +52,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void disableProxy(){
-		log.info("[CPMS Proxy] - Disabling Proxy");
+		log.info("[CMPS Proxy] - Disabling Proxy");
 		synchronized (enableLock) {
 			enableProxy = false;
 		}
@@ -69,7 +67,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void stopProxy(){
-		log.info("[CPMS Proxy] - Stopping Proxy");
+		log.info("[CMPS Proxy] - Stopping Proxy");
 		synchronized (enableLock) {
 			enableProxy = false;
 		}
@@ -78,7 +76,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	private void killOpenSockets(){
-		log.info("[CPMS Proxy] - killOpenSockets Called.");
+		log.info("[CMPS Proxy] - killOpenSockets Called.");
 		try {
 			if(serverSocket != null){
 				serverSocket.close();
@@ -96,7 +94,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 
 	@Override
 	public void run() {
-		log.info("[CPMS Proxy] - Proxy Thread running.");
+		log.info("[CMPS Proxy] - Proxy Thread running.");
 		try {
 			
 			final byte[] request = new byte[1024];
@@ -122,14 +120,14 @@ public class ConnectionManipulationProxyServer implements Runnable {
 					
 					
 
-					log.info("[CPMS Proxy] - Waiting for incoming connection..");
+					log.info("[CMPS Proxy] - Waiting for incoming connection..");
 					
 					try {
 						// Wait for a connection on the local Port
 						client = serverSocket.accept();
 						
 						
-						log.info("[CPMS Proxy] - Client Opened Connection to Proxy...");
+						log.info("[CMPS Proxy] - Client Opened Connection to Proxy...");
 						
 						final InputStream streamFromClient = client.getInputStream();
 						final OutputStream streamToClient = client.getOutputStream();
@@ -157,7 +155,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 										streamToServer.flush();
 									}
 								} catch (IOException ex){
-									log.warning("[CPMS Proxy] - IOException in client to server stream: " + ex.getMessage());
+									log.warning("[CMPS Proxy] - IOException in client to server stream: " + ex.getMessage());
 									try {
 										client.close();
 										server.close();
@@ -180,8 +178,8 @@ public class ConnectionManipulationProxyServer implements Runnable {
 							}
 						
 					 } catch (IOException ex){
-						 log.warning("[CPMS Proxy] - IOException in server to client stream: " + ex.getMessage());
-						 log.info("[CPMS Proxy] - ");
+						 log.warning("[CMPS Proxy] - IOException in server to client stream: " + ex.getMessage());
+						 log.info("[CMPS Proxy] - ");
 						 client.close();
 						 server.close();
 					}
@@ -190,7 +188,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 				
 					
 					}  catch (IOException ex) {
-						log.warning("[CPMS Proxy] - General IO Exception caught in main Thread: " + ex.getMessage());
+						log.warning("[CMPS Proxy] - General IO Exception caught in main Thread: " + ex.getMessage());
 						break;
 					} finally {
 						try {
@@ -201,7 +199,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 								client.close();
 							}
 						} catch(IOException ex) {
-							log.warning("[CPMS Proxy] - IOException caught whilst closing proxy connection.: " + ex.getMessage());
+							log.warning("[CMPS Proxy] - IOException caught whilst closing proxy connection.: " + ex.getMessage());
 						}
 					}
 				
@@ -209,15 +207,15 @@ public class ConnectionManipulationProxyServer implements Runnable {
 			
 				}
 			}
-			log.info("[CPMS Proxy] - Proxy Thread finishing..");
+			log.info("[CMPS Proxy] - Proxy Thread finishing..");
 			
 			if(!serverSocket.isClosed()){
 				serverSocket.close();
 			}
-			log.info("[CPMS Proxy] - Server Socket Closed, returning...");
+			log.info("[CMPS Proxy] - Server Socket Closed, returning...");
 			
 		} catch(IOException ex) {
-			log.warning("[CPMS Proxy] - Thread Connection lost: " + ex.getMessage());
+			log.warning("[CMPS Proxy] - Thread Connection lost: " + ex.getMessage());
 			ex.printStackTrace();
 		}
 		

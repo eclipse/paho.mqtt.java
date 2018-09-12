@@ -165,9 +165,9 @@ public class OfflineBufferingTest {
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		client.setBufferOpts(disconnectedOpts);
-
+		
 		// Create subscription client that won't be affected by proxy
-		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client");
+		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, methodName + "sub-client", new TestMemoryPersistence());
 		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(clientId, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();
@@ -438,7 +438,7 @@ public class OfflineBufferingTest {
 		// Create Subscription client to watch for the message being published
 		// as soon as the main client connects
 		log.info("Creating subscription client");
-		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, clientId);
+		MqttAsyncClient subClient = new MqttAsyncClient(serverURIString, clientId, new TestMemoryPersistence());
 		MqttV5Receiver mqttV3Receiver = new MqttV5Receiver(clientId, LoggingUtilities.getPrintStream());
 		subClient.setCallback(mqttV3Receiver);
 		IMqttToken subConnectToken = subClient.connect();

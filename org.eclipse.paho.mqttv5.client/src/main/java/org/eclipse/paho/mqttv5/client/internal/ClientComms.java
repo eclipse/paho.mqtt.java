@@ -946,11 +946,11 @@ public class ClientComms {
 
 		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
 			if (isConnected()) {
-				while (clientState.getActualInFlight() >= (mqttConnection.getReceiveMaximum() - 1)) {
+				//int qos = ((MqttPublish) bufferedMessage.getMessage()).getQos();
+				while (clientState.getActualInFlight() >= (mqttConnection.getReceiveMaximum() - 4)) {
 					// We need to Yield to the other threads to allow the in flight messages to
 					// clear
 					Thread.yield();
-
 				}
 				// @TRACE 510=Publising Buffered message message={0}
 				log.fine(CLASS_NAME, methodName, "510", new Object[] { bufferedMessage.getMessage().getKey() });
