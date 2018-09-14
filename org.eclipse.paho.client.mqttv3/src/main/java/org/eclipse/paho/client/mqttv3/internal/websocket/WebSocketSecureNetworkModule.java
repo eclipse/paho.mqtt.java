@@ -32,7 +32,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	
 	private static final String CLASS_NAME = WebSocketSecureNetworkModule.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	
 	private PipedInputStream pipedInputStream;
 	private WebSocketReceiver webSocketReceiver;

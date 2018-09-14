@@ -31,7 +31,7 @@ import org.eclipse.paho.mqttv5.common.MqttException;
  * @author Maik Scheibler
  */
 public class NetworkModuleService {
-	private static final Logger LOG = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,
+	private static Logger LOG = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,
 			NetworkModuleService.class.getSimpleName());
 	private static final ServiceLoader<NetworkModuleFactory> FACTORY_SERVICE_LOADER = ServiceLoader.load(
 			NetworkModuleFactory.class, NetworkModuleService.class.getClassLoader());

@@ -26,7 +26,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class WebSocketReceiver implements Runnable{
 
 	private static final String CLASS_NAME = WebSocketReceiver.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private boolean running = false;
 	private boolean stopping = false;

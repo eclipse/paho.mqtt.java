@@ -27,7 +27,7 @@ import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttLegacyBlockingClient;
-import org.eclipse.paho.mqttv5.client.persist.MqttDefaultFilePersistence;
+import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.ConnectionManipulationProxyServer;
@@ -35,6 +35,7 @@ import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -59,7 +60,7 @@ public class ConnectionLossTest implements MqttCallback {
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 
-	private static final MqttDefaultFilePersistence DATA_STORE = new MqttDefaultFilePersistence("/tmp");
+	private MemoryPersistence DATA_STORE = new MemoryPersistence();
 
 	private String username = "username";
 	private byte[] password = "password".getBytes();
@@ -94,6 +95,12 @@ public class ConnectionLossTest implements MqttCallback {
 		log.info("Tests finished, stopping proxy");
 		proxy.stopProxy();
 
+	}
+	
+	@After
+	public void afterTest() {
+		log.info("Disabling Proxy");
+		proxy.disableProxy();
 	}
 
 	/**
