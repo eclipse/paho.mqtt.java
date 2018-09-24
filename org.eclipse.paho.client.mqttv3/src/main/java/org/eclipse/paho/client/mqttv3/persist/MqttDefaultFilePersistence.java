@@ -112,6 +112,11 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 			}
 
 			try {
+				//If lock was previously acquired, release before requesting a new one
+				if(fileLock != null){
+					fileLock.release();
+				}
+
 				fileLock = new FileLock(clientDir, LOCK_FILENAME);
 	 		} catch (Exception e) {
 	 			// TODO - This shouldn't be here according to the interface
