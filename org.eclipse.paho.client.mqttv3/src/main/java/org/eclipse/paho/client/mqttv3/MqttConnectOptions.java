@@ -65,7 +65,7 @@ public class MqttConnectOptions {
 	private char[] password;
 	private SocketFactory socketFactory;
 	private Properties sslClientProps = null;
-	private boolean httpsHostnameVerificationEnabled = false;
+	private boolean httpsHostnameVerificationEnabled = true;
 	private HostnameVerifier sslHostnameVerifier = null;
 	private boolean cleanSession = CLEAN_SESSION_DEFAULT;
 	private int connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
