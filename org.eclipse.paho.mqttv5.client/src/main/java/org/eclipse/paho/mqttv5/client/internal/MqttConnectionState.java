@@ -53,6 +53,9 @@ public class MqttConnectionState {
 
 
 	public Integer getReceiveMaximum() {
+		if (receiveMaximum == null) {
+			return 65535;
+		}
 		return receiveMaximum;
 	}
 

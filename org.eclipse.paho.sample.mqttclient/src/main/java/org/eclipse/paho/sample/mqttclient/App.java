@@ -38,7 +38,8 @@ public class App {
 		// Define Default Settings
 		boolean quiet = false;
 		boolean debug = false;
-		int mqttVersion = 3;
+//		int mqttVersion = 3;
+		int mqttVersion = 5;
 
 		// Define CLI Options
 		Options cliOptions = new Options();
