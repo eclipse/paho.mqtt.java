@@ -336,7 +336,7 @@ public class MqttProperties {
 			// Maximum QoS
 			if (maximumQoS != null && validProperties.contains(MAXIMUM_QOS_IDENTIFIER)) {
 				outputStream.write(MAXIMUM_QOS_IDENTIFIER);
-				outputStream.writeShort(maximumQoS);
+				outputStream.writeByte(maximumQoS);
 			}
 
 			// Retain Available
