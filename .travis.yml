@@ -7,8 +7,8 @@ matrix:
       dist: trusty
       sudo: required
       jdk: oraclejdk8
-    - os: osx
-      jdk: oraclejdk8
+#    - os: osx
+#      jdk: oraclejdk8
 
 
 
