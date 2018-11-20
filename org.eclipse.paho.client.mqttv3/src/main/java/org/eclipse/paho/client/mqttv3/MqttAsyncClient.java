@@ -925,7 +925,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 */
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
 			throws MqttException {
-		final String methodName = "subscribe";
 
 		if (topicFilters.length != qos.length) {
 			throw new IllegalArgumentException();
@@ -937,7 +936,14 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
 			this.comms.removeMessageListener(topicFilters[i]);
 		}
+		
+		return this.subscribeBase(topicFilters, qos, userContext, callback);
+	}
 
+	private IMqttToken subscribeBase(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
+			throws MqttException {
+		final String methodName = "subscribe";
+				
 		// Only Generate Log string if we are logging at FINE level
 		if (log.isLoggable(Logger.FINE)) {
 			StringBuffer subs = new StringBuffer();
@@ -945,9 +951,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				if (i > 0) {
 					subs.append(", ");
 				}
-				subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);
-
-				
+				subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);			
 			}
 			// @TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
 			log.fine(CLASS_NAME, methodName, "106", new Object[] { subs.toString(), userContext, callback });
@@ -1010,11 +1014,10 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		if ((messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
 			throw new IllegalArgumentException();
 		}
-
-		IMqttToken token = this.subscribe(topicFilters, qos, userContext, callback);
-
+		
 		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
+			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
             if (messageListeners[i] == null) {
                 this.comms.removeMessageListener(topicFilters[i]);
             }
@@ -1022,8 +1025,8 @@ public class MqttAsyncClient implements IMqttAsyncClient {
                 this.comms.setMessageListener(topicFilters[i], messageListeners[i]);
             }
 		}
-
-		return token;
+		
+		return this.subscribeBase(topicFilters, qos, userContext, callback);
 	}
 
 	/*

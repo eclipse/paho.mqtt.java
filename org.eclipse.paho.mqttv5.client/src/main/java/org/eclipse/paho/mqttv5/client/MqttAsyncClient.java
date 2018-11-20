@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,12 +11,7 @@
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- *    Dave Locke - initial API and implementation and/or initial documentation
- *    Ian Craggs - MQTT 3.1.1 support
- *    Ian Craggs - per subscription message handlers (bug 466579)
- *    Ian Craggs - ack control (bug 472172)
- *    James Sutton - Bug 459142 - WebSocket support for the Java client.
- *    James Sutton - Automatic Reconnect & Offline Buffering.
+ *    James Sutton - initial API and implementation and/or initial documentation
  */
 
 package org.eclipse.paho.mqttv5.client;
@@ -1107,7 +1102,6 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	@Override
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
 			MqttProperties subscriptionProperties) throws MqttException {
-		final String methodName = "subscribe";
 
 		// remove any message handlers for individual topics and validate Topics
 		for (int i = 0; i < subscriptions.length; ++i) {
@@ -1117,7 +1111,14 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 					this.mqttConnection.isWildcardSubscriptionsAvailable(),
 					this.mqttConnection.isSharedSubscriptionsAvailable());
 		}
+		
+		return this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
+	}
 
+	private IMqttToken subscribeBase(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
+				MqttProperties subscriptionProperties) throws MqttException {
+		final String methodName = "subscribe";
+		
 		// Only Generate Log string if we are logging at FINE level
 		if (log.isLoggable(Logger.FINE)) {
 			StringBuffer subs = new StringBuffer();
@@ -1208,14 +1209,15 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
 			IMqttMessageListener[] messageListeners, MqttProperties subscriptionProperties) throws MqttException {
 
-		IMqttToken token = this.subscribe(subscriptions, userContext, callback, subscriptionProperties);
-
 		// add message handlers to the list for this client
 		for (int i = 0; i < subscriptions.length; ++i) {
+			MqttTopicValidator.validate(subscriptions[i].getTopic(),
+					this.mqttConnection.isWildcardSubscriptionsAvailable(),
+					this.mqttConnection.isSharedSubscriptionsAvailable());
 			this.comms.setMessageListener(null, subscriptions[i].getTopic(), messageListeners[i]);
 		}
-
-		return token;
+		
+		return this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
 	}
 
 	/*
@@ -1251,15 +1253,16 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 				subId = this.mqttSession.getNextSubscriptionIdentifier();
 			}
 		}
-
-		IMqttToken token = this.subscribe(subscriptions, userContext, callback, subscriptionProperties);
-
+		
 		// add message handlers to the list for this client
 		for (int i = 0; i < subscriptions.length; ++i) {
+			MqttTopicValidator.validate(subscriptions[i].getTopic(),
+					this.mqttConnection.isWildcardSubscriptionsAvailable(),
+					this.mqttConnection.isSharedSubscriptionsAvailable());
 			this.comms.setMessageListener(subId, subscriptions[i].getTopic(), messageListener);
 		}
 
-		return token;
+		return this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
 	}
 
 	/*
