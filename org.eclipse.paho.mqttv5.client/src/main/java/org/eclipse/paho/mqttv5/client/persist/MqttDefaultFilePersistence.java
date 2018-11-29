@@ -55,7 +55,7 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	
 	private static FilenameFilter getFilenameFilter(){
 		if(FILENAME_FILTER == null){
-			FILENAME_FILTER =  new PersistanceFileNameFilter(MESSAGE_FILE_EXTENSION);
+			FILENAME_FILTER =  new PersistenceFileNameFilter(MESSAGE_FILE_EXTENSION);
 		}
 		return FILENAME_FILTER;
 	}
@@ -267,7 +267,7 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	 * @param dir The directory in which to scan and restore backups
 	 */
 	private void restoreBackups(File dir) throws MqttPersistenceException {
-		File[] files = dir.listFiles(new PersistanceFileFilter(MESSAGE_BACKUP_FILE_EXTENSION));
+		File[] files = dir.listFiles(new PersistenceFileFilter(MESSAGE_BACKUP_FILE_EXTENSION));
 
 		if (files == null) {
 			throw new MqttPersistenceException();

@@ -3,11 +3,11 @@ package org.eclipse.paho.mqttv5.client.persist;
 import java.io.File;
 import java.io.FileFilter;
 
-public class PersistanceFileFilter implements FileFilter{
+public class PersistenceFileFilter implements FileFilter{
 	
 	private final String fileExtension;
 	
-	public PersistanceFileFilter(String fileExtension){
+	public PersistenceFileFilter(String fileExtension){
 		this.fileExtension = fileExtension;
 	}
 
