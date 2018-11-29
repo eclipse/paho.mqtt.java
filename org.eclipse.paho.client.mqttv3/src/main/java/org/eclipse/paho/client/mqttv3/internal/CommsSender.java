@@ -24,10 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttOutputStream;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
+import org.eclipse.paho.client.mqttv3.internal.wire.*;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
@@ -149,6 +146,13 @@ public class CommsSender implements Runnable {
 									}
 									clientState.notifySent(message);
 								}
+							} else if (((MqttPublish)message).getMessage().getQos() ==0) {
+								// when Qos == 0 the messageId always be 0, in multithread environment or some other condition may case 'actualInFlight'
+								// not correct , because lots of message corresponding to only one token ,only one message will be sent to broker ,
+								// the other will be discarded, I think that we need to make actualInFlight-1
+								// when this message be discarded
+								// then case REASON_CODE_MAX_INFLIGHT(32202) Exception
+								clientState.notifySent(message);
 							}
 						}
 					} else { // null message
