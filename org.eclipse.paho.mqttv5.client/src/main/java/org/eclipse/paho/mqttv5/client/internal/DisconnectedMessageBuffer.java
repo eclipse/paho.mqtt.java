@@ -105,15 +105,15 @@ public class DisconnectedMessageBuffer implements Runnable {
 		log.fine(CLASS_NAME, methodName, "516");
 			while(getMessageCount() > 0){
 				try {
-				BufferedMessage bufferedMessage = getMessage(0);
-				callback.publishBufferedMessage(bufferedMessage);
-				// Publish was successful, remove message from buffer.
-				deleteMessage(0);
+					BufferedMessage bufferedMessage = getMessage(0);
+					callback.publishBufferedMessage(bufferedMessage);
+					// Publish was successful, remove message from buffer.
+					deleteMessage(0);
 				} catch (MqttException ex) {
 					// Error occurred attempting to publish buffered message likely because the client is not connected
 					// @TRACE 519=Error occurred attempting to publish buffered message due to disconnect. Exception: {0}.
-					log.warning(CLASS_NAME, methodName, "519", new Object[]{ex.getMessage()});
-					break;
+					//log.warning(CLASS_NAME, methodName, "519", new Object[]{ex.getMessage()});
+					Thread.yield();
 				}
 			}
 	}

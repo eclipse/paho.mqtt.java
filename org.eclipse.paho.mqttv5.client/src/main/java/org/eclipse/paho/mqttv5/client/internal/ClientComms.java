@@ -173,6 +173,7 @@ public class ClientComms {
 			// Persist if needed and send the message
 			this.clientState.send(message, token);
 		} catch (MqttException e) {
+			token.internalTok.setClient(null); // undo client setting on error
 			if (message instanceof MqttPublish) {
 				this.clientState.undo((MqttPublish) message);
 			}
@@ -946,12 +947,6 @@ public class ClientComms {
 
 		public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException {
 			if (isConnected()) {
-				//int qos = ((MqttPublish) bufferedMessage.getMessage()).getQos();
-				while (clientState.getActualInFlight() >= (mqttConnection.getReceiveMaximum() - 4)) {
-					// We need to Yield to the other threads to allow the in flight messages to
-					// clear
-					Thread.yield();
-				}
 				// @TRACE 510=Publising Buffered message message={0}
 				log.fine(CLASS_NAME, methodName, "510", new Object[] { bufferedMessage.getMessage().getKey() });
 				internalSend(bufferedMessage.getMessage(), bufferedMessage.getToken());
