@@ -336,7 +336,7 @@ public class MqttProperties {
 			// Maximum QoS
 			if (maximumQoS != null && validProperties.contains(MAXIMUM_QOS_IDENTIFIER)) {
 				outputStream.write(MAXIMUM_QOS_IDENTIFIER);
-				outputStream.writeShort(maximumQoS);
+				outputStream.writeByte(maximumQoS);
 			}
 
 			// Retain Available
@@ -476,7 +476,7 @@ public class MqttProperties {
 					} else if (identifier == TOPIC_ALIAS_IDENTIFIER) {
 						topicAlias = (int) inputStream.readShort();
 					} else if (identifier == MAXIMUM_QOS_IDENTIFIER) {
-						maximumQoS = (int) inputStream.readShort();
+						maximumQoS = inputStream.read();
 					} else if (identifier == RETAIN_AVAILABLE_IDENTIFIER) {
 						retainAvailable = inputStream.readBoolean();
 					} else if (identifier == USER_DEFINED_PAIR_IDENTIFIER) {
