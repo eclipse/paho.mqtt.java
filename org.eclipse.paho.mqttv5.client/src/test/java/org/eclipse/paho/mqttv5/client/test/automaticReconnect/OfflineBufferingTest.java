@@ -157,12 +157,16 @@ public class OfflineBufferingTest {
 		// Tokens
 		IMqttToken connectToken;
 
+		int msg_count = 1000;
+		
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
+		
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
+		disconnectedOpts.setBufferSize(msg_count);
 		disconnectedOpts.setBufferEnabled(true);
 		client.setBufferOpts(disconnectedOpts);
 		
@@ -189,8 +193,8 @@ public class OfflineBufferingTest {
 		log.info("Proxy Disconnect isConnected: " + isConnected);
 		Assert.assertFalse(isConnected);
 
-		// Publish 100 messages
-		for (int x = 0; x < 100; x++) {
+		// Publish some messages
+		for (int x = 0; x < msg_count; x++) {
 			client.publish(topicPrefix + methodName, new MqttMessage(Integer.toString(x).getBytes()));
 		}
 		// Enable Proxy
@@ -219,11 +223,11 @@ public class OfflineBufferingTest {
 		Thread.sleep(5000);
 
 		// Check that all messages have been delivered
-		for (int x = 0; x < 100; x++) {
-			boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 0, Integer.toString(x).getBytes());
-			Assert.assertTrue(recieved);
+		for (int x = 0; x < msg_count; x++) {
+			boolean received = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 0, Integer.toString(x).getBytes());
+			Assert.assertTrue(received);
 		}
-		log.info("All messages sent and Recieved correctly.");
+		log.info("All messages sent and received correctly.");
 		IMqttToken disconnectToken = client.disconnect();
 		disconnectToken.waitForCompletion(5000);
 		client.close();

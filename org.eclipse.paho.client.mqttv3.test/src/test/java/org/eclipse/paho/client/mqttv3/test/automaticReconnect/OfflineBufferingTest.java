@@ -173,7 +173,7 @@ public class OfflineBufferingTest {
 		options.setAutomaticReconnect(true);
 		
 		// Workaround for Issue #582 - Remove once fixed.
-		options.setMaxInflight(100);
+		//options.setMaxInflight(100);
 		
 		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
@@ -203,9 +203,11 @@ public class OfflineBufferingTest {
 		isConnected = client.isConnected();
 		log.info("Proxy Disconnect isConnected: " + isConnected);
 		Assert.assertFalse(isConnected);
+		
+		int msg_count = 100;
 
-		// Publish 100 messages
-		for (int x = 0; x < 100; x++) {
+		// Publish msg_count messages
+		for (int x = 0; x < msg_count; x++) {
 			client.publish(topicPrefix + methodName, new MqttMessage(Integer.toString(x).getBytes()));
 		}
 		// Enable Proxy
@@ -234,7 +236,7 @@ public class OfflineBufferingTest {
 		Thread.sleep(5000);
 
 		// Check that all messages have been delivered
-		for (int x = 0; x < 100; x++) {
+		for (int x = 0; x < msg_count; x++) {
 			boolean recieved = mqttV3Receiver.validateReceipt(topicPrefix + methodName, 1,
 					Integer.toString(x).getBytes());
 			Assert.assertTrue(recieved);

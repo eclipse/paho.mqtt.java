@@ -102,6 +102,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 		}
 	}
 
+	private int mycount = 0;
 	/**
 	 * Flushes the buffer of messages into an open connection
 	 */
@@ -116,12 +117,17 @@ public class DisconnectedMessageBuffer implements Runnable {
 				// Publish was successful, remove message from buffer.
 				deleteMessage(0);
 			} catch (MqttException ex) {
-				// Error occurred attempting to publish buffered message likely because the
-				// client is not connected
-				// @TRACE 519=Error occurred attempting to publish buffered message due to disconnect. Exception: {0}:{1}.
-				log.severe(CLASS_NAME, methodName, "519", new Object[] { ex.getReasonCode(), ex.getMessage() });
-				break;
-
+				if (ex.getReasonCode() == MqttException.REASON_CODE_MAX_INFLIGHT) {
+					// If we get the max_inflight condition, try again after a short
+					// interval to allow more messages to be completely sent.
+					try { Thread.sleep(100); } catch (Exception e) {}
+				} else {
+					// Error occurred attempting to publish buffered message likely because the
+					// client is not connected
+					// @TRACE 519=Error occurred attempting to publish buffered message due to disconnect. Exception: {0}:{1}.
+					log.severe(CLASS_NAME, methodName, "519", new Object[] { ex.getReasonCode(), ex.getMessage() });
+					break;
+				}
 			}
 
 		}
