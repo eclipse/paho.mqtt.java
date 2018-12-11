@@ -44,6 +44,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 
 /**
  * Lightweight client for talking to an MQTT server using non-blocking methods
@@ -1014,7 +1015,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		if ((messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
 			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
@@ -1025,8 +1026,18 @@ public class MqttAsyncClient implements IMqttAsyncClient {
                 this.comms.setMessageListener(topicFilters[i], messageListeners[i]);
             }
 		}
-		
-		return this.subscribeBase(topicFilters, qos, userContext, callback);
+
+		IMqttToken token = null;
+		try 	{
+			token = this.subscribeBase(topicFilters, qos, userContext, callback);
+		} catch(Exception e) {
+			// if the subscribe fails, then we have to remove the message handlers
+			for (int i = 0; i < topicFilters.length; ++i) {
+				this.comms.removeMessageListener(topicFilters[i]);
+			}
+			throw e;
+		}
+		return token;
 	}
 
 	/*

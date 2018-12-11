@@ -1217,7 +1217,17 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			this.comms.setMessageListener(null, subscriptions[i].getTopic(), messageListeners[i]);
 		}
 		
-		return this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
+		IMqttToken token = null;
+		try 	{
+			token = this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
+		} catch(Exception e) {
+			// if the subscribe fails, then we have to remove the message handlers
+			for (int i = 0; i < subscriptions.length; ++i) {
+				this.comms.removeMessageListener(subscriptions[i].getTopic());
+			}
+			throw e;
+		}
+		return token;
 	}
 
 	/*
@@ -1262,7 +1272,17 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			this.comms.setMessageListener(subId, subscriptions[i].getTopic(), messageListener);
 		}
 
-		return this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
+		IMqttToken token = null;
+		try 	{
+			token = this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
+		} catch(Exception e) {
+			// if the subscribe fails, then we have to remove the message handlers
+			for (int i = 0; i < subscriptions.length; ++i) {
+				this.comms.removeMessageListener(subscriptions[i].getTopic());
+			}
+			throw e;
+		}
+		return token;
 	}
 
 	/*
