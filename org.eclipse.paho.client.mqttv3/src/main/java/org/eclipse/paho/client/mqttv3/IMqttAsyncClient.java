@@ -873,6 +873,12 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	public void setManualAcks(boolean manualAcks);
 	
 	/**
+	 * Will attempt to reconnect to the server after the client has lost connection.
+	 * @throws MqttException if an error occurs attempting to reconnect
+	 */
+	public void reconnect() throws MqttException;
+
+	/**
 	 * Indicate that the application has completed processing the message with id messageId.
 	 * This will cause the MQTT acknowledgement to be sent to the server.
 	 * @param messageId the MQTT message id to be acknowledged

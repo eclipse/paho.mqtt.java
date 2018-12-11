@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -947,6 +947,12 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 */
 	public void setManualAcks(boolean manualAcks);
 	
+	/**
+	 * Will attempt to reconnect to the server after the client has lost connection.
+	 * @throws MqttException if an error occurs attempting to reconnect
+	 */
+	public void reconnect() throws MqttException;
+
 	/**
 	 * Indicate that the application has completed processing the message with id messageId.
 	 * This will cause the MQTT acknowledgement to be sent to the server.
