@@ -26,7 +26,7 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
 
 import javax.net.SocketFactory;
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
@@ -44,7 +44,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
+
 
 /**
  * Lightweight client for talking to an MQTT server using non-blocking methods
@@ -113,7 +113,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	private boolean reconnecting = false;
 	private static Object clientLock = new Object(); // Simple lock
 
-	private ScheduledExecutorService executorService;
+	private ExecutorService executorService;
 
 	/**
 	 * Create an MqttAsyncClient that is used to communicate with an MQTT
@@ -433,7 +433,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 *             if any other problem was encountered
 	 */
 	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence,
-			MqttPingSender pingSender, ScheduledExecutorService executorService) throws MqttException {
+			MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
 		final String methodName = "MqttAsyncClient";
 
 		log.setResourceName(clientId);
