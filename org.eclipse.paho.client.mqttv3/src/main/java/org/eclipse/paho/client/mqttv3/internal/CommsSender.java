@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
@@ -37,17 +35,19 @@ public class CommsSender implements Runnable {
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	//Sends MQTT packets to the server on its own thread
-	private boolean running 		= false;
-	private Object lifecycle 		= new Object();
+	private enum State {STOPPED, RUNNING, STARTING};
+	private State current_state = State.STOPPED;
+	private State target_state = State.STOPPED;
+	private Object lifecycle = new Object();
+	private Thread 	sendThread		= null;
+	private String threadName;
+	private Future<?> senderFuture;
+	
 	private ClientState clientState = null;
 	private MqttOutputStream out;
 	private ClientComms clientComms = null;
 	private CommsTokenStore tokenStore = null;
-	private Thread 	sendThread		= null;
 
-	private String threadName;
-	private final Semaphore runningSemaphore = new Semaphore(1);
-	private Future senderFuture;
 
 	public CommsSender(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, OutputStream out) {
 		this.out = new MqttOutputStream(clientState, out);
@@ -65,14 +65,17 @@ public class CommsSender implements Runnable {
 	public void start(String threadName, ExecutorService executorService) {
 		this.threadName = threadName;
 		synchronized (lifecycle) {
-			if (!running) {
-				running = true;
+			if (current_state == State.STOPPED && target_state == State.STOPPED) {
+				target_state = State.RUNNING;
 				if (executorService == null) {
 					new Thread(this).start();
 				} else {
 					senderFuture = executorService.submit(this);
 				}
 			}
+		}
+		while (!isRunning()) {
+			try { Thread.sleep(100); } catch (Exception e) { }
 		}
 	}
 
@@ -81,33 +84,28 @@ public class CommsSender implements Runnable {
 	 */
 	public void stop() {
 		final String methodName = "stop";
-
+		
+		if (!isRunning()) {
+			return;
+		}
+			
 		synchronized (lifecycle) {
 			if (senderFuture != null) {
 				senderFuture.cancel(true);
 			}
 			//@TRACE 800=stopping sender
 			log.fine(CLASS_NAME,methodName,"800");
-			if (running) {
-				if (!Thread.currentThread().equals(sendThread)) {
-					try {
-						while (running) {
-							// first notify get routine to finish
-							clientState.notifyQueueLock();
-							// Wait for the thread to finish.
-							runningSemaphore.tryAcquire(100, TimeUnit.MILLISECONDS);
-						}
-					} catch (InterruptedException ex) {
-					} finally {
-						runningSemaphore.release();
-					}
-				}
-				running = false;
+			if (isRunning()) {
+				target_state = State.STOPPED;
+				clientState.notifyQueueLock();
 			}
-			sendThread=null;
-			//@TRACE 801=stopped
-			log.fine(CLASS_NAME,methodName,"801");
 		}
+		while (isRunning()) {
+			try { Thread.sleep(100); } catch (Exception e) { }
+			clientState.notifyQueueLock();
+		}
+		//@TRACE 801=stopped
+		log.fine(CLASS_NAME,methodName,"801");
 	}
 
 	public void run() {
@@ -115,16 +113,17 @@ public class CommsSender implements Runnable {
 		sendThread.setName(threadName);
 		final String methodName = "run";
 		MqttWireMessage message = null;
-
-		try {
-			runningSemaphore.acquire();
-		} catch (InterruptedException e) {
-			running = false;
-			return;
+		
+		synchronized (lifecycle) {
+			current_state = State.RUNNING;
 		}
 
 		try {
-			while (running && (out != null)) {
+			State my_target;
+			synchronized (lifecycle) {
+				my_target = target_state;
+			}
+			while (my_target == State.RUNNING && (out != null)) {
 				try {
 					message = clientState.get();
 					if (message != null) {
@@ -158,23 +157,28 @@ public class CommsSender implements Runnable {
 					} else { // null message
 						//@TRACE 803=get message returned null, stopping}
 						log.fine(CLASS_NAME,methodName,"803");
-
-						running = false;
+						synchronized (lifecycle) {
+							target_state = State.STOPPED;
+						}
 					}
 				} catch (MqttException me) {
 					handleRunException(message, me);
 				} catch (Exception ex) {
 					handleRunException(message, ex);
 				}
+				synchronized (lifecycle) {
+					my_target = target_state;
+				}
 			} // end while
 		} finally {
-			running = false;
-			runningSemaphore.release();
+			synchronized (lifecycle) {
+				current_state = State.STOPPED;
+				sendThread = null;
+			}
 		}
 
 		//@TRACE 805=<
 		log.fine(CLASS_NAME, methodName,"805");
-
 	}
 
 	private void handleRunException(MqttWireMessage message, Exception ex) {
@@ -187,12 +191,17 @@ public class CommsSender implements Runnable {
 		} else {
 			mex = (MqttException)ex;
 		}
-
-		running = false;
+		synchronized (lifecycle) {
+			target_state = State.STOPPED;
+		}
 		clientComms.shutdownConnection(null, mex);
 	}
 
 	public boolean isRunning() {
-		return running;
+		boolean result;
+		synchronized (lifecycle) {
+			result = (current_state == State.RUNNING && target_state == State.RUNNING);
+		}
+		return result;
 	}
 }

@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
@@ -40,18 +38,18 @@ public class CommsReceiver implements Runnable {
 	private static final String CLASS_NAME = CommsReceiver.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
-	private volatile boolean running = false;
+	private enum State {STOPPED, RUNNING, STARTING, RECEIVING};
+	private State current_state = State.STOPPED;
+	private State target_state = State.STOPPED;
 	private Object lifecycle = new Object();
+	private String threadName;
+	private Future<?> receiverFuture;
+	
 	private ClientState clientState = null;
 	private ClientComms clientComms = null;
 	private MqttInputStream in;
 	private CommsTokenStore tokenStore = null;
-	private Thread recThread = null;
-	private volatile boolean receiving;
-	private final Semaphore runningSemaphore = new Semaphore(1);
-	private String threadName;
-	private Future<?> receiverFuture;
-
+	private Thread recThread	= null;
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
 		this.in = new MqttInputStream(clientState, in);
@@ -64,7 +62,7 @@ public class CommsReceiver implements Runnable {
 	/**
 	 * Starts up the Receiver's thread.
 	 * @param threadName the thread name.
-	 * @param executorService used to execute the thread
+	 * @param executorService used to execute the thread, or null
 	 */
 	public void start(String threadName, ExecutorService executorService) {
 		this.threadName = threadName;
@@ -72,14 +70,17 @@ public class CommsReceiver implements Runnable {
 		//@TRACE 855=starting
 		log.fine(CLASS_NAME,methodName, "855");
 		synchronized (lifecycle) {
-			if (!running) {
-				running = true;
+			if (current_state == State.STOPPED && target_state == State.STOPPED) {
+				target_state = State.RUNNING;
 				if (executorService == null) {
 					new Thread(this).start();
 				} else {
 					receiverFuture = executorService.submit(this);
 				}
 			}
+		}
+		while (!isRunning()) {
+			try { Thread.sleep(100); } catch (Exception e) { }
 		}
 	}
 
@@ -94,37 +95,13 @@ public class CommsReceiver implements Runnable {
 			}
 			//@TRACE 850=stopping
 			log.fine(CLASS_NAME,methodName, "850");
-			if (running) {
-				running = false;
-				receiving = false;
-				if (!Thread.currentThread().equals(recThread)) {
-					try {
-						// Wait for the thread to finish.
-						// We need to set a certain timeout since there is no universal way
-						// to wake up the worker thread from blocking read.
-						// If network module is websocket, the worker thread returns from read with InterruptedIOException
-						// in response to receiverFuture.cancel(true) above.
-						//
-						// If network module is tcp or ssl, however, InterruptedIOException is not thrown on read.
-						// In normal cases, the worker thread returns from read with EOFException when
-						// the connection is terminated from the broker side in response to DISCONNECT packet.
-						// In this case, the SSL session is preserved and available for reuse in later connections.
-						//
-						// If stop is called because the broker connection is unexpectedly lost,
-						// the worker thread will keep waiting on read, and tryAcquire below will return on timeout expiration.
-						// The worker thread wakes up with SocketException when the socket is closed later.
-						// In this case, the SSL session is invalidated by SSLSocket implementation.
-						// 
-						runningSemaphore.tryAcquire(3000, TimeUnit.MILLISECONDS);
-					}
-					catch (InterruptedException ex) {
-					} finally {
-						runningSemaphore.release();
-					}
-				}
+			if (isRunning()) {
+				target_state = State.STOPPED;
 			}
 		}
-		recThread = null;
+		while (isRunning()) {
+			try { Thread.sleep(100); } catch (Exception e) { }
+		}
 		//@TRACE 851=stopped
 		log.fine(CLASS_NAME,methodName,"851");
 	}
@@ -138,21 +115,28 @@ public class CommsReceiver implements Runnable {
 		final String methodName = "run";
 		MqttToken token = null;
 
-		try {
-			runningSemaphore.acquire();
-		} catch (InterruptedException e) {
-			running = false;
-			return;
+		synchronized (lifecycle) {
+			current_state = State.RUNNING;
 		}
 		
 		try {
-			while (running && (in != null)) {
+			State my_target;
+			synchronized (lifecycle) {
+				my_target = target_state;
+			}
+			while (my_target == State.RUNNING && (in != null)) {
 				try {
 					//@TRACE 852=network read message
 					log.fine(CLASS_NAME,methodName,"852");
-					receiving = in.available() > 0;
+					if (in.available() > 0) {
+						synchronized (lifecycle) {
+							current_state = State.RECEIVING;
+						}
+					}
 					MqttWireMessage message = in.readMqttWireMessage();
-					receiving = false;
+					synchronized (lifecycle) {
+						current_state = State.RUNNING;
+					}
 
 					// instanceof checks if message is null
 					if (message instanceof MqttAck) {
@@ -186,15 +170,18 @@ public class CommsReceiver implements Runnable {
 				catch (MqttException ex) {
 					//@TRACE 856=Stopping, MQttException
 					log.fine(CLASS_NAME,methodName,"856",null,ex);
-					running = false;
+					synchronized (lifecycle) {
+						target_state = State.STOPPED;
+					}
 					// Token maybe null but that is handled in shutdown
 					clientComms.shutdownConnection(token, ex);
 				}
 				catch (IOException ioe) {
 					//@TRACE 853=Stopping due to IOException
 					log.fine(CLASS_NAME,methodName,"853");
-
-					running = false;
+					synchronized (lifecycle) {
+						target_state = State.STOPPED;
+					}
 					// An EOFException could be raised if the broker processes the
 					// DISCONNECT and ends the socket before we complete. As such,
 					// only shutdown the connection if we're not already shutting down.
@@ -203,19 +190,32 @@ public class CommsReceiver implements Runnable {
 					}
 				}
 				finally {
-					receiving = false;
+					synchronized (lifecycle) {
+						current_state = State.RUNNING;
+					}
 				}
-			}
+				synchronized (lifecycle) {
+					my_target = target_state;
+				}
+			} // end while
 		} finally {
-			runningSemaphore.release();
-		}
+			synchronized (lifecycle) {
+				current_state = State.STOPPED;
+			}
+		} // end try
 
+		recThread = null;
 		//@TRACE 854=<
 		log.fine(CLASS_NAME,methodName,"854");
 	}
 
 	public boolean isRunning() {
-		return running;
+		boolean result;
+		synchronized (lifecycle) {
+			result = ((current_state == State.RUNNING || current_state == State.RECEIVING) && 
+					target_state == State.RUNNING);
+		}
+		return result;
 	}
 
 	/**
@@ -224,6 +224,10 @@ public class CommsReceiver implements Runnable {
 	 * @return true if the receiver is receiving data, false otherwise.
 	 */
 	public boolean isReceiving() {
-		return receiving;
+		boolean result;
+		synchronized (lifecycle) {
+			result = (current_state == State.RECEIVING);
+		}
+		return result;
 	}
 }
