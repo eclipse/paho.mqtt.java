@@ -335,6 +335,7 @@ public class BasicTest {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
 
+    int before_thread_count = Thread.activeCount();
     URI uri = new URI("tcp://iot.eclipse.org:1882");
     IMqttAsyncClient client = clientFactory.createMqttAsyncClient(uri, "client-1");
 
@@ -353,6 +354,17 @@ public class BasicTest {
     } finally {
       client.close();
     }
+    
+    int after_count = Thread.activeCount();
+    Thread[] tarray = new Thread[after_count];
+    while (after_count > before_thread_count) {
+      after_count = Thread.enumerate(tarray);
+      for (int i = 0; i < after_count; ++i) {
+    	    log.info(i + " " + tarray[i].getName());
+      }
+      Thread.sleep(100);
+    }
+    Assert.assertEquals(before_thread_count, after_count);
   }
   
   
@@ -465,7 +477,7 @@ public class BasicTest {
     for (int i = 0; i < after_count; ++i) {
       log.info(i + " " + tarray[i].getName());
     }
-    Assert.assertEquals(before_thread_count, after_count - pool_size);
+    Assert.assertEquals(after_count, before_thread_count + pool_size);
   }
 
 
