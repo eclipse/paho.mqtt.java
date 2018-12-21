@@ -67,7 +67,11 @@ public class CommsSender implements Runnable {
 		synchronized (lifecycle) {
 			if (!running) {
 				running = true;
-				senderFuture = executorService.submit(this);
+				if (executorService == null) {
+					new Thread(this).start();
+				} else {
+					senderFuture = executorService.submit(this);
+				}
 			}
 		}
 	}
@@ -85,7 +89,6 @@ public class CommsSender implements Runnable {
 			//@TRACE 800=stopping sender
 			log.fine(CLASS_NAME,methodName,"800");
 			if (running) {
-				running = false;
 				if (!Thread.currentThread().equals(sendThread)) {
 					try {
 						while (running) {
@@ -99,6 +102,7 @@ public class CommsSender implements Runnable {
 						runningSemaphore.release();
 					}
 				}
+				running = false;
 			}
 			sendThread=null;
 			//@TRACE 801=stopped
@@ -186,5 +190,9 @@ public class CommsSender implements Runnable {
 
 		running = false;
 		clientComms.shutdownConnection(null, mex);
+	}
+
+	public boolean isRunning() {
+		return running;
 	}
 }
