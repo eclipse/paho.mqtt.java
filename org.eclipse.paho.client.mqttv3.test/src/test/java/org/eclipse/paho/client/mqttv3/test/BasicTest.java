@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -325,6 +326,33 @@ public class BasicTest {
     Assert.assertNull(connOpts.getWillMessage());
     Assert.assertNull(connOpts.getSSLProperties());
   }
+
+
+  @Test
+  public void test330() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    URI uri = new URI("tcp://iot.eclipse.org:1882");
+    IMqttAsyncClient client = clientFactory.createMqttAsyncClient(uri, "client-1");
+
+    MqttConnectOptions options = new MqttConnectOptions();
+    options.setAutomaticReconnect(true);
+    options.setUserName("foo");
+    options.setPassword("bar".toCharArray());
+    options.setConnectionTimeout(2);
+    client.connect(options);
+
+    Thread.sleep(1000);
+
+    try {
+    	  // this would deadlock before fix
+      client.disconnect(0).waitForCompletion();
+    } finally {
+      client.close();
+    }
+  }
+
 
   // -------------------------------------------------------------
   // Helper methods/classes

@@ -766,12 +766,19 @@ public class ClientComms {
 			clientState.quiesce(quiesceTimeout);
 			try {
 				internalSend(disconnect, token);
-				token.internalTok.waitUntilSent();
+				// do not wait if the sender process is not running
+				if (sender != null && sender.isRunning()) {
+					token.internalTok.waitUntilSent();
+				}
 			}
 			catch (MqttException ex) {
 			}
 			finally {
 				token.internalTok.markComplete(null, null);
+				if (sender == null || !sender.isRunning()) {
+					// if the sender process is not running 
+					token.internalTok.notifyComplete();
+				}
 				shutdownConnection(token, null);
 			}
 		}
