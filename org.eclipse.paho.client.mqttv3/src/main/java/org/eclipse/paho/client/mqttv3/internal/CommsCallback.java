@@ -96,7 +96,11 @@ public class CommsCallback implements Runnable {
 
 				running = true;
 				quiescing = false;
-				callbackFuture = executorService.submit(this);
+				if (executorService == null) {
+					new Thread(this).start();
+				} else {
+					callbackFuture = executorService.submit(this);
+				}
 			}
 		}
 	}

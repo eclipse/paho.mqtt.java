@@ -421,8 +421,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 * @param pingSender
 	 *            Custom {@link MqttPingSender} implementation.
 	 * @param executorService
-	 *            used for managing threads. If null then a newScheduledThreadPool
-	 *            is used.
+	 *            used for managing threads. If null no executor service is used.
 	 * @throws IllegalArgumentException
 	 *             if the URI does not start with "tcp://", "ssl://" or
 	 *             "local://"
@@ -463,9 +462,6 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		}
 
 		this.executorService = executorService;
-		if (this.executorService == null) {
-			this.executorService = Executors.newScheduledThreadPool(10);
-		}
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });

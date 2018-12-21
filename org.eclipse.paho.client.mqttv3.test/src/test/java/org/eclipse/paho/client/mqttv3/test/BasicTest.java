@@ -16,6 +16,7 @@ package org.eclipse.paho.client.mqttv3.test;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +24,7 @@ import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -351,6 +353,119 @@ public class BasicTest {
     } finally {
       client.close();
     }
+  }
+  
+  
+  @Test
+  public void test402() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttClient client = null;
+    int before_thread_count = Thread.activeCount();
+    try {
+      String clientId = methodName;
+      client = clientFactory.createMqttClient(serverURI, clientId);
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect();
+
+	  String clientId2 = client.getClientId();
+	  log.info("clientId = " + clientId2);
+
+	  boolean isConnected = client.isConnected();
+	  log.info("isConnected = " + isConnected);
+
+	  String id = client.getServerURI();
+	  log.info("ServerURI = " + id);
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+
+	  log.info("Re-Connecting...");
+	  client.connect();
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+	  
+	  int after_count = Thread.activeCount();
+	  Thread[] tarray = new Thread[after_count];
+	  after_count = Thread.enumerate(tarray);
+	  for (int i = 0; i < after_count; ++i) {
+	    log.info(i + " " + tarray[i].getName());
+	  }
+	  Assert.assertEquals(before_thread_count, after_count);
+	}
+	catch (MqttException exception) {
+	  log.log(Level.SEVERE, "caught exception:", exception);
+	  Assert.fail("Unexpected exception: " + exception);
+	}
+	finally {
+	  if (client != null) {
+	     log.info("Close...");
+	     client.close();
+	   }
+	}
+    int after_count = Thread.activeCount();
+    Thread[] tarray = new Thread[after_count];
+    after_count = Thread.enumerate(tarray);
+    for (int i = 0; i < after_count; ++i) {
+    	  log.info(i + " " + tarray[i].getName());
+    }
+    Assert.assertEquals(before_thread_count, after_count);
+  }
+  
+  
+  @Test
+  public void test402a() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttClient client = null;
+    int before_thread_count = Thread.activeCount();
+    final int pool_size = 10;
+    try {
+      String clientId = methodName;
+      client = new MqttClient(serverURI.toString(), clientId, null, Executors.newScheduledThreadPool(pool_size));
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect();
+
+	  String clientId2 = client.getClientId();
+	  log.info("clientId = " + clientId2);
+
+	  boolean isConnected = client.isConnected();
+	  log.info("isConnected = " + isConnected);
+
+	  String id = client.getServerURI();
+	  log.info("ServerURI = " + id);
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+
+	  log.info("Re-Connecting...");
+	  client.connect();
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+	}
+	catch (MqttException exception) {
+	  log.log(Level.SEVERE, "caught exception:", exception);
+	  Assert.fail("Unexpected exception: " + exception);
+	}
+	finally {
+	  if (client != null) {
+	     log.info("Close...");
+	     client.close();
+	   }
+	}
+    int after_count = Thread.activeCount();
+    Thread[] tarray = new Thread[after_count];
+    after_count = Thread.enumerate(tarray);
+    for (int i = 0; i < after_count; ++i) {
+      log.info(i + " " + tarray[i].getName());
+    }
+    Assert.assertEquals(before_thread_count, after_count - pool_size);
   }
 
 

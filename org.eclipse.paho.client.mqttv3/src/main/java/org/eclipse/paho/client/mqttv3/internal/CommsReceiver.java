@@ -74,7 +74,11 @@ public class CommsReceiver implements Runnable {
 		synchronized (lifecycle) {
 			if (!running) {
 				running = true;
-				receiverFuture = executorService.submit(this);
+				if (executorService == null) {
+					new Thread(this).start();
+				} else {
+					receiverFuture = executorService.submit(this);
+				}
 			}
 		}
 	}

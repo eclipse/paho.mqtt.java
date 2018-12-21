@@ -242,7 +242,8 @@ public class ClientComms {
 				}
 
 				conState = CLOSED;
-				shutdownExecutorService();
+				// Don't shut down an externally supplied executor service 
+				//shutdownExecutorService();
 				// ShutdownConnection has already cleaned most things
 				clientState.close();
 				clientState = null;
@@ -688,7 +689,11 @@ public class ClientComms {
 		}
 
 		void start() {
-			executorService.execute(this);
+			if (executorService == null) {
+				new Thread(this).start();
+			} else {
+				executorService.execute(this);
+			}
 		}
 
 		public void run() {
@@ -753,7 +758,11 @@ public class ClientComms {
 
 		void start() {
 			threadName = "MQTT Disc: "+getClient().getClientId();
-			executorService.execute(this);
+			if (executorService == null) {
+				new Thread(this).start();
+			} else {
+				executorService.execute(this);
+			}
 		}
 
 		public void run() {
@@ -865,7 +874,11 @@ public class ClientComms {
 			log.fine(CLASS_NAME, methodName, "509", null);
 
 			disconnectedMessageBuffer.setPublishCallback(new ReconnectDisconnectedBufferCallback(methodName));
-			executorService.execute(disconnectedMessageBuffer);
+			if (executorService == null) {
+				new Thread(disconnectedMessageBuffer).start();
+			} else {
+				executorService.execute(disconnectedMessageBuffer);
+			}
 		}
 	}
 	
