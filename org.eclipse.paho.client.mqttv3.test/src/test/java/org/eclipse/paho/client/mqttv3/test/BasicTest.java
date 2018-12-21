@@ -402,9 +402,16 @@ public class BasicTest {
 	  
 	  int after_count = Thread.activeCount();
 	  Thread[] tarray = new Thread[after_count];
-	  after_count = Thread.enumerate(tarray);
-	  for (int i = 0; i < after_count; ++i) {
-	    log.info(i + " " + tarray[i].getName());
+	  int count = 0;
+	  while (after_count > before_thread_count) {
+	    after_count = Thread.enumerate(tarray);
+	    for (int i = 0; i < after_count; ++i) {
+	      log.info(i + " " + tarray[i].getName());
+	    }
+	    if (++count == 10) {
+	    	  break;
+	    }
+	    	Thread.sleep(100);
 	  }
 	  Assert.assertEquals(before_thread_count, after_count);
 	}
