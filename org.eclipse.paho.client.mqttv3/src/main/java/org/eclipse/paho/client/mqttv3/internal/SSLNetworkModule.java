@@ -16,13 +16,9 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.*;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -132,7 +128,15 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		// If default Hostname verification is enabled, use the same method that is used with HTTPS
 		if(this.httpsHostnameVerificationEnabled) {
 			SSLParameters sslParams = new SSLParameters();
-			sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+			try {
+				sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+			} catch (NoSuchMethodError e) {
+				try {
+					sslParams = SSLContext.getDefault().getDefaultSSLParameters();
+				} catch (NoSuchAlgorithmException e1) {
+					throw new MqttException(e1);
+				}
+			}
 			((SSLSocket) socket).setSSLParameters(sslParams);
 		}
 		((SSLSocket) socket).startHandshake();
