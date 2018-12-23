@@ -482,10 +482,19 @@ public class OfflineBufferingTest {
 		Assert.assertTrue(recieved);
 		log.info("Message was successfully delivered after connect");
 
-		@SuppressWarnings("unchecked")
-		List<String> postConnectKeys = Collections.list(persistence.keys());
-		log.info("There are now: " + postConnectKeys.size() + " keys in persistence");
-		Assert.assertEquals(0, postConnectKeys.size());
+		int keycount = 0;
+		int count = 0;
+		do {
+			@SuppressWarnings("unchecked")
+			List<String> postConnectKeys = Collections.list(persistence.keys());
+			log.info("There are now: " + postConnectKeys.size() + " keys in persistence");
+			keycount = postConnectKeys.size();
+			if (keycount == 0 || ++count > 10) {
+				break;
+			}
+			Thread.sleep(100);
+		} while (keycount != 0);
+		Assert.assertEquals(0, keycount);
 
 		IMqttToken newClientDisconnectToken = newClient.disconnect();
 		newClientDisconnectToken.waitForCompletion(5000);
