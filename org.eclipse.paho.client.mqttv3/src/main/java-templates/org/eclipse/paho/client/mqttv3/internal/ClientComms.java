@@ -599,7 +599,11 @@ public class ClientComms {
 		this.callback.setCallback(mqttCallback);
 	}
 	
-	public void setReconnectCallback(MqttCallbackExtended callback){
+	public void setReconnectCallback(MqttCallbackExtended callback) throws MqttException {
+		if (this.isClosed()) {
+		    throw new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED);
+		}
+
 		this.callback.setReconnectCallback(callback);
 	}
 	
