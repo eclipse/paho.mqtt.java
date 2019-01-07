@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,8 +16,12 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SNIHostName;
+import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -129,6 +133,13 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
 		socket.setSoTimeout(this.handshakeTimeoutSecs * 1000);
 		
+		// SNI support.  Should be automatic under some circumstances - not all, apparently
+		SSLParameters sslParameters = new SSLParameters();
+		List<SNIServerName> sniHostNames = new ArrayList<SNIServerName>(1);
+		sniHostNames.add(new SNIHostName(host));
+		sslParameters.setServerNames(sniHostNames);
+		((SSLSocket)socket).setSSLParameters(sslParameters);
+
 		// If default Hostname verification is enabled, use the same method that is used with HTTPS
 		if(this.httpsHostnameVerificationEnabled) {
 			SSLParameters sslParams = new SSLParameters();

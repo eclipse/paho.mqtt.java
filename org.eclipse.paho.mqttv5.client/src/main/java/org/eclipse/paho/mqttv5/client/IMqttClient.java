@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -333,21 +333,6 @@ public void subscribe(String topicFilter, IMqttMessageListener messageListener) 
 	 *
 	 * @param topicFilters the topic to subscribe to, which can include wildcards.
 	 * @param messageListener one callbacks to handle incoming messages
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-public void subscribe(String[] topicFilters, IMqttMessageListener messageListener) throws MqttException;
-
-	/**
-	 * Subscribe to a topic, which may include wildcards.
-	 *
-	 * @see #subscribe(String[], int[])
-	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
-	 * @param messageListener a callback to handle incoming messages
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
 public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
@@ -783,7 +768,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * Get a topic object which can be used to publish messages.
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:</p>
 	 * <ul>
-	 * <li>{@link MqttLegacyBlockingClient#publish(String, MqttMessage)} to publish a message in a blocking manner
+	 * <li>{@link MqttClient#publish(String, MqttMessage)} to publish a message in a blocking manner
 	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener)}
 	 * </ul>
 	 * <p>When building an application,

@@ -15,7 +15,7 @@
  */
 package org.eclipse.paho.mqttv5.client.alpha;
 
-import org.eclipse.paho.mqttv5.client.MqttLegacyBlockingClient;
+import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.common.MqttPersistable;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 

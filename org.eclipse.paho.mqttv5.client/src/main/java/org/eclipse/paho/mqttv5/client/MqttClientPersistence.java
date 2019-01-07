@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,8 +23,8 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 /**
  * Represents a persistent data store, used to store outbound and inbound messages while they
  * are in flight, enabling delivery to the QoS specified. You can specify an implementation
- * of this interface using {@link MqttLegacyBlockingClient#MqttLegacyBlockingClient(String, String, MqttClientPersistence)},
- * which the {@link MqttLegacyBlockingClient} will use to persist QoS 1 and 2 messages.
+ * of this interface using {@link MqttClient#MqttLegacyBlockingClient(String, String, MqttClientPersistence)},
+ * which the {@link MqttClient} will use to persist QoS 1 and 2 messages.
  * <p>
  * If the methods defined throw the MqttPersistenceException then the state of the data persisted
  * should remain as prior to the method being called. For example, if {@link #put(String, MqttPersistable)}

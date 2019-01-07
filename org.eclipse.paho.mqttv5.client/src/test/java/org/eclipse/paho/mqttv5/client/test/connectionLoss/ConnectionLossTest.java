@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,7 @@ import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
-import org.eclipse.paho.mqttv5.client.MqttLegacyBlockingClient;
+import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
@@ -119,7 +119,7 @@ public class ConnectionLossTest implements MqttCallback {
 		options.setPassword(password);
 		options.setKeepAliveInterval(keepAlive);
 
-		MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
 		client.setCallback(this);
 		proxy.enableProxy();
 		client.connect(options);
@@ -174,7 +174,7 @@ public class ConnectionLossTest implements MqttCallback {
 		options.setPassword(password);
 		options.setKeepAliveInterval(keepAlive);
 
-		MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
 		client.setCallback(this);
 		proxy.enableProxy();
 		client.connect(options);
@@ -230,7 +230,7 @@ public class ConnectionLossTest implements MqttCallback {
 		options.setPassword(password);
 		options.setKeepAliveInterval(keepAlive);
 
-		MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
 		client.setCallback(this);
 		proxy.enableProxy();
 		client.connect(options);
@@ -347,7 +347,7 @@ public class ConnectionLossTest implements MqttCallback {
 		options.setPassword(password);
 		options.setKeepAliveInterval(keepAlive);
 
-		MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
 		client.setCallback(this);
 		proxy.enableProxy();
 		client.connect(options);
@@ -392,7 +392,7 @@ public class ConnectionLossTest implements MqttCallback {
 		options.setPassword(password);
 		options.setKeepAliveInterval(keepAlive);
 
-		MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
 		client.setCallback(this);
 		proxy.enableProxy();
 		client.connect(options);

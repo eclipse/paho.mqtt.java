@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -76,7 +76,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
  *
  * @see IMqttClient
  */
-public class MqttLegacyBlockingClient implements IMqttClient {
+public class MqttClient implements IMqttClient {
 
 	protected MqttAsyncClient aClient = null; // Delegate implementation to MqttAsyncClient
 	protected long timeToWait = -1; // How long each method should wait for action to complete
@@ -168,7 +168,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @throws MqttException
 	 *             if any other problem was encountered
 	 */
-	public MqttLegacyBlockingClient(String serverURI, String clientId) throws MqttException {
+	public MqttClient(String serverURI, String clientId) throws MqttException {
 		this(serverURI, clientId, new MqttDefaultFilePersistence());
 	}
 
@@ -275,7 +275,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @throws MqttException
 	 *             if any other problem was encountered
 	 */
-	public MqttLegacyBlockingClient(String serverURI, String clientId, MqttClientPersistence persistence)
+	public MqttClient(String serverURI, String clientId, MqttClientPersistence persistence)
 			throws MqttException {
 		aClient = new MqttAsyncClient(serverURI, clientId, persistence);
 	}
@@ -386,7 +386,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * @throws MqttException
 	 *             if any other problem was encountered
 	 */
-	public MqttLegacyBlockingClient(String serverURI, String clientId, MqttClientPersistence persistence,
+	public MqttClient(String serverURI, String clientId, MqttClientPersistence persistence,
 			ScheduledExecutorService executorService) throws MqttException {
 		aClient = new MqttAsyncClient(serverURI, clientId, persistence, null, executorService);
 	}
@@ -516,11 +516,24 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 		int[] grantedQos = tok.getGrantedQos();
 		for (int i = 0; i < grantedQos.length; ++i) {
 			subscriptions[i].setQos(grantedQos[i]);
-			;
 		}
 		if (grantedQos.length == 1 && subscriptions[0].getQos() == 0x80) {
 			throw new MqttException(MqttClientException.REASON_CODE_SUBSCRIBE_FAILED);
 		}
+	}
+
+	@Override
+	public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
+		if (topicFilters.length != qos.length) {
+			throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
+		}
+
+		MqttSubscription[] subscriptions = new MqttSubscription[topicFilters.length];
+		for (int i = 0; i < topicFilters.length; ++i) {
+			subscriptions[i] = new MqttSubscription(topicFilters[i], qos[i]);
+		}
+
+		this.subscribe(subscriptions);
 	}
 
 	/*
@@ -531,11 +544,6 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 */
 	public void subscribe(String topicFilter, IMqttMessageListener messageListener) throws MqttException {
 		this.subscribe(new String[] { topicFilter }, new int[] { 1 }, new IMqttMessageListener[] { messageListener });
-	}
-
-	@Override
-	public void subscribe(String[] topicFilters, IMqttMessageListener messageListener) throws MqttException {
-		this.subscribe(topicFilters, new IMqttMessageListener[] { messageListener });
 	}
 
 	/*
@@ -562,10 +570,6 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 		this.subscribe(new String[] { topicFilter }, new int[] { qos }, new IMqttMessageListener[] { messageListener });
 	}
 
-	@Override
-	public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
-		this.subscribe(topicFilters, qos, new IMqttMessageListener[] {});
-	}
 
 	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
@@ -673,7 +677,7 @@ public class MqttLegacyBlockingClient implements IMqttClient {
 	 * Return the maximum time to wait for an action to complete.
 	 * 
 	 * @return the time to wait
-	 * @see MqttLegacyBlockingClient#setTimeToWait(long)
+	 * @see MqttClient#setTimeToWait(long)
 	 */
 	public long getTimeToWait() {
 		return this.timeToWait;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,7 +24,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -71,15 +70,8 @@ public class TCPNetworkModule implements NetworkModule {
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
 			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, Integer.valueOf(port), Long.valueOf(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
-			if (factory instanceof SSLSocketFactory) {
-				// SNI support
-				Socket tempsocket = new Socket();
-				tempsocket.connect(sockaddr, conTimeout*1000);
-				socket = ((SSLSocketFactory)factory).createSocket(tempsocket, host, port, true);
-			} else {
-				socket = factory.createSocket();
-				socket.connect(sockaddr, conTimeout*1000);
-			}
+			socket = factory.createSocket();
+			socket.connect(sockaddr, conTimeout*1000);
 			socket.setSoTimeout(1000);
 		}
 		catch (ConnectException ex) {

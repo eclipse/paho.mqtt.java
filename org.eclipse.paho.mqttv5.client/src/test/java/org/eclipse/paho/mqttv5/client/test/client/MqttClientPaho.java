@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,7 @@
 package org.eclipse.paho.mqttv5.client.test.client;
 
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
-import org.eclipse.paho.mqttv5.client.MqttLegacyBlockingClient;
+import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 
@@ -23,7 +23,7 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 /**
  *
  */
-public class MqttClientPaho extends MqttLegacyBlockingClient {
+public class MqttClientPaho extends MqttClient {
 
   /**
    * @param serverURI

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -959,7 +959,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * <ul>
 	 * <li>{@link MqttAsyncClient#publish(String, MqttMessage)} to publish a message
 	 * in a non-blocking manner or</li>
-	 * <li>{@link MqttLegacyBlockingClient#publish(String, MqttMessage)} to publish
+	 * <li>{@link MqttClient#publish(String, MqttMessage)} to publish
 	 * a message in a blocking manner</li>
 	 * </ul>
 	 * <p>

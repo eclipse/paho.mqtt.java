@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
-import org.eclipse.paho.mqttv5.client.MqttLegacyBlockingClient;
+import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
@@ -69,7 +69,7 @@ public class AutomaticReconnectTest {
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
-		final MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(),
+		final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(),
 				clientId, DATA_STORE);
 
 		proxy.enableProxy();
@@ -115,7 +115,7 @@ public class AutomaticReconnectTest {
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 
-		final MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(),
+		final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(),
 				clientId, DATA_STORE);
 
 		proxy.enableProxy();
@@ -153,7 +153,7 @@ public class AutomaticReconnectTest {
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		options.setConnectionTimeout(15);
-		final MqttLegacyBlockingClient client = new MqttLegacyBlockingClient("tcp://localhost:" + proxy.getLocalPort(),
+		final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(),
 				clientId, DATA_STORE);
 
 		// Make sure the proxy is disabled and give it a second to close everything down
