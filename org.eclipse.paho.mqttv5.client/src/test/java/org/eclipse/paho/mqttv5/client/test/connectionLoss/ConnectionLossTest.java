@@ -111,6 +111,8 @@ public class ConnectionLossTest implements MqttCallback {
 	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos0() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectionOptions options = new MqttConnectionOptions();
@@ -166,6 +168,8 @@ public class ConnectionLossTest implements MqttCallback {
 	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos1() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectionOptions options = new MqttConnectionOptions();
@@ -222,6 +226,8 @@ public class ConnectionLossTest implements MqttCallback {
 	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos2() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectionOptions options = new MqttConnectionOptions();
@@ -277,6 +283,8 @@ public class ConnectionLossTest implements MqttCallback {
 	 */
 	@Test
 	public void testConnectionLossWhilePublishingQos1Async() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectionOptions options = new MqttConnectionOptions();
@@ -339,6 +347,8 @@ public class ConnectionLossTest implements MqttCallback {
 	 */
 	@Test
 	public void testKeepConnectionOpenWhilePublishingQos0() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectionOptions options = new MqttConnectionOptions();
@@ -384,6 +394,8 @@ public class ConnectionLossTest implements MqttCallback {
 	 */
 	@Test
 	public void testKeepConnectionOpenIdle() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectionOptions options = new MqttConnectionOptions();

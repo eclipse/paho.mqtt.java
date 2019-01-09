@@ -14,6 +14,9 @@
 
 package org.eclipse.paho.mqttv5.client;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -36,14 +39,12 @@ public class TimerPingSender implements MqttPingSender{
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private ClientComms comms;
-	private ScheduledExecutorService executorService;
+	private Timer timer;
+	private ScheduledExecutorService executorService = null;
 	private ScheduledFuture<?> scheduledFuture;
 	private String clientid;
 
 	public TimerPingSender(ScheduledExecutorService executorService) {
-		if (executorService == null) {
-			throw new IllegalArgumentException("ExecutorService cannot be null.");
-		}
 		this.executorService = executorService;
 	}
 
@@ -61,21 +62,48 @@ public class TimerPingSender implements MqttPingSender{
 
 		//@Trace 659=start timer for client:{0}
 		log.fine(CLASS_NAME, methodName, "659", new Object[]{ clientid });
-		//Check ping after first keep alive interval.
-		schedule(comms.getKeepAlive());
+		if (executorService == null) {
+			timer = new Timer("MQTT Ping: " + clientid);
+			//Check ping after first keep alive interval.
+			timer.schedule(new PingTask(), comms.getKeepAlive());
+		} else {
+			//Check ping after first keep alive interval.
+			schedule(comms.getKeepAlive());
+		}
 	}
 
 	public void stop() {
 		final String methodName = "stop";
 		//@Trace 661=stop
 		log.fine(CLASS_NAME, methodName, "661", null);
-		if (scheduledFuture != null) {
-			scheduledFuture.cancel(true);
+		if (executorService == null) {
+			if (timer != null){
+				timer.cancel();
+			}
+		} else {
+			if (scheduledFuture != null) {
+				scheduledFuture.cancel(true);
+			}
 		}
 	}
 
 	public void schedule(long delayInMilliseconds) {
-		scheduledFuture = executorService.schedule(new PingRunnable(), delayInMilliseconds, TimeUnit.MILLISECONDS);
+		if (executorService == null) {
+			timer.schedule(new PingTask(), delayInMilliseconds);	
+		} else {
+			scheduledFuture = executorService.schedule(new PingRunnable(), delayInMilliseconds, TimeUnit.MILLISECONDS);
+		}
+	}
+	
+	private class PingTask extends TimerTask {
+		private static final String methodName = "PingTask.run";
+
+		public void run() {
+			Thread.currentThread().setName("MQTT Ping: " + clientid);
+			//@Trace 660=Check schedule at {0}
+			log.fine(CLASS_NAME, methodName, "660", new Object[]{ new Long(System.nanoTime()) });
+			comms.checkForActivity();
+		}
 	}
 
 	private class PingRunnable implements Runnable {

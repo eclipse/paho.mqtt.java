@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
@@ -32,7 +33,10 @@ import org.junit.Test;
  *
  */
 public class BasicTest {
-	private static final Logger log = Logger.getLogger(BasicTest.class.getName());
+	
+	static final Class<?> cclass = BasicTest.class;
+	private static final String className = cclass.getName();
+	private static final Logger log = Logger.getLogger(className);
 
 	private static URI serverURI;
 	private static String topicPrefix;
@@ -41,7 +45,7 @@ public class BasicTest {
 	public static void setUpBeforeClass() throws Exception {
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+			LoggingUtilities.banner(log, cclass, methodName);
 
 			serverURI = TestProperties.getServerURI();
 			topicPrefix = "BasicTest-" + UUID.randomUUID().toString() + "-";
@@ -61,7 +65,7 @@ public class BasicTest {
 	@Test
 	public void testConnectAndDisconnect() throws MqttException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, cclass, methodName);
 		// This utility method already asserts that we are connected, so good so far
 		MqttAsyncClient asyncClient = TestClientUtilities.connectAndGetClient(serverURI.toString(), methodName, null,
 				null, 5000);
@@ -80,7 +84,7 @@ public class BasicTest {
 	@Test
 	public void testPublishAndReceive() throws MqttException, InterruptedException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, cclass, methodName);
 		String topic = topicPrefix + methodName;
 
 		int timeout = 5000;
@@ -124,7 +128,7 @@ public class BasicTest {
 	@Test
 	public void testQoS2DuplicateIssue() throws MqttException, InterruptedException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, cclass, methodName);
 		String subTopic = "a/+/c";
 
 		int timeout = 5000;
@@ -163,5 +167,41 @@ public class BasicTest {
 		IMqttDeliveryToken deliveryToken = client.publish(topic, testMessage);
 		deliveryToken.waitForCompletion(timeout);
 	}
+	
+	  @Test
+	  public void test330() throws Exception {
+	    String methodName = Utility.getMethodName();
+	    LoggingUtilities.banner(log, cclass, methodName);
+
+	    int before_thread_count = Thread.activeCount();
+		MqttAsyncClient client = new MqttAsyncClient("tcp://iot.eclipse.org:1882", methodName);
+
+	    MqttConnectionOptions options = new MqttConnectionOptions();
+	    options.setAutomaticReconnect(true);
+	    options.setUserName("foo");
+	    options.setPassword("bar".getBytes());
+	    options.setConnectionTimeout(2);
+	    client.connect(options);
+
+	    Thread.sleep(1000);
+
+	    try {
+	    	  // this would deadlock before fix
+	      client.disconnect(0).waitForCompletion();
+	    } finally {
+	      client.close();
+	    }
+	    
+	    int after_count = Thread.activeCount();
+	    Thread[] tarray = new Thread[after_count];
+	    while (after_count > before_thread_count) {
+	      after_count = Thread.enumerate(tarray);
+	      for (int i = 0; i < after_count; ++i) {
+	    	    log.info("Thread "+ i + ": " + tarray[i].getName());
+	      }
+	      Thread.sleep(300);
+	    }
+	    Assert.assertEquals(before_thread_count, after_count);
+	  }
 
 }

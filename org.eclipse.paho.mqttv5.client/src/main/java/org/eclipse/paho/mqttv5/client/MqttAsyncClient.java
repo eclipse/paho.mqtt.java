@@ -579,9 +579,6 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		}
 
 		this.executorService = executorService;
-		if (this.executorService == null) {
-			this.executorService = Executors.newScheduledThreadPool(10);
-		}
 
 		this.pingSender = pingSender;
 		if (this.pingSender == null) {
