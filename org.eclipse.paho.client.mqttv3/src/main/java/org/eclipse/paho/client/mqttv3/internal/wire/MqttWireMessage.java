@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistable;
+import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
 
 /**
@@ -64,6 +65,14 @@ public abstract class MqttWireMessage {
 	protected int msgId;
 
 	protected boolean duplicate = false;
+
+	/**
+	 * The token associated with the message. It needs to be stored here,
+	 * because QoS 0 messages do not have an ID, and tokens for these messages
+	 * can thus not be stored in the Token Store.
+	 */
+	private MqttToken token;
+
 
 	public MqttWireMessage(byte type) {
 		this.type = type;
@@ -407,6 +416,24 @@ public abstract class MqttWireMessage {
 			throw new IllegalArgumentException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
 		}
 
+	}
+
+	/**
+	 * Get the token associated with the message.
+	 *
+	 * @return The token associated with the message.
+	 */
+	public MqttToken getToken() {
+		return token;
+	}
+
+	/**
+	 * Set the token associated with the message.
+	 *
+	 * @param token the token associated with the message.
+	 */
+	public void setToken(MqttToken token) {
+		this.token = token;
 	}
 
 	public String toString() {
