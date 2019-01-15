@@ -134,7 +134,10 @@ public class CommsSender implements Runnable {
 							out.write(message);
 							out.flush();
 						} else {
-							MqttToken token = tokenStore.getToken(message);
+							MqttToken token = message.getToken();
+							if (token == null) {
+								tokenStore.getToken(message);
+							}
 							// While quiescing the tokenstore can be cleared so need
 							// to check for null for the case where clear occurs
 							// while trying to send a message.

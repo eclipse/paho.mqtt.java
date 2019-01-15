@@ -507,7 +507,8 @@ public class ClientState {
 					message.setMessageId(getNextMessageId());
 				}
 		}
-		if (token != null ) {
+		if (token != null) {
+			message.setToken(token);
 			try {
 				token.internalTok.setMessageID(message.getMessageId());
 			} catch (Exception e) {
@@ -531,13 +532,14 @@ public class ClientState {
 					case 2:
 						outboundQoS2.put( Integer.valueOf(message.getMessageId()), message);
 						persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
+						tokenStore.saveToken(token, message);
 						break;
 					case 1:
 						outboundQoS1.put( Integer.valueOf(message.getMessageId()), message);
 						persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
+						tokenStore.saveToken(token, message);
 						break;
 				}
-				tokenStore.saveToken(token, message);
 				pendingMessages.addElement(message);
 				queueLock.notifyAll();
 			}
@@ -906,8 +908,11 @@ public class ClientState {
 		//@TRACE 625=key={0}
 		log.fine(CLASS_NAME,methodName,"625",new Object[]{message.getKey()});
 		
-		MqttToken token = tokenStore.getToken(message);
-		if (token == null) return;
+		MqttToken token = message.getToken();
+		if (token == null) {
+			token = tokenStore.getToken(message);
+			if (token == null) return;
+		}
 		token.internalTok.notifySent();
         if (message instanceof MqttPingReq) {
             synchronized (pingOutstandingLock) {
