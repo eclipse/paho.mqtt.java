@@ -656,4 +656,83 @@ public class SendReceiveAsyncTest {
 
 	  log.exiting(className, methodName);
   }
+  
+  /**
+   * Test tokens for QoS 0 being 'lost'
+   */
+  @Test
+  public void testQoS0Tokens() {
+    final String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+    log.entering(className, methodName);
+    
+    int tokenCount = 1000;  // how many QoS 0 tokens shall we track?
+
+    IMqttAsyncClient mqttClient = null;
+    try {
+      mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
+      IMqttToken connectToken;
+      IMqttToken subToken;
+      IMqttDeliveryToken[] pubTokens = new IMqttDeliveryToken[tokenCount];
+
+      MqttV3Receiver mqttV3Receiver = new MqttV3Receiver(mqttClient, LoggingUtilities.getPrintStream());
+      log.info("Assigning callback...");
+      mqttClient.setCallback(mqttV3Receiver);
+
+      MqttConnectOptions opts = new MqttConnectOptions();
+      opts.setMaxInflight(tokenCount);
+      connectToken = mqttClient.connect(opts);
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+      connectToken.waitForCompletion();
+
+      String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
+
+      subToken = mqttClient.subscribe(topicNames[0], 2);
+      log.info("Subscribing to..." + topicNames[0]);
+      subToken.waitForCompletion();
+
+      for (int i = 0; i < tokenCount; ++i) {
+    	    try {
+    	    		pubTokens[i] = mqttClient.publish(topicNames[0], "message".getBytes(), 0, false);
+    	    } catch (Exception e) {
+    	    		e.printStackTrace();
+    	    }
+      }
+      log.info(tokenCount + " messages sent");
+      int errors = 0;
+      for (int i = 0; i < tokenCount; ++i) {
+    	    try {
+    	  	  pubTokens[i].waitForCompletion(10);
+    	    } catch (Exception e) {
+    	    	  errors += 1;
+    	    }
+      }
+      log.info("Number of waits incomplete "+errors);
+      
+      while (mqttV3Receiver.receivedMessageCount() < tokenCount) {
+    	  	Thread.sleep(10);
+      }
+    }
+    catch (Exception exception) {
+      log.log(Level.SEVERE, "caught exception:", exception);
+      Assert.fail("Exception:" + methodName + " exception="+ exception);
+    }
+    finally {
+      try {
+        if (mqttClient != null) {
+          IMqttToken disconnectToken;
+          disconnectToken = mqttClient.disconnect(null, null);
+          log.info("Disconnecting...");
+          disconnectToken.waitForCompletion();
+          log.info("Close...");
+          mqttClient.close();
+        }
+      }
+      catch (Exception exception) {
+        log.log(Level.SEVERE, "caught exception:", exception);
+      }
+    }
+
+    log.exiting(className, methodName);
+  }
 }
