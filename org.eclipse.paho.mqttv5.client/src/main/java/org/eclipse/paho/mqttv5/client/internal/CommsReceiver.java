@@ -18,6 +18,7 @@ package org.eclipse.paho.mqttv5.client.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.paho.mqttv5.client.MqttClientException;
@@ -75,7 +76,7 @@ public class CommsReceiver implements Runnable {
 			if (current_state == State.STOPPED && target_state == State.STOPPED) {
 				target_state = State.RUNNING;
 				if (executorService == null) {
-					new Thread(this).start();
+					Executors.newSingleThreadExecutor().submit(this);
 				} else {
 					receiverFuture = executorService.submit(this);
 				}

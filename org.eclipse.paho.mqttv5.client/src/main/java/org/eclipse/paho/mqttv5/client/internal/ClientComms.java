@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.paho.mqttv5.client.BufferedMessage;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
@@ -749,7 +750,7 @@ public class ClientComms {
 
 		void start() {
 			if (executorService == null) {
-				new Thread(this).start();
+				Executors.newSingleThreadExecutor().submit(this);
 			} else {
 				executorService.execute(this);
 			}
@@ -819,7 +820,7 @@ public class ClientComms {
 		void start() {
 			threadName = "MQTT Disc: "+getClient().getClientId();
 			if (executorService == null) {
-				new Thread(this).start();
+				Executors.newSingleThreadExecutor().submit(this);
 			} else {
 				executorService.execute(this);
 			}
@@ -934,7 +935,7 @@ public class ClientComms {
 
 			disconnectedMessageBuffer.setPublishCallback(new ReconnectDisconnectedBufferCallback(methodName));
 			if (executorService == null) {
-				new Thread(disconnectedMessageBuffer).start();
+				Executors.newSingleThreadExecutor().submit(disconnectedMessageBuffer);
 			} else {
 				executorService.execute(disconnectedMessageBuffer);
 			}

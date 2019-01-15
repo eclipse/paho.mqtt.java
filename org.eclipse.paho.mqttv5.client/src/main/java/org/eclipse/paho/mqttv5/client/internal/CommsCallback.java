@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -113,7 +114,7 @@ public class CommsCallback implements Runnable {
 				}
 				target_state = State.RUNNING;
 				if (executorService == null) {
-					new Thread(this).start();
+					Executors.newSingleThreadExecutor().submit(this);
 				} else {
 					callbackFuture = executorService.submit(this);
 				}
