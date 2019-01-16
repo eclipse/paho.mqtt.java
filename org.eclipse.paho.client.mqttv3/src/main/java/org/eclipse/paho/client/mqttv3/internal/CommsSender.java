@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -136,7 +136,7 @@ public class CommsSender implements Runnable {
 						} else {
 							MqttToken token = message.getToken();
 							if (token == null) {
-								tokenStore.getToken(message);
+								token = tokenStore.getToken(message);
 							}
 							// While quiescing the tokenstore can be cleared so need
 							// to check for null for the case where clear occurs
