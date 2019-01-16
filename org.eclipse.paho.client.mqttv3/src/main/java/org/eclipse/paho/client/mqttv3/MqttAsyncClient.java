@@ -1008,14 +1008,14 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback,
 			IMqttMessageListener[] messageListeners) throws MqttException {
 
-		if ((messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
+		if (messageListeners != null && (messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
 			throw new IllegalArgumentException();
 		}
 
 		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
 			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
-            if (messageListeners[i] == null) {
+            if (messageListeners == null || messageListeners[i] == null) {
                 this.comms.removeMessageListener(topicFilters[i]);
             }
             else {
