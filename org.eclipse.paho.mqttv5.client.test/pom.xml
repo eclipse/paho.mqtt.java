@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.paho</groupId>
+    <artifactId>java-parent</artifactId>
+    <version>1.2.1-SNAPSHOT</version>
+  </parent>
+  <groupId>org.eclipse.paho.mqttv5.client.test</groupId>
+  <artifactId>org.eclipse.paho.mqttv5.client.test</artifactId>
+  <version>1.2.1-SNAPSHOT</version>
+  <name>org.eclipse.paho.mqttv5.client.test</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
+  <build>
+		<plugins>
+			<plugin>
+ 				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+          		<id>generate-test-report</id>
+        			<phase>test</phase>
+        			<goals>
+            		<goal>report-aggregate</goal>
+        			</goals>
+      			</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+  
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.eclipse.paho</groupId>
+    	<artifactId>org.eclipse.paho.mqttv5.common</artifactId>
+    	<version>1.2.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.eclipse.paho</groupId>
+    	<artifactId>org.eclipse.paho.mqttv5.client</artifactId>
+    	<version>1.2.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  
+  <packaging>pom</packaging>
+</project>

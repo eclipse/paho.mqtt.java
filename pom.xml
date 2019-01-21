@@ -17,6 +17,7 @@
 		<junit.version>4.12</junit.version>
 		<javadoc.version>3.0.1</javadoc.version>
 		<mvnsource.version>3.0.1</mvnsource.version>
+		<jacoco.version>0.8.2</jacoco.version>
 		<test.exclude>**/*ConformantTest.java</test.exclude>
 		<download.location>/home/data/httpd/download.eclipse.org/paho/releases/${project.version}/Java</download.location>
 	</properties>
@@ -306,5 +307,6 @@
 		<module>org.eclipse.paho.sample.utility</module>
 		<module>org.eclipse.paho.mqttv5.common</module>
     	<module>org.eclipse.paho.mqttv5.client</module>
+    	<module>org.eclipse.paho.mqttv5.client.test</module>
 	</modules>
 </project>

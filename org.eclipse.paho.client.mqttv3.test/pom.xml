@@ -60,6 +60,25 @@
         			<forkCount>1</forkCount>
 				</configuration>
 			</plugin>
+			<plugin>
+ 				<groupId>org.jacoco</groupId>
+				  	<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+            		<id>generate-test-report</id>
+            			<phase>test</phase>
+            			<goals>
+                		<goal>report-aggregate</goal>
+            			</goals>
+        				</execution>
+					</executions>
+				</plugin>
 		</plugins>
 	</build>
 
