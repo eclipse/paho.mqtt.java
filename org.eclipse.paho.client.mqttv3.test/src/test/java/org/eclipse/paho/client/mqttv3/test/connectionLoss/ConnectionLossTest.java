@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -429,8 +429,11 @@ public class ConnectionLossTest implements MqttCallback
 		client.close();
 	}
 	
+	private boolean connectionLostCalled = false;
+	
 	public void connectionLost(Throwable cause) {
 		log.info((new Date())+" - Connection Lost");
+		connectionLostCalled = true;
 	}
 
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
@@ -440,4 +443,49 @@ public class ConnectionLossTest implements MqttCallback
 	public void deliveryComplete(IMqttDeliveryToken token) {
 //		log.info("Delivery Complete: " + token.getMessageId());
 	}
+	
+	/**
+	 * Tests whether paho can detect a connection loss with the server with no publishing - using ping only
+	 * @throws Exception
+	 */
+	@Test
+	public void testConnectionLossUsingPing()
+		throws Exception
+	{
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		final int keepAlive = 15;
+
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		connectionLostCalled = false;
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		client.connect(options);
+
+		log.info((new Date())+" - Connected.");
+		Thread.sleep(1000);    		
+		proxy.disableProxy();
+
+		int count = 0;
+		while (client.isConnected() && ++count < 2*keepAlive) {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (Exception e) {
+				// ignore
+			}
+		}
+
+		Assert.assertTrue("Connection lost was not called", connectionLostCalled);
+		Assert.assertFalse("Disconnected", client.isConnected());
+		if (client.isConnected()) client.disconnect(0);
+		client.close();
+	}
+
 }
