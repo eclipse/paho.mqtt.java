@@ -33,11 +33,11 @@ import org.eclipse.paho.mqttv5.client.internal.MqttConnectionState;
 import org.eclipse.paho.mqttv5.client.internal.MqttSessionState;
 import org.eclipse.paho.mqttv5.client.internal.NetworkModule;
 import org.eclipse.paho.mqttv5.client.internal.NetworkModuleService;
-import org.eclipse.paho.mqttv5.client.logging.Logger;
-import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.mqttv5.client.util.Debug;
+import org.eclipse.paho.mqttv5.client.logging.Logger;
+import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.ExceptionHelper;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -1049,6 +1049,16 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, userContext, callback,
 				new MqttProperties());
 	}
+	
+	@Override
+	public IMqttToken subscribe(String[] topicFilters, int[] qoss, Object userContext, MqttActionListener callback)
+			throws MqttException {
+		MqttSubscription[] subs = new MqttSubscription[topicFilters.length];
+		for (int i = 0; i < topicFilters.length; ++ i) {
+			subs[i] = new MqttSubscription(topicFilters[i], qoss[i]);
+		}
+		return this.subscribe(subs, userContext, callback, new MqttProperties());
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -1061,6 +1071,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	public IMqttToken subscribe(String topicFilter, int qos) throws MqttException {
 		return this.subscribe(new MqttSubscription[] { new MqttSubscription(topicFilter, qos) }, null, null,
 				new MqttProperties());
+	}
+	
+	@Override
+	public IMqttToken subscribe(String[] topicFilters, int[] qoss) throws MqttException {
+		return this.subscribe(topicFilters, qoss, null, null);
 	}
 
 	/*
@@ -1211,7 +1226,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			MqttTopicValidator.validate(subscriptions[i].getTopic(),
 					this.mqttConnection.isWildcardSubscriptionsAvailable(),
 					this.mqttConnection.isSharedSubscriptionsAvailable());
-			this.comms.setMessageListener(null, subscriptions[i].getTopic(), messageListeners[i]);
+			if (messageListeners == null || messageListeners[i] == null) {
+				this.comms.removeMessageListener(subscriptions[i].getTopic());
+			} else {
+				this.comms.setMessageListener(null, subscriptions[i].getTopic(), messageListeners[i]);
+			}
 		}
 		
 		IMqttToken token = null;
@@ -1266,7 +1285,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			MqttTopicValidator.validate(subscriptions[i].getTopic(),
 					this.mqttConnection.isWildcardSubscriptionsAvailable(),
 					this.mqttConnection.isSharedSubscriptionsAvailable());
-			this.comms.setMessageListener(subId, subscriptions[i].getTopic(), messageListener);
+			if (messageListener == null) {
+				this.comms.removeMessageListener(subscriptions[i].getTopic());
+			} else {
+				this.comms.setMessageListener(subId, subscriptions[i].getTopic(), messageListener);
+			}
 		}
 
 		IMqttToken token = null;

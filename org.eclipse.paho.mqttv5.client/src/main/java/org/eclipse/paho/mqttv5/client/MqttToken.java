@@ -103,7 +103,7 @@ public class MqttToken implements IMqttToken {
 	}
 
 	public MqttProperties getMessageProperties() {
-		return internalTok.getWireMessage().getProperties();
+		return (internalTok.getWireMessage() == null) ? null : internalTok.getWireMessage().getProperties();
 	}
 
 	@Override

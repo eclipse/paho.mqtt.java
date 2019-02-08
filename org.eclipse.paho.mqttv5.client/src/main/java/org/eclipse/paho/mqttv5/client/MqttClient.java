@@ -483,47 +483,14 @@ public class MqttClient implements IMqttClient {
 	}
 
 	/*
-	 * @see IMqttClient#subscribe(String)
-	 */
-	public void subscribe(String topicFilter) throws MqttException {
-		this.subscribe(new String[] { topicFilter }, new int[] { 1 });
-	}
-
-	/*
-	 * @see IMqttClient#subscribe(String[])
-	 */
-	public void subscribe(String[] topicFilters) throws MqttException {
-		int[] qos = new int[topicFilters.length];
-		for (int i = 0; i < qos.length; i++) {
-			qos[i] = 1;
-		}
-		this.subscribe(topicFilters, qos);
-	}
-
-	/*
 	 * @see IMqttClient#subscribe(String, int)
 	 */
-	public void subscribe(String topicFilter, int qos) throws MqttException {
-		this.subscribe(new String[] { topicFilter }, new int[] { qos });
+	public IMqttToken subscribe(String topicFilter, int qos) throws MqttException {
+		return this.subscribe(new String[] { topicFilter }, new int[] { qos });
 	}
-
-	/*
-	 * @see IMqttClient#subscribe(String[], int[])
-	 */
-	public void subscribe(MqttSubscription[] subscriptions) throws MqttException {
-		IMqttToken tok = aClient.subscribe(subscriptions, null, null, new MqttProperties());
-		tok.waitForCompletion(getTimeToWait());
-		int[] grantedQos = tok.getGrantedQos();
-		for (int i = 0; i < grantedQos.length; ++i) {
-			subscriptions[i].setQos(grantedQos[i]);
-		}
-		if (grantedQos.length == 1 && subscriptions[0].getQos() == 0x80) {
-			throw new MqttException(MqttClientException.REASON_CODE_SUBSCRIBE_FAILED);
-		}
-	}
-
+	
 	@Override
-	public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
+	public IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException {
 		if (topicFilters.length != qos.length) {
 			throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
 		}
@@ -533,31 +500,14 @@ public class MqttClient implements IMqttClient {
 			subscriptions[i] = new MqttSubscription(topicFilters[i], qos[i]);
 		}
 
-		this.subscribe(subscriptions);
+		return this.subscribe(subscriptions);
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#subscribe(java.lang.String,
-	 * int, java.lang.Object, org.eclipse.paho.mqttv5.client.IMqttActionListener)
+	 * @see IMqttClient#subscribe(String[], int[])
 	 */
-	public void subscribe(String topicFilter, IMqttMessageListener messageListener) throws MqttException {
-		this.subscribe(new String[] { topicFilter }, new int[] { 1 }, new IMqttMessageListener[] { messageListener });
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#subscribe(java.lang.String,
-	 * int, java.lang.Object, org.eclipse.paho.mqttv5.client.IMqttActionListener)
-	 */
-	public void subscribe(String[] topicFilters, IMqttMessageListener[] messageListeners) throws MqttException {
-		int[] qos = new int[topicFilters.length];
-		for (int i = 0; i < qos.length; i++) {
-			qos[i] = 1;
-		}
-		this.subscribe(topicFilters, qos, messageListeners);
+	public IMqttToken subscribe(MqttSubscription[] subscriptions) throws MqttException {
+		return this.subscribe(subscriptions, null);
 	}
 
 	/*
@@ -566,49 +516,21 @@ public class MqttClient implements IMqttClient {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#subscribe(java.lang.String,
 	 * int)
 	 */
-	public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
-		this.subscribe(new String[] { topicFilter }, new int[] { qos }, new IMqttMessageListener[] { messageListener });
+	public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
+		return this.subscribe(new String[] { topicFilter }, new int[] { qos }, new IMqttMessageListener[] { messageListener });
 	}
 
-
-	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
+	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
-		this.subscribe(topicFilters, qos);
-
-		// add message handlers to the list for this client
-		for (int i = 0; i < topicFilters.length; ++i) {
-			aClient.comms.setMessageListener(0, topicFilters[i], messageListeners[i]);
-		}
+		return this.subscribe(topicFilters, qos, messageListeners);
 	}
 
-	/*
-	 * @see IMqttClient#subscribeWithResponse(String)
-	 */
-	public IMqttToken subscribeWithResponse(String topicFilter) throws MqttException {
-		return this.subscribeWithResponse(new MqttSubscription[] { new MqttSubscription(topicFilter) });
-	}
-
-	/*
-	 * @see IMqttClient#subscribeWithResponse(String[], int[])
-	 */
-	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions) throws MqttException {
-		IMqttToken tok = aClient.subscribe(subscriptions, null, null, new MqttProperties());
+	public IMqttToken subscribe(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException {
+		IMqttToken tok = aClient.subscribe(subscriptions, null, null, messageListeners, new MqttProperties());
 		tok.waitForCompletion(getTimeToWait());
 		return tok;
 	}
-
-	/*
-	 * @see IMqttClient#subscribeWithResponse(String[], int[],
-	 * IMqttMessageListener[])
-	 */
-	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners)
-			throws MqttException {
-		IMqttToken tok = aClient.subscribe(subscriptions, null, null, messageListeners, null);
-
-		tok.waitForCompletion(getTimeToWait());
-		return tok;
-	}
-
+	
 	/*
 	 * @see IMqttClient#unsubscribe(String)
 	 */

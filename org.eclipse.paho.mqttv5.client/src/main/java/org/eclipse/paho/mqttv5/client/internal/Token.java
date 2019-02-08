@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corp.
+ * Copyright (c) 2014, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -114,7 +114,15 @@ public class Token {
 		// @TRACE 407=key={0} wait max={1} token={2}
 		log.fine(CLASS_NAME, methodName, "407", new Object[] { getKey(), new Long(timeout), this });
 
-		MqttWireMessage resp = waitForResponse(timeout);
+		MqttWireMessage resp = null;
+		try {
+			resp = waitForResponse(timeout);
+		} catch (MqttException e) {
+			if (e.getReasonCode() != MqttClientException.REASON_CODE_CLIENT_DISCONNECTING /*||
+					message.getId() != MqttWireMessage.MESSAGE_TYPE_DISCONNECT*/) {
+				throw e;
+			}
+		}
 		if (resp == null && !completed) {
 			// @TRACE 406=key={0} timed out token={1}
 			log.fine(CLASS_NAME, methodName, "406", new Object[] { getKey(), this });
@@ -236,7 +244,6 @@ public class Token {
 		log.fine(CLASS_NAME, methodName, "404", new Object[] { getKey(), msg, ex });
 
 		synchronized (responseLock) {
-
 			// If reason codes are available, store them here.
 			if (msg instanceof MqttPubAck || msg instanceof MqttPubComp || msg instanceof MqttPubRec
 					|| msg instanceof MqttPubRel || msg instanceof MqttSubAck || msg instanceof MqttUnsubAck) {

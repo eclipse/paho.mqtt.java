@@ -392,6 +392,9 @@ public interface IMqttAsyncClient {
 	 */
 	IMqttToken subscribe(String topicFilter, int qos, Object userContext, MqttActionListener callback)
 			throws MqttException;
+	
+	IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, MqttActionListener callback)
+			throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -412,6 +415,8 @@ public interface IMqttAsyncClient {
 	 *             if there was an error registering the subscription.
 	 */
 	IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
+	
+	IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
 
 	/**
 	 * Subscribe to multiple topics, each of which may include wildcards.
