@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corp.
+ * Copyright (c) 2016, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,7 @@ import java.util.Arrays;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
-public class MqttUnsubscribe extends MqttWireMessage{
+public class MqttUnsubscribe extends MqttPersistableWireMessage{
 	
 	private static final Byte[] validProperties = { MqttProperties.USER_DEFINED_PAIR_IDENTIFIER };
 

@@ -15,7 +15,7 @@ public class MqttDataTypes {
 
 	private static final int TWO_BYTE_INT_MAX = 65535;
 	private static final long FOUR_BYTE_INT_MAX = 4294967295L;
-	private static final int VARIABLE_BYTE_INT_MAX = 268435455;
+	public static final int VARIABLE_BYTE_INT_MAX = 268435455;
 
 	public MqttDataTypes() throws IllegalAccessException {
 		throw new IllegalAccessException("Utility Class");
