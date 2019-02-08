@@ -10,7 +10,7 @@
 		<!-- source & target java version for MQTT Client -->
 		<mqttclient.java.version>1.7</mqttclient.java.version>
 		<!-- source & target java version for others modules -->
-		<java.version>1.7</java.version>
+		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<build.level>${maven.build.timestamp}</build.level>
 		<tycho.version>1.1.0</tycho.version>
@@ -308,5 +308,7 @@
 		<module>org.eclipse.paho.mqttv5.common</module>
     	<module>org.eclipse.paho.mqttv5.client</module>
     	<module>org.eclipse.paho.mqttv5.client.test</module>
+    	<module>org.eclipse.paho.mqttv5.client.vertx</module>
+    	<module>org.eclipse.paho.mqttv5.client.vertx.test</module>
 	</modules>
 </project>
