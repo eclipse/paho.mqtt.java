@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corp.
+ * Copyright (c) 2016, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,7 +28,7 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.util.CountingInputStream;
 
-public class MqttSubscribe extends MqttWireMessage {
+public class MqttSubscribe extends MqttPersistableWireMessage {
 
 	private static final Byte[] validProperties = { MqttProperties.SUBSCRIPTION_IDENTIFIER,
 			MqttProperties.SUBSCRIPTION_IDENTIFIER_SINGLE,
