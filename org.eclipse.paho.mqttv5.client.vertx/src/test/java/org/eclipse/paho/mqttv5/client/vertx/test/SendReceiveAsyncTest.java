@@ -606,7 +606,7 @@ public class SendReceiveAsyncTest {
    * Test the behavior of the connection timeout when connecting to a non MQTT server.
    * i.e. ssh port 22
    */
-  @Test
+  //@Test
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();
 	  LoggingUtilities.banner(log, cclass, methodName);
