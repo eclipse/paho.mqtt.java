@@ -232,7 +232,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	private MqttConnectionOptions connOpts;
 	
 	// Variables that exist within the life of an MQTT connection.
-	private MqttConnectionState mqttConnection = new MqttConnectionState(); 
+	private MqttConnectionState connectionstate; 
 	
 	private ClientInternal internal; 
 	
@@ -567,6 +567,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		}
 		internal = new ClientInternal(this, persistence);
 		internal.setClientId(clientId);
+		connectionstate = internal.getConnectionState();
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
@@ -1032,8 +1033,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			//this.comms.removeMessageListener(subscriptions[i].getTopic());
 			// Check if the topic filter is valid before subscribing
 			MqttTopicValidator.validate(subscriptions[i].getTopic(),
-					this.mqttConnection.isWildcardSubscriptionsAvailable(),
-					this.mqttConnection.isSharedSubscriptionsAvailable());
+					this.connectionstate.isWildcardSubscriptionsAvailable(),
+					this.connectionstate.isSharedSubscriptionsAvailable());
 		}
 		
 		return this.subscribeBase(subscriptions, userContext, callback, subscriptionProperties);
@@ -1139,8 +1140,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		// add message handlers to the list for this client
 		for (int i = 0; i < subscriptions.length; ++i) {
 			MqttTopicValidator.validate(subscriptions[i].getTopic(),
-					this.mqttConnection.isWildcardSubscriptionsAvailable(),
-					this.mqttConnection.isSharedSubscriptionsAvailable());
+					this.connectionstate.isWildcardSubscriptionsAvailable(),
+					this.connectionstate.isSharedSubscriptionsAvailable());
 			if (messageListeners == null || messageListeners[i] == null) {
 				//this.comms.removeMessageListener(subscriptions[i].getTopic());
 			} else {
@@ -1178,7 +1179,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		int subId = subscriptionProperties.getSubscriptionIdentifiers().get(0);
 
 		// Automatic Subscription Identifier Assignment is enabled
-		if (connOpts.useSubscriptionIdentifiers() && this.mqttConnection.isSubscriptionIdentifiersAvailable()) {
+		if (connOpts.useSubscriptionIdentifiers() && this.connectionstate.isSubscriptionIdentifiersAvailable()) {
 
 			// Application is overriding the subscription Identifier
 			if (subId != 0) {
@@ -1198,8 +1199,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		// add message handlers to the list for this client
 		for (int i = 0; i < subscriptions.length; ++i) {
 			MqttTopicValidator.validate(subscriptions[i].getTopic(),
-					this.mqttConnection.isWildcardSubscriptionsAvailable(),
-					this.mqttConnection.isSharedSubscriptionsAvailable());
+					this.connectionstate.isWildcardSubscriptionsAvailable(),
+					this.connectionstate.isSharedSubscriptionsAvailable());
 			if (messageListener == null) {
 				//this.comms.removeMessageListener(subscriptions[i].getTopic());
 			} else {
@@ -1288,7 +1289,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			// Although we already checked when subscribing, but invalid
 			// topic filter is meanless for unsubscribing, just prohibit it
 			// to reduce unnecessary control packet send to broker.
-			MqttTopicValidator.validate(topicFilters[i], true/* allow wildcards */, this.mqttConnection.isSharedSubscriptionsAvailable());
+			MqttTopicValidator.validate(topicFilters[i], true/* allow wildcards */, this.connectionstate.isSharedSubscriptionsAvailable());
 		}
 
 		// remove message handlers from the list for this client

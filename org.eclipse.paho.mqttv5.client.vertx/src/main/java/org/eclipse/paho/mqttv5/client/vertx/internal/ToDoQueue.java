@@ -31,11 +31,14 @@ public class ToDoQueue {
 	private MessageConsumer<MqttPersistableWireMessage> consumer;
 	private ClientInternal internal;
 	private MessageCodec codec = new Codec();
+	private MqttConnectionState connectionstate;
 	
-	public ToDoQueue(ClientInternal internal, Vertx vertx, MqttClientPersistence persistence) {
+	public ToDoQueue(ClientInternal internal, Vertx vertx, MqttClientPersistence persistence,
+			MqttConnectionState connectionstate) {
 		this.eb = vertx.eventBus();
 		this.persistence = persistence;
 		this.internal = internal;
+		this.connectionstate = connectionstate;
 		
 		try {
 			eb.registerCodec(codec);
@@ -103,6 +106,7 @@ public class ToDoQueue {
 		internal.socket.write(Buffer.buffer(publish.serialize()),
 			res1 -> {
 				if (res1.succeeded()) {
+					connectionstate.registerOutboundActivity();
 					System.out.println("published successfully "+publish.getQoS());
 					if (publish.getQoS() == 0) {
 						MqttToken token = internal.out_hash_tokens.remove(hashcode);
@@ -119,6 +123,7 @@ public class ToDoQueue {
 		internal.socket.write(Buffer.buffer(subscribe.serialize()),
 				res1 -> {
 					if (res1.succeeded()) {
+						connectionstate.registerOutboundActivity();
 						System.out.println("subscribe");
 					} else {
 						System.out.println("subscribe fail");

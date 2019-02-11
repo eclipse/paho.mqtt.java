@@ -1,7 +1,12 @@
 package org.eclipse.paho.mqttv5.client.vertx.internal;
 
 import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.eclipse.paho.mqttv5.common.packet.MqttPingReq;
+
+import io.vertx.core.buffer.Buffer;
 
 /**
  * This class is used as a store for client information that should be preserved
@@ -46,8 +51,69 @@ public class MqttConnectionState {
 	// Topic Alias Maps
 	private Hashtable<String, Integer> outgoingTopicAliases;
 	private Hashtable<Integer, String> incomingTopicAliases;
+	
+	private ClientInternal internal;
+	
+	long lastInboundActivity;
+	long lastOutboundActivity;
+	long pingSentTime;
+	boolean pingOutstanding = false;
+	
+	public MqttConnectionState(ClientInternal internal) {
+		this.internal = internal;
+	}
+	
+	public void registerOutboundActivity() {
+		lastOutboundActivity = System.nanoTime();
+	}
 
+	public void registerInboundActivity() {
+		lastInboundActivity = System.nanoTime();
+	}
+	
+	public void keepAlive(int keepalive_interval) {
+		System.out.println("keepalive");
 
+		long now = System.nanoTime();
+		long keepAlive = TimeUnit.MILLISECONDS.toNanos(keepalive_interval);
+
+		if (!internal.isConnected() || internal.socket == null) {
+			return;
+		}
+		
+		if (pingOutstanding) {
+			if (pingSentTime - now > keepAlive) { 
+				// we didn't get a response in the expected time
+				// DEBUG("PINGRESP not received in keepalive interval\r\n");
+				// close connection
+			}
+		}
+		else if (now - lastOutboundActivity >= keepAlive || now - lastInboundActivity >= keepAlive) {
+			MqttPingReq pingreq = new MqttPingReq();
+			try {
+				internal.socket.write(Buffer.buffer(pingreq.serialize()),
+						res1 -> {
+							if (res1.succeeded()) {
+								System.out.println("ping sent successfully");
+								pingSentTime = System.nanoTime();
+								pingOutstanding = true;
+							} else {
+								// close connection
+							}
+						});
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}		
+	}
+	
+	
+	public void pingReceived() {
+		pingOutstanding = false;
+		pingSentTime = 0L;
+	}
+	
+	
 	/**
 	 * Clears the session and resets. This would be called when the connection has
 	 * been lost and cleanStart = True.

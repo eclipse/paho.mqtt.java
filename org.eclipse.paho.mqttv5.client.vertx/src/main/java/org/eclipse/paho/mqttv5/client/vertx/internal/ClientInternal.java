@@ -17,6 +17,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingReq;
+import org.eclipse.paho.mqttv5.common.packet.MqttPingResp;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubComp;
@@ -53,6 +54,7 @@ public class ClientInternal {
 	
 	// Variables that exist within the life of an MQTT session
 	private MqttSessionState sessionstate;
+	private MqttConnectionState connectionstate;
 	
 	private ToDoQueue todoQueue;
 	
@@ -69,14 +71,20 @@ public class ClientInternal {
 		options.setConnectTimeout(100);
 		netclient = vertx.createNetClient(options);
 		sessionstate = new MqttSessionState(persistence);
+		connectionstate = new MqttConnectionState(this);
 		
-		todoQueue = new ToDoQueue(this, vertx, persistence);
+		todoQueue = new ToDoQueue(this, vertx, persistence, connectionstate);
+	}
+	
+	public MqttConnectionState getConnectionState() {
+		return connectionstate;
 	}
 	
 	private void handleData(Buffer buffer, MqttToken connectToken) {
 		MqttWireMessage msg = getPacket(buffer);
 		
 		while (msg != null) {
+			connectionstate.registerInboundActivity();
 			handlePacket(msg, connectToken);
 			msg = getPacket(null);
 		}
@@ -174,9 +182,11 @@ public class ClientInternal {
 					client.setClientId(assigned_clientid);
 				}
 				try {
-				long kid = vertx.setPeriodic(connOpts.getKeepAliveInterval() * 1000, id -> {
-					keepAlive();
-				});
+					if (connOpts.getKeepAliveInterval() > 0) {
+						long kid = vertx.setPeriodic(connOpts.getKeepAliveInterval() * 1000, id -> {
+							connectionstate.keepAlive(connOpts.getKeepAliveInterval());
+						});
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -207,29 +217,17 @@ public class ClientInternal {
 						msg.getMessageId(),
 						msg.getProperties());
 				acktoken.setReasonCodes(msg.getReasonCodes());
-				socket.write(Buffer.buffer(pubrel.serialize())); // check write successful
+				socket.write(Buffer.buffer(pubrel.serialize()),
+						res1 -> {
+							if (!res1.succeeded()) {
+								connectionstate.registerOutboundActivity();
+							}
+						});
+			} else if (msg instanceof MqttPingResp) {
+				connectionstate.pingReceived();
 			}
 		} catch (Exception e) {
 			//internal_connect(options, userToken, serverURIs, index + 1);
-		}
-	}
-
-	private void keepAlive() {
-		System.out.println("keepalive");
-		
-		/* This is the simplest and incorrect implementation - 
-		 * it sends a ping at the keep alive interval whether or not there has been existing traffic.
-		 */
-		MqttPingReq pingreq = new MqttPingReq();
-		try {
-			socket.write(Buffer.buffer(pingreq.serialize()),
-				res1 -> {
-					if (!res1.succeeded()) {
-						
-					}
-				});
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -285,6 +283,7 @@ public class ClientInternal {
 					socket.write(Buffer.buffer(connect.serialize()),
 						res1 -> {
 							if (!res1.succeeded()) {
+								connectionstate.registerOutboundActivity();
 								connect(options, userToken, serverURIs, index + 1);
 							}
 						});
@@ -309,6 +308,7 @@ public class ClientInternal {
 			socket.write(Buffer.buffer(disconnect.serialize()),
 					res1 -> {
 						if (res1.succeeded()) {
+							connectionstate.registerOutboundActivity();
 							// we still need to close the socket and indicate the disconnect
 							// is finished if the packet write failed
 							socket.close();

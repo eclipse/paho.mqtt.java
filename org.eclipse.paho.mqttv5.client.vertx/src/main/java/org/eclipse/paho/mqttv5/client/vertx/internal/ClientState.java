@@ -50,7 +50,7 @@ public class ClientState {
 	private MqttSessionState sessionstate;
 	
 	// Variables that exist within the life of an MQTT connection.
-	private MqttConnectionState connectionstate = new MqttConnectionState(); 
+	private MqttConnectionState connectionstate; 
 	
 	public ClientState() {
 		inUseMsgIds = new ConcurrentHashMap<>();
