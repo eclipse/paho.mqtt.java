@@ -306,9 +306,7 @@
 		<module>org.eclipse.paho.client.mqttv3.repository</module>
 		<module>org.eclipse.paho.sample.utility</module>
 		<module>org.eclipse.paho.mqttv5.common</module>
-    	<module>org.eclipse.paho.mqttv5.client</module>
-    	<module>org.eclipse.paho.mqttv5.client.test</module>
-    	<module>org.eclipse.paho.mqttv5.client.vertx</module>
-    	<module>org.eclipse.paho.mqttv5.client.vertx.test</module>
+    		<module>org.eclipse.paho.mqttv5.client.vertx</module>
+    		<module>org.eclipse.paho.mqttv5.client.vertx.test</module>
 	</modules>
 </project>
