@@ -72,8 +72,6 @@ public class MqttConnectionState {
 	}
 	
 	public void keepAlive(int keepalive_interval) {
-		System.out.println("keepalive");
-
 		long now = System.nanoTime();
 		long keepAlive = TimeUnit.MILLISECONDS.toNanos(keepalive_interval);
 
@@ -94,7 +92,6 @@ public class MqttConnectionState {
 				internal.socket.write(Buffer.buffer(pingreq.serialize()),
 						res1 -> {
 							if (res1.succeeded()) {
-								System.out.println("ping sent successfully");
 								pingSentTime = System.nanoTime();
 								pingOutstanding = true;
 							} else {

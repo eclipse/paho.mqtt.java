@@ -235,17 +235,14 @@ public class ClientInternal {
 	
 	private NetClient createNetClient(URI uri) {
 		NetClientOptions netopts = new NetClientOptions().setLogActivity(true);
-		System.out.println("Scheme "+uri.getScheme());
 		if (uri.getScheme().equals("ssl")) {
 			netopts.setSsl(true);
 			String temp = System.getProperty("javax.net.ssl.keyStore");
 			if (temp != null) {
 				JksOptions keyopts = new JksOptions();
-				System.out.println("Setting keystore to "+temp);
 				keyopts.setPath(temp);
 				temp = System.getProperty("javax.net.ssl.keyStorePassword");
 				if (temp != null) {
-					System.out.println("Setting keystore password to "+temp);
 					keyopts.setPassword(temp);
 				}
 				netopts.setKeyStoreOptions(keyopts);
@@ -253,11 +250,9 @@ public class ClientInternal {
 			temp = System.getProperty("javax.net.ssl.trustStore");
 			if (temp != null) {
 				JksOptions trustopts = new JksOptions();
-				System.out.println("Setting truststore to "+temp);
 				trustopts.setPath(temp);
 				temp = System.getProperty("javax.net.ssl.trustStorePassword");
 				if (temp != null) {
-					System.out.println("Setting truststore password to "+temp);
 					trustopts.setPassword(temp);
 				}
 				netopts.setTrustStoreOptions(trustopts);
@@ -265,7 +260,6 @@ public class ClientInternal {
 		}	
 		netopts.setIdleTimeout(100);
 		netopts.setConnectTimeout(100);	
-		System.out.println("Netopts ssl "+netopts.isSsl());
 		return vertx.createNetClient(netopts);
 	}
 	
@@ -400,32 +394,15 @@ public class ClientInternal {
 
 		// Add the info to the retry queue.  In the event of reconnecting, any outstanding publishes
 		// will need to be resent.
-		System.out.println("Session expiry " +connOpts.getConnectionProperties().getSessionExpiryInterval());
 		Long sessionExpiry = connOpts.getConnectionProperties().getSessionExpiryInterval();
 		if (sessionExpiry == null) {
 			sessionExpiry = new Long(0L);
 		}
 		if (sessionExpiry >= 0L /*&& this.persistence != null*/) {
-			System.out.println("Adding to retry queue");
 			sessionstate.addRetryQueue(publish, token);
 		}
 		
-		todoQueue.add(publish, "", token);
-		
-		//System.out.println("publish at "+message.getQos());
-		/*socket.write(Buffer.buffer(publish.serialize()),
-				res1 -> {
-					if (res1.succeeded()) {
-						System.out.println("published successfully");
-						if (message.getQos() == 0) {
-							token.setComplete();
-						}
-					} else {
-						System.out.println("publish fail");
-						// If the socket write fails, then we should remove it from persistence.
-					}
-				});*/
-		
+		todoQueue.add(publish, "", token);	
 	}
 	
 	public MqttSessionState getSessionState() {

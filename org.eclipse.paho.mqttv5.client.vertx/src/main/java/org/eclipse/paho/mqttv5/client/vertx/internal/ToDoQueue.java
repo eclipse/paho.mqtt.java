@@ -107,7 +107,6 @@ public class ToDoQueue {
 			res1 -> {
 				if (res1.succeeded()) {
 					connectionstate.registerOutboundActivity();
-					System.out.println("published successfully "+publish.getQoS());
 					if (publish.getQoS() == 0) {
 						MqttToken token = internal.out_hash_tokens.remove(hashcode);
 						token.setComplete();
@@ -124,7 +123,6 @@ public class ToDoQueue {
 				res1 -> {
 					if (res1.succeeded()) {
 						connectionstate.registerOutboundActivity();
-						System.out.println("subscribe");
 					} else {
 						System.out.println("subscribe fail");
 					}
