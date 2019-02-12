@@ -664,7 +664,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		}
 
 		connOpts = options;
-		internal.connect(options, connectToken, serverURIs, 0);
+		internal.connect(options, connectToken, serverURIs, 0, null);
 		
 		return connectToken;
 	}

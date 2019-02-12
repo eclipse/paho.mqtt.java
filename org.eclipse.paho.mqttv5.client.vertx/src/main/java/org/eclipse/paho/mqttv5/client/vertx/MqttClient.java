@@ -292,6 +292,9 @@ public class MqttClient implements IMqttClient {
 	 */
 	public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException {
 		aClient.connect(options, null, null).waitForCompletion(getTimeToWait());
+		if (!aClient.isConnected()) {
+			throw new MqttException(99);
+		}
 	}
 
 	/*

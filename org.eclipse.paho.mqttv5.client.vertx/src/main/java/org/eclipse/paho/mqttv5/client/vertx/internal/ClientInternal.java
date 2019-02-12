@@ -11,6 +11,7 @@ import org.eclipse.paho.mqttv5.client.vertx.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.vertx.MqttToken;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
@@ -269,7 +270,7 @@ public class ClientInternal {
 	}
 	
 	public void connect(MqttConnectionOptions options, MqttToken userToken, 
-			String[] serverURIs, final int index) {
+			String[] serverURIs, final int index, Exception exc)  {
 	
 		connOpts = options;
 		
@@ -284,7 +285,7 @@ public class ClientInternal {
 			uri = new URI(serverURIs[index]);
 		} catch (Exception e) {
 			e.printStackTrace();
-			connect(options, userToken, serverURIs, index + 1);
+			connect(options, userToken, serverURIs, index + 1, exc);
 			return;
 		}
 		
@@ -304,6 +305,7 @@ public class ClientInternal {
 				});
 				socket.exceptionHandler(throwable -> {
 					System.out.println("The socket has an exception "+throwable.getMessage());
+					userToken.setComplete();
 				});
 				MqttConnect connect = new MqttConnect(client.getClientId(), 
 						options.getMqttVersion(),
@@ -314,23 +316,24 @@ public class ClientInternal {
 				try {
 					socket.write(Buffer.buffer(connect.serialize()),
 						res1 -> {
-							if (!res1.succeeded()) {
+							if (res1.succeeded()) {
 								connectionstate.registerOutboundActivity();
-								connect(options, userToken, serverURIs, index + 1);
+							} else {
+								connect(options, userToken, serverURIs, index + 1, exc);
 							}
 						});
 				} catch (Exception e) {
 					e.printStackTrace();
-					connect(options, userToken, serverURIs, index + 1);
+					connect(options, userToken, serverURIs, index + 1, e);
 				}
 			} else {
 				System.out.println("TCP connect failed");
-				connect(options, userToken, serverURIs, index + 1);
+				connect(options, userToken, serverURIs, index + 1, exc);
 			}
 		});
 		} catch (Exception e) {
 			e.printStackTrace();
-			connect(options, userToken, serverURIs, index + 1);
+			connect(options, userToken, serverURIs, index + 1, e);
 		}
 	}
 	
