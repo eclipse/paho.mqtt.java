@@ -36,6 +36,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetSocket;
+import io.vertx.core.net.JksOptions;
+import io.vertx.core.net.NetClient;
 
 public class ClientInternal {
 	
@@ -43,7 +45,7 @@ public class ClientInternal {
 	
 	private static Object vertxLock = new Object(); // Simple lock
 	private static Vertx vertx = null;
-	private io.vertx.core.net.NetClient netclient = null;
+	private NetClient netclient = null;
 	public NetSocket socket = null;
 	
 	private MqttConnectionOptions connOpts;
@@ -66,13 +68,8 @@ public class ClientInternal {
 				vertx = Vertx.vertx();
 			}
 		}
-		NetClientOptions options = new NetClientOptions().setLogActivity(true);
-		options.setIdleTimeout(100);
-		options.setConnectTimeout(100);
-		netclient = vertx.createNetClient(options);
 		sessionstate = new MqttSessionState(persistence);
 		connectionstate = new MqttConnectionState(this);
-		
 		todoQueue = new ToDoQueue(this, vertx, persistence, connectionstate);
 	}
 	
@@ -227,12 +224,48 @@ public class ClientInternal {
 				connectionstate.pingReceived();
 			}
 		} catch (Exception e) {
-			//internal_connect(options, userToken, serverURIs, index + 1);
+			//error processing message
 		}
 	}
 	
 	public boolean isConnected() {
 		return connected;
+	}
+	
+	private NetClient createNetClient(URI uri) {
+		NetClientOptions netopts = new NetClientOptions().setLogActivity(true);
+		System.out.println("Scheme "+uri.getScheme());
+		if (uri.getScheme().equals("ssl")) {
+			netopts.setSsl(true);
+			String temp = System.getProperty("javax.net.ssl.keyStore");
+			if (temp != null) {
+				JksOptions keyopts = new JksOptions();
+				System.out.println("Setting keystore to "+temp);
+				keyopts.setPath(temp);
+				temp = System.getProperty("javax.net.ssl.keyStorePassword");
+				if (temp != null) {
+					System.out.println("Setting keystore password to "+temp);
+					keyopts.setPassword(temp);
+				}
+				netopts.setKeyStoreOptions(keyopts);
+			}
+			temp = System.getProperty("javax.net.ssl.trustStore");
+			if (temp != null) {
+				JksOptions trustopts = new JksOptions();
+				System.out.println("Setting truststore to "+temp);
+				trustopts.setPath(temp);
+				temp = System.getProperty("javax.net.ssl.trustStorePassword");
+				if (temp != null) {
+					System.out.println("Setting truststore password to "+temp);
+					trustopts.setPassword(temp);
+				}
+				netopts.setTrustStoreOptions(trustopts);
+			}
+		}	
+		netopts.setIdleTimeout(100);
+		netopts.setConnectTimeout(100);	
+		System.out.println("Netopts ssl "+netopts.isSsl());
+		return vertx.createNetClient(netopts);
 	}
 	
 	public void connect(MqttConnectionOptions options, MqttToken userToken, 
@@ -241,7 +274,6 @@ public class ClientInternal {
 		connOpts = options;
 		
 		if (index >= serverURIs.length) {
-			// connect failed
 			System.out.println("connect failed");
 			userToken.setComplete();
 			return;
@@ -259,7 +291,8 @@ public class ClientInternal {
 		System.out.println("Connecting to "+uri.toString());
 
 		try {
-			netclient.connect(uri.getPort(), uri.getHost(), res -> {
+			netclient = createNetClient(uri);
+			netclient.connect(uri.getPort(), uri.getHost(), uri.getHost(), res -> {
 			if (res.succeeded()) {
 				socket = res.result();
 				socket.handler(buffer -> {
@@ -272,7 +305,6 @@ public class ClientInternal {
 				socket.exceptionHandler(throwable -> {
 					System.out.println("The socket has an exception "+throwable.getMessage());
 				});
-				System.out.println("Cleansession: "+options.isCleanStart());
 				MqttConnect connect = new MqttConnect(client.getClientId(), 
 						options.getMqttVersion(),
 						options.isCleanStart(),

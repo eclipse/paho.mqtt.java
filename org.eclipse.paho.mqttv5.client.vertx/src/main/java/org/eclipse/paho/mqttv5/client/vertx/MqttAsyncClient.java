@@ -912,8 +912,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 
 		MqttTopic result = (MqttTopic) topics.get(topic);
 		if (result == null) {
-			result = new MqttTopic(topic);
-			//result.setAsyncClient(this);
+			result = new MqttTopic(topic, internal);
 			topics.put(topic, result);
 		}
 		return result;
