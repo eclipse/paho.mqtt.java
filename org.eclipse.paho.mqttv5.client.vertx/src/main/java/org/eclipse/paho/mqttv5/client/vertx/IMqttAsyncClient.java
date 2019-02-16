@@ -23,6 +23,7 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 public interface IMqttAsyncClient {
 
@@ -1017,7 +1018,7 @@ public interface IMqttAsyncClient {
 	 *            the index of the message to be retrieved.
 	 * @return the message located at the bufferIndex
 	 */
-	MqttMessage getBufferedMessage(int bufferIndex);
+	MqttWireMessage getBufferedMessage(int bufferIndex);
 
 	/**
 	 * Deletes a message from the Disconnected Message Buffer

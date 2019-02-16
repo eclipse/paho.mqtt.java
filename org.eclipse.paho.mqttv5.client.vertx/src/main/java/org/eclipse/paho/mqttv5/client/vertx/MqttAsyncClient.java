@@ -31,7 +31,7 @@ import org.eclipse.paho.mqttv5.client.vertx.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.vertx.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.mqttv5.client.vertx.util.Debug;
 import org.eclipse.paho.mqttv5.client.vertx.internal.ClientInternal;
-import org.eclipse.paho.mqttv5.client.vertx.internal.MqttConnectionState;
+import org.eclipse.paho.mqttv5.client.vertx.internal.ConnectionState;
 import org.eclipse.paho.mqttv5.client.vertx.logging.Logger;
 import org.eclipse.paho.mqttv5.client.vertx.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.common.ExceptionHelper;
@@ -44,6 +44,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttAuth;
 import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
+import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
 
@@ -230,9 +231,10 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	private URI serverURI;
 	private MqttClientPersistence persistence;
 	private MqttConnectionOptions connOpts;
+	private DisconnectedBufferOptions bufferOpts = new DisconnectedBufferOptions();
 	
 	// Variables that exist within the life of an MQTT connection.
-	private MqttConnectionState connectionstate; 
+	private ConnectionState connectionstate; 
 	
 	private ClientInternal internal; 
 	
@@ -801,6 +803,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		token.setActionCallback(callback);
 		token.setUserContext(userContext);
 		
+		internal.getSessionState().setShouldBeConnected(false);
 		internal.disconnect(reasonCode, disconnectProperties, token);
 
 		// @TRACE 108=<
@@ -1441,83 +1444,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		final String methodName = "reconnect";
 		// @Trace 500=Attempting to reconnect client: {0}
 		log.fine(CLASS_NAME, methodName, "500", new Object[] { internal.getClientId() });
-		// Some checks to make sure that we're not attempting to reconnect an
-		// already connected client
-		/*if (comms.isConnected()) {
-			throw ExceptionHelper.createMqttException(MqttClientException.REASON_CODE_CLIENT_CONNECTED);
-		}
-		if (comms.isConnecting()) {
-			throw new MqttException(MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS);
-		}
-		if (comms.isDisconnecting()) {
-			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_DISCONNECTING);
-		}
-		if (comms.isClosed()) {
-			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_CLOSED);
-		}
-		// We don't want to spam the server
-		stopReconnectCycle();
-
-		attemptReconnect();*/
-	}
-
-	/**
-	 * Attempts to reconnect the client to the server. If successful it will make
-	 * sure that there are no further reconnects scheduled. However if the connect
-	 * fails, the delay will double up to 128 seconds and will re-schedule the
-	 * reconnect for after the delay.
-	 *
-	 * Any thrown exceptions are logged but not acted upon as it is assumed that
-	 * they are being thrown due to the server being offline and so reconnect
-	 * attempts will continue.
-	 */
-	private void attemptReconnect() {
-		final String methodName = "attemptReconnect";
-		// @Trace 500=Attempting to reconnect client: {0}
-		log.fine(CLASS_NAME, methodName, "500", new Object[] { internal.getClientId() });
-		try {
-			connect(this.connOpts, this.userContext, new MqttReconnectActionListener(methodName));
-		} catch (MqttSecurityException ex) {
-			// @TRACE 804=exception
-			log.fine(CLASS_NAME, methodName, "804", null, ex);
-		} catch (MqttException ex) {
-			// @TRACE 804=exception
-			log.fine(CLASS_NAME, methodName, "804", null, ex);
-		}
-	}
-
-	private void startReconnectCycle() {
-		String methodName = "startReconnectCycle";
-		// @Trace 503=Start reconnect timer for client: {0}, delay: {1}
-		log.fine(CLASS_NAME, methodName, "503",
-				new Object[] { internal.getClientId(), new Long(reconnectDelay) });
-		reconnectTimer = new Timer("MQTT Reconnect: " + internal.getClientId());
-		reconnectTimer.schedule(new ReconnectTask(), reconnectDelay);
-	}
-
-	private void stopReconnectCycle() {
-		String methodName = "stopReconnectCycle";
-		// @Trace 504=Stop reconnect timer for client: {0}
-		log.fine(CLASS_NAME, methodName, "504", new Object[] { internal.getClientId() });
-		//synchronized (clientLock) {
-			if (this.connOpts.isAutomaticReconnect()) {
-				if (reconnectTimer != null) {
-					reconnectTimer.cancel();
-					reconnectTimer = null;
-				}
-				reconnectDelay = 1000; // Reset Delay Timer
-			}
-		//}
-	}
-
-	private class ReconnectTask extends TimerTask {
-		private static final String methodName = "ReconnectTask.run";
-
-		public void run() {
-			// @Trace 506=Triggering Automatic Reconnect attempt.
-			log.fine(CLASS_NAME, methodName, "506");
-			attemptReconnect();
-		}
+		
 	}
 
 	class MqttReconnectCallback implements MqttCallback {
@@ -1540,7 +1467,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		public void disconnected(MqttDisconnectResponse disconnectResponse) {
 			if (automaticReconnect) {
 				//reconnecting = true;
-				startReconnectCycle();
+				//startReconnectCycle();
 			}
 		}
 
@@ -1565,7 +1492,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			// @Trace 501=Automatic Reconnect Successful: {0}
 			log.fine(CLASS_NAME, methodName, "501", new Object[] { asyncActionToken.getClient().getClientId() });
 			//comms.setRestingState(false);
-			stopReconnectCycle();
+			//stopReconnectCycle();
 		}
 
 		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
@@ -1574,26 +1501,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			if (reconnectDelay < connOpts.getMaxReconnectDelay()) {
 				reconnectDelay = reconnectDelay * 2;
 			}
-			rescheduleReconnectCycle(reconnectDelay);
-		}
-
-		private void rescheduleReconnectCycle(int delay) {
-			String reschedulemethodName = methodName + ":rescheduleReconnectCycle";
-			// @Trace 505=Rescheduling reconnect timer for client: {0}, delay:
-			// {1}
-			log.fine(CLASS_NAME, reschedulemethodName, "505",
-					new Object[] { internal.getClientId(), String.valueOf(reconnectDelay) });
-			//synchronized (clientLock) {
-				if (MqttAsyncClient.this.connOpts.isAutomaticReconnect()) {
-					if (reconnectTimer != null) {
-						reconnectTimer.schedule(new ReconnectTask(), delay);
-					} else {
-						// The previous reconnect timer was cancelled
-						reconnectDelay = delay;
-						startReconnectCycle();
-					}
-				}
-			//}
+			//rescheduleReconnectCycle(reconnectDelay);
 		}
 
 	}
@@ -1607,7 +1515,15 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 */
 	@Override
 	public void setBufferOpts(DisconnectedBufferOptions bufferOpts) {
-		//this.comms.setDisconnectedMessageBuffer(new DisconnectedMessageBuffer(bufferOpts));
+		this.bufferOpts = bufferOpts;
+	}
+	
+	public DisconnectedBufferOptions getBufferOpts() {
+		return bufferOpts;
+	}
+	
+	public MqttConnectionOptions getConnectOpts() {
+		return connOpts;
 	}
 
 	/*
@@ -1618,7 +1534,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 */
 	@Override
 	public int getBufferedMessageCount() {
-		return 0; //this.comms.getBufferedMessageCount();
+		return internal.getBufferedMessageCount();
 	}
 
 	/*
@@ -1627,8 +1543,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#getBufferedMessage(int)
 	 */
 	@Override
-	public MqttMessage getBufferedMessage(int bufferIndex) {
-		return null; //this.comms.getBufferedMessage(bufferIndex);
+	public MqttWireMessage getBufferedMessage(int bufferIndex) {
+		return internal.getBufferedMessage(bufferIndex);
 	}
 
 	/*
@@ -1639,7 +1555,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 */
 	@Override
 	public void deleteBufferedMessage(int bufferIndex) {
-		//this.comms.deleteBufferedMessage(bufferIndex);
+		internal.deleteBufferedMessage(bufferIndex);
 	}
 
 	/*
@@ -1673,7 +1589,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		final String methodName = "close";
 		// @TRACE 113=<
 		log.fine(CLASS_NAME, methodName, "113");
-		//comms.close(force);
+		internal.close();
 		// @TRACE 114=>
 		log.fine(CLASS_NAME, methodName, "114");
 

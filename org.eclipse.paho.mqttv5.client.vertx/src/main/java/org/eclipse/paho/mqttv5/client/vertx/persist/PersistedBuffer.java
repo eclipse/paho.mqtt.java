@@ -45,6 +45,10 @@ public class PersistedBuffer {
 		this.persistence = persistence;
 	}
 	
+	public void clear() {
+		buffer.clear();
+	}
+	
 	/**
 	 * Restores an entry that was obtained from persistence.  As it is already persisted,
 	 * we don't need to persist it.

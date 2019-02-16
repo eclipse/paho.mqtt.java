@@ -4,7 +4,9 @@ import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.paho.mqttv5.client.vertx.MqttToken;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingReq;
+import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 
 import io.vertx.core.buffer.Buffer;
 
@@ -29,7 +31,7 @@ import io.vertx.core.buffer.Buffer;
  * <li>Send Reason Messages</li>
  * </ul>
  */
-public class MqttConnectionState {
+public class ConnectionState {
 
 	// ******* Connection properties ******//
 	private Integer receiveMaximum = 65535;
@@ -59,7 +61,7 @@ public class MqttConnectionState {
 	long pingSentTime;
 	boolean pingOutstanding = false;
 	
-	public MqttConnectionState(ClientInternal internal) {
+	public ConnectionState(ClientInternal internal) {
 		this.internal = internal;
 	}
 	
@@ -230,7 +232,23 @@ public class MqttConnectionState {
 	public void setKeepAliveSeconds(long keepAlive) {
 		this.keepAlive = keepAlive * 1000;
 	}
-
-
 	
+	public MqttPublish setTopicAlias(MqttPublish publish) {
+		if (publish.getTopicName() != null && getOutgoingTopicAliasMaximum() > 0) {
+			String topic = publish.getTopicName();
+			if (outgoingTopicAliases.containsKey(topic)) {
+				// Existing Topic Alias, Assign it and remove the topic string
+				publish.getProperties().setTopicAlias(outgoingTopicAliases.get(topic));
+				publish.setTopicName(null);
+			} else {
+				int nextOutgoingTopicAlias = getNextOutgoingTopicAlias();
+				if (nextOutgoingTopicAlias <= getOutgoingTopicAliasMaximum()) {
+					// Create a new Topic Alias and increment the counter
+					publish.getProperties().setTopicAlias(nextOutgoingTopicAlias);
+					outgoingTopicAliases.put(publish.getTopicName(), nextOutgoingTopicAlias);
+				}
+			}
+		}
+		return publish;
+	}
 }

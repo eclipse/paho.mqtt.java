@@ -2,12 +2,11 @@ package org.eclipse.paho.mqttv5.client.vertx.internal;
 
 import java.io.EOFException;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.paho.mqttv5.client.vertx.MqttDeliveryToken;
-import org.eclipse.paho.mqttv5.client.vertx.internal.ClientState;
 import org.eclipse.paho.mqttv5.client.vertx.logging.Logger;
 import org.eclipse.paho.mqttv5.client.vertx.logging.LoggerFactory;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClientException;
@@ -17,6 +16,7 @@ import org.eclipse.paho.mqttv5.client.vertx.persist.PersistedBuffer;
 
 import org.eclipse.paho.mqttv5.common.MqttPersistable;
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubRel;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttPersistableWireMessage;
@@ -35,8 +35,8 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
  * to use.</li>
  * </ul>
  */
-public class MqttSessionState {
-	private static final String CLASS_NAME = ClientState.class.getName();
+public class SessionState {
+	private static final String CLASS_NAME = SessionState.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 	
 	private static final String PERSISTENCE_SENT_PREFIX = "s-";
@@ -56,22 +56,52 @@ public class MqttSessionState {
 	private PersistedBuffer retryQueue;
 	private PersistedBuffer inboundQoS2;
 	private MqttClientPersistence persistence;
+	private ToDoQueue todoQueue;
 	
-	public MqttSessionState(MqttClientPersistence persistence) {
+	public Hashtable<Integer, MqttToken> out_tokens = new Hashtable<Integer, MqttToken>();
+	
+	private boolean shouldBeConnected = false;
+	
+	public SessionState(MqttClientPersistence persistence, ToDoQueue todoQueue) {
 		this.persistence = persistence;
 		retryQueue = new PersistedBuffer(persistence);
+		this.todoQueue = todoQueue;
+		try {
+			restore();
+		} catch (Exception e) {}
 	}
 	
-	public void addRetryQueue(MqttPersistableWireMessage message, MqttToken token) {
+	public void setShouldBeConnected(boolean value) {
+		shouldBeConnected = value;
+	}
+
+	public boolean getShouldBeConnected() {
+		return shouldBeConnected;
+	}
+	
+	public void addRetryQueue(MqttPersistableWireMessage message, Integer hashcode) {
 		try {
-			retryQueue.add(new Integer(message.getMessageId()), message, "s-");
+			retryQueue.add(new Integer(message.getMessageId()), message, PERSISTENCE_SENT_PREFIX);
+		} catch (Exception e) {}
+	}
+	
+	public void completeMessage(Integer msgid) {
+		out_tokens.remove(msgid);
+		try {
+			persistence.remove(PERSISTENCE_SENT_PREFIX + msgid.toString());
+		} catch (Exception e) {}
+	}
+
+	public void clear() {
+		nextSubscriptionIdentifier.set(1);
+		try {
+			persistence.clear();
+			retryQueue.clear();
+			todoQueue.clear();
+			inboundQoS2.clear();
 		} catch (Exception e) {
 			
 		}
-	}
-
-	public void clearSessionState() {
-		nextSubscriptionIdentifier.set(1);
 	}
 
 	public Integer getNextSubscriptionIdentifier() {
@@ -116,9 +146,10 @@ public class MqttSessionState {
 	 * Restores the state information from persistence.
 	 * @throws MqttException if an exception occurs whilst restoring state
 	 */
-	protected void restoreState() throws MqttException {
+	protected void restore() throws MqttException {
 		final String methodName = "restoreState";
 		Enumeration messageKeys = persistence.keys();
+		System.out.println("restoreState "+messageKeys.hasMoreElements());
 		MqttPersistable persistable;
 		String key;
 		int highestMsgId = nextMsgId;
@@ -128,6 +159,7 @@ public class MqttSessionState {
 		
 		while (messageKeys.hasMoreElements()) {
 			key = (String) messageKeys.nextElement();
+			System.out.println("restoreState key "+key);
 			persistable = persistence.get(key);
 			MqttWireMessage message = restoreMessage(key, persistable);
 			if (message != null) {
@@ -180,20 +212,18 @@ public class MqttSessionState {
 					// Buffered outgoing messages that have not yet been sent at all
 					MqttPublish sendMessage = (MqttPublish) message;
 					highestMsgId = Math.max(sendMessage.getMessageId(), highestMsgId);
-					if(sendMessage.getMessage().getQos() == 2){
+					if(sendMessage.getMessage().getQos() != 0) {
 						//@TRACE 607=outbound QoS 2 publish key={0} message={1}
 						log.fine(CLASS_NAME,methodName, "607", new Object[]{key,message});
-						retryQueue.restore( Integer.valueOf(sendMessage.getMessageId()),sendMessage);
-					} else if(sendMessage.getMessage().getQos() == 1){
-						//@TRACE 608=outbound QoS 1 publish key={0} message={1}
-						log.fine(CLASS_NAME,methodName, "608", new Object[]{key,message});
-
-						retryQueue.restore( Integer.valueOf(sendMessage.getMessageId()),sendMessage);
-						
+						MqttToken newtoken = new MqttToken();
+						todoQueue.restore(Integer.valueOf(sendMessage.getMessageId()),
+								newtoken, sendMessage);
+						out_tokens.put(new Integer(sendMessage.getMessageId()), newtoken);
 					} else {
 						//@TRACE 511=outbound QoS 0 publish key={0} message={1}
 						log.fine(CLASS_NAME,methodName, "511", new Object[]{key,message});
-						retryQueue.restore( Integer.valueOf(sendMessage.getMessageId()), sendMessage);
+						todoQueue.restore(Integer.valueOf(sendMessage.getMessageId()), 
+								new MqttToken(), sendMessage);
 						// Because there is no Puback, we have to trust that this is enough to send the message
 						persistence.remove(key);
 					}
@@ -201,8 +231,6 @@ public class MqttSessionState {
 					//MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
 					//tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put( Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
-					
-					
 				} else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {
 					MqttPubRel pubRelMessage = (MqttPubRel) message;
 					if (!persistence.containsKey(getSendPersistenceKey(pubRelMessage))) {

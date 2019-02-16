@@ -171,7 +171,7 @@ public class PersistenceTests implements MqttCallback {
 		client.close();
 		
 	}
-
+	
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		log.info("Message Arrived on " + topic + " with " + new String(message.getPayload()));

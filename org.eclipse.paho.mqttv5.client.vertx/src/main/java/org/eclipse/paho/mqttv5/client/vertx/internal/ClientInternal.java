@@ -6,6 +6,7 @@ import java.util.Hashtable;
 
 import org.eclipse.paho.mqttv5.client.vertx.MqttClientException;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClientPersistence;
+import org.eclipse.paho.mqttv5.client.vertx.DisconnectedBufferOptions;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.vertx.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.vertx.MqttToken;
@@ -48,16 +49,16 @@ public class ClientInternal {
 	private static Vertx vertx = null;
 	private NetClient netclient = null;
 	public NetSocket socket = null;
-	
-	private MqttConnectionOptions connOpts;
 	private boolean connected = false;
-	public Hashtable<Integer, MqttToken> out_tokens = new Hashtable<Integer, MqttToken>();
+	private long reconnect_timer = 0;
+
 	public Hashtable<Integer, MqttToken> out_hash_tokens = new Hashtable<Integer, MqttToken>();
 	
+	// Data that exists for the life of an MQTT session
+	private SessionState sessionstate;
 	
-	// Variables that exist within the life of an MQTT session
-	private MqttSessionState sessionstate;
-	private MqttConnectionState connectionstate;
+	// Data that exists for the life of an TCP connection
+	private ConnectionState connectionstate;
 	
 	private ToDoQueue todoQueue;
 	
@@ -69,12 +70,22 @@ public class ClientInternal {
 				vertx = Vertx.vertx();
 			}
 		}
-		sessionstate = new MqttSessionState(persistence);
-		connectionstate = new MqttConnectionState(this);
+		connectionstate = new ConnectionState(this);
 		todoQueue = new ToDoQueue(this, vertx, persistence, connectionstate);
+		sessionstate = new SessionState(persistence, todoQueue);
 	}
 	
-	public MqttConnectionState getConnectionState() {
+	public void close() {
+		boolean cancelled = vertx.cancelTimer(reconnect_timer);
+		sessionstate.setShouldBeConnected(false);
+		todoQueue.close();
+	}
+	
+	public MqttAsyncClient getClient() {
+		return client;
+	}
+	
+	public ConnectionState getConnectionState() {
 		return connectionstate;
 	}
 	
@@ -112,6 +123,8 @@ public class ClientInternal {
 	Buffer tempBuffer = Buffer.buffer();
 	VariableByteInteger remlen = null;
 	int packet_len = 0;
+
+	private String[] serverURIs;
 	
 	public MqttWireMessage getPacket(Buffer buffer) {
 		MqttWireMessage msg = null;
@@ -173,24 +186,11 @@ public class ClientInternal {
 			System.out.println("DEBUG - msg received "+msg.toString());
 			if (msg instanceof MqttConnAck) {
 				connectToken.setResponse(msg);
-				connected = true;
+				connectionStart(msg.getProperties());
 				connectToken.setComplete();	
-				String assigned_clientid = connectToken.getResponse().getProperties().getAssignedClientIdentifier();	
-				if (assigned_clientid != null) {
-					client.setClientId(assigned_clientid);
-				}
-				try {
-					if (connOpts.getKeepAliveInterval() > 0) {
-						long kid = vertx.setPeriodic(connOpts.getKeepAliveInterval() * 1000, id -> {
-							connectionstate.keepAlive(connOpts.getKeepAliveInterval());
-						});
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 			} else if (msg instanceof MqttSubAck || msg instanceof MqttPubAck
 					|| msg instanceof MqttUnsubAck || msg instanceof MqttPubComp) {
-				MqttToken acktoken = out_tokens.get(new Integer(msg.getMessageId()));
+				MqttToken acktoken = sessionstate.out_tokens.get(new Integer(msg.getMessageId()));
 				if (acktoken != null) {
 					if (msg instanceof MqttPubComp) {
 						int[] a = acktoken.getReasonCodes();
@@ -201,7 +201,7 @@ public class ClientInternal {
 						acktoken.setReasonCodes(c);
 					}
 					acktoken.setResponse(msg);
-					out_tokens.remove(new Integer(msg.getMessageId()));
+					sessionstate.completeMessage(new Integer(msg.getMessageId()));
 					acktoken.setComplete();
 				}
 			} else if (msg instanceof MqttPublish) {
@@ -210,7 +210,7 @@ public class ClientInternal {
 							((MqttPublish) msg).getMessage());
 				}
 			} else if (msg instanceof MqttPubRec) {
-				MqttToken acktoken = out_tokens.get(new Integer(msg.getMessageId()));
+				MqttToken acktoken = sessionstate.out_tokens.get(new Integer(msg.getMessageId()));
 				MqttPubRel pubrel = new MqttPubRel(MqttReturnCode.RETURN_CODE_SUCCESS, 
 						msg.getMessageId(),
 						msg.getProperties());
@@ -225,7 +225,7 @@ public class ClientInternal {
 				connectionstate.pingReceived();
 			}
 		} catch (Exception e) {
-			//error processing message
+			e.printStackTrace();
 		}
 	}
 	
@@ -263,14 +263,34 @@ public class ClientInternal {
 		return vertx.createNetClient(netopts);
 	}
 	
+	
+	public void reconnect(MqttConnectionOptions connOpts) {
+		connect(connOpts, new MqttToken(), serverURIs, 0, null);
+	}
+	
+	private int current_reconnect_delay = 0;
+	
 	public void connect(MqttConnectionOptions options, MqttToken userToken, 
 			String[] serverURIs, final int index, Exception exc)  {
 	
-		connOpts = options;
+		todoQueue.setSize(client.getBufferOpts().getBufferSize());
+		this.serverURIs = serverURIs;
 		
 		if (index >= serverURIs.length) {
 			System.out.println("connect failed");
 			userToken.setComplete();
+			if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
+				if (current_reconnect_delay == 0) {
+					current_reconnect_delay = options.getAutomaticReconnectMinDelay();
+				}
+				current_reconnect_delay *= 2;
+				if (current_reconnect_delay > options.getAutomaticReconnectMinDelay()) {
+					current_reconnect_delay = options.getAutomaticReconnectMaxDelay();
+				}
+				reconnect_timer = vertx.setTimer(current_reconnect_delay, id -> {
+					reconnect(options);
+				});
+			}
 			return;
 		}
 		
@@ -283,33 +303,46 @@ public class ClientInternal {
 			return;
 		}
 		
-		System.out.println("Connecting to "+uri.toString());
+		System.out.println(client.getClientId() + " Connecting to "+uri.toString());
 
 		try {
 			netclient = createNetClient(uri);
 			netclient.connect(uri.getPort(), uri.getHost(), uri.getHost(), res -> {
 			if (res.succeeded()) {
 				socket = res.result();
+				System.out.println("TCP connect succeeded "+getClient().getClientId() + " "+
+						socket.writeHandlerID());
 				socket.handler(buffer -> {
 					handleData(buffer, userToken);
 				});
 				socket.closeHandler(v -> {
+					connectionEnd();
 					System.out.println("The socket has been closed "+v);
-					connected = false;
+					if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
+						current_reconnect_delay = options.getAutomaticReconnectMinDelay();
+						reconnect_timer = vertx.setTimer(current_reconnect_delay, id -> {
+							reconnect(options);
+						});
+					}
 				});
 				socket.exceptionHandler(throwable -> {
+					connectionEnd();
 					System.out.println("The socket has an exception "+throwable.getMessage());
-					userToken.setComplete();
+					if (userToken != null) {
+						userToken.setComplete();
+					}
 				});
 				MqttConnect connect = new MqttConnect(client.getClientId(), 
 						options.getMqttVersion(),
 						options.isCleanStart(),
 						options.getKeepAliveInterval(),
-						null, // properties
-						new MqttProperties());  // will properties
+						options.getConnectionProperties(), // properties
+						options.getWillMessageProperties());  // will properties
 				try {
+					System.out.println("Sending connect "+getClient().getClientId());
 					socket.write(Buffer.buffer(connect.serialize()),
 						res1 -> {
+							System.out.println("Connect sent "+getClient().getClientId());
 							if (res1.succeeded()) {
 								connectionstate.registerOutboundActivity();
 							} else {
@@ -321,7 +354,7 @@ public class ClientInternal {
 					connect(options, userToken, serverURIs, index + 1, e);
 				}
 			} else {
-				System.out.println("TCP connect failed");
+				System.out.println("TCP connect failed "+getClient().getClientId());
 				connect(options, userToken, serverURIs, index + 1, exc);
 			}
 		});
@@ -332,6 +365,12 @@ public class ClientInternal {
 	}
 	
 	public void disconnect(int reasonCode, MqttProperties disconnectProperties, MqttToken token) {
+		sessionstate.setShouldBeConnected(false);
+		if (!isConnected()) {
+			connectionEnd();
+			token.setComplete();
+			return;  // already disconnected
+		}
 		try {
 			MqttDisconnect disconnect = new MqttDisconnect(reasonCode, disconnectProperties);
 			socket.write(Buffer.buffer(disconnect.serialize()),
@@ -340,18 +379,14 @@ public class ClientInternal {
 							connectionstate.registerOutboundActivity();
 							// we still need to close the socket and indicate the disconnect
 							// is finished if the packet write failed
-							socket.close();
-							socket = null;
+							connectionEnd();
 							token.setComplete();
-							connected = false;
 						} else {
 							System.out.println("write failed");
 							// we still need to close the socket and indicate the disconnect
 							// is finished if the packet write failed
-							socket.close();
-							socket = null;
+							connectionEnd();
 							token.setComplete();
-							connected = false;
 						}
 					});
 		} catch (Exception e) {
@@ -359,12 +394,45 @@ public class ClientInternal {
 		}
 	}
 	
+	private void connectionStart(MqttProperties properties) {
+		System.out.println("DEBUG - connectionStart");
+		sessionstate.setShouldBeConnected(true);
+		connected = true;
+		String assigned_clientid = properties.getAssignedClientIdentifier();	
+		if (assigned_clientid != null) {
+			client.setClientId(assigned_clientid);
+		}
+		try {
+			if (client.getConnectOpts().getKeepAliveInterval() > 0) {
+				long kid = vertx.setPeriodic(client.getConnectOpts().getKeepAliveInterval() * 1000, id -> {
+					connectionstate.keepAlive(client.getConnectOpts().getKeepAliveInterval());
+				});
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		todoQueue.resume();
+	}
+	
+	private void connectionEnd() {
+		todoQueue.pause();
+		connected = false;
+		if (socket != null) {
+			socket.close();
+			socket = null;
+		}
+		if (client.getConnectOpts().getSessionExpiryInterval() == null || 
+				client.getConnectOpts().getSessionExpiryInterval() == 0) {
+			sessionstate.clear();
+		}
+	}
+	
 	public void subscribe(MqttSubscription[] subscriptions, MqttProperties subscriptionProperties,
 			MqttToken token) throws MqttException {
 		MqttSubscribe subscribe = new MqttSubscribe(subscriptions, subscriptionProperties);
 		subscribe.setMessageId(sessionstate.getNextMessageId());
-		out_tokens.put(new Integer(subscribe.getMessageId()), token);
-		todoQueue.add(subscribe, "", token);
+		sessionstate.out_tokens.put(new Integer(subscribe.getMessageId()), token);
+		todoQueue.add(subscribe, token);
 	}
 	
 	public void unsubscribe(String[] topicFilters, MqttProperties unsubscribeProperties,
@@ -372,40 +440,32 @@ public class ClientInternal {
 
 		MqttUnsubscribe unsubscribe = new MqttUnsubscribe(topicFilters, unsubscribeProperties);
 		unsubscribe.setMessageId(sessionstate.getNextMessageId());
-		out_tokens.put(new Integer(unsubscribe.getMessageId()), token);
-		todoQueue.add(unsubscribe, "", token);
+		sessionstate.out_tokens.put(new Integer(unsubscribe.getMessageId()), token);
+		todoQueue.add(unsubscribe, token);
 	}
-	
+		
 	public void publish(String topic, MqttMessage message, MqttToken token) throws MqttException {
 		
 		// if we are not connected, and offline buffering is not enabled, then we return a failure
-		if (!client.isConnected()) {
+		if (!client.getBufferOpts().isBufferEnabled() && !client.isConnected()) {
 			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_NOT_CONNECTED);
 		}
 		
 		MqttPublish publish = new MqttPublish(topic, message, message.getProperties());
 		if (message.getQos() > 0) {
 			publish.setMessageId(sessionstate.getNextMessageId()); // getNextId
-			out_tokens.put(new Integer(publish.getMessageId()), token);
+			sessionstate.out_tokens.put(new Integer(publish.getMessageId()), token);
 		} else {
 			// QoS 0 messages have no message id
 			out_hash_tokens.put(new Integer(token.hashCode()), token);
 		}
-
-		// Add the info to the retry queue.  In the event of reconnecting, any outstanding publishes
-		// will need to be resent.
-		Long sessionExpiry = connOpts.getConnectionProperties().getSessionExpiryInterval();
-		if (sessionExpiry == null) {
-			sessionExpiry = new Long(0L);
-		}
-		if (sessionExpiry >= 0L /*&& this.persistence != null*/) {
-			sessionstate.addRetryQueue(publish, token);
-		}
 		
-		todoQueue.add(publish, "", token);	
+		publish = connectionstate.setTopicAlias(publish);
+		todoQueue.add(publish, token);	
 	}
 	
-	public MqttSessionState getSessionState() {
+	
+	public SessionState getSessionState() {
 		return sessionstate;
 	}
 	
@@ -417,5 +477,16 @@ public class ClientInternal {
 		sessionstate.setClientId(clientId);
 	}
 
+	public MqttWireMessage getBufferedMessage(int index) {
+		return todoQueue.getMessage(index);
+	}
+	
+	public void deleteBufferedMessage(int index) {
+		todoQueue.removeMessage(index);
+	}
+	
+	public int getBufferedMessageCount() {
+		return todoQueue.getQueued();
+	}
 
 }
