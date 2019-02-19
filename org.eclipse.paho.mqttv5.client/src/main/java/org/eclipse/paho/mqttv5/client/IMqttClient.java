@@ -191,6 +191,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
   public IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
@@ -288,6 +289,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
@@ -298,8 +300,10 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 *
 	 * @see #subscribe(String[], int[])
 	 *
-	 * @param topicFilters the topic to subscribe to, which can include wildcards.
+	 * @param topicFilter the topic to subscribe to, which can include wildcards.
+	 * @param qos QoS
 	 * @param messageListener one callbacks to handle incoming messages
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
 public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
@@ -396,6 +400,7 @@ public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener me
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
 	 * @param messageListeners one or more callbacks to handle incoming messages
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
