@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,7 +45,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class CommsTokenStore {
 	private static final String CLASS_NAME = CommsTokenStore.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	// Maps message-specific data (usually message IDs) to tokens
 	private Hashtable tokens;
@@ -109,7 +109,7 @@ public class CommsTokenStore {
 		final String methodName = "restoreToken";
 		MqttDeliveryToken token;
 		synchronized(tokens) {
-			String key = new Integer(message.getMessageId()).toString();
+			String key = Integer.toString(message.getMessageId());
 			if (this.tokens.containsKey(key)) {
 				token = (MqttDeliveryToken)this.tokens.get(key);
 				//@TRACE 302=existing key={0} message={1} token={2}
@@ -227,7 +227,7 @@ public class CommsTokenStore {
 	public void clear() {
 		final String methodName = "clear";
 		//@TRACE 305=> {0} tokens
-		log.fine(CLASS_NAME, methodName, "305", new Object[] {new Integer(tokens.size())});
+		log.fine(CLASS_NAME, methodName, "305", new Object[] {Integer.valueOf(tokens.size())});
 		synchronized(tokens) {
 			tokens.clear();
 		}

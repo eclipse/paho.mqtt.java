@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.eclipse.paho</groupId>
 		<artifactId>java-parent</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.paho.client.mqttv3.test</artifactId>
@@ -56,8 +56,29 @@
 						<exclude>${test.exclude}</exclude>
 					</excludes>
 					<runOrder>alphabetical</runOrder>
+					<reuseForks>false</reuseForks>
+        			<forkCount>1</forkCount>
 				</configuration>
 			</plugin>
+			<plugin>
+ 				<groupId>org.jacoco</groupId>
+				  	<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+            		<id>generate-test-report</id>
+            			<phase>test</phase>
+            			<goals>
+                		<goal>report-aggregate</goal>
+            			</goals>
+        				</execution>
+					</executions>
+				</plugin>
 		</plugins>
 	</build>
 
@@ -65,7 +86,7 @@
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>1.2.0</version>
+			<version>1.2.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

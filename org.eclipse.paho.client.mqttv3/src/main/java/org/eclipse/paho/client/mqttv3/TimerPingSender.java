@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corp.
+ * Copyright (c) 2014, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,21 +31,23 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class TimerPingSender implements MqttPingSender {
 	private static final String CLASS_NAME = TimerPingSender.class.getName();
-	private static final  Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
 	private ClientComms comms;
 	private Timer timer;
+	private String clientid;
 
 	public void init(ClientComms comms) {
 		if (comms == null) {
 			throw new IllegalArgumentException("ClientComms cannot be null.");
 		}
 		this.comms = comms;
+		clientid = comms.getClient().getClientId();
+		log.setResourceName(clientid);
 	}
 
 	public void start() {
 		final String methodName = "start";		
-		String clientid = comms.getClient().getClientId();
 		
 		//@Trace 659=start timer for client:{0}
 		log.fine(CLASS_NAME, methodName, "659", new Object[]{clientid});
@@ -73,7 +75,7 @@ public class TimerPingSender implements MqttPingSender {
 		
 		public void run() {
 			//@Trace 660=Check schedule at {0}
-			log.fine(CLASS_NAME, methodName, "660", new Object[]{new Long(System.currentTimeMillis())});
+			log.fine(CLASS_NAME, methodName, "660", new Object[]{Long.valueOf(System.nanoTime())});
 			comms.checkForActivity();			
 		}
 	}

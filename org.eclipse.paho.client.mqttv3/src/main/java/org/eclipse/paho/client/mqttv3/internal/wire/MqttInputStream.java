@@ -34,14 +34,14 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * <code>MqttWireMessage</code>. 
  */
 public class MqttInputStream extends InputStream {
-	private static final String CLASS_NAME = MqttInputStream.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private final String CLASS_NAME = MqttInputStream.class.getName();
+	private final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private ClientState clientState = null;
 	private DataInputStream in;	
 	private ByteArrayOutputStream bais;
-	private long remLen;
-	private long packetLen;
+	private int remLen;
+	private int packetLen;
 	private byte[] packet;
 
 	public MqttInputStream(ClientState clientState, InputStream in) {
@@ -117,8 +117,8 @@ public class MqttInputStream extends InputStream {
 				byte[] header = bais.toByteArray();
 				System.arraycopy(header,0,packet,0, header.length);
 				message = MqttWireMessage.createWireMessage(packet);
-				// @TRACE 501= received {0} 
-				log.fine(CLASS_NAME, methodName, "501",new Object[] {message});
+				// @TRACE 301= received {0} 
+				log.fine(CLASS_NAME, methodName, "301",new Object[] {message});
 			}
 		} catch (SocketTimeoutException e) {
 			// ignore socket read timeout
@@ -142,10 +142,12 @@ public class MqttInputStream extends InputStream {
     			packetLen += n;
     			throw e;
     		}
-    		clientState.notifyReceivedBytes(count);
+    		
 
-    		if (count < 0)
+    		if (count < 0) {
     			throw new EOFException();
+    		}
+    		clientState.notifyReceivedBytes(count);
     		n += count;
     	}
     }

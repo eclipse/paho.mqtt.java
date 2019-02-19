@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,6 +33,7 @@ import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.ConnectionManipulationProxyServer;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -90,8 +91,14 @@ public class ConnectionLossTest implements MqttCallback
 	public static void tearDownAfterClass() throws Exception {
 		log.info("Tests finished, stopping proxy");
 		proxy.stopProxy();
-		
 	}
+	
+	@After
+	public void afterTest() {
+		log.info("Disabling Proxy");
+		proxy.disableProxy();
+	}
+	
 	/**
 	 * Tests whether paho can detect a connection loss with the server even if it has outbound activity by publishing messages with QoS 0.
 	 * @throws Exception
@@ -100,48 +107,50 @@ public class ConnectionLossTest implements MqttCallback
 	public void testConnectionLossWhilePublishingQos0()
 		throws Exception
 	{
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
-    	MqttConnectOptions options = new MqttConnectOptions();
-    	options.setCleanSession(true);
-    	options.setUserName(username);
-    	options.setPassword(password);
-    	options.setKeepAliveInterval(keepAlive);
-    	
-    	MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
-    	client.setCallback(this);
-    	proxy.enableProxy();
-    	client.connect(options);
-    	
-    	log.info((new Date())+" - Connected.");
-    	for (int i=0; i<10; i++) {    		
-        	log.info("Disconnect your network in "+(10-i)+" sec...");
-    		client.publish(username+"/"+clientId+"/abc", message.getBytes(), 0, false);
-    		Thread.sleep(1000);    		
-    	}
-    	proxy.disableProxy();
-    	
-    	final int[] res = new int[1];
-    	new Timer().schedule( new TimerTask() {
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		client.connect(options);
+
+		log.info((new Date())+" - Connected.");
+		for (int i=0; i<10; i++) {    		
+			log.info("Disconnect your network in "+(10-i)+" sec...");
+			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 0, false);
+			Thread.sleep(1000);    		
+		}
+		proxy.disableProxy();
+
+		final int[] res = new int[1];
+		new Timer().schedule( new TimerTask() {
 			@Override
 			public void run() {
 				res[0]++;
-	    		if (res[0] == keepAlive + 1) {
-	    			log.info((new Date())+" - Connection should be lost...");
-	    		}				
+				if (res[0] == keepAlive + 1) {
+					log.info((new Date())+" - Connection should be lost...");
+				}				
 			}    		
-    	}, 0, 1000);
-    	
-    	while (client.isConnected() && res[0] < 2*keepAlive) {
-    		try {
-    			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 0, false);
-    			Thread.sleep(1000);
-    		}
-    		catch (MqttException e) {
-    			// ignore
-    		}
-    	}
-    	
+		}, 0, 1000);
+
+		while (client.isConnected() && res[0] < 2*keepAlive) {
+			try {
+				client.publish(username+"/"+clientId+"/abc", message.getBytes(), 0, false);
+				Thread.sleep(1000);
+			}
+			catch (MqttException e) {
+				// ignore
+			}
+		}
+
 		Assert.assertFalse("Disconected", client.isConnected());
 		if (client.isConnected()) client.disconnect(0);
 		client.close();
@@ -153,57 +162,57 @@ public class ConnectionLossTest implements MqttCallback
 	 * @throws Exception
 	 */
 	@Test
-	public void testConnectionLossWhilePublishingQos1()
-		throws Exception
-	{
+	public void testConnectionLossWhilePublishingQos1() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+
 		final int keepAlive = 15;
 
-    	MqttConnectOptions options = new MqttConnectOptions();
-    	options.setCleanSession(true);
-    	options.setUserName(username);
-    	options.setPassword(password);
-    	options.setKeepAliveInterval(keepAlive);
-    	
-    	MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
-    	client.setCallback(this);
-    	proxy.enableProxy();
-    	client.connect(options);
-	
-    	log.info((new Date())+" - Connected.");
-    	for (int i=0; i<10; i++) {    		
-        	log.info("Disconnect your network in "+(10-i)+" sec...");
-    		client.publish(username+"/"+clientId+"/abc", message.getBytes(), 1, false);
-    		Thread.sleep(1000);    		
-    	}
-    	proxy.disableProxy();
-    	
-    	final int[] res = new int[1];
-    	new Timer().schedule( new TimerTask() {
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		client.connect(options);
+
+		log.info((new Date()) + " - Connected.");
+		for (int i = 0; i < 10; i++) {
+			log.info("Disconnect your network in " + (10 - i) + " sec...");
+			client.publish(username + "/" + clientId + "/abc", message.getBytes(), 1, false);
+			Thread.sleep(1000);
+		}
+		proxy.disableProxy();
+
+		final int[] res = new int[1];
+		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
 				res[0]++;
-	    		if (res[0] == keepAlive + 1) {
-	    			log.info((new Date())+" - Connection should be lost...");
-	    		}				
-			}    		
-    	}, 0, 1000);
-    	
-    	while (client.isConnected() && res[0] < 2*keepAlive) {
-    		try {
-    			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 1, false);
-    			Thread.sleep(1000);
-    		}
-    		catch (MqttException e) {
-    			// ignore
-    		}
-    	}
-    	log.info("Finished publishing...");
-    	
+				if (res[0] == keepAlive + 1) {
+					log.info((new Date()) + " - Connection should be lost...");
+				}
+			}
+		}, 0, 1000);
+
+		while (client.isConnected() && res[0] < 2 * keepAlive) {
+			try {
+				client.publish(username + "/" + clientId + "/abc", message.getBytes(), 1, false);
+				Thread.sleep(1000);
+			} catch (MqttException e) {
+				// ignore
+			}
+		}
+		log.info("Finished publishing...");
+
 		Assert.assertFalse("Disconected", client.isConnected());
-		if (client.isConnected()) client.disconnect(0);
+		if (client.isConnected())
+			client.disconnect(0);
 		client.close();
 	}
-
 
 	/**
 	 * Tests whether paho can detect a connection loss with the server even if it has outbound activity by publishing messages with QoS 2.
@@ -213,48 +222,50 @@ public class ConnectionLossTest implements MqttCallback
 	public void testConnectionLossWhilePublishingQos2()
 		throws Exception
 	{
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
-    	MqttConnectOptions options = new MqttConnectOptions();
-    	options.setCleanSession(true);
-    	options.setUserName(username);
-    	options.setPassword(password);
-    	options.setKeepAliveInterval(keepAlive);
-    	
-    	MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
-    	client.setCallback(this);
-    	proxy.enableProxy();
-    	client.connect(options);
-    	
-    	log.info((new Date())+" - Connected.");
-    	for (int i=0; i<10; i++) {    		
-        	log.info("Disconnect your network in "+(10-i)+" sec...");
-    		client.publish(username+"/"+clientId+"/abc", message.getBytes(), 2, false);
-    		Thread.sleep(1000);    		
-    	}
-    	proxy.disableProxy();
-    	
-    	final int[] res = new int[1];
-    	new Timer().schedule( new TimerTask() {
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		client.connect(options);
+
+		log.info((new Date())+" - Connected.");
+		for (int i=0; i<10; i++) {    		
+			log.info("Disconnect your network in "+(10-i)+" sec...");
+			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 2, false);
+			Thread.sleep(1000);    		
+		}
+		proxy.disableProxy();
+
+		final int[] res = new int[1];
+		new Timer().schedule( new TimerTask() {
 			@Override
 			public void run() {
 				res[0]++;
-	    		if (res[0] == keepAlive + 1) {
-	    			log.info((new Date())+" - Connection should be lost...");
-	    		}				
+				if (res[0] == keepAlive + 1) {
+					log.info((new Date())+" - Connection should be lost...");
+				}				
 			}    		
-    	}, 0, 1000);
-    	
-    	while (client.isConnected() && res[0] < 2*keepAlive) {
-    		try {
-    			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 2, false);
-    			Thread.sleep(1000);
-    		}
-    		catch (MqttException e) {
-    			// ignore
-    		}    			
-    	}
-    	
+		}, 0, 1000);
+
+		while (client.isConnected() && res[0] < 2*keepAlive) {
+			try {
+				client.publish(username+"/"+clientId+"/abc", message.getBytes(), 2, false);
+				Thread.sleep(1000);
+			}
+			catch (MqttException e) {
+				// ignore
+			}    			
+		}
+
 		Assert.assertFalse("Disconected", client.isConnected());
 		if (client.isConnected()) client.disconnect(0);
 		client.close();
@@ -269,55 +280,57 @@ public class ConnectionLossTest implements MqttCallback
 	public void testConnectionLossWhilePublishingQos1Async()
 		throws Exception
 	{
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
-    	MqttConnectOptions options = new MqttConnectOptions();
-    	options.setCleanSession(true);
-    	options.setUserName(username);
-    	options.setPassword(password);
-    	options.setKeepAliveInterval(keepAlive);
-    	
-    	MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
-    	client.setCallback(this);
-    	proxy.enableProxy();
-    	log.info((new Date())+" - Connecting...");
-    	client.connect(options);
-    	while (!client.isConnected()) {
-    		Thread.sleep(1000);
-    	}
-	
-    	log.info((new Date())+" - Connected.");
-    	for (int i=0; i<10; i++) {    		
-        	log.info("Disconnect your network in "+(10-i)+" sec...");
-    		client.publish(username+"/"+clientId+"/abc", message.getBytes(), 1, false);
-    		Thread.sleep(1000);    		
-    	}
-    	proxy.disableProxy();
-    	final int[] res = new int[1];
-    	new Timer().schedule( new TimerTask() {
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		log.info((new Date())+" - Connecting...");
+		client.connect(options);
+		while (!client.isConnected()) {
+			Thread.sleep(1000);
+		}
+
+		log.info((new Date())+" - Connected.");
+		for (int i=0; i<10; i++) {    		
+			log.info("Disconnect your network in "+(10-i)+" sec...");
+			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 1, false);
+			Thread.sleep(1000);    		
+		}
+		proxy.disableProxy();
+		final int[] res = new int[1];
+		new Timer().schedule( new TimerTask() {
 			@Override
 			public void run() {
 				res[0]++;
-	    		if (res[0] == keepAlive + 1) {
-	    			log.info((new Date())+" - Connection should be lost...");
-	    		}				
+				if (res[0] == keepAlive + 1) {
+					log.info((new Date())+" - Connection should be lost...");
+				}				
 			}    		
-    	}, 0, 1000);
-    	
-    	boolean stopPublishing = false;
-    	while (client.isConnected() && res[0] < 10*keepAlive) {
-    		if (!stopPublishing) {
-	    		try {
-	    			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 1, false);
-	    			log.info((new Date())+" - Published...");
-	    			Thread.sleep(1000);
-	    		}
-	    		catch (MqttException e) {
-	    			stopPublishing = true; 
-	    		}
-    		}
-    	}
-    	
+		}, 0, 1000);
+
+		boolean stopPublishing = false;
+		while (client.isConnected() && res[0] < 10*keepAlive) {
+			if (!stopPublishing) {
+				try {
+					client.publish(username+"/"+clientId+"/abc", message.getBytes(), 1, false);
+					log.info((new Date())+" - Published...");
+					Thread.sleep(1000);
+				}
+				catch (MqttException e) {
+					stopPublishing = true; 
+				}
+			}
+		}
+
 		Assert.assertFalse("Disconected", client.isConnected());
 		if (client.isConnected()) client.disconnect(0);
 		client.close();
@@ -330,39 +343,41 @@ public class ConnectionLossTest implements MqttCallback
 	 */
 	@Test
 	public void testKeepConnectionOpenWhilePublishingQos0()
-		throws Exception
+			throws Exception
 	{
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
-    	MqttConnectOptions options = new MqttConnectOptions();
-    	options.setCleanSession(true);
-    	options.setUserName(username);
-    	options.setPassword(password);
-    	options.setKeepAliveInterval(keepAlive);
-    	
-    	MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
-    	client.setCallback(this);
-    	proxy.enableProxy();
-    	client.connect(options);
-    	
-    	log.info((new Date())+" - Connected.");
-    	
-    	final int[] res = new int[1];
-    	new Timer().schedule( new TimerTask() {
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		client.connect(options);
+
+		log.info((new Date())+" - Connected.");
+
+		final int[] res = new int[1];
+		new Timer().schedule( new TimerTask() {
 			@Override
 			public void run() {
 				res[0]++;
-	    		if (res[0] % keepAlive == 0) {
-	    			log.info((new Date())+" - Still running keep alive count: "+res[0]+"...");
-	    		}				
+				if (res[0] % keepAlive == 0) {
+					log.info((new Date())+" - Still running keep alive count: "+res[0]+"...");
+				}				
 			}    		
-    	}, 0, 1000);
-    	
-    	while (client.isConnected() && res[0] < 10*keepAlive) {    		
-    		client.publish(username+"/"+clientId+"/abc", message.getBytes(), 0, false);
-    		Thread.sleep(1000);    		
-    	}
-    	
+		}, 0, 1000);
+
+		while (client.isConnected() && res[0] < 10*keepAlive) {    		
+			client.publish(username+"/"+clientId+"/abc", message.getBytes(), 0, false);
+			Thread.sleep(1000);    		
+		}
+
 		Assert.assertTrue("Connected", client.isConnected());
 		if (client.isConnected()) client.disconnect(0);
 		client.close();
@@ -375,45 +390,50 @@ public class ConnectionLossTest implements MqttCallback
 	 */
 	@Test
 	public void testKeepConnectionOpenIdle()
-		throws Exception
+			throws Exception
 	{
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
 		final int keepAlive = 15;
 
-    	MqttConnectOptions options = new MqttConnectOptions();
-    	options.setCleanSession(true);
-    	options.setUserName(username);
-    	options.setPassword(password);
-    	options.setKeepAliveInterval(keepAlive);
-    	
-    	MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
-    	client.setCallback(this);
-    	proxy.enableProxy();
-    	client.connect(options);
-    	
-    	log.info((new Date())+" - Connected.");
-    	
-    	final int[] res = new int[1];
-    	new Timer().schedule( new TimerTask() {
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		client.connect(options);
+
+		log.info((new Date())+" - Connected.");
+
+		final int[] res = new int[1];
+		new Timer().schedule( new TimerTask() {
 			@Override
 			public void run() {
 				res[0]++;
-	    		if (res[0] % keepAlive == 0) {
-	    			log.info((new Date())+" - Still running keep alive count: "+res[0]+"...");
-	    		}				
+				if (res[0] % keepAlive == 0) {
+					log.info((new Date())+" - Still running keep alive count: "+res[0]+"...");
+				}				
 			}    		
-    	}, 0, 1000);
-    	
-    	while (client.isConnected() && res[0] < 10*keepAlive) {    		
-    		Thread.sleep(1000);    		
-    	}
-    	
+		}, 0, 1000);
+
+		while (client.isConnected() && res[0] < 10*keepAlive) {    		
+			Thread.sleep(1000);    		
+		}
+
 		Assert.assertTrue("Connected", client.isConnected());
 		if (client.isConnected()) client.disconnect(0);
 		client.close();
 	}
 	
+	private boolean connectionLostCalled = false;
+	
 	public void connectionLost(Throwable cause) {
 		log.info((new Date())+" - Connection Lost");
+		connectionLostCalled = true;
 	}
 
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
@@ -423,4 +443,49 @@ public class ConnectionLossTest implements MqttCallback
 	public void deliveryComplete(IMqttDeliveryToken token) {
 //		log.info("Delivery Complete: " + token.getMessageId());
 	}
+	
+	/**
+	 * Tests whether paho can detect a connection loss with the server with no publishing - using ping only
+	 * @throws Exception
+	 */
+	@Test
+	public void testConnectionLossUsingPing()
+		throws Exception
+	{
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		final int keepAlive = 15;
+
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(true);
+		options.setUserName(username);
+		options.setPassword(password);
+		options.setKeepAliveInterval(keepAlive);
+
+		connectionLostCalled = false;
+		MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(), clientId, DATA_STORE);
+		client.setCallback(this);
+		proxy.enableProxy();
+		client.connect(options);
+
+		log.info((new Date())+" - Connected.");
+		Thread.sleep(1000);    		
+		proxy.disableProxy();
+
+		int count = 0;
+		while (client.isConnected() && ++count < 2*keepAlive) {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (Exception e) {
+				// ignore
+			}
+		}
+
+		Assert.assertTrue("Connection lost was not called", connectionLostCalled);
+		Assert.assertFalse("Disconnected", client.isConnected());
+		if (client.isConnected()) client.disconnect(0);
+		client.close();
+	}
+
 }

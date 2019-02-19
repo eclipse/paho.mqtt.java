@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
@@ -139,7 +140,7 @@ public class MqttV3Receiver implements MqttCallback {
     final String methodName = "validateReceipt";
     log.entering(className, methodName, new Object[]{sendTopic, expectedQos});
 
-    long waitMilliseconds = 40*30000;
+    long waitMilliseconds = 60000;
     ReceivedMessage receivedMessage = receiveNext(waitMilliseconds);
     if (receivedMessage == null) {
       report(" No message received in waitMilliseconds=" + waitMilliseconds);
@@ -213,13 +214,13 @@ public class MqttV3Receiver implements MqttCallback {
     long totWait = 0;
     int messageNo = 0;
     while (true) {
-      long startWait = System.currentTimeMillis();
+      long startWait = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
       ReceivedMessage receivedMessage = receiveNext(waitMilliseconds);
       if (receivedMessage == null) {
         break;
       }
       messageNo++;
-      totWait += (System.currentTimeMillis() - startWait);
+      totWait += (TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) - startWait);
 
       // Calculate new wait time based on experience, but not allowing it
       // to get too small

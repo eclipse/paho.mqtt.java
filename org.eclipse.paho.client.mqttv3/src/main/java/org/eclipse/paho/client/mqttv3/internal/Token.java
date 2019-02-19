@@ -29,7 +29,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 public class Token {
 	private static final String CLASS_NAME = Token.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
 	private volatile boolean completed = false;
 	private boolean pendingComplete = false;
@@ -103,7 +103,7 @@ public class Token {
 	public void waitForCompletion(long timeout) throws MqttException {
 		final String methodName = "waitForCompletion";
 		//@TRACE 407=key={0} wait max={1} token={2}
-		log.fine(CLASS_NAME,methodName, "407",new Object[]{getKey(), new Long(timeout), this});
+		log.fine(CLASS_NAME,methodName, "407",new Object[]{getKey(), Long.valueOf(timeout), this});
 
 		MqttWireMessage resp = waitForResponse(timeout);
 		if (resp == null && !completed) {
@@ -131,7 +131,7 @@ public class Token {
 		final String methodName = "waitForResponse";
 		synchronized (responseLock) {
 			//@TRACE 400=>key={0} timeout={1} sent={2} completed={3} hasException={4} response={5} token={6}
-			log.fine(CLASS_NAME, methodName, "400",new Object[]{getKey(), new Long(timeout),new Boolean(sent),new Boolean(completed),(exception==null)?"false":"true",response,this},exception);
+			log.fine(CLASS_NAME, methodName, "400",new Object[]{getKey(), Long.valueOf(timeout),Boolean.valueOf(sent),Boolean.valueOf(completed),(exception==null)?"false":"true",response,this},exception);
 
 			while (!this.completed) {
 				if (this.exception == null) {
@@ -320,7 +320,7 @@ public class Token {
 	}
 	
 	public void setTopics(String[] topics) {
-		this.topics = topics;
+		this.topics = topics.clone();
 	}
 	
 	public Object getUserContext() {

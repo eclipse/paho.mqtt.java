@@ -61,7 +61,7 @@ public class ConnOpts extends JPanel implements ActionListener {
     private JTextArea  lwtData;
     private JCheckBox  lwtRetain;
     private JComboBox  lwtQoS;
-	private Integer[]  qos = { new Integer(0), new Integer(1), new Integer(2) };
+	private Integer[]  qos = { Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(2) };
     
 	/**
 	 * Constructor for ConnOpts. The constructor builds all the GUI objects required and creates the

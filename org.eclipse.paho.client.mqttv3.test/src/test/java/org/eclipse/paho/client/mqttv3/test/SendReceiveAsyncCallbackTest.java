@@ -153,15 +153,18 @@ public class SendReceiveAsyncCallbackTest {
 
 		public void messageArrived(String topic, MqttMessage message)
 				throws Exception {
-
-			log.info("message arrived: '" + new String(message.getPayload())
+			String msgstr = new String(message.getPayload());
+			log.info("message arrived: '" + msgstr
 					+ "' " + this.hashCode() + " "
 					+ (message.isDuplicate() ? "duplicate" : ""));
 
 			if (!message.isDuplicate()) {
 				synchronized (messages) {
-					messages.add(message);
-					messages.notifyAll();
+					if (!msgstr.equals("might cancel")) {
+						log.info("add message");
+						messages.add(message);
+						messages.notifyAll();
+					}
 				}
 			}
 		}
@@ -190,6 +193,16 @@ public class SendReceiveAsyncCallbackTest {
 						token.getClient().publish(topicFilter, "my data".getBytes(), 2, false, null, myOnPublish);
 					}
 					else {
+						IMqttDeliveryToken tokenToRemove1 = token.getClient().publish(topicFilter, "might cancel".getBytes(), 1, false, null, myOnPublish);
+						boolean res1_1 = token.getClient().removeMessage(tokenToRemove1);
+						Assert.assertTrue("message (QoS1) removed", res1_1);
+						boolean res1_2 = token.getClient().removeMessage(tokenToRemove1);
+						Assert.assertFalse("already removed message (QoS1) shoudn't be removed", res1_2);
+						IMqttDeliveryToken tokenToRemove2 = token.getClient().publish(topicFilter, "might cancel".getBytes(), 2, false, null, myOnPublish);
+						boolean res2_1 = token.getClient().removeMessage(tokenToRemove2);
+						Assert.assertTrue("message (QoS2) removed", res2_1);
+						boolean res2_2 = token.getClient().removeMessage(tokenToRemove2);
+						Assert.assertFalse("already removed message (QoS2) shoudn't be removed", res2_2);
 						log.info(methodName + ": all messages published");
 						testFinished = true;
 					}

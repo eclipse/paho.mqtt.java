@@ -144,7 +144,7 @@ public class WebSocketTest {
   /**
    * @throws Exception
    */
-  @Test(timeout=10000)
+  @Test
   public void testWebSocketPubSub() throws Exception {
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);

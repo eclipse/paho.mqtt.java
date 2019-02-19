@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,8 +16,14 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SNIHostName;
+import javax.net.ssl.SNIServerName;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -31,22 +37,30 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class SSLNetworkModule extends TCPNetworkModule {
 	private static final String CLASS_NAME = SSLNetworkModule.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
 	private HostnameVerifier hostnameVerifier;
+	private boolean httpsHostnameVerificationEnabled = false;
+
 	
+
 	private String host;
 	private int port;
+
 	/**
-	 * Constructs a new SSLNetworkModule using the specified host and
-	 * port.  The supplied SSLSocketFactory is used to supply the network
-	 * socket.
-	 * @param factory the {@link SSLSocketFactory} to be used in this SSLNetworkModule
-	 * @param host the Hostname of the Server
-	 * @param port the Port of the Server
-	 * @param resourceContext Resource Context
+	 * Constructs a new SSLNetworkModule using the specified host and port. The
+	 * supplied SSLSocketFactory is used to supply the network socket.
+	 * 
+	 * @param factory
+	 *            the {@link SSLSocketFactory} to be used in this SSLNetworkModule
+	 * @param host
+	 *            the Hostname of the Server
+	 * @param port
+	 *            the Port of the Server
+	 * @param resourceContext
+	 *            Resource Context
 	 */
 	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext) {
 		super(factory, host, port, resourceContext);
@@ -57,6 +71,7 @@ public class SSLNetworkModule extends TCPNetworkModule {
 
 	/**
 	 * Returns the enabled cipher suites.
+	 * 
 	 * @return a string array of enabled Cipher suites
 	 */
 	public String[] getEnabledCiphers() {
@@ -65,38 +80,50 @@ public class SSLNetworkModule extends TCPNetworkModule {
 
 	/**
 	 * Sets the enabled cipher suites on the underlying network socket.
-	 * @param enabledCiphers a String array of cipher suites to enable
+	 * 
+	 * @param enabledCiphers
+	 *            a String array of cipher suites to enable
 	 */
 	public void setEnabledCiphers(String[] enabledCiphers) {
 		final String methodName = "setEnabledCiphers";
-		this.enabledCiphers = enabledCiphers;
-		if ((socket != null) && (enabledCiphers != null)) {
+		if (enabledCiphers != null) {
+			this.enabledCiphers = enabledCiphers.clone();
+		}
+		if ((socket != null) && (this.enabledCiphers != null)) {
 			if (log.isLoggable(Logger.FINE)) {
 				String ciphers = "";
-				for (int i=0;i<enabledCiphers.length;i++) {
-					if (i>0) {
-						ciphers+=",";
+				for (int i = 0; i < this.enabledCiphers.length; i++) {
+					if (i > 0) {
+						ciphers += ",";
 					}
-					ciphers+=enabledCiphers[i];
+					ciphers += this.enabledCiphers[i];
 				}
-				//@TRACE 260=setEnabledCiphers ciphers={0}
-				log.fine(CLASS_NAME,methodName,"260",new Object[]{ciphers});
+				// @TRACE 260=setEnabledCiphers ciphers={0}
+				log.fine(CLASS_NAME, methodName, "260", new Object[] { ciphers });
 			}
-			((SSLSocket) socket).setEnabledCipherSuites(enabledCiphers);
+			((SSLSocket) socket).setEnabledCipherSuites(this.enabledCiphers);
 		}
 	}
-	
+
 	public void setSSLhandshakeTimeout(int timeout) {
 		super.setConnectTimeout(timeout);
 		this.handshakeTimeoutSecs = timeout;
 	}
-	
+
 	public HostnameVerifier getSSLHostnameVerifier() {
-	    return hostnameVerifier;
+		return hostnameVerifier;
 	}
 
 	public void setSSLHostnameVerifier(HostnameVerifier hostnameVerifier) {
-	    this.hostnameVerifier = hostnameVerifier;
+		this.hostnameVerifier = hostnameVerifier;
+	}
+	
+	public boolean isHttpsHostnameVerificationEnabled() {
+		return httpsHostnameVerificationEnabled;
+	}
+
+	public void setHttpsHostnameVerificationEnabled(boolean httpsHostnameVerificationEnabled) {
+		this.httpsHostnameVerificationEnabled = httpsHostnameVerificationEnabled;
 	}
 
 	public void start() throws IOException, MqttException {
@@ -104,16 +131,34 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		setEnabledCiphers(enabledCiphers);
 		int soTimeout = socket.getSoTimeout();
 		// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
-		socket.setSoTimeout(this.handshakeTimeoutSecs*1000);
-		((SSLSocket)socket).startHandshake();
-		if (hostnameVerifier != null) {
-		    SSLSession session = ((SSLSocket)socket).getSession();
-		    hostnameVerifier.verify(host, session);
+		socket.setSoTimeout(this.handshakeTimeoutSecs * 1000);
+		
+		// SNI support.  Should be automatic under some circumstances - not all, apparently
+		SSLParameters sslParameters = new SSLParameters();
+		List<SNIServerName> sniHostNames = new ArrayList<SNIServerName>(1);
+		sniHostNames.add(new SNIHostName(host));
+		sslParameters.setServerNames(sniHostNames);
+		((SSLSocket)socket).setSSLParameters(sslParameters);
+
+		// If default Hostname verification is enabled, use the same method that is used with HTTPS
+		if(this.httpsHostnameVerificationEnabled) {
+			SSLParameters sslParams = new SSLParameters();
+			sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+			((SSLSocket) socket).setSSLParameters(sslParams);
+		}
+		((SSLSocket) socket).startHandshake();
+		if (hostnameVerifier != null && !this.httpsHostnameVerificationEnabled) {
+			SSLSession session = ((SSLSocket) socket).getSession();
+			if(!hostnameVerifier.verify(host, session)) {
+				session.invalidate();
+				socket.close();
+				throw new SSLPeerUnverifiedException("Host: " + host + ", Peer Host: " + session.getPeerHost());
+			}
 		}
 		// reset timeout to default value
-		socket.setSoTimeout(soTimeout);   
+		socket.setSoTimeout(soTimeout);
 	}
-	
+
 	public String getServerURI() {
 		return "ssl://" + host + ":" + port;
 	}

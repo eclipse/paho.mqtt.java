@@ -16,7 +16,6 @@
 package org.eclipse.paho.client.mqttv3.persist;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -113,6 +112,11 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 			}
 
 			try {
+				//If lock was previously acquired, release before requesting a new one
+				if(fileLock != null){
+					fileLock.release();
+				}
+
 				fileLock = new FileLock(clientDir, LOCK_FILENAME);
 	 		} catch (Exception e) {
 	 			// TODO - This shouldn't be here according to the interface
@@ -237,10 +241,10 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	 * @return all of the persistent data from the persistence directory.
 	 * @throws MqttPersistenceException if an exception is thrown whilst getting the keys
 	 */
-	public Enumeration keys() throws MqttPersistenceException {
+	public Enumeration<String> keys() throws MqttPersistenceException {
 		checkIsOpen();
 		File[] files = getFiles();
-		Vector result = new Vector(files.length);
+		Vector<String> result = new Vector<String>(files.length);
 		for (int i=0;i<files.length;i++) {
 			String filename = files[i].getName();
 			String key = filename.substring(0,filename.length()-MESSAGE_FILE_EXTENSION.length());
@@ -266,7 +270,7 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	 * Identifies any backup files in the specified directory and restores them
 	 * to their original file. This will overwrite any existing file of the same
 	 * name. This is safe as a stray backup file will only exist if a problem
-	 * occured whilst writing to the original file.
+	 * occurred whilst writing to the original file.
 	 * @param dir The directory in which to scan and restore backups
 	 */
 	private void restoreBackups(File dir) throws MqttPersistenceException {

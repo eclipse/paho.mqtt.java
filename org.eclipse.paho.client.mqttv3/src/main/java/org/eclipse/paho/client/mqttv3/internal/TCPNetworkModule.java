@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,13 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -36,7 +34,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class TCPNetworkModule implements NetworkModule {
 	private static final String CLASS_NAME = TCPNetworkModule.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
 	protected Socket socket;
 	private SocketFactory factory;
@@ -69,24 +67,12 @@ public class TCPNetworkModule implements NetworkModule {
 	public void start() throws IOException, MqttException {
 		final String methodName = "start";
 		try {
-//			InetAddress localAddr = InetAddress.getLocalHost();
-//			socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
-			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
+			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, Integer.valueOf(port), Long.valueOf(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
-			if (factory instanceof SSLSocketFactory) {
-				// SNI support
-				Socket tempsocket = new Socket();
-				tempsocket.connect(sockaddr, conTimeout*1000);
-				socket = ((SSLSocketFactory)factory).createSocket(tempsocket, host, port, true);
-			} else {
-				socket = factory.createSocket();
-				socket.connect(sockaddr, conTimeout*1000);
-			}
-		
-			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm.
-			// This should not be required.
-//			socket.setTcpNoDelay(true);	// TCP_NODELAY on, which means we do not use Nagle's algorithm
+			socket = factory.createSocket();
+			socket.connect(sockaddr, conTimeout*1000);
+			socket.setSoTimeout(1000);
 		}
 		catch (ConnectException ex) {
 			//@TRACE 250=Failed to create TCP socket
@@ -109,25 +95,6 @@ public class TCPNetworkModule implements NetworkModule {
 	 */
 	public void stop() throws IOException {
 		if (socket != null) {
-			// CDA: an attempt is made to stop the receiver cleanly before closing the socket.
-			// If the socket is forcibly closed too early, the blocking socket read in
-			// the receiver thread throws a SocketException.
-			// While this causes the receiver thread to exit, it also invalidates the
-			// SSL session preventing to perform an accelerated SSL handshake in the
-			// next connection.
-			//
-			// Also note that due to the blocking socket reads in the receiver thread,
-			// it's not possible to interrupt the thread. Using non blocking reads in
-			// combination with a socket timeout (see setSoTimeout()) would be a better approach.
-			//
-			// Please note that the Javadoc only says that an EOF is returned on
-			// subsequent reads of the socket stream.
-			// Anyway, at least with Oracle Java SE 7 on Linux systems, this causes a blocked read
-			// to return EOF immediately.
-			// This workaround should not cause any harm in general but you might
-			// want to move it in SSLNetworkModule.
-
-			socket.shutdownInput();
 			socket.close();
 		}
 	}

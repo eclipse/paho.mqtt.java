@@ -25,7 +25,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 /**
  * Default ping sender implementation
  *
- * <p>This class implements the {@link IMqttPingSender} pinger interface
+ * <p>This class implements the {@link MqttPingSender} pinger interface
  * allowing applications to send ping packet to server every keep alive interval.
  * </p>
  *
@@ -33,7 +33,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class ScheduledExecutorPingSender implements MqttPingSender {
 	private static final String CLASS_NAME = ScheduledExecutorPingSender.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private ClientComms comms;
 	private ScheduledExecutorService executorService;
@@ -84,7 +84,7 @@ public class ScheduledExecutorPingSender implements MqttPingSender {
 			String originalThreadName = Thread.currentThread().getName();
 			Thread.currentThread().setName("MQTT Ping: " + clientid);
 			//@Trace 660=Check schedule at {0}
-			log.fine(CLASS_NAME, methodName, "660", new Object[]{ new Long(System.currentTimeMillis()) });
+			log.fine(CLASS_NAME, methodName, "660", new Object[]{ Long.valueOf(System.nanoTime()) });
 			comms.checkForActivity();
 			Thread.currentThread().setName(originalThreadName);
 		}

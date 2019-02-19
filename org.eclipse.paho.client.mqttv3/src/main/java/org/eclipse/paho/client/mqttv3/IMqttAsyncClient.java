@@ -116,7 +116,7 @@ package org.eclipse.paho.client.mqttv3;
  *   also be notified when a message has been delivered to the requested quality of service.</p>
  *
  */
-public interface IMqttAsyncClient {
+public interface IMqttAsyncClient extends AutoCloseable {
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * <p>The default options are specified in {@link MqttConnectOptions} class.
@@ -809,6 +809,22 @@ public interface IMqttAsyncClient {
 	public IMqttToken unsubscribe(String[] topicFilters, Object userContext, IMqttActionListener callback)
 			throws MqttException;
 
+	/**
+	 * Removes a published message corresponding to the token.
+	 * <p>If a publish is requested with QoS1 or Qos2 and the publish callback is
+	 * not called yet, this function returns true, the publish called will never
+	 * be called, and a messageId corresponding to the token will become reusable.
+	 * </p>
+	 * <p>If the publish callback is already be called, this function returns false.
+	 * </p>
+	 * <p>This function might not stop sending the published message.
+	 * </p>
+	 * 	 *
+	 * @param token the token of removing published message
+	 * @return if the message is removed then true, otherwise false
+	 * @throws MqttException if there was an error removing the message.
+	 */
+	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException;
 
 	/**
 	 * Sets a callback listener to use for events that happen asynchronously.
@@ -856,6 +872,12 @@ public interface IMqttAsyncClient {
 	 */
 	public void setManualAcks(boolean manualAcks);
 	
+	/**
+	 * Will attempt to reconnect to the server after the client has lost connection.
+	 * @throws MqttException if an error occurs attempting to reconnect
+	 */
+	public void reconnect() throws MqttException;
+
 	/**
 	 * Indicate that the application has completed processing the message with id messageId.
 	 * This will cause the MQTT acknowledgement to be sent to the server.

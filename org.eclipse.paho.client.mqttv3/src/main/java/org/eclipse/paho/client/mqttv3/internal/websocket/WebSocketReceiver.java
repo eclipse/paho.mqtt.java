@@ -26,7 +26,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 public class WebSocketReceiver implements Runnable{
 
 	private static final String CLASS_NAME = WebSocketReceiver.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private boolean running = false;
 	private boolean stopping = false;
@@ -78,7 +78,7 @@ public class WebSocketReceiver implements Runnable{
 
 			}
 		}
-		if(closed && !Thread.currentThread().equals(receiverThread)) {
+		if(closed && !Thread.currentThread().equals(receiverThread) && (receiverThread != null)) {
 			try {
 				// Wait for the thread to finish
 		        //This must not happen in the synchronized block, otherwise we can deadlock ourselves!

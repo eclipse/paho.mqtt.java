@@ -27,22 +27,22 @@ import org.eclipse.paho.client.mqttv3.util.Strings;
 public class MqttTopic {
 
 	/**
-	 * The forward slash (/) is used to separate each level within a topic tree
-	 * and provide a hierarchical structure to the topic space. The use of the
-	 * topic level separator is significant when the two wildcard characters are
+	 * The forward slash (/) is used to separate each level within a topic tree and
+	 * provide a hierarchical structure to the topic space. The use of the topic
+	 * level separator is significant when the two wildcard characters are
 	 * encountered in topics specified by subscribers.
 	 */
 	public static final String TOPIC_LEVEL_SEPARATOR = "/";
 
 	/**
-	 * Multi-level wildcard The number sign (#) is a wildcard character that
-	 * matches any number of levels within a topic.
+	 * Multi-level wildcard The number sign (#) is a wildcard character that matches
+	 * any number of levels within a topic.
 	 */
 	public static final String MULTI_LEVEL_WILDCARD = "#";
 
 	/**
-	 * Single-level wildcard The plus sign (+) is a wildcard character that
-	 * matches only one topic level.
+	 * Single-level wildcard The plus sign (+) is a wildcard character that matches
+	 * only one topic level.
 	 */
 	public static final String SINGLE_LEVEL_WILDCARD = "+";
 
@@ -56,7 +56,7 @@ public class MqttTopic {
 	 */
 	public static final String TOPIC_WILDCARDS = MULTI_LEVEL_WILDCARD + SINGLE_LEVEL_WILDCARD;
 
-	//topic name and topic filter length range defined in the spec
+	// topic name and topic filter length range defined in the spec
 	private static final int MIN_TOPIC_LEN = 1;
 	private static final int MAX_TOPIC_LEN = 65535;
 	private static final char NUL = '\u0000';
@@ -65,8 +65,10 @@ public class MqttTopic {
 	private String name;
 
 	/**
-	 * @param name The Name of the topic
-	 * @param comms The {@link ClientComms}
+	 * @param name
+	 *            The Name of the topic
+	 * @param comms
+	 *            The {@link ClientComms}
 	 */
 	public MqttTopic(String name, ClientComms comms) {
 		this.comms = comms;
@@ -74,23 +76,30 @@ public class MqttTopic {
 	}
 
 	/**
-	 * Publishes a message on the topic.  This is a convenience method, which will
+	 * Publishes a message on the topic. This is a convenience method, which will
 	 * create a new {@link MqttMessage} object with a byte array payload and the
-	 * specified QoS, and then publish it.  All other values in the
-	 * message will be set to the defaults.
-
-	 * @param payload the byte array to use as the payload
-	 * @param qos the Quality of Service.  Valid values are 0, 1 or 2.
-	 * @param retained whether or not this message should be retained by the server.
+	 * specified QoS, and then publish it. All other values in the message will be
+	 * set to the defaults.
+	 * 
+	 * @param payload
+	 *            the byte array to use as the payload
+	 * @param qos
+	 *            the Quality of Service. Valid values are 0, 1 or 2.
+	 * @param retained
+	 *            whether or not this message should be retained by the server.
 	 * @return {@link MqttDeliveryToken}
-	 * @throws MqttException If an error occurs publishing the message
-	 * @throws MqttPersistenceException If an error occurs persisting the message
-	 * @throws IllegalArgumentException if value of QoS is not 0, 1 or 2.
+	 * @throws MqttException
+	 *             If an error occurs publishing the message
+	 * @throws MqttPersistenceException
+	 *             If an error occurs persisting the message
+	 * @throws IllegalArgumentException
+	 *             if value of QoS is not 0, 1 or 2.
 	 * @see #publish(MqttMessage)
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public MqttDeliveryToken publish(byte[] payload, int qos, boolean retained) throws MqttException, MqttPersistenceException {
+	public MqttDeliveryToken publish(byte[] payload, int qos, boolean retained)
+			throws MqttException, MqttPersistenceException {
 		MqttMessage message = new MqttMessage(payload);
 		message.setQos(qos);
 		message.setRetained(retained);
@@ -99,16 +108,19 @@ public class MqttTopic {
 
 	/**
 	 * Publishes the specified message to this topic, but does not wait for delivery
-	 * of the message to complete. The returned {@link MqttDeliveryToken token} can be used
-	 * to track the delivery status of the message.  Once this method has
+	 * of the message to complete. The returned {@link MqttDeliveryToken token} can
+	 * be used to track the delivery status of the message. Once this method has
 	 * returned cleanly, the message has been accepted for publication by the
-	 * client. Message delivery will be completed in the background when a connection
-	 * is available.
+	 * client. Message delivery will be completed in the background when a
+	 * connection is available.
 	 *
-	 * @param message the message to publish
+	 * @param message
+	 *            the message to publish
 	 * @return an MqttDeliveryToken for tracking the delivery of the message
-	 * @throws MqttException if an error occurs publishing the message
-	 * @throws MqttPersistenceException  if an error occurs persisting the message
+	 * @throws MqttException
+	 *             if an error occurs publishing the message
+	 * @throws MqttPersistenceException
+	 *             if an error occurs persisting the message
 	 */
 	public MqttDeliveryToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
 		MqttDeliveryToken token = new MqttDeliveryToken(comms.getClient().getClientId());
@@ -136,6 +148,7 @@ public class MqttTopic {
 
 	/**
 	 * Returns a string representation of this topic.
+	 * 
 	 * @return a string representation of this topic.
 	 */
 	public String toString() {
@@ -145,12 +158,14 @@ public class MqttTopic {
 	/**
 	 * Validate the topic name or topic filter
 	 *
-	 * @param topicString topic name or filter
-	 * @param wildcardAllowed true if validate topic filter, false otherwise
-	 * @throws IllegalArgumentException if the topic is invalid
+	 * @param topicString
+	 *            topic name or filter
+	 * @param wildcardAllowed
+	 *            true if validate topic filter, false otherwise
+	 * @throws IllegalArgumentException
+	 *             if the topic is invalid
 	 */
-	public static void validate(String topicString, boolean wildcardAllowed)
-			throws  IllegalArgumentException{
+	public static void validate(String topicString, boolean wildcardAllowed) throws IllegalArgumentException {
 		int topicLen = 0;
 		try {
 			topicLen = topicString.getBytes("UTF-8").length;
@@ -164,8 +179,8 @@ public class MqttTopic {
 		// - Topic Names and Topic Filters are UTF-8 encoded strings, they MUST
 		// NOT encode to more than 65535 bytes
 		if (topicLen < MIN_TOPIC_LEN || topicLen > MAX_TOPIC_LEN) {
-			throw new IllegalArgumentException(String.format("Invalid topic length, should be in range[%d, %d]!", 
-					new Object[] { new Integer(MIN_TOPIC_LEN), new Integer(MAX_TOPIC_LEN) }));
+			throw new IllegalArgumentException(String.format("Invalid topic length, should be in range[%d, %d]!",
+					new Object[] { Integer.valueOf(MIN_TOPIC_LEN), Integer.valueOf(MAX_TOPIC_LEN) }));
 		}
 
 		// *******************************************************************************
@@ -186,11 +201,10 @@ public class MqttTopic {
 			// - The multi-level wildcard must be the last character used within
 			// the topic tree
 			if (Strings.countMatches(topicString, MULTI_LEVEL_WILDCARD) > 1
-					|| (topicString.contains(MULTI_LEVEL_WILDCARD) && !topicString
-							.endsWith(MULTI_LEVEL_WILDCARD_PATTERN))) {
+					|| (topicString.contains(MULTI_LEVEL_WILDCARD)
+							&& !topicString.endsWith(MULTI_LEVEL_WILDCARD_PATTERN))) {
 				throw new IllegalArgumentException(
-						"Invalid usage of multi-level wildcard in topic string: "
-								+ topicString);
+						"Invalid usage of multi-level wildcard in topic string: " + topicString);
 			}
 
 			// 2) Check single-level wildcard
@@ -209,76 +223,91 @@ public class MqttTopic {
 		// 2) This is a topic name string that MUST NOT contains any wildcard characters
 		// *******************************************************************************
 		if (Strings.containsAny(topicString, TOPIC_WILDCARDS)) {
-			throw new IllegalArgumentException(
-					"The topic name MUST NOT contain any wildcard characters (#+)");
+			throw new IllegalArgumentException("The topic name MUST NOT contain any wildcard characters (#+)");
 		}
 	}
 
-    private static void validateSingleLevelWildcard(String topicString) {
-        char singleLevelWildcardChar = SINGLE_LEVEL_WILDCARD.charAt(0);
-        char topicLevelSeparatorChar = TOPIC_LEVEL_SEPARATOR.charAt(0);
+	private static void validateSingleLevelWildcard(String topicString) {
+		char singleLevelWildcardChar = SINGLE_LEVEL_WILDCARD.charAt(0);
+		char topicLevelSeparatorChar = TOPIC_LEVEL_SEPARATOR.charAt(0);
 
-        char[] chars = topicString.toCharArray();
-        int length = chars.length;
-        char prev = NUL, next = NUL;
-        for (int i = 0; i < length; i++) {
-            prev = (i - 1 >= 0) ? chars[i - 1] : NUL;
-            next = (i + 1 < length) ? chars[i + 1] : NUL;
+		char[] chars = topicString.toCharArray();
+		int length = chars.length;
+		char prev = NUL, next = NUL;
+		for (int i = 0; i < length; i++) {
+			prev = (i - 1 >= 0) ? chars[i - 1] : NUL;
+			next = (i + 1 < length) ? chars[i + 1] : NUL;
 
-            if (chars[i] == singleLevelWildcardChar) {
-                // prev and next can be only '/' or none
-                if (prev != topicLevelSeparatorChar && prev != NUL || next != topicLevelSeparatorChar && next != NUL) {
-                    throw new IllegalArgumentException(String.format( 
-                            "Invalid usage of single-level wildcard in topic string '%s'!",
-                            new Object[] { topicString }));
-                   
-                }
-            }
-        }
-    }
+			if (chars[i] == singleLevelWildcardChar) {
+				// prev and next can be only '/' or none
+				if (prev != topicLevelSeparatorChar && prev != NUL || next != topicLevelSeparatorChar && next != NUL) {
+					throw new IllegalArgumentException(
+							String.format("Invalid usage of single-level wildcard in topic string '%s'!",
+									new Object[] { topicString }));
+
+				}
+			}
+		}
+	}
 
 	/**
 	 * Check the supplied topic name and filter match
 	 *
-	 * @param topicFilter topic filter: wildcards allowed
-	 * @param topicName topic name: wildcards not allowed
+	 * @param topicFilter
+	 *            topic filter: wildcards allowed
+	 * @param topicName
+	 *            topic name: wildcards not allowed
 	 * @return true if the topic matches the filter
-	 * @throws IllegalArgumentException if the topic name or filter is invalid
+	 * @throws IllegalArgumentException
+	 *             if the topic name or filter is invalid
 	 */
-	public static boolean isMatched(String topicFilter, String topicName)
-	                    throws IllegalArgumentException {
-	    int curn = 0,
-	        curf = 0;
-	    int curn_end = topicName.length();
-	    int curf_end = topicFilter.length();
+	public static boolean isMatched(String topicFilter, String topicName) throws IllegalArgumentException {
+		int topicPos = 0;
+		int filterPos = 0;
+		int topicLen = topicName.length();
+		int filterLen = topicFilter.length();
 
-	    MqttTopic.validate(topicFilter, true);
-	    MqttTopic.validate(topicName, false);
+		MqttTopic.validate(topicFilter, true);
+		MqttTopic.validate(topicName, false);
 
-	    if (topicFilter.equals(topicName)) {
-	    	return true;
-	    }
+		if (topicFilter.equals(topicName)) {
+			return true;
+		}
 
-	    while (curf < curf_end && curn < curn_end)
-	    {
-	        if (topicName.charAt(curn) == '/' && topicFilter.charAt(curf) != '/')
-	            break;
-	        if (topicFilter.charAt(curf) != '+' && topicFilter.charAt(curf) != '#' &&
-	        		topicFilter.charAt(curf) != topicName.charAt(curn))
-	            break;
-	        if (topicFilter.charAt(curf) == '+')
-	        {   // skip until we meet the next separator, or end of string
-	            int nextpos = curn + 1;
-	            while (nextpos < curn_end && topicName.charAt(nextpos) != '/')
-	                nextpos = ++curn + 1;
-	        }
-	        else if (topicFilter.charAt(curf) == '#')
-	            curn = curn_end - 1;    // skip until end of string
-	        curf++;
-	        curn++;
-	    };
+		while (filterPos < filterLen && topicPos < topicLen) {
+			if (topicName.charAt(topicPos) == '/' && topicFilter.charAt(filterPos) != '/')
 
-	    return (curn == curn_end) && (curf == curf_end);
+				break;
+			if (topicFilter.charAt(filterPos) != '+' && topicFilter.charAt(filterPos) != '#'
+					&& topicFilter.charAt(filterPos) != topicName.charAt(topicPos))
+				break;
+			if (topicFilter.charAt(filterPos) == '+') { // skip until we meet the next separator, or end of string
+				int nextpos = topicPos + 1;
+				while (nextpos < topicLen && topicName.charAt(nextpos) != '/')
+					nextpos = ++topicPos + 1;
+			} else if (topicFilter.charAt(filterPos) == '#')
+				topicPos = topicLen - 1; // skip until end of string
+			filterPos++;
+			topicPos++;
+		}
+
+		if ((topicPos == topicLen) && (filterPos == filterLen)) {
+			return true;
+		} else {
+			/*
+			 * https://github.com/eclipse/paho.mqtt.java/issues/418
+			 * Covers edge case to match sport/# to sport
+			 */
+			if ((topicFilter.length() - topicName.length()) == 2 &&
+					topicFilter.substring(topicFilter.length() -2, topicFilter.length()).equals("/#")) {
+				String filterSub = topicFilter.substring(0, topicFilter.length() - 2);
+				if (filterSub.equals(topicName)) {
+					System.err.println("filterSub equals topicName: " + filterSub + " == " + topicName);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

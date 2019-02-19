@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Iterator;
 /**
  * Helper class to execute a WebSocket Handshake.
  */
@@ -52,14 +55,15 @@ public class WebSocketHandshake {
 	String uri;
 	String host;
 	int port;
+	Properties customWebSocketHeaders;
 
-
-	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port){
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Properties customWebSocketHeaders){
 		this.input = input;
 		this.output = output;
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
+		this.customWebSocketHeaders = customWebSocketHeaders;
 	}
 
 
@@ -108,6 +112,16 @@ public class WebSocketHandshake {
 			pw.print("Sec-WebSocket-Protocol: mqtt" + LINE_SEPARATOR);
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
 
+			if (customWebSocketHeaders != null) {
+				Set keys = customWebSocketHeaders.keySet();
+				Iterator i = keys.iterator();
+				while (i.hasNext()) {
+					String k = (String) i.next();
+					String value = customWebSocketHeaders.getProperty(k);
+					pw.print(k + ": " + value + LINE_SEPARATOR);
+				}
+			}
+
 			String userInfo = srvUri.getUserInfo();
 			if(userInfo != null) {
 				pw.print("Authorization: Basic " + Base64.encode(userInfo) + LINE_SEPARATOR);
@@ -127,7 +141,7 @@ public class WebSocketHandshake {
 	 */
 	private void receiveHandshakeResponse(String key) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(input));
-		ArrayList responseLines = new ArrayList();
+		ArrayList<String> responseLines = new ArrayList<String>();
 		String line = in.readLine();
 		if(line == null){
 			throw new IOException("WebSocket Response header: Invalid response from Server, It may not support WebSockets.");
@@ -136,7 +150,7 @@ public class WebSocketHandshake {
 			responseLines.add(line);
 			line = in.readLine();
 		}
-		Map headerMap = getHeaders(responseLines);
+		Map<String, String> headerMap = getHeaders(responseLines);
 
 		String connectionHeader = (String) headerMap.get(HTTP_HEADER_CONNECTION);
 		if (connectionHeader == null || connectionHeader.equalsIgnoreCase(HTTP_HEADER_CONNECTION_VALUE)) {
@@ -172,8 +186,8 @@ public class WebSocketHandshake {
 	 * @param ArrayList<String> of headers
 	 * @return A Hashmap<String, String> of the headers
 	 */
-	private Map getHeaders(ArrayList headers){
-		Map headerMap = new HashMap();
+	private Map<String, String> getHeaders(ArrayList<String> headers){
+		Map<String, String> headerMap = new HashMap<String, String>();
 		for(int i = 1; i < headers.size(); i++){
 			String headerPre = (String) headers.get(i);
 			String[] header =  headerPre.split(":");

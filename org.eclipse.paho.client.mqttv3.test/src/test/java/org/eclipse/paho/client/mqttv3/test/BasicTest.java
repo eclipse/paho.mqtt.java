@@ -16,12 +16,15 @@ package org.eclipse.paho.client.mqttv3.test;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -325,6 +328,165 @@ public class BasicTest {
     Assert.assertNull(connOpts.getWillMessage());
     Assert.assertNull(connOpts.getSSLProperties());
   }
+
+
+  @Test
+  public void test330() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    int before_thread_count = Thread.activeCount();
+    URI uri = new URI("tcp://iot.eclipse.org:1882");
+    IMqttAsyncClient client = clientFactory.createMqttAsyncClient(uri, "client-1");
+
+    MqttConnectOptions options = new MqttConnectOptions();
+    options.setAutomaticReconnect(true);
+    options.setUserName("foo");
+    options.setPassword("bar".toCharArray());
+    options.setConnectionTimeout(2);
+    client.connect(options);
+
+    Thread.sleep(1000);
+
+    try {
+    	  // this would deadlock before fix
+      client.disconnect(0).waitForCompletion();
+    } finally {
+      client.close();
+    }
+    
+    int after_count = Thread.activeCount();
+    Thread[] tarray = new Thread[after_count];
+    while (after_count > before_thread_count) {
+      after_count = Thread.enumerate(tarray);
+      for (int i = 0; i < after_count; ++i) {
+    	    log.info(i + " " + tarray[i].getName());
+      }
+      Thread.sleep(100);
+    }
+    Assert.assertEquals(before_thread_count, after_count);
+  }
+  
+  
+  @Test
+  public void test402() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttClient client = null;
+    int before_thread_count = Thread.activeCount();
+    try {
+      String clientId = methodName;
+      client = clientFactory.createMqttClient(serverURI, clientId);
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect();
+
+	  String clientId2 = client.getClientId();
+	  log.info("clientId = " + clientId2);
+
+	  boolean isConnected = client.isConnected();
+	  log.info("isConnected = " + isConnected);
+
+	  String id = client.getServerURI();
+	  log.info("ServerURI = " + id);
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+
+	  log.info("Re-Connecting...");
+	  client.connect();
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+	  
+	  int after_count = Thread.activeCount();
+	  Thread[] tarray = new Thread[after_count];
+	  int count = 0;
+	  while (after_count > before_thread_count) {
+	    after_count = Thread.enumerate(tarray);
+	    for (int i = 0; i < after_count; ++i) {
+	      log.info(i + " " + tarray[i].getName());
+	    }
+	    if (++count == 10) {
+	    	  break;
+	    }
+	    	Thread.sleep(100);
+	  }
+	  Assert.assertEquals(before_thread_count, after_count);
+	}
+	catch (MqttException exception) {
+	  log.log(Level.SEVERE, "caught exception:", exception);
+	  Assert.fail("Unexpected exception: " + exception);
+	}
+	finally {
+	  if (client != null) {
+	     log.info("Close...");
+	     client.close();
+	   }
+	}
+    int after_count = Thread.activeCount();
+    Thread[] tarray = new Thread[after_count];
+    after_count = Thread.enumerate(tarray);
+    for (int i = 0; i < after_count; ++i) {
+    	  log.info(i + " " + tarray[i].getName());
+    }
+    Assert.assertEquals(before_thread_count, after_count);
+  }
+  
+  
+  @Test
+  public void test402a() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttClient client = null;
+    int before_thread_count = Thread.activeCount();
+    final int pool_size = 10;
+    try {
+      String clientId = methodName;
+      client = new MqttClient(serverURI.toString(), clientId, null, Executors.newScheduledThreadPool(pool_size));
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect();
+
+	  String clientId2 = client.getClientId();
+	  log.info("clientId = " + clientId2);
+
+	  boolean isConnected = client.isConnected();
+	  log.info("isConnected = " + isConnected);
+
+	  String id = client.getServerURI();
+	  log.info("ServerURI = " + id);
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+
+	  log.info("Re-Connecting...");
+	  client.connect();
+
+	  log.info("Disconnecting...");
+	  client.disconnect();
+	}
+	catch (MqttException exception) {
+	  log.log(Level.SEVERE, "caught exception:", exception);
+	  Assert.fail("Unexpected exception: " + exception);
+	}
+	finally {
+	  if (client != null) {
+	     log.info("Close...");
+	     client.close();
+	   }
+	}
+    int after_count = Thread.activeCount();
+    Thread[] tarray = new Thread[after_count];
+    after_count = Thread.enumerate(tarray);
+    for (int i = 0; i < after_count; ++i) {
+      log.info(i + " " + tarray[i].getName());
+    }
+    Assert.assertEquals(after_count, before_thread_count + pool_size);
+  }
+
 
   // -------------------------------------------------------------
   // Helper methods/classes

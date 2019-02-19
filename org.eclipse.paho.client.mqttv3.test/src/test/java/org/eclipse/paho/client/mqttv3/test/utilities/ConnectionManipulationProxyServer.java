@@ -7,12 +7,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.client.mqttv3.test.automaticReconnect.AutomaticReconnectTest;
-
 public class ConnectionManipulationProxyServer implements Runnable {
-	static final Class<?> cclass = AutomaticReconnectTest.class;
+	static final Class<?> cclass = ConnectionManipulationProxyServer.class;
 	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
+	private Logger log = Logger.getLogger(className);
 	private int localPort;
 	private boolean portSet = false;
 	private String host;
@@ -34,6 +32,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void startProxy(){
+		log.info("[CMPS Proxy] - Starting Proxy");
 		synchronized (enableLock) {
 			enableProxy = true;
 		}
@@ -42,6 +41,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void enableProxy(){
+		log.info("[CMPS Proxy] - Enabling Proxy");
 		synchronized (enableLock) {
 			enableProxy = true;
 		}
@@ -52,6 +52,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void disableProxy(){
+		log.info("[CMPS Proxy] - Disabling Proxy");
 		synchronized (enableLock) {
 			enableProxy = false;
 		}
@@ -66,6 +67,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	public void stopProxy(){
+		log.info("[CMPS Proxy] - Stopping Proxy");
 		synchronized (enableLock) {
 			enableProxy = false;
 		}
@@ -74,6 +76,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	}
 	
 	private void killOpenSockets(){
+		log.info("[CMPS Proxy] - killOpenSockets Called.");
 		try {
 			if(serverSocket != null){
 				serverSocket.close();
@@ -91,6 +94,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 
 	@Override
 	public void run() {
+		log.info("[CMPS Proxy] - Proxy Thread running.");
 		try {
 			
 			final byte[] request = new byte[1024];
@@ -116,13 +120,14 @@ public class ConnectionManipulationProxyServer implements Runnable {
 					
 					
 
-					//log.fine("Proxy: Waiting for incoming connection");
+					log.info("[CMPS Proxy] - Waiting for incoming connection..");
 					
 					try {
 						// Wait for a connection on the local Port
 						client = serverSocket.accept();
 						
-						log.fine("Proxy: Client Opened Connection to Proxy...");
+						
+						log.info("[CMPS Proxy] - Client Opened Connection to Proxy...");
 						
 						final InputStream streamFromClient = client.getInputStream();
 						final OutputStream streamToClient = client.getOutputStream();
@@ -135,7 +140,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 							client.close();
 							continue;
 						}
-						log.fine("Proxy: Proxy Connected to Server");
+						log.info("Proxy: Proxy Connected to Server");
 						
 						// Get Server Streams
 						final InputStream streamFromServer = server.getInputStream();
@@ -150,7 +155,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 										streamToServer.flush();
 									}
 								} catch (IOException ex){
-									//log.warning("Proxy: 1 Connection lost: " + ex.getMessage());
+									log.warning("[CMPS Proxy] - IOException in client to server stream: " + ex.getMessage());
 									try {
 										client.close();
 										server.close();
@@ -173,7 +178,8 @@ public class ConnectionManipulationProxyServer implements Runnable {
 							}
 						
 					 } catch (IOException ex){
-						 //log.warning("Proxy: 2 Connection lost: " + ex.getMessage());
+						 log.warning("[CMPS Proxy] - IOException in server to client stream: " + ex.getMessage());
+						 log.info("[CMPS Proxy] - ");
 						 client.close();
 						 server.close();
 					}
@@ -182,8 +188,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 				
 					
 					}  catch (IOException ex) {
-						//log.warning("Proxy: 3 Connection lost: " + ex.getMessage());
-						//ex.printStackTrace();
+						log.warning("[CMPS Proxy] - General IO Exception caught in main Thread: " + ex.getMessage());
 						break;
 					} finally {
 						try {
@@ -194,7 +199,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 								client.close();
 							}
 						} catch(IOException ex) {
-							//log.warning("Proxy: 4 Connection lost: " + ex.getMessage());
+							log.warning("[CMPS Proxy] - IOException caught whilst closing proxy connection.: " + ex.getMessage());
 						}
 					}
 				
@@ -202,14 +207,15 @@ public class ConnectionManipulationProxyServer implements Runnable {
 			
 				}
 			}
-			log.fine("Proxy: Proxy Thread finishing..");
+			log.info("[CMPS Proxy] - Proxy Thread finishing..");
+			
 			if(!serverSocket.isClosed()){
 				serverSocket.close();
 			}
-			log.fine("Proxy: Server Socket Closed, returning...");
+			log.info("[CMPS Proxy] - Server Socket Closed, returning...");
 			
 		} catch(IOException ex) {
-			log.warning("Proxy: 5 Thread Connection lost: " + ex.getMessage());
+			log.warning("[CMPS Proxy] - Thread Connection lost: " + ex.getMessage());
 			ex.printStackTrace();
 		}
 		
