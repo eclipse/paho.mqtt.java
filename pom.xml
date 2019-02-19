@@ -4,7 +4,7 @@
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.2.1-SNAPSHOT</version>
+	<version>1.2.1</version>
 
 	<properties>
 		<!-- source & target java version for MQTT Client -->
@@ -55,7 +55,8 @@
 	<scm>
 		<url>http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.java.git</url>
 		<connection>scm:git://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.java.git</connection>
-	</scm>
+	  <tag>java-parent-1.2.1</tag>
+  </scm>
 
 	<distributionManagement>
 		<repository>
@@ -151,6 +152,11 @@
 					<version>${tycho.version}</version>
 				</plugin>
 				<plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-versions-plugin</artifactId>
+          <version>${tycho.version}</version>
+        </plugin>
+				<plugin>
 					<groupId>org.eclipse.tycho.extras</groupId>
 					<artifactId>tycho-document-bundle-plugin</artifactId>
 					<version>${tycho.version}</version>
@@ -179,6 +185,11 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+		<plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-versions-plugin</artifactId>
+        <version>${tycho.version}</version>
+      </plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
