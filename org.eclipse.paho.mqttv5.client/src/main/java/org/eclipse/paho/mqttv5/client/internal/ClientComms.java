@@ -91,7 +91,7 @@ public class ClientComms {
 	 * network calls.
 	 *
 	 * @param client
-	 *            The {@link IMqttAsyncClient}
+	 *            The {@link MqttClientInterface}
 	 * @param persistence
 	 *            the {@link MqttClientPersistence} layer.
 	 * @param pingSender
