@@ -204,7 +204,7 @@ public class MqttV3Receiver implements MqttCallback {
     log.entering(className, methodName, new Object[]{
         sendTopics, expectedQosList, sentBytes});
 
-    int expectedMessageNumbers[] = new int[nPublishers];
+    int[] expectedMessageNumbers = new int[nPublishers];
     for (int i = 0; i < nPublishers; i++) {
       expectedMessageNumbers[i] = 0;
     }

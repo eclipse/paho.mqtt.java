@@ -26,7 +26,7 @@ public class WebSocketFrame {
 	
 	private byte opcode;
 	private boolean fin;
-	private byte payload[];
+	private byte[] payload;
 	private boolean closeFlag = false;
 	
 	public byte getOpcode() {
@@ -91,7 +91,7 @@ public class WebSocketFrame {
 			}
 
 			// Get the Masking key if masked
-			byte maskingKey[] = null;
+		byte[] maskingKey = null;
 			if(masked) {
 				maskingKey = new byte[4];
 				buffer.get(maskingKey,0,4);
@@ -155,7 +155,7 @@ public class WebSocketFrame {
 			}
 			
 			// Get the masking key
-			byte maskingKey[] = null;
+			byte[] maskingKey = null;
 			if(masked) {
 				maskingKey = new byte[4];
 				input.read(maskingKey,0,4);
@@ -206,7 +206,7 @@ public class WebSocketFrame {
 
 		ByteBuffer buffer = ByteBuffer.allocate(length);
 		appendFinAndOpCode(buffer, this.opcode, this.fin);
-		byte mask[] = generateMaskingKey();
+		byte[] mask = generateMaskingKey();
 		appendLengthAndMask(buffer, this.payload.length, mask);
 
 		for(int i = 0; i < this.payload.length; i ++){
@@ -223,7 +223,7 @@ public class WebSocketFrame {
 	 * @param length the length of the frame
 	 * @param mask The WebSocket Mask
 	 */
-	public static void appendLengthAndMask(ByteBuffer buffer, int length, byte mask[]){
+	public static void appendLengthAndMask(ByteBuffer buffer, int length, byte[] mask){
 		if(mask != null){
 			appendLength(buffer, length, true);
 			buffer.put(mask);

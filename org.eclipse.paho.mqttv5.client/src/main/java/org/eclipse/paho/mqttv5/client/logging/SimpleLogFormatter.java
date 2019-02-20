@@ -49,7 +49,7 @@ public class SimpleLogFormatter extends Formatter {
 			if (cnl>20) {
 				cn = r.getSourceClassName().substring(cnl-19);
 			} else {
-				char sp[] = {' '};
+				char[] sp = {' '};
 				StringBuffer sb1= new StringBuffer().append(cnm);
 				cn = sb1.append(sp,0, 1).toString();
 			}

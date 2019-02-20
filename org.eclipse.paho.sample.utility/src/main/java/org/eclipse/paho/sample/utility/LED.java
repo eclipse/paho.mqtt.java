@@ -31,18 +31,18 @@ import java.awt.Panel;
 public class LED extends Panel implements Runnable {
 
 	// define the polyline for the outer border
-	private static final int xOutline[] = {2,3,4,8,9,10,10,9,9,8, 7, 3,2,2,1,1,2};
-	private static final int yOutline[] = {2,2,1,1,2, 3, 7,8,9,9,10,10,9,8,7,4,3};
+	private static final int[] xOutline = {2, 3, 4, 8, 9, 10, 10, 9, 9, 8, 7, 3, 2, 2, 1, 1, 2};
+	private static final int[] yOutline = {2, 2, 1, 1, 2, 3, 7, 8, 9, 9, 10, 10, 9, 8, 7, 4, 3};
 	private static final int nOutline = xOutline.length;
 
-	private static final int xHighlight[] = {6,7,7,8,8};
-	private static final int yHighlight[] = {8,8,7,7,6};
+	private static final int[] xHighlight = {6, 7, 7, 8, 8};
+	private static final int[] yHighlight = {8, 8, 7, 7, 6};
 	private static final int nHighlight = xHighlight.length;
 
 	// define the polyline which is the grey extra highlight
 	// when the LED is in its off state
-	private static final int xOfflight [] = {3,7,8,9,9,8,8,7,6,5,4};
-	private static final int yOfflight [] = {9,9,8,7,3,4,5,6,7,8,8};
+	private static final int[] xOfflight = {3, 7, 8, 9, 9, 8, 8, 7, 6, 5, 4};
+	private static final int[] yOfflight = {9, 9, 8, 7, 3, 4, 5, 6, 7, 8, 8};
 	private static final int nOfflight = xOfflight.length;
 
 	private static final Color OfflightColour = new Color(91,91,91);

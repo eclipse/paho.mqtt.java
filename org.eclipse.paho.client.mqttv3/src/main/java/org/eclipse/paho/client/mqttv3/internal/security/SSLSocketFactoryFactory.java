@@ -133,11 +133,11 @@ public class SSLSocketFactoryFactory {
 	
 
 	public static final String DEFAULT_PROTOCOL = "TLS";  // "SSL_TLS" is not supported by DesktopEE
-	
-	private static final String propertyKeys[] = { SSLPROTOCOL, JSSEPROVIDER,
-			KEYSTORE, KEYSTOREPWD, KEYSTORETYPE, KEYSTOREPROVIDER, KEYSTOREMGR, 
-			TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER, 
-			TRUSTSTOREMGR, CIPHERSUITES, CLIENTAUTH};
+
+    private static final String[] propertyKeys = {SSLPROTOCOL, JSSEPROVIDER,
+            KEYSTORE, KEYSTOREPWD, KEYSTORETYPE, KEYSTOREPROVIDER, KEYSTOREMGR,
+            TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER,
+            TRUSTSTOREMGR, CIPHERSUITES, CLIENTAUTH};
 
 	private Hashtable configs; // a hashtable that maps configIDs to properties.
 
