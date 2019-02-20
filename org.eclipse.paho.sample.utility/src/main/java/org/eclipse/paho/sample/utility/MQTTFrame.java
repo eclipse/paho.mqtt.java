@@ -752,8 +752,8 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
     public void stopTrace() {
     	traceEnabled = false;
     	if ( mqtt != null ) {
-	    /*mqtt.stopTrace()*/;
-     		JOptionPane.showMessageDialog( frame, "Trace file mqe0.trc generated in the current directory",
+	    /*mqtt.stopTrace()*/
+			JOptionPane.showMessageDialog( frame, "Trace file mqe0.trc generated in the current directory",
         		 "MQTT Trace", JOptionPane.INFORMATION_MESSAGE );
     	}	
     }	

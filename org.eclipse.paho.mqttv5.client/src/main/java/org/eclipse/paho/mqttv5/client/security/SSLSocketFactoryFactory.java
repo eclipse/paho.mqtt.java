@@ -818,7 +818,7 @@ public class SSLSocketFactoryFactory {
 	private String getPropertyFromConfig(String configID, String ibmKey) {
 		String res = null;
 		Properties p =null;
-		if(configID!=null) {;
+		if(configID!=null) {
 			p = (Properties) configs.get(configID);
 		}
 		if (p != null) {
