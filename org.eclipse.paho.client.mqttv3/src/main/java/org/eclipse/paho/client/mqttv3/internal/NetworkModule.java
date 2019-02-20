@@ -61,7 +61,7 @@ public interface NetworkModule {
 	 * @throws IOException of any underlaying transport
 	 * @throws MqttException if the server connection cannot be established, e.g. the connection is being refused
 	 */
-	public void start() throws IOException, MqttException;
+    void start() throws IOException, MqttException;
 
 	/**
 	 * Returns the input stream to be used for receiving messages. This method is usually called once directly after
@@ -72,7 +72,7 @@ public interface NetworkModule {
 	 * @throws IOException if an I/O error occurs when creating the input stream or the broker connection is not
 	 *         established
 	 */
-	public InputStream getInputStream() throws IOException;
+    InputStream getInputStream() throws IOException;
 
 	/**
 	 * Returns the output stream to be used for sending messages. This method is usually called once directly after
@@ -83,7 +83,7 @@ public interface NetworkModule {
 	 * @throws IOException if an I/O error occurs when creating the output stream or the broker connection is not
 	 *         established
 	 */
-	public OutputStream getOutputStream() throws IOException;
+    OutputStream getOutputStream() throws IOException;
 
 	/**
 	 * Close the transport to the broker. The streams provided by {@link #getInputStream()} and
@@ -93,12 +93,12 @@ public interface NetworkModule {
 	 *
 	 * @throws IOException if an I/O error occurs when closing the transport
 	 */
-	public void stop() throws IOException;
+    void stop() throws IOException;
 
 	/**
 	 * Returns the URI of the broker which was used to create this NetworkModule.
 	 *
 	 * @return the URI of the broker
 	 */
-	public String getServerURI();
+    String getServerURI();
 }

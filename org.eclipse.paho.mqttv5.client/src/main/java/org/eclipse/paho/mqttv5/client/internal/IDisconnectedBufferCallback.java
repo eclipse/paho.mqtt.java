@@ -20,6 +20,6 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 
 public interface IDisconnectedBufferCallback {
 	
-	public void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException;
+	void publishBufferedMessage(BufferedMessage bufferedMessage) throws MqttException;
 
 }

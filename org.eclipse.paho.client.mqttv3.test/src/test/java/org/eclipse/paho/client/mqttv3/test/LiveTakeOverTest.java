@@ -45,7 +45,7 @@ public class LiveTakeOverTest {
   private static String topicPrefix;
 
 
-  static enum FirstClientState {
+  enum FirstClientState {
     INITIAL,
     READY,
     RUNNING,

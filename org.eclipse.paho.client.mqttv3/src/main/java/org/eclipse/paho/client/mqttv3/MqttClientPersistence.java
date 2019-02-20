@@ -45,14 +45,14 @@ public interface MqttClientPersistence extends AutoCloseable {
 	 * @param serverURI The connection string as specified when the MQTT client instance was created.
 	 * @throws MqttPersistenceException if there was a problem opening the persistent store.
 	 */
-	public void open(String clientId, String serverURI) throws MqttPersistenceException;
+    void open(String clientId, String serverURI) throws MqttPersistenceException;
 
 	/**
 	 * Close the persistent store that was previously opened.
 	 * This will be called when a client application disconnects from the broker.
 	 * @throws MqttPersistenceException if an error occurs closing the persistence store.
-	 */	
-	public void close() throws MqttPersistenceException;
+	 */
+    void close() throws MqttPersistenceException;
 
 	/**
 	 * Puts the specified data into the persistent store.
@@ -61,7 +61,7 @@ public interface MqttClientPersistence extends AutoCloseable {
 	 * @throws MqttPersistenceException if there was a problem putting the data
 	 * into the persistent store.
 	 */
-	public void put(String key, MqttPersistable persistable) throws MqttPersistenceException;
+    void put(String key, MqttPersistable persistable) throws MqttPersistenceException;
 	
 	/**
 	 * Gets the specified data out of the persistent store.
@@ -70,27 +70,27 @@ public interface MqttClientPersistence extends AutoCloseable {
 	 * @throws MqttPersistenceException if there was a problem getting the data
 	 * from the persistent store.
 	 */
-	public MqttPersistable get(String key) throws MqttPersistenceException;
+    MqttPersistable get(String key) throws MqttPersistenceException;
 	
 	/**
 	 * Remove the data for the specified key.
 	 * @param key The key for the data to remove
 	 * @throws MqttPersistenceException if there was a problem removing the data.
 	 */
-	public void remove(String key) throws MqttPersistenceException;
+    void remove(String key) throws MqttPersistenceException;
 
 	/**
 	 * Returns an Enumeration over the keys in this persistent data store.
 	 * @return an enumeration of {@link String} objects.
 	 * @throws MqttPersistenceException if there was a problem getting they keys
 	 */
-	public Enumeration keys() throws MqttPersistenceException;
+    Enumeration keys() throws MqttPersistenceException;
 	
 	/**
 	 * Clears persistence, so that it no longer contains any persisted data.
 	 * @throws MqttPersistenceException if there was a problem clearing all data from the persistence store
 	 */
-	public void clear() throws MqttPersistenceException;
+    void clear() throws MqttPersistenceException;
 	
 	/**
 	 * Returns whether or not data is persisted using the specified key.
@@ -98,5 +98,5 @@ public interface MqttClientPersistence extends AutoCloseable {
 	 * @return True if the persistence store contains the key
 	 * @throws MqttPersistenceException if there was a problem checking whether they key existed.
 	 */
-	public boolean containsKey(String key) throws MqttPersistenceException;
+    boolean containsKey(String key) throws MqttPersistenceException;
 }
