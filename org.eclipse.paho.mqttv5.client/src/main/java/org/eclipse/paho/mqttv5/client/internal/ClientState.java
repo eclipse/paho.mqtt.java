@@ -968,7 +968,7 @@ public class ClientState implements MqttState {
 			// @TRACE 626=quiescing={0} actualInFlight={1} pendingFlows={2}
 			// inFlightPubRels={3} callbackQuiesce={4} tokens={5}
 			log.fine(CLASS_NAME, methodName, "626",
-					new Object[] { new Boolean(quiescing), Integer.valueOf(actualInFlight),
+					new Object[] { Boolean.valueOf(quiescing), Integer.valueOf(actualInFlight),
 							Integer.valueOf(pendingFlows.size()), Integer.valueOf(inFlightPubRels),
 							Boolean.valueOf(callback.isQuiesced()), Integer.valueOf(tokC) });
 			synchronized (quiesceLock) {

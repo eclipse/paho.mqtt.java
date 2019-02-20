@@ -667,7 +667,7 @@ public class ClientComms {
 		props.put("conState", Integer.valueOf(conState));
 		props.put("serverURI", getClient().getServerURI());
 		props.put("callback", callback);
-		props.put("stoppingComms", new Boolean(stoppingComms));
+		props.put("stoppingComms", Boolean.valueOf(stoppingComms));
 		return props;
 	}
 

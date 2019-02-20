@@ -617,7 +617,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		// @TRACE 103=cleanSession={0} connectionTimeout={1} TimekeepAlive={2}
 		// userName={3} password={4} will={5} userContext={6} callback={7}
 		log.fine(CLASS_NAME, methodName, "103",
-				new Object[] { Boolean.valueOf(options.isCleanSession()), new Integer(options.getConnectionTimeout()),
+				new Object[] { Boolean.valueOf(options.isCleanSession()), Integer.valueOf(options.getConnectionTimeout()),
 						Integer.valueOf(options.getKeepAliveInterval()), options.getUserName(),
 						((null == options.getPassword()) ? "[null]" : "[notnull]"),
 						((null == options.getWillMessage()) ? "[null]" : "[notnull]"), userContext, callback });

@@ -137,7 +137,7 @@ public class Token {
 				if (this.exception == null) {
 					try {
 						//@TRACE 408=key={0} wait max={1}
-						log.fine(CLASS_NAME,methodName,"408",new Object[] {getKey(),new Long(timeout)});
+						log.fine(CLASS_NAME,methodName,"408",new Object[] {getKey(), Long.valueOf(timeout)});
 	
 						if (timeout <= 0) {
 							responseLock.wait();
