@@ -1105,7 +1105,7 @@ public class SSLSocketFactoryFactory {
 	 * @param configID
 	 *            The configuration ID
 	 * @return An SSL context factory.
-	 * @throws MqttDirectException
+	 * @throws MqttSecurityException
 	 */
 	private SSLContext getSSLContext(String configID)
 			throws MqttSecurityException{

@@ -114,8 +114,7 @@ public class MqttV5Receiver implements MqttCallback {
   /**
    * @param sendTopic
    * @param expectedQos
-   * @param sentBytes
-   * @return flag
+   * @param message
    * @throws MqttException
    * @throws InterruptedException
    */
