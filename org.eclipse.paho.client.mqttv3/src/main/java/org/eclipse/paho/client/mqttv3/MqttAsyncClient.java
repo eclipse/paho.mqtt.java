@@ -111,7 +111,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	private static int reconnectDelay = 1000; // Reconnect delay, starts at 1
 												// second
 	private boolean reconnecting = false;
-	private static Object clientLock = new Object(); // Simple lock
+	private static final Object clientLock = new Object(); // Simple lock
 
 	private ScheduledExecutorService executorService;
 

@@ -35,8 +35,8 @@ public class Token {
 	private boolean pendingComplete = false;
 	private boolean sent = false;
 	
-	private Object responseLock = new Object();
-	private Object sentLock = new Object();
+	private final Object responseLock = new Object();
+	private final Object sentLock = new Object();
 	
 	protected MqttMessage message = null; 
 	private MqttWireMessage response = null;

@@ -38,7 +38,7 @@ public class CommsSender implements Runnable {
 	private enum State {STOPPED, RUNNING, STARTING};
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;
-	private Object lifecycle = new Object();
+	private final Object lifecycle = new Object();
 	private Thread 	sendThread		= null;
 	private String threadName;
 	private Future<?> senderFuture;

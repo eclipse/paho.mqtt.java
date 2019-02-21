@@ -74,7 +74,7 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
     private MqttConnectOptions opts = null;
 	private boolean connected = false;
 	private boolean traceEnabled = false;
-	private Object    connLostWait = new Object(); // Object to coordinated ConnectionLost and disconnect threads if
+	private final Object    connLostWait = new Object(); // Object to coordinated ConnectionLost and disconnect threads if
                 	                                // disconnect is hit during connectionLost
 	private JFrame frame= null;
 	

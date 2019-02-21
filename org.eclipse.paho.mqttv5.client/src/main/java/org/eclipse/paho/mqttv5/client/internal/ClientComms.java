@@ -79,7 +79,7 @@ public class ClientComms {
 	private boolean stoppingComms = false;
 
 	private byte conState = DISCONNECTED;
-	private Object conLock = new Object(); // Used to synchronize connection state
+	private final Object conLock = new Object(); // Used to synchronize connection state
 	private boolean closePending = false;
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;

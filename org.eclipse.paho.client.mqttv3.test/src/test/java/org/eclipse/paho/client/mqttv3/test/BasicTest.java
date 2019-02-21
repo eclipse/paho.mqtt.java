@@ -502,7 +502,7 @@ public class BasicTest {
    */
   class MessageListener implements MqttCallback {
 
-    ArrayList<MqttMessage> messages;
+    final ArrayList<MqttMessage> messages;
 
     public MessageListener() {
       messages = new ArrayList<MqttMessage>();

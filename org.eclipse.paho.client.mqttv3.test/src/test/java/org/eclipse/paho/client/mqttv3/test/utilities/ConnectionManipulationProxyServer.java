@@ -16,7 +16,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	private String host;
 	private int remotePort;
 	private Thread proxyThread;
-	private Object enableLock = new Object();
+	private final Object enableLock = new Object();
 	private boolean enableProxy = true;
 	private boolean running = true;
 	Socket client = null, server = null;
