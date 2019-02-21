@@ -928,10 +928,10 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		}
 
 		// remove any message handlers for individual topics and validate topicFilter
-		for (int i = 0; i < topicFilters.length; ++i) {
+		for (String topicFilter : topicFilters) {
 			// Check if the topic filter is valid before subscribing
-			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
-			this.comms.removeMessageListener(topicFilters[i]);
+			MqttTopic.validate(topicFilter, true/* allow wildcards */);
+			this.comms.removeMessageListener(topicFilter);
 		}
 		
 		return this.subscribeBase(topicFilters, qos, userContext, callback);
@@ -1028,8 +1028,8 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			token = this.subscribeBase(topicFilters, qos, userContext, callback);
 		} catch(Exception e) {
 			// if the subscribe fails, then we have to remove the message handlers
-			for (int i = 0; i < topicFilters.length; ++i) {
-				this.comms.removeMessageListener(topicFilters[i]);
+			for (String topicFilter : topicFilters) {
+				this.comms.removeMessageListener(topicFilter);
 			}
 			throw e;
 		}
@@ -1097,17 +1097,17 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			log.fine(CLASS_NAME, methodName, "107", new Object[] { subs, userContext, callback });
 		}
 
-		for (int i = 0; i < topicFilters.length; i++) {
+		for (String topicFilter : topicFilters) {
 			// Check if the topic filter is valid before unsubscribing
 			// Although we already checked when subscribing, but invalid
 			// topic filter is meanless for unsubscribing, just prohibit it
 			// to reduce unnecessary control packet send to broker.
-			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
+			MqttTopic.validate(topicFilter, true/* allow wildcards */);
 		}
 
 		// remove message handlers from the list for this client
-		for (int i = 0; i < topicFilters.length; ++i) {
-			this.comms.removeMessageListener(topicFilters[i]);
+		for (String topicFilter : topicFilters) {
+			this.comms.removeMessageListener(topicFilter);
 		}
 
 		MqttToken token = new MqttToken(getClientId());

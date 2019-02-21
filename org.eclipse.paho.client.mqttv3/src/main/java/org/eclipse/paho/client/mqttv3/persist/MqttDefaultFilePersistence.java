@@ -245,9 +245,9 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 		checkIsOpen();
 		File[] files = getFiles();
 		Vector<String> result = new Vector<String>(files.length);
-		for (int i=0;i<files.length;i++) {
-			String filename = files[i].getName();
-			String key = filename.substring(0,filename.length()-MESSAGE_FILE_EXTENSION.length());
+		for (File file : files) {
+			String filename = file.getName();
+			String key = filename.substring(0, filename.length() - MESSAGE_FILE_EXTENSION.length());
 			result.addElement(key);
 		}
 		return result.elements();
@@ -280,12 +280,12 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 			throw new MqttPersistenceException();
 		}
 
-		for (int i=0;i<files.length;i++) {
-			File originalFile = new File(dir,files[i].getName().substring(0,files[i].getName().length()-MESSAGE_BACKUP_FILE_EXTENSION.length()));
-			boolean result = files[i].renameTo(originalFile);
+		for (File file : files) {
+			File originalFile = new File(dir, file.getName().substring(0, file.getName().length() - MESSAGE_BACKUP_FILE_EXTENSION.length()));
+			boolean result = file.renameTo(originalFile);
 			if (!result) {
 				originalFile.delete();
-				files[i].renameTo(originalFile);
+				file.renameTo(originalFile);
 			}
 		}
 	}
@@ -299,8 +299,8 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	public void clear() throws MqttPersistenceException {
 		checkIsOpen();
 		File[] files = getFiles();
-		for (int i=0; i<files.length; i++) {
-			files[i].delete();
+		for (File file : files) {
+			file.delete();
 		}
 		clientDir.delete();
 	}

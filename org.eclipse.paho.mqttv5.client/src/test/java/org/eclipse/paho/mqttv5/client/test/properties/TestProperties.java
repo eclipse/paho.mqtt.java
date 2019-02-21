@@ -429,8 +429,8 @@ public class TestProperties {
 
     List<String> list2 = new ArrayList<String>();
 
-    for (int i = 0; i < list1.size(); i++) {
-      list2.add(list1.get(i).toString());
+    for (URI uri : list1) {
+      list2.add(uri.toString());
     }
 
     return list2;
