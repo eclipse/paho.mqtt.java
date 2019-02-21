@@ -475,12 +475,12 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
 			// If the entry in the IP Address drop down list contains '://' then assume
 			// the connection has been explicitly entered as tcp://ip_address:port or local://broker_name.
 			// Otherwise read the ip address and port number from their respective drop downs.
-			if ( ipAddr.indexOf("://") < 0 ) {
+			if (!ipAddr.contains("://")) {
     			connStr = "tcp://" + ipAddr + ":" + portNum;
    	 		} else {
    	 			connStr = ipAddr;
    	 		}
-	
+
     		connect( connStr, optionsComp.isPersistenceSelected() );
 			
 			// Successful connect(no exception). Remember the ipAddress and port in the drop downs

@@ -190,7 +190,7 @@ public class JSR47Logger implements Logger {
 			ResourceBundle messageCatalog, String msg, Object[] inserts, Throwable thrown) {
 //		LogRecord logRecord = new LogRecord(julLevel, msg);
 		String formattedWithArgs = msg;
-		if (msg.indexOf("=====")== -1) {
+		if (!msg.contains("=====")) {
 			formattedWithArgs = MessageFormat.format(getResourceMessage(messageCatalog, msg), inserts);
 		}
 		LogRecord logRecord = new LogRecord(julLevel, resourceName + ": " +formattedWithArgs);
