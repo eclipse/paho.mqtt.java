@@ -28,7 +28,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 public class DisconnectedMessageBuffer implements Runnable {
 	
-	private static final String CLASS_NAME = "DisconnectedMessageBuffer";
+	private static final String CLASS_NAME = DisconnectedMessageBuffer.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	private DisconnectedBufferOptions bufferOpts;
 	private ArrayList<BufferedMessage> buffer;
