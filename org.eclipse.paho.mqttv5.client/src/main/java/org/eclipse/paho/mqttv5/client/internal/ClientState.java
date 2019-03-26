@@ -512,8 +512,8 @@ public class ClientState implements MqttState {
 			message.setMessageId(getNextMessageId());
 		}
 		// Set Topic Alias if required
-		if (message instanceof MqttPublish && ((MqttPublish) message).getTopicName() != null 
-				&& this.mqttConnection.getOutgoingTopicAliasMaximum() > 0) {
+        if (message instanceof MqttPublish && ((MqttPublish) message).getTopicName() != null
+                && this.mqttConnection.getOutgoingTopicAliasMaximum() != null && this.mqttConnection.getOutgoingTopicAliasMaximum() > 0) {
 			String topic = ((MqttPublish) message).getTopicName();
 			if (outgoingTopicAliases.containsKey(topic)) {
 				// Existing Topic Alias, Assign it and remove the topic string
