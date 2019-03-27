@@ -21,6 +21,7 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -98,18 +99,18 @@ public class CommsCallback implements Runnable {
 				completeQueue.clear();
 				
 				target_state = State.RUNNING;
+				current_state = State.RUNNING;
 				if (executorService == null) {
-					new Thread(this).start();
+					callbackFuture = null;
+					callbackThread = new Thread(this);
+					callbackThread.start();
 				} else {
+					callbackThread = null;
 					callbackFuture = executorService.submit(this);
 				}
 			}
 		}
-		while (!isRunning()) {
-			try { Thread.sleep(100); } catch (Exception e) { }
-		}			
 	}
-	
 
 	/**
 	 * Stops the callback thread. 
@@ -117,12 +118,7 @@ public class CommsCallback implements Runnable {
 	 */
 	public void stop() {
 		final String methodName = "stop";
-		
-		synchronized (lifecycle) {
-			if (callbackFuture != null) {
-				callbackFuture.cancel(true);
-			}
-		}
+
 		if (isRunning()) {
 			// @TRACE 700=stopping
 			log.fine(CLASS_NAME, methodName, "700");
@@ -137,9 +133,18 @@ public class CommsCallback implements Runnable {
 					workAvailable.notifyAll();
 				}
 				// Wait for the thread to finish.
-				while (isRunning()) {
-					try { Thread.sleep(100); } catch (Exception e) { }
-					clientState.notifyQueueLock();
+				if (callbackFuture != null) {
+					try {
+						callbackFuture.get();
+					} catch (ExecutionException | InterruptedException e) {
+					}
+				} else if (callbackThread != null) {
+					try {
+						callbackThread.join();
+					} catch (InterruptedException e) {
+					}
+				} else {
+					System.err.println("Bug: tried to stop, but without any future.");
 				}
 			}
 			// @TRACE 703=stopped
@@ -163,10 +168,6 @@ public class CommsCallback implements Runnable {
 		final String methodName = "run";
 		callbackThread = Thread.currentThread();
 		callbackThread.setName(threadName);
-		
-		synchronized (lifecycle) {
-			current_state = State.RUNNING;
-		}
 
 		while (isRunning()) {
 			try {
@@ -240,7 +241,6 @@ public class CommsCallback implements Runnable {
 		synchronized (lifecycle) {
 			current_state = State.STOPPED;
 		}
-		callbackThread = null;
 	}
 
 	private void handleActionComplete(MqttToken token)

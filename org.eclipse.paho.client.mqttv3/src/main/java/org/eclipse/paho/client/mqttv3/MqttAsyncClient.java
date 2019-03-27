@@ -461,7 +461,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			this.persistence = new MemoryPersistence();
 		}
 
-		this.executorService = executorService;
+		this.executorService = Executors.newScheduledThreadPool(128);//executorService;
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
