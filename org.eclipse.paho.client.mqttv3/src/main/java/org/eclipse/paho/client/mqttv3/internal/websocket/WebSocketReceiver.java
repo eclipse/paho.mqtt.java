@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.net.SocketTimeoutException;
 
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -114,7 +115,8 @@ public class WebSocketReceiver implements Runnable{
 				}
 
 				receiving = false;
-
+			} catch (SocketTimeoutException ex) {
+				// Ignore SocketTimeoutException 
 			} catch (IOException ex) {
 				// Exception occurred whilst reading the stream.
 				this.stop();
