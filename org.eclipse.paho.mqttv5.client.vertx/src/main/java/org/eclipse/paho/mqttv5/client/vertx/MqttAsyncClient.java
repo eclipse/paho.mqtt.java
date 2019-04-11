@@ -47,6 +47,8 @@ import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
+import javax.net.SocketFactory;
+
 
 /**
  * Lightweight client for talking to an MQTT server using non-blocking methods
@@ -522,12 +524,6 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * @param persistence
 	 *            the persistence class to use to store in-flight message. If null
 	 *            then the default persistence mechanism is used
-	 * @param pingSender
-	 *            the {@link MqttPingSender} Implementation to handle timing and
-	 *            sending Ping messages to the server.
-	 * @param executorService
-	 *            used for managing threads. If null then a newScheduledThreadPool
-	 *            is used.
 	 * @throws IllegalArgumentException
 	 *             if the URI does not start with "tcp://", "ssl://" or "local://"
 	 * @throws IllegalArgumentException
@@ -1602,7 +1598,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	/**
 	 * Return a debug object that can be used to help solve problems.
 	 * 
-	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#getDebug()
+	 * @see org.eclipse.paho.mqttv5.client.vertx.IMqttAsyncClient#getDebug()
 	 */
 	@Override
 	public Debug getDebug() {
