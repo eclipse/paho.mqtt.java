@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
