@@ -37,13 +37,15 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * This test aims to run some basic SSL functionality tests of the MQTT client
  */
-
+@Category(OnlineTest.class)
 public class SSLSessionResumptionTest {
 
 	static final Class<?> cclass = SSLSessionResumptionTest.class;

@@ -33,11 +33,13 @@ import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.ConnectionManipulationProxyServer;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * These tests verify whether paho can successfully detect a loss of connection with a broker.
@@ -49,7 +51,7 @@ import org.junit.Test;
  * 
  * @author mcarrer
  */
-
+@Category(OnlineTest.class)
 public class ConnectionLossTest implements MqttCallback
 {
 	static final Class<?> cclass = ConnectionLossTest.class;

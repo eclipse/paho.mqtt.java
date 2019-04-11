@@ -65,6 +65,9 @@ To then build the library run the following maven command: ```mvn package -Dskip
 
 This will build the client library without running the tests. The jars for the library, source and javadoc can be found in the ```org.eclipse.paho.client.mqttv3/target``` directory.
 
+To build this library offline, use the command: ```mvn -Plocal clean package```
+
+
 ## Documentation
 Reference documentation is online at: [http://www.eclipse.org/paho/files/javadoc/index.html](http://www.eclipse.org/paho/files/javadoc/index.html)
 

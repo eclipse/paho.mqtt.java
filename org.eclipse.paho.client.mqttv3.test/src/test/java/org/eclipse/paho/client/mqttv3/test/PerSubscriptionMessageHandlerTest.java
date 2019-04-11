@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -38,7 +39,12 @@ import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.junit.experimental.categories.Categories;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
+
+@Category(OnlineTest.class)
 public class PerSubscriptionMessageHandlerTest {
 	
 	  static final Class<?> cclass = PerSubscriptionMessageHandlerTest.class;

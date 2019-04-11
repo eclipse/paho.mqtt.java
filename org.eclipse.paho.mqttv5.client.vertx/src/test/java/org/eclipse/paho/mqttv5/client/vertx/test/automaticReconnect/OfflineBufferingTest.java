@@ -7,20 +7,19 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.DisconnectedBufferOptions;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttToken;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.vertx.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.vertx.persist.MemoryPersistence;
-import org.eclipse.paho.mqttv5.client.vertx.test.automaticReconnect.OfflineBufferingTest;
 import org.eclipse.paho.mqttv5.client.vertx.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.vertx.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.vertx.test.utilities.ConnectionManipulationProxyServer;
 import org.eclipse.paho.mqttv5.client.vertx.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.vertx.test.utilities.TestMemoryPersistence;
 import org.eclipse.paho.mqttv5.client.vertx.test.utilities.Utility;
-import org.eclipse.paho.mqttv5.client.vertx.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
@@ -30,7 +29,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category(OnlineTest.class)
 public class OfflineBufferingTest {
 
 	static final Class<?> cclass = OfflineBufferingTest.class;

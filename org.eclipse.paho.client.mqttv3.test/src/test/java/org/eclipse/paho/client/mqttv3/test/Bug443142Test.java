@@ -13,9 +13,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=443142"> Bug 443142 </a>: Deadlocked "MQTT Rec:" When
@@ -26,6 +28,7 @@ import org.junit.Test;
  * condition will never be false when the {@code messageQueue} is full and not {@code quiescing}, even when the callback
  * thread is trying to stop.
  */
+@Category(OnlineTest.class)
 public class Bug443142Test {
     private static final Logger log = Logger.getLogger(Bug443142Test.class.getName());
     private static URI serverURI;

@@ -27,11 +27,15 @@ import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.ConnectionManipulationProxyServer;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.experimental.categories.Category;
 
+
+@Category(OnlineTest.class)
 public class AutomaticReconnectTest{
 	
 	static final Class<?> cclass = AutomaticReconnectTest.class;

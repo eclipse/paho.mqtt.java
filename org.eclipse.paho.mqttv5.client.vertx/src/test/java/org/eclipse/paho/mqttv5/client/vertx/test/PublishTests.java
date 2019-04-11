@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttToken;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
@@ -20,7 +21,10 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category(OnlineTest.class)
 public class PublishTests {
 
 	static final Class<?> cclass = PublishTests.class;

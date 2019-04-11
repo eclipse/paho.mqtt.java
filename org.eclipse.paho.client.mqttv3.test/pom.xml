@@ -85,6 +85,14 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
+			<artifactId>org.eclipse.paho.common</artifactId>
+			<version>1.2.1-SNAPSHOT</version>
+			<scope>test</scope>
+			<type>test-jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 			<version>1.2.1-SNAPSHOT</version>
 		</dependency>
@@ -94,4 +102,22 @@
 			<artifactId>junit</artifactId>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>local</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>3.0.0-M3</version>
+						<configuration>
+							<excludedGroups>org.eclipse.paho.common.test.categories.OnlineTest</excludedGroups>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

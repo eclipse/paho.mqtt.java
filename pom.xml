@@ -301,6 +301,7 @@
 		</profile>
 	</profiles>
 	<modules>
+		<module>org.eclipse.paho.common</module>
 		<module>org.eclipse.paho.client.mqttv3</module>
 		<module>org.eclipse.paho.client.mqttv3.test</module>
 		<module>org.eclipse.paho.client.mqttv3.repository</module>

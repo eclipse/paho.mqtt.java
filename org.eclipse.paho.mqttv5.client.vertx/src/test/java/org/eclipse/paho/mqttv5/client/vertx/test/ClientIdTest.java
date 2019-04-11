@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.vertx.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.vertx.test.logging.LoggingUtilities;
@@ -16,10 +17,12 @@ import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * 
  */
+@Category(OnlineTest.class)
 public class ClientIdTest {
 	private static final Logger log = Logger.getLogger(ClientIdTest.class.getName());
 

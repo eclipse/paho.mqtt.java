@@ -4,10 +4,10 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClient;
 import org.eclipse.paho.mqttv5.client.vertx.persist.MemoryPersistence;
-import org.eclipse.paho.mqttv5.client.vertx.test.automaticReconnect.AutomaticReconnectTest;
 import org.eclipse.paho.mqttv5.client.vertx.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.vertx.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.vertx.test.utilities.ConnectionManipulationProxyServer;
@@ -17,7 +17,10 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category(OnlineTest.class)
 public class AutomaticReconnectTest {
 
 	static final Class<?> cclass = AutomaticReconnectTest.class;

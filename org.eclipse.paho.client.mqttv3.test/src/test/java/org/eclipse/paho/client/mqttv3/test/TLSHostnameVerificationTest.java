@@ -24,14 +24,18 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Categories;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
 /**
  * This test aims to run some basic SSL functionality tests of the MQTT client
  */
-
+@Category(OnlineTest.class)
 public class TLSHostnameVerificationTest {
 
 	static final Class<?> cclass = TLSHostnameVerificationTest.class;
