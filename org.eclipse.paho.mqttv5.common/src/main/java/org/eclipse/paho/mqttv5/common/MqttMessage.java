@@ -24,6 +24,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
  * message) represented as a byte[].
  */
 public class MqttMessage {
+	private static final byte[] EMPTY_PAYLOAD = new byte[] {};
 
 	private boolean mutable = true;
 	private byte[] payload;
@@ -59,7 +60,7 @@ public class MqttMessage {
 	 * </ul>
 	 */
 	public MqttMessage() {
-		setPayload(new byte[] {});
+		setPayload(EMPTY_PAYLOAD);
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class MqttMessage {
 	 */
 	public void clearPayload() {
 		checkMutable();
-		this.payload = new byte[] {};
+		this.payload = EMPTY_PAYLOAD;
 	}
 
 	/**
