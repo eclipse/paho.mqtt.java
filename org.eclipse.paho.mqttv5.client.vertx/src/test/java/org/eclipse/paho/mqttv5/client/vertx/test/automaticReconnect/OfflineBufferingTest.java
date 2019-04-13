@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.DisconnectedBufferOptions;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttDeliveryToken;
@@ -32,7 +33,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class OfflineBufferingTest {
 
 	static final Class<?> cclass = OfflineBufferingTest.class;

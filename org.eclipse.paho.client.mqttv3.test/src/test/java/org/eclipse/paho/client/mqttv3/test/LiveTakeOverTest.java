@@ -29,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.MqttV3Receiver;
 import org.eclipse.paho.client.mqttv3.test.utilities.MqttV3Receiver.ReceivedMessage;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -37,7 +38,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV3Test.class})
 public class LiveTakeOverTest {
 
   private static final Class<?> cclass = LiveTakeOverTest.class;

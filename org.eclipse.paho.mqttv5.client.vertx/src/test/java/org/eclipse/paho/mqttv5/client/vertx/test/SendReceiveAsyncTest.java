@@ -19,6 +19,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.ExternalTest;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttDeliveryToken;
@@ -31,13 +33,10 @@ import org.eclipse.paho.mqttv5.client.vertx.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.vertx.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.vertx.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.client.vertx.test.logging.LoggingUtilities;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class SendReceiveAsyncTest {
 
   static final Class<?> cclass = SendReceiveAsyncTest.class;
@@ -606,7 +605,8 @@ public class SendReceiveAsyncTest {
    * Test the behavior of the connection timeout when connecting to a non MQTT server.
    * i.e. ssh port 22
    */
-  //@Test
+  @Ignore
+  @Category(ExternalTest.class)
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();
 	  LoggingUtilities.banner(log, cclass, methodName);

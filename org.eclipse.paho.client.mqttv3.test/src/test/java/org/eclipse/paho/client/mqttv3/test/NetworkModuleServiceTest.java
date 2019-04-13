@@ -13,8 +13,11 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.NetworkModuleService;
 import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(MQTTV3Test.class)
 public class NetworkModuleServiceTest {
 
 	@Test

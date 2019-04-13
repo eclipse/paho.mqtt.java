@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttToken;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
@@ -16,7 +17,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class ServerAssignedClientIdentifierTest {
 	private static URI serverURI;
 	private static final String className = ServerAssignedClientIdentifierTest.class.getName();

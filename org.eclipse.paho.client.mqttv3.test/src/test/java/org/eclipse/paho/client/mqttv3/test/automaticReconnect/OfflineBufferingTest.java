@@ -38,12 +38,13 @@ import org.eclipse.paho.client.mqttv3.test.utilities.MqttV3Receiver;
 import org.eclipse.paho.client.mqttv3.test.utilities.TestMemoryPersistence;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.*;
 import org.junit.experimental.categories.Category;
 
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV3Test.class})
 public class OfflineBufferingTest {
 
 	static final Class<?> cclass = OfflineBufferingTest.class;

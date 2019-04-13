@@ -18,14 +18,17 @@ import java.util.logging.Logger;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * Tests mqtt topic wildcards
  */
+@Category(MQTTV3Test.class)
 public class MqttTopicTest {
 
 	static final Class<?> cclass = MqttTopicTest.class;

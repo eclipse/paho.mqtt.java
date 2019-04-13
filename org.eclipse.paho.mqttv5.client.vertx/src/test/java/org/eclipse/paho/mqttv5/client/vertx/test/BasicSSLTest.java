@@ -19,7 +19,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
+import org.eclipse.paho.common.test.categories.SSLTest;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttClient;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClient;
 import org.eclipse.paho.mqttv5.client.vertx.MqttTopic;
@@ -36,7 +38,7 @@ import org.junit.experimental.categories.Category;
 /**
  * This test aims to run some basic SSL functionality tests of the MQTT client
  */
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV5Test.class, SSLTest.class})
 public class BasicSSLTest {
 
   static final Class<?> cclass = BasicSSLTest.class;

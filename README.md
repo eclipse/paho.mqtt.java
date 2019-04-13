@@ -65,7 +65,17 @@ To then build the library run the following maven command: ```mvn package -Dskip
 
 This will build the client library without running the tests. The jars for the library, source and javadoc can be found in the ```org.eclipse.paho.client.mqttv3/target``` directory.
 
-To build this library offline, use the command: ```mvn -Plocal clean package```
+#### Test Selection and Setup
+
+By default, Paho will try to execute all tests available in the code base. This may not be ideal in all situations and, 
+as such, the code provides the ability to turn on/off certain categories of tests. This is done by filtering out the
+tests by using the categories they are assigned along with the exclude-test profile. The test categories are defined in
+the package org.eclipse.paho.common.test.categories. For example, to filter out MQTT v5 tests:
+
+```mvn -Pexclude-tests -Dexclude.groups="org.eclipse.paho.common.test.categories.MQTTV5Test" clean package```
+
+Filters can be combined to disable a larger set of tests. For example, to disable both MQTT v5, SSL and
+WebSockets, run: ```mvn -Pexclude-tests -Dexclude.groups="org.eclipse.paho.common.test.categories.MQTTV5Test,org.eclipse.paho.common.test.categories.ExternalTest,org.eclipse.paho.common.test.categories.SSLTest,org.eclipse.paho.common.test.categories.WebSockTest" clean package```
 
 
 ## Documentation

@@ -31,6 +31,8 @@ import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.MqttV3Receiver;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.ExternalTest;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -38,7 +40,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV3Test.class})
 public class SendReceiveAsyncTest {
 
   static final Class<?> cclass = SendReceiveAsyncTest.class;
@@ -603,6 +605,7 @@ public class SendReceiveAsyncTest {
    * Test the behavior of the connection timeout when connecting to a non MQTT server.
    * i.e. ssh port 22
    */
+  @Category(ExternalTest.class)
   @Test
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();

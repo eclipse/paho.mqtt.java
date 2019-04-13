@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClient;
@@ -20,7 +21,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class AutomaticReconnectTest {
 
 	static final Class<?> cclass = AutomaticReconnectTest.class;

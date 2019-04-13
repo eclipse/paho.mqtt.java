@@ -17,6 +17,7 @@ package org.eclipse.paho.client.mqttv3.test;
 
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -24,7 +25,7 @@ import org.junit.experimental.categories.Category;
 /**
  * This is a reproducer for issue #370
  */
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV3Test.class})
 public class Issue370Test {
     @Test
     public void noOpenClose() throws MqttException {

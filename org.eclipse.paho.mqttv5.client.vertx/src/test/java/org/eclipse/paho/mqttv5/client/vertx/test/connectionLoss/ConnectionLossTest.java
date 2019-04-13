@@ -21,6 +21,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
@@ -58,7 +59,7 @@ import org.junit.experimental.categories.Category;
  */
 
 
-@Category(OnlineTest.class)
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class ConnectionLossTest implements MqttCallback {
 	static final Class<?> cclass = ConnectionLossTest.class;
 	private static final String className = cclass.getName();
