@@ -11,7 +11,6 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,10 +22,15 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.spi.NetworkModuleFactory;
 
 public class TCPNetworkModuleFactory implements NetworkModuleFactory {
+	private static final Set<String> supportedUriSchemes;
+
+	static {
+		supportedUriSchemes = Collections.unmodifiableSet(new HashSet<>(Collections.singletonList("tcp")));
+	}
 
 	@Override
 	public Set<String> getSupportedUriSchemes() {
-		return Collections.unmodifiableSet(new HashSet<>(Arrays.asList("tcp")));
+		return supportedUriSchemes;
 	}
 
 	@Override

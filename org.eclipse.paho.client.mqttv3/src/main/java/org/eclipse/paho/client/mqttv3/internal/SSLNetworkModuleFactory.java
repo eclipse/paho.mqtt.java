@@ -11,7 +11,6 @@
 package org.eclipse.paho.client.mqttv3.internal;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
@@ -25,10 +24,15 @@ import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
 import org.eclipse.paho.client.mqttv3.spi.NetworkModuleFactory;
 
 public class SSLNetworkModuleFactory implements NetworkModuleFactory {
+	private static final Set<String> supportedUriSchemes;
+
+	static {
+		supportedUriSchemes = Collections.unmodifiableSet(new HashSet<>(Collections.singletonList("ssl")));
+	}
 
 	@Override
 	public Set<String> getSupportedUriSchemes() {
-		return Collections.unmodifiableSet(new HashSet<>(Arrays.asList("ssl")));
+		return supportedUriSchemes;
 	}
 
 	@Override

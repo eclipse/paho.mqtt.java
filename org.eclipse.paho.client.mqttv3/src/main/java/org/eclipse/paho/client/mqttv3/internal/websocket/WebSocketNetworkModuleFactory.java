@@ -25,10 +25,15 @@ import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
 import org.eclipse.paho.client.mqttv3.spi.NetworkModuleFactory;
 
 public class WebSocketNetworkModuleFactory implements NetworkModuleFactory {
+	private static final Set<String> supportedUriSchemes;
+
+	static {
+		supportedUriSchemes = Collections.unmodifiableSet(new HashSet<>(Collections.singletonList("ws")));
+	}
 
 	@Override
 	public Set<String> getSupportedUriSchemes() {
-		return Collections.unmodifiableSet(new HashSet<>(Arrays.asList("ws")));
+		return supportedUriSchemes;
 	}
 
 	@Override
