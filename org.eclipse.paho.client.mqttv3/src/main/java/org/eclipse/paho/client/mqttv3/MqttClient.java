@@ -459,9 +459,8 @@ public class MqttClient implements IMqttClient {
 		IMqttToken tok = aClient.subscribe(topicFilters, qos, null, null, messageListeners);
 		tok.waitForCompletion(getTimeToWait());
 		int[] grantedQos = tok.getGrantedQos();
-		for (int i = 0; i < grantedQos.length; ++i) {
-			qos[i] = grantedQos[i];
-		}
+
+		System.arraycopy(grantedQos, 0, qos, 0, grantedQos.length);
 		if (grantedQos.length == 1 && qos[0] == 0x80) {
 			throw new MqttException(MqttException.REASON_CODE_SUBSCRIBE_FAILED);
 		}
