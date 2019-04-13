@@ -246,7 +246,7 @@ public class CommsTokenStore {
 			MqttToken token;
 			while(enumeration.hasMoreElements()) {
 				token = (MqttToken)enumeration.nextElement();
-					toks.append("{"+token.internalTok+"}"+lineSep);
+				toks.append("{").append(token.internalTok).append("}").append(lineSep);
 			}
 			return toks.toString();
 		}

@@ -89,10 +89,20 @@ public class Debug {
 	 */
 	protected void dumpVersion() {
 		StringBuffer vInfo = new StringBuffer();
-    	vInfo.append(lineSep+separator+" Version Info "+ separator+lineSep);
-    	vInfo.append(left("Version",20,' ') + ":  "+ ClientComms.VERSION + lineSep);
-    	vInfo.append(left("Build Level",20,' ') + ":  "+ ClientComms.BUILD_LEVEL + lineSep);
-    	vInfo.append(separator+separator+separator+lineSep);
+    	vInfo.append(lineSep)
+				.append(separator)
+				.append(" Version Info ")
+				.append(separator).append(lineSep);
+    	vInfo.append(left("Version", 20, ' '))
+				.append(":  ")
+				.append(ClientComms.VERSION)
+				.append(lineSep);
+    	vInfo.append(left("Build Level", 20, ' '))
+				.append(":  ")
+				.append(ClientComms.BUILD_LEVEL)
+				.append(lineSep);
+    	vInfo.append(separator + separator + separator)
+				.append(lineSep);
     	log.fine(CLASS_NAME,"dumpVersion", vInfo.toString());
 	}
 
@@ -149,12 +159,12 @@ public class Debug {
 		
 		StringBuffer propStr = new StringBuffer();
 	    Enumeration propsE = props.propertyNames();
-    	propStr.append(lineSep+separator+" "+name+" "+ separator+lineSep);
+    	propStr.append(lineSep).append(separator).append(" ").append(name).append(" ").append(separator).append(lineSep);
 	    while (propsE.hasMoreElements()) {
 	    	String key = (String)propsE.nextElement();
-	    	propStr.append(left(key,28,' ') + ":  "+ props.get(key)+lineSep);
+	    	propStr.append(left(key, 28, ' ')).append(":  ").append(props.get(key)).append(lineSep);
 	    }
-    	propStr.append(separator+separator+separator+lineSep);
+    	propStr.append(separator + separator + separator).append(lineSep);
 
     	return propStr.toString();
 	}

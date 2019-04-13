@@ -1329,87 +1329,87 @@ public class MqttProperties {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("MqttProperties [validProperties=" + validProperties);
+		sb.append("MqttProperties [validProperties=").append(validProperties);
 		if (requestResponseInfo != null) {
-			sb.append(", requestResponseInfo=" + requestResponseInfo);
+			sb.append(", requestResponseInfo=").append(requestResponseInfo);
 		}
 		if (requestProblemInfo != null) {
-			sb.append(", requestProblemInfo=" + requestProblemInfo);
+			sb.append(", requestProblemInfo=").append(requestProblemInfo);
 		}
 		if (willDelayInterval != null) {
-			sb.append(", willDelayInterval=" + willDelayInterval);
+			sb.append(", willDelayInterval=").append(willDelayInterval);
 		}
 		if (receiveMaximum != null) {
-			sb.append(", receiveMaximum=" + receiveMaximum);
+			sb.append(", receiveMaximum=").append(receiveMaximum);
 		}
 		if (maximumQoS != null) {
-			sb.append(", maximumQoS=" + maximumQoS);
+			sb.append(", maximumQoS=").append(maximumQoS);
 		}
 		if (maximumPacketSize != null) {
-			sb.append(", maximumPacketSize=" + maximumPacketSize);
+			sb.append(", maximumPacketSize=").append(maximumPacketSize);
 		}
 		if (retainAvailable != null) {
-			sb.append(", retainAvailable=" + retainAvailable);
+			sb.append(", retainAvailable=").append(retainAvailable);
 		}
 		if (assignedClientIdentifier != null) {
-			sb.append(", assignedClientIdentifier=" + assignedClientIdentifier);
+			sb.append(", assignedClientIdentifier=").append(assignedClientIdentifier);
 		}
 		if (topicAliasMaximum != null) {
-			sb.append(", topicAliasMaximum=" + topicAliasMaximum);
+			sb.append(", topicAliasMaximum=").append(topicAliasMaximum);
 		}
 		if (topicAlias != null) {
-			sb.append(", topicAlias=" + topicAlias);
+			sb.append(", topicAlias=").append(topicAlias);
 		}
 		if (serverKeepAlive != null) {
-			sb.append(", serverKeepAlive=" + serverKeepAlive);
+			sb.append(", serverKeepAlive=").append(serverKeepAlive);
 		}
 		if (responseInfo != null) {
-			sb.append(", responseInfo=" + responseInfo);
+			sb.append(", responseInfo=").append(responseInfo);
 		}
 		if (serverReference != null) {
-			sb.append(", serverReference=" + serverReference);
+			sb.append(", serverReference=").append(serverReference);
 		}
 		if (wildcardSubscriptionsAvailable != null) {
-			sb.append(", wildcardSubscriptionsAvailable=" + wildcardSubscriptionsAvailable);
+			sb.append(", wildcardSubscriptionsAvailable=").append(wildcardSubscriptionsAvailable);
 		}
 		if (subscriptionIdentifiersAvailable != null) {
-			sb.append(", subscriptionIdentifiersAvailable=" + subscriptionIdentifiersAvailable);
+			sb.append(", subscriptionIdentifiersAvailable=").append(subscriptionIdentifiersAvailable);
 		}
 		if (sharedSubscriptionAvailable != null) {
-			sb.append(", sharedSubscriptionAvailable=" + sharedSubscriptionAvailable);
+			sb.append(", sharedSubscriptionAvailable=").append(sharedSubscriptionAvailable);
 		}
 		if (sessionExpiryInterval != null) {
-			sb.append(", sessionExpiryInterval=" + sessionExpiryInterval);
+			sb.append(", sessionExpiryInterval=").append(sessionExpiryInterval);
 		}
 		if (authenticationMethod != null) {
-			sb.append(", authenticationMethod=" + authenticationMethod);
+			sb.append(", authenticationMethod=").append(authenticationMethod);
 		}
 		if (authenticationData != null) {
-			sb.append(", authenticationData=" + Arrays.toString(authenticationData));
+			sb.append(", authenticationData=").append(Arrays.toString(authenticationData));
 		}
 		if (reasonString != null) {
-			sb.append(", reasonString=" + reasonString);
+			sb.append(", reasonString=").append(reasonString);
 		}
 		if (userProperties != null && userProperties.size() != 0) {
-			sb.append(", userProperties=" + userProperties);
+			sb.append(", userProperties=").append(userProperties);
 		}
 		if (payloadFormat) {
-			sb.append(", isUTF8=" + payloadFormat);
+			sb.append(", isUTF8=").append(payloadFormat);
 		}
 		if (messageExpiryInterval != null) {
-			sb.append(", messageExpiryInterval=" + messageExpiryInterval);
+			sb.append(", messageExpiryInterval=").append(messageExpiryInterval);
 		}
 		if (contentType != null) {
-			sb.append(", contentType=" + contentType);
+			sb.append(", contentType=").append(contentType);
 		}
 		if (responseTopic != null) {
-			sb.append(", responseTopic=" + responseTopic);
+			sb.append(", responseTopic=").append(responseTopic);
 		}
 		if (correlationData != null) {
-			sb.append(", correlationData=" + Arrays.toString(correlationData));
+			sb.append(", correlationData=").append(Arrays.toString(correlationData));
 		}
 		if (publishSubscriptionIdentifiers.size() != 0) {
-			sb.append(", subscriptionIdentifiers=" + publishSubscriptionIdentifiers);
+			sb.append(", subscriptionIdentifiers=").append(publishSubscriptionIdentifiers);
 		}
 		sb.append("]");
 		return (sb.toString());

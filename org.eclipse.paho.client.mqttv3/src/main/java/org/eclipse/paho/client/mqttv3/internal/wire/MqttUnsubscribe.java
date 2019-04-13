@@ -84,7 +84,7 @@ public class MqttUnsubscribe extends MqttWireMessage {
 			if (i > 0) {
 				sb.append(", ");
 			}
-			sb.append("\"" + names[i] + "\"");
+			sb.append("\"").append(names[i]).append("\"");
 		}
 		sb.append("]");
 		return sb.toString();
