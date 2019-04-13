@@ -23,7 +23,7 @@ public class MqttDataTypesTest {
 
 	/**
 	 * Utility Function to encode, then decode a UTF-8 String using the
-	 * {@link MqttDataTypes#encodeUTF8} function.
+	 * {@link MqttWireMessage#encodeUTF8} function.
 	 * 
 	 * @param testString
 	 *            - The String to encode / decode
