@@ -1085,16 +1085,16 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 
 		// Only Generate Log string if we are logging at FINE level
 		if (log.isLoggable(Logger.FINE)) {
-			String subs = "";
+			StringBuilder subs = new StringBuilder();
 			for (int i = 0; i < topicFilters.length; i++) {
 				if (i > 0) {
-					subs += ", ";
+					subs.append(", ");
 				}
-				subs += topicFilters[i];
+				subs.append(topicFilters[i]);
 			}
 
 			// @TRACE 107=Unsubscribe topic={0} userContext={1} callback={2}
-			log.fine(CLASS_NAME, methodName, "107", new Object[] { subs, userContext, callback });
+			log.fine(CLASS_NAME, methodName, "107", new Object[] {subs.toString(), userContext, callback });
 		}
 
 		for (int i = 0; i < topicFilters.length; i++) {

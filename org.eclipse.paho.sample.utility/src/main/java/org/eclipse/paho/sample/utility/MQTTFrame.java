@@ -806,48 +806,53 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
      * @return A string to write into the properties file.
      */
     public String constructPropertyValue( String prop ) {
-    	String retString = null;
+    	StringBuilder retString = null;
 
         // For IPADDRESS and IPPORT there may be mulitple values, so
         // delimit the values with the PROP_DELIM character     	
     	if ( prop.equals("IPAddressList") ) {
             int numAddrs = ipAddress.getItemCount();
+
             if (numAddrs > 0) {
-            	retString = "";
+            	retString = new StringBuilder();
             } else {
-            	retString = DEFAULT_IP_ADDRESS;
-            }	
+            	retString = new StringBuilder(DEFAULT_IP_ADDRESS);
+            }
+
             for( int i=0; i < numAddrs; i++ ) {
-            	retString += ipAddress.getItemAt(i);
+            	retString.append(ipAddress.getItemAt(i));
             	// Don't add a delimiter after the last token
             	if ( i != numAddrs - 1 ) {
-                	retString += PROP_DELIM;
+                	retString.append(PROP_DELIM);
             	}
             }	
     	} else if ( prop.equals("IPPortList") ) {
             int numPorts = port.getItemCount();
             if (numPorts > 0) {
-            	retString = "";
+            	retString = new StringBuilder();
             } else {
-            	retString = DEFAULT_PORT_NUMBER;
+            	retString = new StringBuilder(DEFAULT_PORT_NUMBER);
             }	
             for( int i=0; i < numPorts; i++ ) {
-            	retString += port.getItemAt(i);
+            	retString.append(port.getItemAt(i));
             	// Don't add a delimiter after the last token
             	if ( i != numPorts - 1 ) {
-                	retString += PROP_DELIM;
+                	retString.append(PROP_DELIM);
             	}
             }	
     	} else if ( prop.equals("ClientId") ) {
-    		retString = optionsComp.getClientID();
+    		retString = new StringBuilder(optionsComp.getClientID());
     	} else if ( prop.equals("Persistence") ) {
-    		retString = String.valueOf( optionsComp.isPersistenceSelected() );
+    		retString = new StringBuilder(String.valueOf(optionsComp.isPersistenceSelected()));
     	} else if ( prop.equals("PersistenceDir") ) {
-    		retString = optionsComp.getPersistenceDirectory();
-    	}			
-    	
-    	return retString;
-    }	
+    		retString = new StringBuilder(optionsComp.getPersistenceDirectory());
+    	}
+    	else {
+    		retString = new StringBuilder("");
+		}
+
+    	return retString.toString();
+    }
 
     /**
      *  If we are not connected then disable the disconnect, publish,
