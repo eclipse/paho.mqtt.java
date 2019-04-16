@@ -31,9 +31,6 @@ import org.eclipse.paho.client.mqttv3.test.utilities.StringUtilities;
  * in a human readable way. 
  */
 public class LoggerDumper {
-
-  static final Class<?> cclass = LoggerDumper.class;
-
   private LoggerNode rootNode = null;
 
   /**

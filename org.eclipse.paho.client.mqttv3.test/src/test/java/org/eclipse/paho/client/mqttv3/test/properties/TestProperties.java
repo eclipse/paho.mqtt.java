@@ -72,9 +72,7 @@ import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
  */
 public class TestProperties {
 
-  static private final Class<?> cclass = TestProperties.class;
-  static private final String className = cclass.getName();
-  static private final Logger log = Logger.getLogger(className);
+  static private final Logger log = Logger.getLogger(TestProperties.class.getName());
 
   /**
    * The URI of the test MQTT Server.
@@ -180,7 +178,7 @@ public class TestProperties {
 
       if (stream == null) {
         filename = "test.properties";
-        stream = cclass.getClassLoader().getResourceAsStream(filename);
+        stream = this.getClass().getClassLoader().getResourceAsStream(filename);
       }
 
       // Read the properties from the property file
@@ -335,7 +333,7 @@ public class TestProperties {
    */
 
   public static String getClientKeyStore() {
-    URL keyStore = cclass.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_KEY_STORE));
+    URL keyStore = TestProperties.class.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_KEY_STORE));
     return keyStore.getPath();
   }
 
@@ -353,7 +351,7 @@ public class TestProperties {
    */
 
   public static String getClientTrustStore() {
-    URL trustStore = cclass.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_TRUST_STORE));
+    URL trustStore = TestProperties.class.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_TRUST_STORE));
     return trustStore.getPath();
   }
 
@@ -372,12 +370,12 @@ public class TestProperties {
    */
   public static URI getServerURI() throws URISyntaxException {
     String methodName = Utility.getMethodName();
-    log.entering(className, methodName);
+    log.entering(TestProperties.class.getName(), methodName);
 
     String string = getInstance().getProperty(KEY_SERVER_URI);
     URI uri = new URI(string);
 
-    log.exiting(className, methodName, string);
+    log.exiting(TestProperties.class.getName(), methodName, string);
     return uri;
   }
   
@@ -388,12 +386,12 @@ public class TestProperties {
    */
   public static URI getWebSocketServerURI() throws URISyntaxException {
 	  String methodName = Utility.getMethodName();
-	  log.entering(className, methodName);
+	  log.entering(TestProperties.class.getName(), methodName);
 	  
 	  String string = getInstance().getProperty(KEY_SERVER_WEBSOCKET_URI);
 	  URI uri = new URI(string);
 	  
-	  log.exiting(className, methodName, string);
+	  log.exiting(TestProperties.class.getName(), methodName, string);
 	  return uri;
   }
 
