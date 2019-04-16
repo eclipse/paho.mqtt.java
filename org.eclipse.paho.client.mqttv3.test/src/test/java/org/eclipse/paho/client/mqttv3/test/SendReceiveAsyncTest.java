@@ -40,10 +40,7 @@ import org.junit.Test;
  *
  */
 public class SendReceiveAsyncTest {
-
-  static final Class<?> cclass = SendReceiveAsyncTest.class;
-  static final String className = cclass.getName();
-  static final Logger log = Logger.getLogger(className);
+  static final Logger log = Logger.getLogger(SendReceiveAsyncTest.class.getName());
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
@@ -58,7 +55,7 @@ public class SendReceiveAsyncTest {
 
     try {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
+      LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
 
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
@@ -78,7 +75,7 @@ public class SendReceiveAsyncTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
 
     try {
       if (clientFactory != null) {
@@ -100,8 +97,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testConnect() throws Exception {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+    log.entering(SendReceiveAsyncTest.class.getName(), methodName);
 
     IMqttAsyncClient mqttClient = null;
     try {
@@ -136,7 +133,7 @@ public class SendReceiveAsyncTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
   }
 
   /**
@@ -147,8 +144,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testRemoteConnect() throws Exception {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+    log.entering(SendReceiveAsyncTest.class.getName(), methodName);
 
     IMqttAsyncClient mqttClient = null;
     try {
@@ -183,7 +180,7 @@ public class SendReceiveAsyncTest {
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
-      byte[] payload = ("Message payload " + className + "." + methodName).getBytes();
+      byte[] payload = ("Message payload " + SendReceiveAsyncTest.class.getName() + "." + methodName).getBytes();
       pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
       pubToken.waitForCompletion();
@@ -210,7 +207,7 @@ public class SendReceiveAsyncTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
   }
 
   /**
@@ -219,8 +216,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testLargeMessage() {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+    log.entering(SendReceiveAsyncTest.class.getName(), methodName);
 
     IMqttAsyncClient mqttClient = null;
     try {
@@ -287,7 +284,7 @@ public class SendReceiveAsyncTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
   }
 
   /**
@@ -296,8 +293,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testMultipleClients() {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+    log.entering(SendReceiveAsyncTest.class.getName(), methodName);
 
     int publishers = 2;
     int subscribers = 10;
@@ -381,7 +378,7 @@ public class SendReceiveAsyncTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
   }
 
   /**
@@ -391,8 +388,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testCleanStart() throws Exception {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+    log.entering(SendReceiveAsyncTest.class.getName(), methodName);
 
     IMqttAsyncClient mqttClient = null;
 
@@ -423,7 +420,7 @@ public class SendReceiveAsyncTest {
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
-      byte[] payload = ("Message payload " + className + "." + methodName + " First").getBytes();
+      byte[] payload = ("Message payload " + SendReceiveAsyncTest.class.getName() + "." + methodName + " First").getBytes();
       pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
       pubToken.waitForCompletion();
@@ -457,7 +454,7 @@ public class SendReceiveAsyncTest {
       subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
-      payload = ("Message payload " + className + "." + methodName + " Other client").getBytes();
+      payload = ("Message payload " + SendReceiveAsyncTest.class.getName() + "." + methodName + " Other client").getBytes();
       pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
       pubToken.waitForCompletion();
@@ -487,7 +484,7 @@ public class SendReceiveAsyncTest {
       }
 
       // Also check that subscription is cancelled.
-      payload = ("Message payload " + className + "." + methodName + " Cancelled Subscription").getBytes();
+      payload = ("Message payload " + SendReceiveAsyncTest.class.getName() + "." + methodName + " Cancelled Subscription").getBytes();
       pubToken = mqttClient.publish(topicNames[0], payload, 1, false, null, null);
       log.info("Publishing to..." + topicNames[0]);
       pubToken.waitForCompletion();
@@ -517,7 +514,7 @@ public class SendReceiveAsyncTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
   }
   
   /**
@@ -537,8 +534,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testVeryLargeMessageWithShortKeepAlive() {
   	final String methodName = Utility.getMethodName();
-  	LoggingUtilities.banner(log, cclass, methodName);
-  	log.entering(className, methodName);
+  	LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+  	log.entering(SendReceiveAsyncTest.class.getName(), methodName);
   
   	IMqttAsyncClient mqttClient = null;
   	try {
@@ -595,7 +592,7 @@ public class SendReceiveAsyncTest {
   		}
   	}
   
-  	log.exiting(className, methodName);
+  	log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
   }
   
   /**
@@ -606,8 +603,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();
-	  LoggingUtilities.banner(log, cclass, methodName);
-	  log.entering(className, methodName);
+	  LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+	  log.entering(SendReceiveAsyncTest.class.getName(), methodName);
 
 	  IMqttAsyncClient mqttClient = null;
 	  // Change the URI to a none MQTT server
@@ -656,7 +653,7 @@ public class SendReceiveAsyncTest {
 
 	  Assert.assertFalse(mqttClient.isConnected());
 
-	  log.exiting(className, methodName);
+	  log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
   }
   
   /**
@@ -665,8 +662,8 @@ public class SendReceiveAsyncTest {
   @Test
   public void testQoS0Tokens() {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
+    log.entering(SendReceiveAsyncTest.class.getName(), methodName);
     
     int tokenCount = 1000;  // how many QoS 0 tokens shall we track?
 
@@ -734,13 +731,13 @@ public class SendReceiveAsyncTest {
         log.log(Level.SEVERE, "caught exception:", exception);
       }
     }
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveAsyncTest.class.getName(), methodName);
    }
     
     @Test
 	public void testPublishManyQoS0Messages() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, SendReceiveAsyncTest.class, methodName);
 		String clientId = methodName;
 		IMqttAsyncClient asyncClient = new MqttAsyncClient(serverURI.toString(), clientId);
 

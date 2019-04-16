@@ -33,10 +33,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 
 public class AutomaticReconnectTest{
-	
-	static final Class<?> cclass = AutomaticReconnectTest.class;
-	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
+	private static final Logger log = Logger.getLogger(AutomaticReconnectTest.class.getName());
 	
 	private static final MemoryPersistence DATA_STORE = new MemoryPersistence();
 
@@ -50,7 +47,7 @@ public class AutomaticReconnectTest{
 	public static void setUpBeforeClass() throws Exception{
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, cclass, methodName);
+			LoggingUtilities.banner(log, AutomaticReconnectTest.class, methodName);
 			serverURI = TestProperties.getServerURI();
 			// Use 0 for the first time.
 			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 0);
@@ -81,7 +78,7 @@ public class AutomaticReconnectTest{
 	@Test
 	public void testAutomaticReconnectAfterDisconnect() throws Exception{
 	    String methodName = Utility.getMethodName();
-	    LoggingUtilities.banner(log, cclass, methodName);
+	    LoggingUtilities.banner(log, AutomaticReconnectTest.class, methodName);
     	MqttConnectOptions options = new MqttConnectOptions();
     	options.setCleanSession(true);
     	options.setAutomaticReconnect(true);
@@ -125,7 +122,7 @@ public class AutomaticReconnectTest{
 	@Test
 	public void testManualReconnectAfterDisconnect() throws Exception {
 	    String methodName = Utility.getMethodName();
-	    LoggingUtilities.banner(log, cclass, methodName);
+	    LoggingUtilities.banner(log, AutomaticReconnectTest.class, methodName);
 		MqttConnectOptions options = new MqttConnectOptions();
     	options.setCleanSession(true);
     	options.setAutomaticReconnect(true);
@@ -163,7 +160,7 @@ public class AutomaticReconnectTest{
 	@Test
 	public void testNoAutomaticReconnectWithNoInitialConnect() throws Exception {
 		 String methodName = Utility.getMethodName();
-		    LoggingUtilities.banner(log, cclass, methodName);
+		    LoggingUtilities.banner(log, AutomaticReconnectTest.class, methodName);
 	    	MqttConnectOptions options = new MqttConnectOptions();
 	    	options.setCleanSession(true);
 	    	options.setAutomaticReconnect(true);

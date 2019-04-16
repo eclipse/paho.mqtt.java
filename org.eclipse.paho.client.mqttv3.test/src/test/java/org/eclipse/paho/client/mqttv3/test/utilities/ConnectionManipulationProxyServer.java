@@ -8,9 +8,7 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 public class ConnectionManipulationProxyServer implements Runnable {
-	static final Class<?> cclass = ConnectionManipulationProxyServer.class;
-	private static final String className = cclass.getName();
-	private Logger log = Logger.getLogger(className);
+	private Logger log = Logger.getLogger(ConnectionManipulationProxyServer.class.getName());
 	private int localPort;
 	private boolean portSet = false;
 	private String host;

@@ -44,15 +44,11 @@ import org.junit.Test;
  */
 
 public class BasicTest {
-
-  static final Class<?> cclass = BasicTest.class;
-  private static final String className = cclass.getName();
-  private static final Logger log = Logger.getLogger(className);
+  private static final Logger log = Logger.getLogger(BasicTest.class.getName());
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
   private static String topicPrefix;
-
 
   /**
    * @throws Exception 
@@ -62,7 +58,7 @@ public class BasicTest {
 
     try {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
+      LoggingUtilities.banner(log, BasicTest.class, methodName);
 
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
@@ -82,7 +78,7 @@ public class BasicTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     try {
       if (clientFactory != null) {
@@ -101,7 +97,7 @@ public class BasicTest {
   @Test
   public void testConnect() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     IMqttClient client = null;
     try {
@@ -147,7 +143,7 @@ public class BasicTest {
   @Test
   public void testHAConnect() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     // Some old clients do not support the new HA interface on the connect call
     if (clientFactory.isHighAvalabilitySupported() == false) {
@@ -197,7 +193,7 @@ public class BasicTest {
   @Test
   public void testPubSub() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     IMqttClient client = null;
     try {
@@ -247,7 +243,7 @@ public class BasicTest {
   @Test
   public void testMsgProperties() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     log.info("Check defaults for empty message");
     MqttMessage msg = new MqttMessage();
@@ -315,7 +311,7 @@ public class BasicTest {
   @Test
   public void testConnOptDefaults() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     log.info("Check MqttConnectOptions defaults");
     MqttConnectOptions connOpts = new MqttConnectOptions();
@@ -333,7 +329,7 @@ public class BasicTest {
   @Test
   public void test330() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     int before_thread_count = Thread.activeCount();
     URI uri = new URI("tcp://iot.eclipse.org:1882");
@@ -371,7 +367,7 @@ public class BasicTest {
   @Test
   public void test402() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     IMqttClient client = null;
     int before_thread_count = Thread.activeCount();
@@ -438,7 +434,7 @@ public class BasicTest {
   @Test
   public void test402a() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicTest.class, methodName);
 
     IMqttClient client = null;
     int before_thread_count = Thread.activeCount();
@@ -487,20 +483,11 @@ public class BasicTest {
     Assert.assertEquals(after_count, before_thread_count + pool_size);
   }
 
-
-  // -------------------------------------------------------------
-  // Helper methods/classes
-  // -------------------------------------------------------------
-
-  static final Class<MessageListener> cclass2 = MessageListener.class;
-  static final String classSimpleName2 = cclass2.getSimpleName();
-  static final String classCanonicalName2 = cclass2.getCanonicalName();
-  static final Logger logger2 = Logger.getLogger(classCanonicalName2);
-
   /**
    *
    */
   class MessageListener implements MqttCallback {
+    private final Logger logger2 = Logger.getLogger(MessageListener.class.getCanonicalName());
 
     ArrayList<MqttMessage> messages;
 
