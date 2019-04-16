@@ -43,7 +43,6 @@ public class BasicSSLTest {
   private static URI serverURI;
   private static String serverHost;
   private static MqttClientFactoryPaho clientFactory;
-  private static File keystorePath;
   private static int messageSize = 100000;
   private static String topicPrefix;
 
