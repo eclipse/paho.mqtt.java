@@ -6,8 +6,12 @@ import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1
 import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1_1;
 import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_DEFAULT;
 import static org.junit.Assert.*;
-import org.junit.Test;
 
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+@Category(MQTTV3Test.class)
 public class MqttConnectOptionsTest {
 
 	@Test

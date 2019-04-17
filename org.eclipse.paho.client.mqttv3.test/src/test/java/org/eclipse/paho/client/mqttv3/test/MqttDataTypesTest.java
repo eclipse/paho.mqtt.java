@@ -11,9 +11,12 @@ import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category(MQTTV3Test.class)
 public class MqttDataTypesTest {
 
 

@@ -45,9 +45,11 @@ import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
 import org.eclipse.paho.client.mqttv3.test.properties.TestProperties;
 import org.eclipse.paho.client.mqttv3.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.MQTTV3Test;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * Client test which rapidly tries random combinations of connect,
@@ -56,7 +58,7 @@ import org.junit.Test;
  * of the history of commands tried which can be fed back into the
  * test to re-produce a previous run (See run(String filename)
  */
-
+@Category(MQTTV3Test.class)
 public class ModelTestCase implements MqttCallback {
 
   private static final Class<?> cclass = ModelTestCase.class;

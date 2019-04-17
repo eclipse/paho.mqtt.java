@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttToken;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
@@ -22,7 +24,10 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class TopicAliasReconnectTest {
 
 	static final Class<?> cclass = TopicAliasReconnectTest.class;

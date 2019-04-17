@@ -20,6 +20,7 @@
 		<jacoco.version>0.8.2</jacoco.version>
 		<test.exclude>**/*ConformantTest.java</test.exclude>
 		<download.location>/home/data/httpd/download.eclipse.org/paho/releases/${project.version}/Java</download.location>
+		<exclude.groups></exclude.groups>
 	</properties>
 
 	<name>Eclipse Paho</name>
@@ -201,6 +202,13 @@
 		</plugins>
 	</build>
 
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
 	<profiles>
 		<profile>
 			<id>eclipse-sign</id>
@@ -299,14 +307,33 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>exclude-tests</id>
+			<properties>
+				<exclude.groups>${exclude.groups}</exclude.groups>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>3.0.0-M3</version>
+						<configuration>
+							<excludedGroups>${exclude.groups}</excludedGroups>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 	<modules>
+		<module>org.eclipse.paho.common</module>
 		<module>org.eclipse.paho.client.mqttv3</module>
 		<module>org.eclipse.paho.client.mqttv3.test</module>
 		<module>org.eclipse.paho.client.mqttv3.repository</module>
 		<module>org.eclipse.paho.sample.utility</module>
 		<module>org.eclipse.paho.mqttv5.common</module>
-    		<module>org.eclipse.paho.mqttv5.client.vertx</module>
-    		<module>org.eclipse.paho.mqttv5.client.vertx.test</module>
-	</modules>
+		<module>org.eclipse.paho.mqttv5.client.vertx</module>
+		<module>org.eclipse.paho.mqttv5.client.vertx.test</module>
+    </modules>
 </project>

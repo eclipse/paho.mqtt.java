@@ -29,7 +29,7 @@
 						</goals>
 					</execution>
 					<execution>
-          		<id>generate-test-report</id>
+          		    <id>generate-test-report</id>
         			<phase>test</phase>
         			<goals>
             		<goal>report-aggregate</goal>

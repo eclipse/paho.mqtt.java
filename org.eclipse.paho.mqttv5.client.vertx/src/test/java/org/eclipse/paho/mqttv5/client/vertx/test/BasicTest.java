@@ -5,6 +5,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.vertx.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.vertx.IMqttToken;
@@ -20,6 +22,7 @@ import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * A series of basic connectivity tests to validate that basic functions work:
@@ -32,6 +35,7 @@ import org.junit.Test;
  * </ul>
  *
  */
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class BasicTest {
 	
 	static final Class<?> cclass = BasicTest.class;
