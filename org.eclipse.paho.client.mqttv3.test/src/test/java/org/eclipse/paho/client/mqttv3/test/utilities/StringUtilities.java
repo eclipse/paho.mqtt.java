@@ -15,16 +15,11 @@
 package org.eclipse.paho.client.mqttv3.test.utilities;
 
 import java.text.MessageFormat;
-import java.util.logging.Logger;
 
 /**
  * Static utility functions 
  */
 public class StringUtilities {
-
-  private static final String className = StringUtilities.class.getName();
-  private final static Logger log = Logger.getLogger(className);
-
   /** Lookup the line separator once */
   public static final String NL = System.getProperty("line.separator");
 

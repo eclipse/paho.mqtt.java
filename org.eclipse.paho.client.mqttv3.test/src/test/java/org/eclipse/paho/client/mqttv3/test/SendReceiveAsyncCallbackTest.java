@@ -41,10 +41,7 @@ import org.junit.experimental.categories.Category;
 
 @Category({OnlineTest.class, MQTTV3Test.class})
 public class SendReceiveAsyncCallbackTest {
-
-	static final Class<?> cclass = SendReceiveAsyncTest.class;
-	static final String className = cclass.getName();
-	static final Logger log = Logger.getLogger(className);
+	static final Logger log = Logger.getLogger(SendReceiveAsyncCallbackTest.class.getName());
 	
 	private final int messageCount = 5;
 	private static URI serverURI;
@@ -63,7 +60,7 @@ public class SendReceiveAsyncCallbackTest {
 
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, cclass, methodName);
+			LoggingUtilities.banner(log, SendReceiveAsyncCallbackTest.class, methodName);
 
 			serverURI = TestProperties.getServerURI();
 			clientFactory = new MqttClientFactoryPaho();
@@ -83,7 +80,7 @@ public class SendReceiveAsyncCallbackTest {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, SendReceiveAsyncCallbackTest.class, methodName);
 
 		try {
 			if (clientFactory != null) {
@@ -312,8 +309,8 @@ public class SendReceiveAsyncCallbackTest {
 	@Test(timeout=10000)
 	public void test1() throws Exception {
 		final String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
-		log.entering(className, methodName);
+		LoggingUtilities.banner(log, SendReceiveAsyncCallbackTest.class, methodName);
+		log.entering(SendReceiveAsyncCallbackTest.class.getName(), methodName);
 
 		IMqttAsyncClient mqttClient = null;
 		try {
@@ -361,7 +358,7 @@ public class SendReceiveAsyncCallbackTest {
 			}
 		}
 
-		log.exiting(className, methodName);
+		log.exiting(SendReceiveAsyncCallbackTest.class.getName(), methodName);
 	}
 
 }

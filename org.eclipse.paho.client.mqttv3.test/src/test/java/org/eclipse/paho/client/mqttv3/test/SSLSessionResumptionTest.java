@@ -49,10 +49,7 @@ import org.junit.experimental.categories.Category;
  */
 @Category({OnlineTest.class, MQTTV3Test.class, SSLTest.class})
 public class SSLSessionResumptionTest {
-
-	static final Class<?> cclass = SSLSessionResumptionTest.class;
-	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
+	private static final Logger log = Logger.getLogger(SSLSessionResumptionTest.class.getName());
 
 	private static String serverURI;
 	private static String serverHost;
@@ -66,7 +63,7 @@ public class SSLSessionResumptionTest {
 
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, cclass, methodName);
+			LoggingUtilities.banner(log, SSLSessionResumptionTest.class, methodName);
 			serverURI = "ssl://" + TestProperties.getServerURI().getHost() + ":" +TestProperties.getServerSSLPort();
 			serverHost = TestProperties.getServerURI().getHost();
 			serverPort = TestProperties.getServerSSLPort();

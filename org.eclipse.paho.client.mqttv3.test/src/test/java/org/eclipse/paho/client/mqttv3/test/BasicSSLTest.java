@@ -43,14 +43,11 @@ import org.junit.experimental.categories.Category;
 @Category({OnlineTest.class, MQTTV3Test.class, SSLTest.class})
 public class BasicSSLTest {
 
-  static final Class<?> cclass = BasicSSLTest.class;
-  private static final String className = cclass.getName();
-  private static final Logger log = Logger.getLogger(className);
+  private static final Logger log = Logger.getLogger(BasicSSLTest.class.getName());
 
   private static URI serverURI;
   private static String serverHost;
   private static MqttClientFactoryPaho clientFactory;
-  private static File keystorePath;
   private static int messageSize = 100000;
   private static String topicPrefix;
 
@@ -63,7 +60,7 @@ public class BasicSSLTest {
 
     try {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
+      LoggingUtilities.banner(log, BasicSSLTest.class, methodName);
 
       serverURI = TestProperties.getServerURI();
       serverHost = serverURI.getHost();
@@ -84,7 +81,7 @@ public class BasicSSLTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, BasicSSLTest.class, methodName);
 
     try {
       if (clientFactory != null) {
@@ -106,8 +103,8 @@ public class BasicSSLTest {
   public void testSSL() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, BasicSSLTest.class, methodName);
+    log.entering(BasicSSLTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -158,7 +155,7 @@ public class BasicSSLTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(BasicSSLTest.class.getName(), methodName);
   }
 
   /**
@@ -169,8 +166,8 @@ public class BasicSSLTest {
   public void testSSLWorkload() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, BasicSSLTest.class, methodName);
+    log.entering(BasicSSLTest.class.getName(), methodName);
 
     IMqttClient[] mqttPublisher = new IMqttClient[4];
     IMqttClient[] mqttSubscriber = new IMqttClient[20];
@@ -253,7 +250,7 @@ public class BasicSSLTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(BasicSSLTest.class.getName(), methodName);
   }
 
   /**
@@ -265,8 +262,8 @@ public class BasicSSLTest {
   public void testSSLLargeMessage() throws Exception {
     URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, BasicSSLTest.class, methodName);
+    log.entering(BasicSSLTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -320,7 +317,7 @@ public class BasicSSLTest {
         throw exception;
       }
     }
-    log.exiting(className, methodName);
+    log.exiting(BasicSSLTest.class.getName(), methodName);
   }
 
   /**
@@ -330,8 +327,8 @@ public class BasicSSLTest {
   @Test(timeout=10000)
   public void testNonSSLtoSSLChannel() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, BasicSSLTest.class, methodName);
+    log.entering(BasicSSLTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -370,7 +367,7 @@ public class BasicSSLTest {
         throw exception;
       }
     }
-    log.exiting(className, methodName);
+    log.exiting(BasicSSLTest.class.getName(), methodName);
   }
 
   /**
@@ -380,8 +377,8 @@ public class BasicSSLTest {
   @Test
   public void testSSLtoNonSSLChannel() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, BasicSSLTest.class, methodName);
+    log.entering(BasicSSLTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -426,6 +423,6 @@ public class BasicSSLTest {
         throw exception;
       }
     }
-    log.exiting(className, methodName);
+    log.exiting(BasicSSLTest.class.getName(), methodName);
   }
 }

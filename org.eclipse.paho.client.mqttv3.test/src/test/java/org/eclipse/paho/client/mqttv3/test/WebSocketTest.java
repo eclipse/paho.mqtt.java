@@ -46,10 +46,7 @@ import org.junit.experimental.categories.Category;
  */
 @Category({OnlineTest.class, MQTTV3Test.class, WebSockTest.class})
 public class WebSocketTest {
-
-  static final Class<?> cclass = WebSocketTest.class;
-  private static final String className = cclass.getName();
-  private static final Logger log = Logger.getLogger(className);
+  private static final Logger log = Logger.getLogger(WebSocketTest.class.getName());
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
@@ -63,7 +60,7 @@ public class WebSocketTest {
 
     try {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
+      LoggingUtilities.banner(log, WebSocketTest.class, methodName);
 
       serverURI = TestProperties.getWebSocketServerURI();
       clientFactory = new MqttClientFactoryPaho();
@@ -82,7 +79,7 @@ public class WebSocketTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
 
     try {
       if (clientFactory != null) {
@@ -101,7 +98,7 @@ public class WebSocketTest {
   @Test()
   public void testWebSocketConnect() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
 
     IMqttClient client = null;
     try {
@@ -151,7 +148,7 @@ public class WebSocketTest {
   @Test
   public void testWebSocketPubSub() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
 
     IMqttClient client = null;
     try {
@@ -216,7 +213,7 @@ public class WebSocketTest {
 	  byte[] largeByteArray = new byte[32000];
 	  new Random().nextBytes(largeByteArray);
 	  String methodName = Utility.getMethodName();
-	  LoggingUtilities.banner(log, cclass, methodName);
+	  LoggingUtilities.banner(log, WebSocketTest.class, methodName);
 
 	    IMqttClient client = null;
 	    try {
@@ -264,7 +261,7 @@ public class WebSocketTest {
   @Test(timeout=10000)
   public void testBasicAuth() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
 
     String userInfo = "username:password";
 
@@ -296,19 +293,11 @@ public class WebSocketTest {
     }
   }
 
-  // -------------------------------------------------------------
-  // Helper methods/classes
-  // -------------------------------------------------------------
-
-  static final Class<MessageListener> cclass2 = MessageListener.class;
-  static final String classSimpleName2 = cclass2.getSimpleName();
-  static final String classCanonicalName2 = cclass2.getCanonicalName();
-  static final Logger logger2 = Logger.getLogger(classCanonicalName2);
-
   /**
    *
    */
   class MessageListener implements MqttCallback {
+    final Logger logger2 = Logger.getLogger(MessageListener.class.getCanonicalName());
 
     ArrayList<MqttMessage> messages;
 

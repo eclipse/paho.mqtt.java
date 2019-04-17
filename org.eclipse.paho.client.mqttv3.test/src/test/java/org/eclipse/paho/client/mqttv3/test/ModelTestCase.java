@@ -60,10 +60,7 @@ import org.junit.experimental.categories.Category;
  */
 @Category(MQTTV3Test.class)
 public class ModelTestCase implements MqttCallback {
-
-  private static final Class<?> cclass = ModelTestCase.class;
-  private static final String className = cclass.getName();
-  private static final Logger log = Logger.getLogger(className);
+  private static final Logger log = Logger.getLogger(ModelTestCase.class.getName());
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
@@ -135,7 +132,7 @@ public class ModelTestCase implements MqttCallback {
 
     try {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
+      LoggingUtilities.banner(log, ModelTestCase.class, methodName);
 
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
@@ -153,7 +150,7 @@ public class ModelTestCase implements MqttCallback {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, ModelTestCase.class, methodName);
 
     try {
       if (clientFactory != null) {

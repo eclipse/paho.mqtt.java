@@ -55,9 +55,7 @@ import org.junit.experimental.categories.Category;
 @Category({OnlineTest.class, MQTTV3Test.class})
 public class ConnectionLossTest implements MqttCallback
 {
-	static final Class<?> cclass = ConnectionLossTest.class;
-	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
+	private static final Logger log = Logger.getLogger(ConnectionLossTest.class.getName());
 
 	private static final MqttDefaultFilePersistence DATA_STORE = new MqttDefaultFilePersistence("/tmp");
 
@@ -74,7 +72,7 @@ public class ConnectionLossTest implements MqttCallback
 	public static void setUpBeforeClass() throws Exception{
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, cclass, methodName);
+			LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 			serverURI = TestProperties.getServerURI();
 			// Use 0 for the first time.
 			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 0);
@@ -111,7 +109,7 @@ public class ConnectionLossTest implements MqttCallback
 		throws Exception
 	{
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectOptions options = new MqttConnectOptions();
@@ -167,7 +165,7 @@ public class ConnectionLossTest implements MqttCallback
 	@Test
 	public void testConnectionLossWhilePublishingQos1() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 
 		final int keepAlive = 15;
 
@@ -226,7 +224,7 @@ public class ConnectionLossTest implements MqttCallback
 		throws Exception
 	{
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectOptions options = new MqttConnectOptions();
@@ -284,7 +282,7 @@ public class ConnectionLossTest implements MqttCallback
 		throws Exception
 	{
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectOptions options = new MqttConnectOptions();
@@ -349,7 +347,7 @@ public class ConnectionLossTest implements MqttCallback
 			throws Exception
 	{
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectOptions options = new MqttConnectOptions();
@@ -396,7 +394,7 @@ public class ConnectionLossTest implements MqttCallback
 			throws Exception
 	{
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectOptions options = new MqttConnectOptions();
@@ -456,7 +454,7 @@ public class ConnectionLossTest implements MqttCallback
 		throws Exception
 	{
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, ConnectionLossTest.class, methodName);
 		final int keepAlive = 15;
 
 		MqttConnectOptions options = new MqttConnectOptions();

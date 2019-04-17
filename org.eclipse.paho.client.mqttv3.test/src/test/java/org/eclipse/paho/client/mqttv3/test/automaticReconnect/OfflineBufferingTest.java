@@ -46,10 +46,7 @@ import org.junit.experimental.categories.Category;
 
 @Category({OnlineTest.class, MQTTV3Test.class})
 public class OfflineBufferingTest {
-
-	static final Class<?> cclass = OfflineBufferingTest.class;
-	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
+	private static final Logger log = Logger.getLogger(OfflineBufferingTest.class.getName());
 
 	private static final MemoryPersistence DATA_STORE = new MemoryPersistence();
 
@@ -62,7 +59,7 @@ public class OfflineBufferingTest {
 	public static void setUpBeforeClass() throws Exception {
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, cclass, methodName);
+			LoggingUtilities.banner(log, OfflineBufferingTest.class, methodName);
 			serverURI = TestProperties.getServerURI();
 			serverURIString = "tcp://" + serverURI.getHost() + ":" + serverURI.getPort();
 			topicPrefix = "OfflineBufferingTest-" + UUID.randomUUID().toString() + "-";
@@ -93,7 +90,7 @@ public class OfflineBufferingTest {
 	@Test
 	public void testSingleMessageBufferAndDeliver() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, OfflineBufferingTest.class, methodName);
 
 		// Tokens
 		IMqttToken connectToken;
@@ -164,7 +161,7 @@ public class OfflineBufferingTest {
 	@Test
 	public void testManyMessageBufferAndDeliver() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, OfflineBufferingTest.class, methodName);
 
 		// Tokens
 		IMqttToken connectToken;
@@ -264,7 +261,7 @@ public class OfflineBufferingTest {
 	@Test
 	public void testDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, OfflineBufferingTest.class, methodName);
 		int maxMessages = 10;
 
 		// Tokens
@@ -321,7 +318,7 @@ public class OfflineBufferingTest {
 	@Test
 	public void testNoDeleteOldestBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, OfflineBufferingTest.class, methodName);
 		int maxMessages = 10;
 
 		// Tokens
@@ -380,7 +377,7 @@ public class OfflineBufferingTest {
 	@Test
 	public void testPersistBufferedMessages() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, OfflineBufferingTest.class, methodName);
 
 		// Tokens
 		IMqttToken connectToken;
@@ -440,7 +437,7 @@ public class OfflineBufferingTest {
 	@Test
 	public void testUnPersistBufferedMessagesOnNewClient() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, OfflineBufferingTest.class, methodName);
 		int qos = 2;
 
 		// Mock up an Mqtt Message to be stored in Persistence

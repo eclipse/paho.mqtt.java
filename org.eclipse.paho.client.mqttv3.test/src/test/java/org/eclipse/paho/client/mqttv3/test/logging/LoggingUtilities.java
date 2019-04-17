@@ -27,7 +27,6 @@ public class LoggingUtilities {
   /**
    * Configure logging by loading the logging.properties file
    */
-  public static final Class<?> cclass = LoggingUtilities.class;
 
   static {
     String configClass = System.getProperty("java.util.logging.config.class");
@@ -35,7 +34,7 @@ public class LoggingUtilities {
 
     if ((configClass == null) && (configFile == null)) {
       try {
-        InputStream inputStream = cclass.getClassLoader().getResourceAsStream("logging.properties");
+        InputStream inputStream = LoggingUtilities.class.getClassLoader().getResourceAsStream("logging.properties");
         LogManager manager = LogManager.getLogManager();
         manager.readConfiguration(inputStream);
         inputStream.close();

@@ -38,9 +38,7 @@ import org.junit.experimental.categories.Category;
 @Category({OnlineTest.class, MQTTV3Test.class, SSLTest.class})
 public class TLSHostnameVerificationTest {
 
-	static final Class<?> cclass = TLSHostnameVerificationTest.class;
-	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
+	private static final Logger log = Logger.getLogger(TLSHostnameVerificationTest.class.getName());
 
 	private static String serverHost;
 	private static int serverPort;
@@ -55,7 +53,7 @@ public class TLSHostnameVerificationTest {
 
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, cclass, methodName);
+			LoggingUtilities.banner(log, TLSHostnameVerificationTest.class, methodName);
 			// Configured to use the Paho Testing server localhost certificate
 			serverHost = "localhost";
 			serverIP = "127.0.0.1";

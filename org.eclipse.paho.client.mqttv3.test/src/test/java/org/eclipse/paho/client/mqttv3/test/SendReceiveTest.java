@@ -41,10 +41,7 @@ import org.junit.experimental.categories.Category;
  */
 @Category({OnlineTest.class, MQTTV3Test.class})
 public class SendReceiveTest {
-
-  static final Class<?> cclass = SendReceiveTest.class;
-  private static final String className = cclass.getName();
-  private static final Logger log = Logger.getLogger(className);
+  private static final Logger log = Logger.getLogger(SendReceiveTest.class.getName());
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
@@ -59,7 +56,7 @@ public class SendReceiveTest {
 
     try {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
+      LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
 
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
@@ -79,7 +76,7 @@ public class SendReceiveTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
 
     try {
       if (clientFactory != null) {
@@ -100,8 +97,8 @@ public class SendReceiveTest {
   @Test
   public void testConnect() throws Exception {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
+    log.entering(SendReceiveTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -126,7 +123,7 @@ public class SendReceiveTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveTest.class.getName(), methodName);
   }
 
   /**
@@ -136,8 +133,8 @@ public class SendReceiveTest {
   @Test
   public void testRemoteConnect() throws Exception {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
+    log.entering(SendReceiveTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -160,7 +157,7 @@ public class SendReceiveTest {
       log.info("Subscribing to..." + topicNames[0]);
       mqttClient.subscribe(topicNames, topicQos);
 
-      byte[] payload = ("Message payload " + className + "." + methodName).getBytes();
+      byte[] payload = ("Message payload " + SendReceiveTest.class.getName() + "." + methodName).getBytes();
       MqttTopic mqttTopic = mqttClient.getTopic(topicNames[0]);
       log.info("Publishing to..." + topicNames[0]);
       mqttTopic.publish(payload, 1, false);
@@ -182,7 +179,7 @@ public class SendReceiveTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveTest.class.getName(), methodName);
   }
 
   /**
@@ -191,8 +188,8 @@ public class SendReceiveTest {
   @Test
   public void testLargeMessage() {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
+    log.entering(SendReceiveTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -243,7 +240,7 @@ public class SendReceiveTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveTest.class.getName(), methodName);
   }
 
   /**
@@ -252,8 +249,8 @@ public class SendReceiveTest {
   @Test
   public void testQoSPreserved() {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
+    log.entering(SendReceiveTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -272,7 +269,7 @@ public class SendReceiveTest {
       mqttClient.subscribe(topicNames, topicQos);
 
       for (int i = 0; i < topicNames.length; i++) {
-        byte[] message = ("Message payload " + className + "." + methodName + " " + topicNames[i]).getBytes();
+        byte[] message = ("Message payload " + SendReceiveTest.class.getName() + "." + methodName + " " + topicNames[i]).getBytes();
         MqttTopic mqttTopic = mqttClient.getTopic(topicNames[i]);
         for (int iQos = 0; iQos < 3; iQos++) {
           log.info("Publishing to..." + topicNames[i] + " at Qos " + iQos);
@@ -302,7 +299,7 @@ public class SendReceiveTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveTest.class.getName(), methodName);
   }
   
   /**
@@ -312,8 +309,8 @@ public class SendReceiveTest {
   @Test
   public void testMultipleClients() throws Exception {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
+    log.entering(SendReceiveTest.class.getName(), methodName);
 
     IMqttClient[] mqttPublisher = new IMqttClient[2];
     IMqttClient[] mqttSubscriber = new IMqttClient[10];
@@ -385,7 +382,7 @@ public class SendReceiveTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveTest.class.getName(), methodName);
   }
 
   /**
@@ -395,8 +392,8 @@ public class SendReceiveTest {
   @Test
   public void testCleanStart() throws Exception {
     final String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, SendReceiveTest.class, methodName);
+    log.entering(SendReceiveTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -418,7 +415,7 @@ public class SendReceiveTest {
       log.info("Subscribing to..." + topicNames[0]);
       mqttClient.subscribe(topicNames, topicQos);
 
-      byte[] payload = ("Message payload " + className + "." + methodName + " First").getBytes();
+      byte[] payload = ("Message payload " + SendReceiveTest.class.getName() + "." + methodName + " First").getBytes();
       MqttTopic mqttTopic = mqttClient.getTopic(topicNames[0]);
       log.info("Publishing to..." + topicNames[0]);
       mqttTopic.publish(payload, 1, false);
@@ -446,7 +443,7 @@ public class SendReceiveTest {
       // Otherwise the first client may reconnect with its clean session before the message has arrived.
       log.info("Subscribing to..." + topicNames[0]);
       mqttClient.subscribe(topicNames, topicQos);
-      payload = ("Message payload " + className + "." + methodName + " Other client").getBytes();
+      payload = ("Message payload " + SendReceiveTest.class.getName() + "." + methodName + " Other client").getBytes();
       mqttTopic = mqttClient.getTopic(topicNames[0]);
       log.info("Publishing to..." + topicNames[0]);
       mqttTopic.publish(payload, 1, false);
@@ -474,7 +471,7 @@ public class SendReceiveTest {
       }
 
       // Also check that subscription is cancelled.
-      payload = ("Message payload " + className + "." + methodName + " Cancelled Subscription").getBytes();
+      payload = ("Message payload " + SendReceiveTest.class.getName() + "." + methodName + " Cancelled Subscription").getBytes();
       mqttTopic = mqttClient.getTopic(topicNames[0]);
       log.info("Publishing to..." + topicNames[0]);
       mqttTopic.publish(payload, 1, false);
@@ -507,6 +504,6 @@ public class SendReceiveTest {
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(SendReceiveTest.class.getName(), methodName);
   }
 }

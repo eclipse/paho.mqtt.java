@@ -40,10 +40,7 @@ import org.junit.experimental.categories.Category;
 
 @Category({OnlineTest.class, MQTTV3Test.class})
 public class LiveTakeOverTest {
-
-  private static final Class<?> cclass = LiveTakeOverTest.class;
-  private static final String className = cclass.getName();
-  private static final Logger log = Logger.getLogger(className);
+  private static final Logger log = Logger.getLogger(LiveTakeOverTest.class.getName());
 
   private static URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
@@ -69,7 +66,7 @@ public class LiveTakeOverTest {
 
     try {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
+      LoggingUtilities.banner(log, LiveTakeOverTest.class, methodName);
 
       serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
@@ -90,7 +87,7 @@ public class LiveTakeOverTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
+    LoggingUtilities.banner(log, LiveTakeOverTest.class, methodName);
 
     try {
       if (clientFactory != null) {
@@ -110,8 +107,8 @@ public class LiveTakeOverTest {
   @Test(timeout=10000)
   public void testLiveTakeOver() throws Exception {
     String methodName = Utility.getMethodName();
-    LoggingUtilities.banner(log, cclass, methodName);
-    log.entering(className, methodName);
+    LoggingUtilities.banner(log, LiveTakeOverTest.class, methodName);
+    log.entering(LiveTakeOverTest.class.getName(), methodName);
 
     IMqttClient mqttClient = null;
     try {
@@ -174,7 +171,7 @@ public class LiveTakeOverTest {
       }
     }
     catch (Exception exception) {
-      log.throwing(className, methodName, exception);
+      log.throwing(LiveTakeOverTest.class.getName(), methodName, exception);
       throw exception;
     }
     finally {
@@ -187,12 +184,12 @@ public class LiveTakeOverTest {
         }
       }
       catch (Exception exception) {
-        log.throwing(className, methodName, exception);
+        log.throwing(LiveTakeOverTest.class.getName(), methodName, exception);
         throw exception;
       }
     }
 
-    log.exiting(className, methodName);
+    log.exiting(LiveTakeOverTest.class.getName(), methodName);
   }
 
   class FirstClient implements Runnable {
@@ -210,7 +207,7 @@ public class LiveTakeOverTest {
             stateLock.wait();
           }
           catch (InterruptedException exception) {
-            log.throwing(className, methodName, exception);
+            log.throwing(LiveTakeOverTest.class.getName(), methodName, exception);
             throw exception;
           }
         }
@@ -219,7 +216,7 @@ public class LiveTakeOverTest {
           Assert.fail("Firstclient entered an ERROR state");
         }
       }
-      log.exiting(className, methodName);
+      log.exiting(LiveTakeOverTest.class.getName(), methodName);
     }
 
     void setState(FirstClientState newState) {
@@ -277,8 +274,8 @@ public class LiveTakeOverTest {
 
     public void run() {
       String methodName = Utility.getMethodName();
-      LoggingUtilities.banner(log, cclass, methodName);
-      log.entering(className, methodName);
+      LoggingUtilities.banner(log, LiveTakeOverTest.class, methodName);
+      log.entering(LiveTakeOverTest.class.getName(), methodName);
 
       connectAndSub();
       try {
@@ -286,7 +283,7 @@ public class LiveTakeOverTest {
         waitForState(FirstClientState.RUNNING);
         repeatedlyPub();
         log.info("FirstClient exiting...");
-        log.exiting(className, methodName);
+        log.exiting(LiveTakeOverTest.class.getName(), methodName);
 
         mqttClient.close();
 

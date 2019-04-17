@@ -30,27 +30,24 @@ import org.junit.experimental.categories.Category;
  */
 @Category(MQTTV3Test.class)
 public class MqttTopicTest {
-
-	static final Class<?> cclass = MqttTopicTest.class;
-	private static final String className = cclass.getName();
-	private static final Logger log = Logger.getLogger(className);
+	private static final Logger log = Logger.getLogger(MqttTopicTest.class.getName());
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 	}
 
 	@Test
 	public void testValidTopicFilterWildcards() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		String[] topics = new String[] { "+", "+/+", "+/foo", "+/tennis/#", "foo/+", "foo/+/bar", "/+",
 				"/+/sport/+/player1", "#", "/#", "sport/#", "sport/tennis/#" };
 
@@ -62,7 +59,7 @@ public class MqttTopicTest {
 	@Test
 	public void testMatchedTopicFilterWildcards() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player1" },
 				{ "sport/tennis/player1/#", "sport/tennis/player1/ranking" },
 				{ "sport/tennis/player1/#", "sport/tennis/player1/score/wimbledon" }, { "sport/#", "sport" },
@@ -76,7 +73,7 @@ public class MqttTopicTest {
 	@Test
 	public void testNonMatchedTopicFilterWildcards() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player2" },
 				{ "sport1/#", "sport2" }, { "sport/tennis1/player/#", "sport/tennis2/player" } };
 
@@ -88,35 +85,35 @@ public class MqttTopicTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards1() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		MqttTopic.validate("sport/tennis#", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards2() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		MqttTopic.validate("sport/tennis/#/ranking", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards3() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		MqttTopic.validate("sport+", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards4() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		MqttTopic.validate("sport/+aa", true);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidTopicFilterWildcards5() throws Exception {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, cclass, methodName);
+		LoggingUtilities.banner(log, MqttTopicTest.class, methodName);
 		MqttTopic.validate("sport/#/ball/+/aa", true);
 	}
 

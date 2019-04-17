@@ -26,10 +26,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
  * General purpose test utilities  
  */
 public class Utility {
-
-  static final String className = Utility.class.getName();
-  static final Logger log = Logger.getLogger(className);
-
   /**
    * @return the current method name for the caller.
    */
