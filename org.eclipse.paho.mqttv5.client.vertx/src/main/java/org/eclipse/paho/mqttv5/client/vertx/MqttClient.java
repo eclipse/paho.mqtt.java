@@ -283,26 +283,19 @@ public class MqttClient implements IMqttClient {
 	/*
 	 * @see IMqttClient#connect()
 	 */
-	public void connect() throws MqttSecurityException, MqttException {
-		this.connect(new MqttConnectionOptions());
+	public IMqttToken connect() throws MqttSecurityException, MqttException {
+		return this.connect(new MqttConnectionOptions());
 	}
 
 	/*
 	 * @see IMqttClient#connect(MqttConnectOptions)
 	 */
-	public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException {
-		aClient.connect(options, null, null).waitForCompletion(getTimeToWait());
+	public IMqttToken connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException {
+		IMqttToken tok = aClient.connect(options, null, null);
+		tok.waitForCompletion(getTimeToWait());
 		if (!aClient.isConnected()) {
 			throw new MqttException(99);
 		}
-	}
-
-	/*
-	 * @see IMqttClient#connect(MqttConnectOptions)
-	 */
-	public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException {
-		IMqttToken tok = aClient.connect(options, null, null);
-		tok.waitForCompletion(getTimeToWait());
 		return tok;
 	}
 
@@ -361,7 +354,12 @@ public class MqttClient implements IMqttClient {
 
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
-		return this.subscribe(topicFilters, qos, messageListeners);
+		MqttSubscription[] subs = new MqttSubscription[topicFilters.length];
+		for (int i = 0; i < topicFilters.length; ++i) {
+			subs[i] = new MqttSubscription(topicFilters[i]);
+			subs[i].setQos(qos[i]);
+		}
+		return this.subscribe(subs, messageListeners);
 	}
 
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException {

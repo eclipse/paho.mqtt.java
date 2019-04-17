@@ -17,6 +17,7 @@
 package org.eclipse.paho.mqttv5.client.vertx;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1145,9 +1146,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 					this.connectionstate.isWildcardSubscriptionsAvailable(),
 					this.connectionstate.isSharedSubscriptionsAvailable());
 			if (messageListeners == null || messageListeners[i] == null) {
-				//this.comms.removeMessageListener(subscriptions[i].getTopic());
+				Integer subId = subscriptionProperties.getSubscriptionIdentifier();
+				internal.removeMessageListener(subId, subscriptions[i].getTopic());
 			} else {
-				//this.comms.setMessageListener(null, subscriptions[i].getTopic(), messageListeners[i]);
+				Integer subId = subscriptionProperties.getSubscriptionIdentifier();
+				internal.setMessageListener(subId, subscriptions[i].getTopic(), messageListeners[i]);
 			}
 		}
 		
@@ -1157,7 +1160,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		} catch(Exception e) {
 			// if the subscribe fails, then we have to remove the message handlers
 			for (int i = 0; i < subscriptions.length; ++i) {
-				//this.comms.removeMessageListener(subscriptions[i].getTopic());
+				Integer subId = subscriptionProperties.getSubscriptionIdentifier();
+				internal.removeMessageListener(subId, subscriptions[i].getTopic());
 			}
 			throw e;
 		}
@@ -1178,15 +1182,18 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
 			IMqttMessageListener messageListener, MqttProperties subscriptionProperties) throws MqttException {
 
-		int subId = subscriptionProperties.getSubscriptionIdentifiers().get(0);
+		int subId = 0;
+		List<Integer> x = subscriptionProperties.getSubscriptionIdentifiers();
+		if (x.size() > 0) {
+			subId = x.get(0);
+		}
 
 		// Automatic Subscription Identifier Assignment is enabled
 		if (connOpts.useSubscriptionIdentifiers() && this.connectionstate.isSubscriptionIdentifiersAvailable()) {
 
 			// Application is overriding the subscription Identifier
 			if (subId != 0) {
-				// Check that we are not already using this ID, else throw Illegal Argument
-				// Exception
+				// Check that we are not already using this ID, else throw an exception
 				/*if (this.comms.doesSubscriptionIdentifierExist(subId)) {
 					throw new IllegalArgumentException(
 							String.format("The Subscription Identifier %s already exists.", subId));
@@ -1195,6 +1202,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			} else {
 				// Automatically assign new ID and link to callback.
 				subId = internal.getSessionState().getNextSubscriptionIdentifier();
+				subscriptionProperties.setSubscriptionIdentifier(subId);
 			}
 		}
 		
@@ -1204,9 +1212,9 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 					this.connectionstate.isWildcardSubscriptionsAvailable(),
 					this.connectionstate.isSharedSubscriptionsAvailable());
 			if (messageListener == null) {
-				//this.comms.removeMessageListener(subscriptions[i].getTopic());
+				internal.removeMessageListener(subId, subscriptions[i].getTopic());
 			} else {
-				//this.comms.setMessageListener(subId, subscriptions[i].getTopic(), messageListener);
+				internal.setMessageListener(subId, subscriptions[i].getTopic(), messageListener);
 			}
 		}
 
@@ -1216,7 +1224,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		} catch(Exception e) {
 			// if the subscribe fails, then we have to remove the message handlers
 			for (int i = 0; i < subscriptions.length; ++i) {
-				//this.comms.removeMessageListener(subscriptions[i].getTopic());
+				internal.removeMessageListener(subId, subscriptions[i].getTopic());
 			}
 			throw e;
 		}

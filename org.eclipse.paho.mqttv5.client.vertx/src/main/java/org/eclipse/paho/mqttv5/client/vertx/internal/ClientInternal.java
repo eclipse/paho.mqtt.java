@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClientException;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.vertx.DisconnectedBufferOptions;
+import org.eclipse.paho.mqttv5.client.vertx.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.vertx.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.vertx.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.vertx.MqttToken;
@@ -205,9 +206,26 @@ public class ClientInternal {
 					acktoken.setComplete();
 				}
 			} else if (msg instanceof MqttPublish) {
+				IMqttMessageListener listener = sessionstate.getMessageListener(((MqttPublish) msg).getProperties().getSubscriptionIdentifier(), 
+						((MqttPublish) msg).getTopicName());
+				if (listener != null) {
+					listener.messageArrived(((MqttPublish) msg).getTopicName(), 
+							((MqttPublish) msg).getMessage());
+				}	
 				if (client.getCallback() != null) {
 					client.getCallback().messageArrived(((MqttPublish) msg).getTopicName(), 
 							((MqttPublish) msg).getMessage());
+				}
+				if (((MqttPublish) msg).getQoS() == 1) {
+					MqttPubAck puback = new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, 
+							msg.getMessageId(), null);
+					socket.write(Buffer.buffer(puback.serialize()),
+							res1 -> {
+								if (!res1.succeeded()) {
+									connectionstate.registerOutboundActivity();
+								}
+							});
+					
 				}
 			} else if (msg instanceof MqttPubRec) {
 				MqttToken acktoken = sessionstate.out_tokens.get(new Integer(msg.getMessageId()));
@@ -487,6 +505,14 @@ public class ClientInternal {
 	
 	public int getBufferedMessageCount() {
 		return todoQueue.getQueued();
+	}
+	
+	public void removeMessageListener(Integer subId, String topic) { 
+		sessionstate.removeMessageListener(subId, topic);
+	}
+	
+	public void setMessageListener(Integer subId, String topic, IMqttMessageListener messageListener) {
+		sessionstate.setMessageListener(subId, topic, messageListener);
 	}
 
 }

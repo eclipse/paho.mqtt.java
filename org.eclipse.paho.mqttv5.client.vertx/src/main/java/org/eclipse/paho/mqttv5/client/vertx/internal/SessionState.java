@@ -3,12 +3,14 @@ package org.eclipse.paho.mqttv5.client.vertx.internal;
 import java.io.EOFException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.mqttv5.client.vertx.logging.Logger;
 import org.eclipse.paho.mqttv5.client.vertx.logging.LoggerFactory;
+import org.eclipse.paho.mqttv5.client.vertx.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClientException;
 import org.eclipse.paho.mqttv5.client.vertx.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.vertx.MqttToken;
@@ -21,6 +23,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPubRel;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttPersistableWireMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
+import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
 
 /**
  * This class is used as a store for client information that should be preserved
@@ -57,6 +60,45 @@ public class SessionState {
 	private PersistedBuffer inboundQoS2;
 	private MqttClientPersistence persistence;
 	private ToDoQueue todoQueue;
+	
+	private ConcurrentHashMap<String, IMqttMessageListener> topicStringToListeners = 
+			new ConcurrentHashMap<String, IMqttMessageListener>();
+	private ConcurrentHashMap<Integer, IMqttMessageListener> topicIdToListeners = 
+			new ConcurrentHashMap<Integer, IMqttMessageListener>();
+	
+	public void removeMessageListener(Integer subId, String topic) { 
+		if (topicStringToListeners.keySet().contains(topic)) {
+			topicStringToListeners.remove(topic);
+		}
+		if (subId != null && subId > 0 && topicIdToListeners.keySet().contains(subId)) {
+			topicIdToListeners.remove(subId);
+		}
+	}
+	
+	public void setMessageListener(Integer subId, String topic, IMqttMessageListener messageListener) {
+		if (subId != null && subId > 0) {
+			topicIdToListeners.put(subId, messageListener);
+		} else {
+			topicStringToListeners.put(topic, messageListener);
+		}
+	}
+	
+	public IMqttMessageListener getMessageListener(Integer subId, String topic) {
+		IMqttMessageListener result = null;
+		if (subId != null && subId > 0) {
+			result = topicIdToListeners.get(subId);
+		} 
+		if (result == null) {
+			for (Map.Entry<String, IMqttMessageListener> entry : this.topicStringToListeners.entrySet()) {
+				if (MqttTopicValidator.isMatched(entry.getKey(), topic)) {
+					result = entry.getValue();
+					break;
+				}
+			}
+		}
+		System.out.println(result + " getMessageListener " + subId + " " + topic);
+		return result;
+	}
 	
 	public Hashtable<Integer, MqttToken> out_tokens = new Hashtable<Integer, MqttToken>();
 	

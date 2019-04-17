@@ -64,7 +64,7 @@ public class ToDoQueue {
 		ebtopic += "."+this.hashCode(); // ensure this topic is unique for this queue
 		consumer = eb.consumer(ebtopic);
 		setSize(internal.getClient().getBufferOpts().getBufferSize());
-		consumer.pause();
+		//consumer.pause();
 		consumer.handler(message -> { handle(message); });
 	}
 	
@@ -184,7 +184,11 @@ public class ToDoQueue {
 		
 		// Add the info to the retry queue.  In the event of reconnecting, any outstanding publishes
 		// will need to be resent.
-		Long sessionExpiry = internal.getClient().getConnectOpts().getConnectionProperties().getSessionExpiryInterval();
+		Long sessionExpiry = null;
+		
+		if (internal.getClient().getConnectOpts() != null) {
+			sessionExpiry = internal.getClient().getConnectOpts().getConnectionProperties().getSessionExpiryInterval();
+		}
 		if (sessionExpiry == null) {
 			sessionExpiry = new Long(0L);
 		}
