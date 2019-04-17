@@ -42,7 +42,6 @@ public class Debug {
 	/**
 	 * Set the debug facility up for a specific client
 	 * @param clientID  the ID of the client being debugged
-	 * @param comms    the ClientComms object of the client being debugged
 	 */
 	public Debug(String clientID) {
 		this.clientID = clientID;

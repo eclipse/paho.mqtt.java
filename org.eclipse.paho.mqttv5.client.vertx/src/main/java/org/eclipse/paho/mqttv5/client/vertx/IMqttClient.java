@@ -244,7 +244,7 @@ public IMqttToken connect(MqttConnectionOptions options) throws MqttSecurityExce
 	 *
 	 * @see #subscribe(String[], int[])
 	 *
-	 * @param topicFilters the topic to subscribe to, which can include wildcards.
+	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param messageListener one callbacks to handle incoming messages
 	 * @throws MqttException if there was an error registering the subscription.
 	 */

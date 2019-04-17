@@ -150,7 +150,7 @@ public class MqttClient implements IMqttClient {
 	 * An instance of the default persistence mechanism
 	 * {@link MqttDefaultFilePersistence} is used by the client. To specify a
 	 * different persistence mechanism or to turn off persistence, use the
-	 * {@link #MqttLegacyBlockingClient(String, String, MqttClientPersistence)}
+	 * {@link #MqttClient(String, String, MqttClientPersistence)}
 	 * constructor.
 	 *
 	 * @param serverURI

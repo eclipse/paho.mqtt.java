@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2016 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
@@ -74,7 +74,7 @@ public class MqttMessage {
 	}
 
 	/**
-	 * Contructs an message with the specified payload, qos and retained flag.
+	 * Constructs an message with the specified payload, qos and retained flag.
 	 * 
 	 * @param payload
 	 *            The Message Payload.

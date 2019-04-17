@@ -31,7 +31,7 @@ import org.eclipse.paho.mqttv5.client.vertx.logging.Logger;
  * how to run with a memory based trace facility that runs with minimal performance 
  * overhead. The memory buffer can be dumped when a log/trace record is written matching 
  * the MemoryHandlers trigger level or when the push method is invoked on the MemoryHandler. 
- * {@link org.eclipse.paho.mqttv5.client.util.Debug Debug} provides method to make it easy
+ * {@link org.eclipse.paho.mqttv5.client.vertx.util.Debug Debug} provides method to make it easy
  * to dump the memory buffer as well as other useful debug info. 
  */
 public class JSR47Logger implements Logger {

@@ -33,8 +33,8 @@ public class MqttTopic {
 	/**
 	 * @param name
 	 *            The Name of the topic
-	 * @param comms
-	 *            The {@link ClientComms}
+	 * @param internal
+	 *            The {@link ClientInternal}
 	 */
 	public MqttTopic(String name, ClientInternal internal) {
 		this.name = name;
