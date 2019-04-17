@@ -94,7 +94,7 @@ public class LoggerDumper {
    */
   public void dump() {
     StringBuilder sb = new StringBuilder();
-    sb.append("-----------------------------------------------------------------" + StringUtilities.NL);
+    sb.append("-----------------------------------------------------------------").append(StringUtilities.NL);
     dumpLoggerNode(rootNode, 0, sb);
     sb.append("-----------------------------------------------------------------");
     System.out.println(sb.toString());
@@ -110,7 +110,7 @@ public class LoggerDumper {
 
     sb.append(padding);
     // sb.append("@" + Integer.toHexString(System.identityHashCode(l)) + " ");
-    sb.append("\"" + l.getName() + "\" ");
+    sb.append("\"").append(l.getName()).append("\" ");
     sb.append(l.getLevel());
     sb.append(StringUtilities.NL);
 

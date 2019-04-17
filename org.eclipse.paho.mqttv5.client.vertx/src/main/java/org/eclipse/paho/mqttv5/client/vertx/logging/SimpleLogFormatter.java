@@ -41,7 +41,7 @@ public class SimpleLogFormatter extends Formatter {
 		StringBuffer sb = new StringBuffer();
 		sb.append(r.getLevel().getName()).append("\t");
 		sb.append(MessageFormat.format("{0, date, yy-MM-dd} {0, time, kk:mm:ss.SSSS} ",
-			new Object[] { new Date(r.getMillis()) })+"\t");
+                new Object[]{new Date(r.getMillis())})).append("\t");
 		String cnm = r.getSourceClassName();
 		String cn="";
 		if (cnm != null) {

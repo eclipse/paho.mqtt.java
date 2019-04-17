@@ -339,14 +339,14 @@ public class SubPanel implements ActionListener {
             // Adding 256 to this value changes it to 170 which is displayed correctly as 0xAA
     		if (byteValue < 0) {
     			byteValue += 256;
-    		}	
+    		}
 
-    		if ( byteValue < 16 ) {
-        		hexText.append( "0" + Integer.toHexString(byteValue) );
-    		} else {
-        		hexText.append( Integer.toHexString(byteValue) );
-    		}		
-    	}	
+			if (byteValue < 16) {
+				hexText.append("0").append(Integer.toHexString(byteValue));
+			} else {
+				hexText.append(Integer.toHexString(byteValue));
+			}
+		}
     	
         hexDisplay = true;
         subLabel.setText( PANEL_TITLE + " - hexadecimal display" );

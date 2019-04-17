@@ -91,15 +91,15 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		}
 		if ((socket != null) && (this.enabledCiphers != null)) {
 			if (log.isLoggable(Logger.FINE)) {
-				String ciphers = "";
+				StringBuilder ciphers = new StringBuilder();
 				for (int i = 0; i < this.enabledCiphers.length; i++) {
 					if (i > 0) {
-						ciphers += ",";
+						ciphers.append(",");
 					}
-					ciphers += this.enabledCiphers[i];
+					ciphers.append(this.enabledCiphers[i]);
 				}
 				// @TRACE 260=setEnabledCiphers ciphers={0}
-				log.fine(CLASS_NAME, methodName, "260", new Object[] { ciphers });
+				log.fine(CLASS_NAME, methodName, "260", new Object[] {ciphers.toString()});
 			}
 			((SSLSocket) socket).setEnabledCipherSuites(this.enabledCiphers);
 		}
