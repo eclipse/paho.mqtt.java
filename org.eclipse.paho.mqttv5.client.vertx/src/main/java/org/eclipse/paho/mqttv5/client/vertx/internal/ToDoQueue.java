@@ -64,7 +64,7 @@ public class ToDoQueue {
 		ebtopic += "."+this.hashCode(); // ensure this topic is unique for this queue
 		consumer = eb.consumer(ebtopic);
 		setSize(internal.getClient().getBufferOpts().getBufferSize());
-		//consumer.pause();
+		consumer.pause();
 		consumer.handler(message -> { handle(message); });
 	}
 	

@@ -22,7 +22,7 @@ script:
   - mvn -B clean -q
 # only run the V5 tests on this branch for now
 #  - mvn -B --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test -q
-  - mvn -B --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client.vertx,org.eclipse.paho.mqttv5.client.vertx.test test -q
+  - mvn -B --projects org.eclipse.paho.common,org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client.vertx,org.eclipse.paho.mqttv5.client.vertx.test test -q
 
 #addons:
 #  apt:
