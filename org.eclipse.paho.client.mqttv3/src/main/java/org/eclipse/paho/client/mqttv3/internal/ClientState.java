@@ -930,6 +930,7 @@ public class ClientState {
 				// once a QoS 0 message is sent we can clean up its records straight away as
 				// we won't be hearing about it again
 				token.internalTok.markComplete(null, null);
+				token.internalTok.notifyComplete();
 				callback.asyncOperationComplete(token);
 				decrementInFlight();
 				releaseMessageId(message.getMessageId());
