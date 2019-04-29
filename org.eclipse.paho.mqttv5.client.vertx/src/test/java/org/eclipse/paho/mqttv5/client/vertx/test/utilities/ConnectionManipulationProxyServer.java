@@ -45,9 +45,16 @@ public class ConnectionManipulationProxyServer implements Runnable {
 		synchronized (enableLock) {
 			enableProxy = true;
 		}
-		running  = true;
+		running = true;
 		if(proxyThread.isAlive() == false){
 			proxyThread.start();
+			// Give it some time to start up
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -57,7 +64,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 			enableProxy = false;
 		}
 		killOpenSockets();
-		// Give it a second to close down
+		// Give it some time to close down
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
