@@ -334,6 +334,7 @@ public class ClientInternal {
 					handleData(buffer, userToken);
 				});
 				socket.closeHandler(v -> {
+					System.out.println("CloseHandler "+v);
 					connectionEnd();
 					System.out.println("The socket has been closed "+v);
 					if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
@@ -393,7 +394,14 @@ public class ClientInternal {
 			MqttDisconnect disconnect = new MqttDisconnect(reasonCode, disconnectProperties);
 			socket.write(Buffer.buffer(disconnect.serialize()),
 					res1 -> {
+						// remove closeHandler to avoid any chance of recursive handler calls
+						socket.closeHandler(v -> {});   
 						if (res1.succeeded()) {
+							System.out.println("Disconnect sent - closing socket");
+							if (socket != null) {
+								socket.close();
+								socket = null;
+							}
 							connectionstate.registerOutboundActivity();
 							// we still need to close the socket and indicate the disconnect
 							// is finished if the packet write failed
@@ -435,10 +443,6 @@ public class ClientInternal {
 	private void connectionEnd() {
 		todoQueue.pause();
 		connected = false;
-		if (socket != null) {
-			socket.close();
-			socket = null;
-		}
 		if (client.getConnectOpts().getSessionExpiryInterval() == null || 
 				client.getConnectOpts().getSessionExpiryInterval() == 0) {
 			sessionstate.clear();
