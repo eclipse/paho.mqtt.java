@@ -150,7 +150,7 @@ public class MqttClient implements IMqttClient {
 	 * An instance of the default persistence mechanism
 	 * {@link MqttDefaultFilePersistence} is used by the client. To specify a
 	 * different persistence mechanism or to turn off persistence, use the
-	 * {@link #MqttLegacyBlockingClient(String, String, MqttClientPersistence)}
+	 * {@link #MqttClient(String, String, MqttClientPersistence)}
 	 * constructor.
 	 *
 	 * @param serverURI
@@ -280,137 +280,22 @@ public class MqttClient implements IMqttClient {
 		aClient = new MqttAsyncClient(serverURI, clientId, persistence);
 	}
 
-	/**
-	 * Create an MqttClient that can be used to communicate with an MQTT server.
-	 * <p>
-	 * The address of a server can be specified on the constructor. Alternatively a
-	 * list containing one or more servers can be specified using the
-	 * {@link MqttConnectionOptions#setServerURIs(String[]) setServerURIs} method on
-	 * MqttConnectOptions.
-	 *
-	 * <p>
-	 * The <code>serverURI</code> parameter is typically used with the the
-	 * <code>clientId</code> parameter to form a key. The key is used to store and
-	 * reference messages while they are being delivered. Hence the serverURI
-	 * specified on the constructor must still be specified even if a list of
-	 * servers is specified on an MqttConnectOptions object. The serverURI on the
-	 * constructor must remain the same across restarts of the client for delivery
-	 * of messages to be maintained from a given client to a given server or set of
-	 * servers.
-	 *
-	 * <p>
-	 * The address of the server to connect to is specified as a URI. Two types of
-	 * connection are supported <code>tcp://</code> for a TCP connection and
-	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS. For example:
-	 * </p>
-	 * <ul>
-	 * <li><code>tcp://localhost:1883</code></li>
-	 * <li><code>ssl://localhost:8883</code></li>
-	 * </ul>
-	 * <p>
-	 * If the port is not specified, it will default to 1883 for
-	 * <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
-	 * </p>
-	 *
-	 * <p>
-	 * A client identifier <code>clientId</code> must be specified and be less that
-	 * 65535 characters. It must be unique across all clients connecting to the same
-	 * server. The clientId is used by the server to store data related to the
-	 * client, hence it is important that the clientId remain the same when
-	 * connecting to a server if durable subscriptions or reliable messaging are
-	 * required.
-	 * <p>
-	 * As the client identifier
-	 * is used by the server to identify a client when it reconnects, the client
-	 * must use the same identifier between connections if durable subscriptions or
-	 * reliable delivery of messages is required.
-	 * </p>
-	 * <p>
-	 * In Java SE, SSL can be configured in one of several ways, which the client
-	 * will use in the following order:
-	 * </p>
-	 * <ul>
-	 * <li><strong>Supplying an <code>SSLSocketFactory</code></strong> -
-	 * applications can use
-	 * {@link MqttConnectionOptions#setSocketFactory(SocketFactory)} to supply a
-	 * factory with the appropriate SSL settings.</li>
-	 * <li><strong>SSL Properties</strong> - applications can supply SSL settings as
-	 * a simple Java Properties using
-	 * {@link MqttConnectionOptions#setSSLProperties(Properties)}.</li>
-	 * <li><strong>Use JVM settings</strong> - There are a number of standard Java
-	 * system properties that can be used to configure key and trust stores.</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * In Java ME, the platform settings are used for SSL connections.
-	 * </p>
-	 * <p>
-	 * A persistence mechanism is used to enable reliable messaging. For messages
-	 * sent at qualities of service (QoS) 1 or 2 to be reliably delivered, messages
-	 * must be stored (on both the client and server) until the delivery of the
-	 * message is complete. If messages are not safely stored when being delivered
-	 * then a failure in the client or server can result in lost messages. A
-	 * pluggable persistence mechanism is supported via the
-	 * {@link MqttClientPersistence} interface. An implementer of this interface
-	 * that safely stores messages must be specified in order for delivery of
-	 * messages to be reliable. In addition
-	 * {@link MqttConnectionOptions#setCleanStart(boolean)} must be set to false.
-	 * In the event that only QoS 0 messages are sent or received or cleanStart is
-	 * set to true then a safe store is not needed.
-	 * </p>
-	 * <p>
-	 * An implementation of file-based persistence is provided in class
-	 * {@link MqttDefaultFilePersistence} which will work in all Java SE based
-	 * systems. If no persistence is needed, the persistence parameter can be
-	 * explicitly set to <code>null</code>.
-	 * </p>
-	 *
-	 * @param serverURI
-	 *            the address of the server to connect to, specified as a URI. Can
-	 *            be overridden using
-	 *            {@link MqttConnectionOptions#setServerURIs(String[])}
-	 * @param clientId
-	 *            a client identifier that is unique on the server being connected
-	 *            to
-	 * @param persistence
-	 *            the persistence class to use to store in-flight message. If null
-	 *            then the default persistence mechanism is used
-	 * @param executorService
-	 *            used for managing threads. If null then a newScheduledThreadPool
-	 *            is used.
-	 * @throws IllegalArgumentException
-	 *             if the URI does not start with "tcp://", "ssl://" or "local://"
-	 * @throws IllegalArgumentException
-	 *             if the clientId is null or is greater than 65535 characters in
-	 *             length
-	 * @throws MqttException
-	 *             if any other problem was encountered
-	 */
-	public MqttClient(String serverURI, String clientId, MqttClientPersistence persistence,
-			ScheduledExecutorService executorService) throws MqttException {
-		aClient = new MqttAsyncClient(serverURI, clientId, persistence, null, executorService);
-	}
-
 	/*
 	 * @see IMqttClient#connect()
 	 */
-	public void connect() throws MqttSecurityException, MqttException {
-		this.connect(new MqttConnectionOptions());
+	public IMqttToken connect() throws MqttSecurityException, MqttException {
+		return this.connect(new MqttConnectionOptions());
 	}
 
 	/*
 	 * @see IMqttClient#connect(MqttConnectOptions)
 	 */
-	public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException {
-		aClient.connect(options, null, null).waitForCompletion(getTimeToWait());
-	}
-
-	/*
-	 * @see IMqttClient#connect(MqttConnectOptions)
-	 */
-	public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException {
+	public IMqttToken connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException {
 		IMqttToken tok = aClient.connect(options, null, null);
 		tok.waitForCompletion(getTimeToWait());
+		if (!aClient.isConnected()) {
+			throw new MqttException(99);
+		}
 		return tok;
 	}
 
@@ -427,59 +312,6 @@ public class MqttClient implements IMqttClient {
 	public void disconnect(long quiesceTimeout) throws MqttException {
 		aClient.disconnect(quiesceTimeout, null, null, MqttReturnCode.RETURN_CODE_SUCCESS, new MqttProperties())
 				.waitForCompletion();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly()
-	 */
-	public void disconnectForcibly() throws MqttException {
-		aClient.disconnectForcibly();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly(long)
-	 */
-	public void disconnectForcibly(long disconnectTimeout) throws MqttException {
-		aClient.disconnectForcibly(disconnectTimeout);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.paho.mqttv5.client.IMqttAsyncClient#disconnectForcibly(long,
-	 * long)
-	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException {
-		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, MqttReturnCode.RETURN_CODE_SUCCESS,
-				new MqttProperties());
-	}
-
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful
-	 * when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT
-	 * server and it will certainly fail to send the disconnect packet.
-	 *
-	 * @param quiesceTimeout
-	 *            the amount of time in milliseconds to allow for existing work to
-	 *            finish before disconnecting. A value of zero or less means the
-	 *            client will not quiesce.
-	 * @param disconnectTimeout
-	 *            the amount of time in milliseconds to allow send disconnect packet
-	 *            to server.
-	 * @param sendDisconnectPacket
-	 *            if true, will send the disconnect packet to the server
-	 * @throws MqttException
-	 *             if any unexpected error
-	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket)
-			throws MqttException {
-		aClient.disconnectForcibly(quiesceTimeout, disconnectTimeout, sendDisconnectPacket);
 	}
 
 	/*
@@ -522,7 +354,12 @@ public class MqttClient implements IMqttClient {
 
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
-		return this.subscribe(topicFilters, qos, messageListeners);
+		MqttSubscription[] subs = new MqttSubscription[topicFilters.length];
+		for (int i = 0; i < topicFilters.length; ++i) {
+			subs[i] = new MqttSubscription(topicFilters[i]);
+			subs[i].setQos(qos[i]);
+		}
+		return this.subscribe(subs, messageListeners);
 	}
 
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException {

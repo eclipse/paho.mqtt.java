@@ -4,11 +4,15 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.client.test.automaticReconnect.TopicAliasReconnectTest;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.ConnectionManipulationProxyServer;
@@ -20,7 +24,10 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class TopicAliasReconnectTest {
 
 	static final Class<?> cclass = TopicAliasReconnectTest.class;
@@ -146,7 +153,8 @@ public class TopicAliasReconnectTest {
 			log.info("The client should still be connected: " + isConnected);
 			Assert.assertTrue(isConnected);
 
-			asyncClient.disconnect();
+			IMqttToken token = asyncClient.disconnect();
+			token.waitForCompletion();
 			Assert.assertFalse(asyncClient.isConnected());
 		} catch (MqttException ex) {
 			Assert.fail("An unexpected exception occurred during this test: " + ex.getMessage());

@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 
+import org.eclipse.paho.mqttv5.client.test.logging.ObjectFormatter;
 import org.eclipse.paho.mqttv5.client.test.utilities.StringUtilities;
 import org.xml.sax.Attributes;
 

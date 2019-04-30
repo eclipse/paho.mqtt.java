@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.DisconnectedBufferOptions;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
@@ -19,23 +21,24 @@ import org.eclipse.paho.mqttv5.client.test.utilities.ConnectionManipulationProxy
 import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.test.utilities.TestMemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.eclipse.paho.mqttv5.client.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
+import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class OfflineBufferingTest {
 
 	static final Class<?> cclass = OfflineBufferingTest.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
-
-	private static final MemoryPersistence DATA_STORE = new MemoryPersistence();
 
 	private static URI serverURI;
 	private static String serverURIString;
@@ -90,7 +93,8 @@ public class OfflineBufferingTest {
 		
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
-		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
+		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), 
+				methodName, new MemoryPersistence());
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		client.setBufferOpts(disconnectedOpts);
@@ -164,7 +168,8 @@ public class OfflineBufferingTest {
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		
-		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
+		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), 
+				methodName, new MemoryPersistence());
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferSize(msg_count);
 		disconnectedOpts.setBufferEnabled(true);
@@ -213,8 +218,8 @@ public class OfflineBufferingTest {
 			}
 			Thread.sleep(500);
 		}
-		Debug clientDebug = client.getDebug();
-		clientDebug.dumpClientState();
+		//Debug clientDebug = client.getDebug();
+		//clientDebug.dumpClientState();
 
 		isConnected = client.isConnected();
 		log.info("Proxy Re-Enabled isConnected: " + isConnected);
@@ -258,7 +263,9 @@ public class OfflineBufferingTest {
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
-		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
+		options.setSessionExpiryInterval(120L);
+		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), 
+				methodName, new MemoryPersistence());
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		// Set buffer to 100 to save time
@@ -290,7 +297,7 @@ public class OfflineBufferingTest {
 		client.publish(topicPrefix + methodName, new MqttMessage(Integer.toString(101).getBytes()));
 		// Make sure that the message now at index 0 in the buffer is '1'
 		// instead of '0'
-		MqttMessage messageAt0 = client.getBufferedMessage(0);
+		MqttWireMessage messageAt0 = client.getBufferedMessage(0);
 		String msg = new String(messageAt0.getPayload());
 		Assert.assertEquals("1", msg);
 		client.close();
@@ -315,7 +322,8 @@ public class OfflineBufferingTest {
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
-		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
+		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), 
+				methodName, new MemoryPersistence());
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		// Set buffer to 100 to save time
@@ -502,9 +510,11 @@ public class OfflineBufferingTest {
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		
 		options.setCleanStart(true);
-		options.setAutomaticReconnect(true);
+		//options.setAutomaticReconnect(true);
+		options.setSessionExpiryInterval(205L);
 		options.setTopicAliasMaximum(10);
-		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, DATA_STORE);
+		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(),
+				methodName, new MemoryPersistence());
 		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
 		disconnectedOpts.setBufferEnabled(true);
 		client.setBufferOpts(disconnectedOpts);
@@ -529,8 +539,8 @@ public class OfflineBufferingTest {
 		Assert.assertFalse(pubToken.isComplete());
 		
 		log.info(String.format("There is %d message buffered", client.getBufferedMessageCount()));
-		Assert.assertEquals(client.getBufferedMessageCount(), 1);
-		MqttMessage publishedMessage = client.getBufferedMessage(0);
+		Assert.assertEquals(1, client.getBufferedMessageCount());
+		MqttWireMessage publishedMessage = client.getBufferedMessage(0);
 		log.info(String.format("It's Topic alias is set: %b", publishedMessage.getProperties().getTopicAlias()));
 		Assert.assertNull(publishedMessage.getProperties().getTopicAlias());
 		

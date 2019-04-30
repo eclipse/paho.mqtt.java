@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,10 @@ import java.lang.reflect.Method;
  */
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
+import org.eclipse.paho.mqttv5.client.logging.JSR47Logger;
+import org.eclipse.paho.mqttv5.client.logging.Logger;
+import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 /**
  * A factory that returns a logger for use by the MQTT client. 
  * 

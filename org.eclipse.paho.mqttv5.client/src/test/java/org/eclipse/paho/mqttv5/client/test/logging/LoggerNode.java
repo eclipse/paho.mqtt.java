@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.mqttv5.client.test.logging.LoggerNode;
+
 /**
  * The Java Util Logger package does not provide public method to dump its handlers and formatters in a useful way
  * so the LogDumper class builds up a collection of the handlers using this simple container class which it can then dump

@@ -6,6 +6,8 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
@@ -16,10 +18,12 @@ import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * 
  */
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class ClientIdTest {
 	private static final Logger log = Logger.getLogger(ClientIdTest.class.getName());
 
@@ -29,7 +33,7 @@ public class ClientIdTest {
 	public static void setUpBeforeClass() throws Exception {
 		try {
 			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+			LoggingUtilities.banner(log, ClientIdTest.class, methodName);
 
 			serverURI = TestProperties.getServerURI();
 
@@ -42,7 +46,7 @@ public class ClientIdTest {
 	@Test
 	public void createClientsWithNonAsciiIds() throws MqttException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, ClientIdTest.class, methodName);
 		new MqttAsyncClient(serverURI.toString(), "葛渚噓");
 		//new MqttAsyncClient(serverURI.toString(), "👁🐝Ⓜ");
 	}
@@ -50,7 +54,7 @@ public class ClientIdTest {
 	@Test
 	public void veryLongValidClientId() throws MqttException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, ClientIdTest.class, methodName);
 		// Very long ASCII string
 		int maxLength = 65535;
 		StringBuffer outputBuffer = new StringBuffer(maxLength);
@@ -66,7 +70,7 @@ public class ClientIdTest {
 	@Test
 	public void veryLongValidClientIdWithUTF8() throws MqttException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, ClientIdTest.class, methodName);
 		// Very long UTF-8 string (each instance of 渚 is 3 bytes)
 		int maxLength = 21845;
 		StringBuffer outputBuffer = new StringBuffer(maxLength);
@@ -85,7 +89,7 @@ public class ClientIdTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void veryLongInvalidClientId() throws MqttException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, ClientIdTest.class, methodName);
 		// Very long ASCII string
 		int maxLength = 65536;
 		StringBuffer outputBuffer = new StringBuffer(maxLength);
@@ -99,7 +103,7 @@ public class ClientIdTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void veryLongInvalidClientIdWithUTF8() throws MqttException {
 		String methodName = Utility.getMethodName();
-		LoggingUtilities.banner(log, SubscribeTests.class, methodName);
+		LoggingUtilities.banner(log, ClientIdTest.class, methodName);
 		// Very long UTF-8 string (each instance of 渚 is 3 bytes)
 		int maxLength = 21846;
 		StringBuffer outputBuffer = new StringBuffer(maxLength);

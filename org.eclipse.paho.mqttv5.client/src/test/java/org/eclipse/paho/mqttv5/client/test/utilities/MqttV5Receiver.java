@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -426,6 +426,7 @@ public class MqttV5Receiver implements MqttCallback {
     log.entering(className, methodName, new Object[]{topic,
         message});
 
+    System.out.println("message arrived");
     // logger.fine(methodName + ": '" + new String(message.getPayload()) + "'");
     receivedMessages.add(new ReceivedMessage(topic, message));
     notify();

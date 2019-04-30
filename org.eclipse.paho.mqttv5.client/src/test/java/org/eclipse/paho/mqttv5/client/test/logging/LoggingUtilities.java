@@ -19,6 +19,9 @@ import java.io.PrintStream;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.mqttv5.client.test.logging.LoggerDumper;
+import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
+
 /**
  * Class containing logging utility methods  
  */

@@ -135,9 +135,9 @@ public class TestProperties {
 
     // Make sure all the property classes we know about get initialised
     List<String> list = new ArrayList<String>();
-    list.add("org.eclipse.paho.client.mqttv3.test.properties.ClientTestProperties");
-    list.add("org.eclipse.paho.client.mqttv3.test.properties.MqTestProperties");
-    list.add("org.eclipse.paho.client.mqttv3.test.properties.ImsTestProperties");
+    list.add("org.eclipse.paho.client.mqttv5.test.properties.ClientTestProperties");
+    list.add("org.eclipse.paho.client.mqttv5.test.properties.MqTestProperties");
+    list.add("org.eclipse.paho.client.mqttv5.test.properties.ImsTestProperties");
 
     for (String name : list) {
       try {

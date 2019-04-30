@@ -26,8 +26,8 @@ import java.util.Properties;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 
-import org.eclipse.paho.mqttv5.client.internal.NetworkModuleService;
-import org.eclipse.paho.mqttv5.client.util.Debug;
+//import org.eclipse.paho.mqttv5.client.internal.NetworkModuleService;
+//import org.eclipse.paho.mqttv5.client.vertx.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.UserProperty;
@@ -419,7 +419,7 @@ public class MqttConnectionOptions {
 	 */
 	public void setServerURIs(String[] serverURIs) {
 		for (String serverURI : serverURIs) {
-			NetworkModuleService.validateURI(serverURI);
+			//NetworkModuleService.validateURI(serverURI);
 		}
 		this.serverURIs = serverURIs.clone();
 	}
@@ -943,7 +943,7 @@ public class MqttConnectionOptions {
 	}
 
 	public String toString() {
-		return Debug.dumpProperties(getDebug(), "Connection options");
+		return null; //Debug.dumpProperties(getDebug(), "Connection options");
 	}
 
 	public boolean isSendReasonMessages() {

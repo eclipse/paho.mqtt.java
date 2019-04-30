@@ -17,6 +17,8 @@ package org.eclipse.paho.mqttv5.client.test.logging;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+import org.eclipse.paho.mqttv5.client.test.logging.DetailFormatter;
+
 /**
  * A log formatter which formats a reduced selection of the LogRecord fields.
  */

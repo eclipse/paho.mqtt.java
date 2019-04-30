@@ -21,6 +21,8 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.MemoryHandler;
 
+import org.eclipse.paho.mqttv5.client.logging.Logger;
+
 /**
  * Implementation of the the logger interface that uses java.uti.logging
  * 

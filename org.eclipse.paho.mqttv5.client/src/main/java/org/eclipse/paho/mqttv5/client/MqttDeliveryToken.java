@@ -28,6 +28,8 @@ import org.eclipse.paho.mqttv5.common.MqttMessage;
  * @see MqttToken
  */
 public class MqttDeliveryToken extends MqttToken implements IMqttDeliveryToken {
+	
+	private MqttMessage msg = null;
 		
 	
 	public MqttDeliveryToken() {
@@ -47,10 +49,10 @@ public class MqttDeliveryToken extends MqttToken implements IMqttDeliveryToken {
 	 * @throws MqttException if there was a problem completing retrieving the message
 	 */
 	public MqttMessage getMessage() throws MqttException {
-		return internalTok.getMessage();
+		return msg;
 	}
 	
 	protected void setMessage(MqttMessage msg) {
-		internalTok.setMessage(msg);
+		this.msg = msg;
 	}
 }

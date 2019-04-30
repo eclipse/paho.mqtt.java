@@ -23,6 +23,7 @@ import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 public interface IMqttAsyncClient {
 
@@ -229,85 +230,6 @@ public interface IMqttAsyncClient {
 	 */
 	IMqttToken disconnect(long quiesceTimeout, Object userContext, MqttActionListener callback, int reasonCode,
 			MqttProperties disconnectProperties) throws MqttException;
-
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful
-	 * when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT
-	 * server and it will certainly fail to send the disconnect packet. It will wait
-	 * for a maximum of 30 seconds for work to quiesce before disconnecting and wait
-	 * for a maximum of 10 seconds for sending the disconnect packet to server.
-	 *
-	 * @throws MqttException
-	 *             if any unexpected error
-	 * @since 0.4.1
-	 */
-	void disconnectForcibly() throws MqttException;
-
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful
-	 * when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT
-	 * server and it will certainly fail to send the disconnect packet. It will wait
-	 * for a maximum of 30 seconds for work to quiesce before disconnecting.
-	 *
-	 * @param disconnectTimeout
-	 *            the amount of time in milliseconds to allow send disconnect packet
-	 *            to server.
-	 * @throws MqttException
-	 *             if any unexpected error
-	 * @since 0.4.1
-	 */
-	void disconnectForcibly(long disconnectTimeout) throws MqttException;
-
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful
-	 * when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT
-	 * server and it will certainly fail to send the disconnect packet.
-	 *
-	 * @param quiesceTimeout
-	 *            the amount of time in milliseconds to allow for existing work to
-	 *            finish before disconnecting. A value of zero or less means the
-	 *            client will not quiesce.
-	 * @param disconnectTimeout
-	 *            the amount of time in milliseconds to allow send disconnect packet
-	 *            to server.
-	 * @param reasonCode
-	 *            the disconnection reason code.
-	 * @param disconnectProperties
-	 *            The {@link MqttProperties} to be sent.
-	 * @throws MqttException
-	 *             if any unexpected error
-	 * @since 0.4.1
-	 */
-	void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
-			MqttProperties disconnectProperties) throws MqttException;
-
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful
-	 * when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT
-	 * server and it will certainly fail to send the disconnect packet.
-	 *
-	 * @param quiesceTimeout
-	 *            the amount of time in milliseconds to allow for existing work to
-	 *            finish before disconnecting. A value of zero or less means the
-	 *            client will not quiesce.
-	 * @param disconnectTimeout
-	 *            the amount of time in milliseconds to allow send disconnect packet
-	 *            to server.
-	 * @param sendDisconnectPacket
-	 *            if true, will send the disconnect packet to the server
-	 * @throws MqttException
-	 *             if any unexpected error
-	 */
-	void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket)
-			throws MqttException;
 
 	/**
 	 * Determines if this client is currently connected to the server.
@@ -1096,7 +1018,7 @@ public interface IMqttAsyncClient {
 	 *            the index of the message to be retrieved.
 	 * @return the message located at the bufferIndex
 	 */
-	MqttMessage getBufferedMessage(int bufferIndex);
+	MqttWireMessage getBufferedMessage(int bufferIndex);
 
 	/**
 	 * Deletes a message from the Disconnected Message Buffer

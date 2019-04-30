@@ -6,6 +6,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
@@ -15,11 +17,15 @@ import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.common.packet.MqttReturnCode;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class PublishTests {
 
 	static final Class<?> cclass = PublishTests.class;
@@ -85,7 +91,7 @@ public class PublishTests {
 		deliveryToken.waitForCompletion(5000);
 		log.info(deliveryToken.getResponse().toString());
 		log.info("Return codes: " + Arrays.toString(deliveryToken.getReasonCodes()));
-		int[] expectedRC = new int[] {16, 0};
+		int[] expectedRC = new int[] {MqttReturnCode.RETURN_CODE_NO_MATCHING_SUBSCRIBERS, 0}; 
 		Assert.assertArrayEquals(expectedRC, deliveryToken.getReasonCodes());
 
 		log.info("Disconnecting...");
@@ -114,20 +120,20 @@ public class PublishTests {
 		
 		MqttMessage testMessage = new MqttMessage("Test Payload".getBytes(), 0, false, new MqttProperties());
 		long lStartTime = System.nanoTime();
-		for(int i = 0; i < 70000; i++) {
+		int no_of_messages = 10000; // or 70000 
+		for(int i = 0; i < no_of_messages; i++) {
 			IMqttDeliveryToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
-			deliveryToken.waitForCompletion(1000);
+			try
+			{
+				deliveryToken.waitForCompletion(5000);
+			} catch (Exception e) {
+				System.out.println("wait failed "+i);
+			}
 		}
-		
-		//end
+
         long lEndTime = System.nanoTime();
-
-		//time elapsed
-        long output = lEndTime - lStartTime;
-
-        log.info("Sending 70000 of messages  took : " + output / 1000000 + " milliseconds.");
-
-	
+        long output = lEndTime - lStartTime; 		//time elapsed
+        log.info("Sending "+no_of_messages+" of messages  took : " + output / 1000000 + " milliseconds.");
 
 		log.info("Disconnecting...");
 		IMqttToken disconnectToken = asyncClient.disconnect();

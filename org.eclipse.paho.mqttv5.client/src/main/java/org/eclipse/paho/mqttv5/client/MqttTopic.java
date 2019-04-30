@@ -15,7 +15,7 @@
  */
 package org.eclipse.paho.mqttv5.client;
 
-import org.eclipse.paho.mqttv5.client.internal.ClientComms;
+import org.eclipse.paho.mqttv5.client.internal.ClientInternal;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
@@ -27,19 +27,18 @@ import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
  */
 public class MqttTopic {
 
-
-	private ClientComms comms;
 	private String name;
+	private ClientInternal internal;
 
 	/**
 	 * @param name
 	 *            The Name of the topic
-	 * @param comms
-	 *            The {@link ClientComms}
+	 * @param internal
+	 *            The {@link ClientInternal}
 	 */
-	public MqttTopic(String name, ClientComms comms) {
-		this.comms = comms;
+	public MqttTopic(String name, ClientInternal internal) {
 		this.name = name;
+		this.internal = internal;
 	}
 
 	/**
@@ -90,10 +89,8 @@ public class MqttTopic {
 	 *             if an error occurs persisting the message
 	 */
 	public MqttDeliveryToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
-		MqttDeliveryToken token = new MqttDeliveryToken(comms.getClient().getClientId());
-		token.setMessage(message);
-		comms.sendNoWait(createPublish(message, new MqttProperties()), token);
-		token.internalTok.waitUntilSent();
+		MqttDeliveryToken token = new MqttDeliveryToken();
+		internal.publish(name, message, token);
 		return token;
 	}
 

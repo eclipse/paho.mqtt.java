@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,8 @@ package org.eclipse.paho.mqttv5.client.websocket;
 
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
+
+import org.eclipse.paho.mqttv5.client.websocket.Base64;
 
 public class Base64 {
 	

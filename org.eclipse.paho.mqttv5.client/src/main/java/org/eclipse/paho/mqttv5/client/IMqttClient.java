@@ -73,24 +73,8 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * @throws MqttException  for non security related problems
 	 * @see #connect(MqttConnectionOptions)
 	 */
-  public void connect() throws MqttSecurityException, MqttException;
-
-	/**
-	 * Connects to an MQTT server using the specified options.
-	 * <p>The server to connect to is specified on the constructor.
-	 * It is recommended to call {@link #setCallback(MqttCallback)} prior to
-	 * connecting in order that messages destined for the client can be accepted
-	 * as soon as the client is connected.
-	 * </p>
-	 * <p>This is a blocking method that returns once connect completes</p>
-	 *
-	 * @param options a set of connection parameters that override the defaults.
-	 * @throws MqttSecurityException when the server rejects the connect for security
-	 * reasons
-	 * @throws MqttException  for non security related problems including communication errors
-	 */
-  public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
-  
+  public IMqttToken connect() throws MqttSecurityException, MqttException;
+ 
 	/**
 	 * Connects to an MQTT server using the specified options.
 	 * <p>The server to connect to is specified on the constructor.
@@ -106,7 +90,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
+public IMqttToken connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -143,44 +127,6 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 */
   public void disconnect(long quiesceTimeout) throws MqttException;
   
-  /**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
-	 * send the disconnect packet. It will wait for a maximum of 30 seconds for work to quiesce before disconnecting and
-	 * wait for a maximum of 10 seconds for sending the disconnect packet to server.
-	 * 
-	 * @throws MqttException if any unexpected error
-	 * @since 0.4.1
-	 */
-	public void disconnectForcibly() throws MqttException;
-	
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
-	 * send the disconnect packet. It will wait for a maximum of 30 seconds for work to quiesce before disconnecting.
-	 * 
-	 * @param disconnectTimeout the amount of time in milliseconds to allow send disconnect packet to server.
-	 * @throws MqttException if any unexpected error
-	 * @since 0.4.1
-	 */
-	public void disconnectForcibly(long disconnectTimeout) throws MqttException;
-	
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
-	 * send the disconnect packet.
-	 * 
-	 * @param quiesceTimeout the amount of time in milliseconds to allow for existing work to finish before
-	 * disconnecting. A value of zero or less means the client will not quiesce.
-	 * @param disconnectTimeout the amount of time in milliseconds to allow send disconnect packet to server.
-	 * @throws MqttException if any unexpected error
-	 * @since 0.4.1
-	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
-
 	/**
 	 * Subscribe to a topic, which may include wildcards.
 	 *
@@ -298,7 +244,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 *
 	 * @see #subscribe(String[], int[])
 	 *
-	 * @param topicFilters the topic to subscribe to, which can include wildcards.
+	 * @param topicFilter the topic to subscribe to, which can include wildcards.
 	 * @param messageListener one callbacks to handle incoming messages
 	 * @throws MqttException if there was an error registering the subscription.
 	 */

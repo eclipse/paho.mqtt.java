@@ -16,9 +16,9 @@ package org.eclipse.paho.mqttv5.client.test.client;
 
 import java.net.URI;
 
+import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
-import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 
 
 /**

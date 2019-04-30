@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+import org.eclipse.paho.mqttv5.client.test.logging.ObjectFormatter;
 import org.eclipse.paho.mqttv5.client.test.utilities.StringUtilities;
 
 /**

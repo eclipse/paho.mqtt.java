@@ -21,12 +21,14 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
+import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
-import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
@@ -40,6 +42,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * These tests verify whether paho can successfully detect a loss of connection
@@ -55,6 +58,8 @@ import org.junit.Test;
  * @author mcarrer
  */
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class ConnectionLossTest implements MqttCallback {
 	static final Class<?> cclass = ConnectionLossTest.class;
 	private static final String className = cclass.getName();

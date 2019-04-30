@@ -4,8 +4,10 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.MqttClient;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
@@ -16,14 +18,15 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class AutomaticReconnectTest {
 
 	static final Class<?> cclass = AutomaticReconnectTest.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
-
-	private static final MemoryPersistence DATA_STORE = new MemoryPersistence();
 
 	private static URI serverURI;
 	private String clientId = "device-client-id";
@@ -70,7 +73,7 @@ public class AutomaticReconnectTest {
 		options.setCleanStart(true);
 		options.setAutomaticReconnect(true);
 		final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(),
-				clientId, DATA_STORE);
+				methodName, new MemoryPersistence());
 
 		proxy.enableProxy();
 		client.connect(options);
@@ -101,6 +104,7 @@ public class AutomaticReconnectTest {
 		Assert.assertTrue(isConnected);
 		client.disconnect();
 		Assert.assertFalse(client.isConnected());
+		client.close();
 	}
 
 	/**
@@ -116,7 +120,7 @@ public class AutomaticReconnectTest {
 		options.setAutomaticReconnect(true);
 
 		final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(),
-				clientId, DATA_STORE);
+				methodName, new MemoryPersistence());
 
 		proxy.enableProxy();
 		client.connect(options);
@@ -139,6 +143,7 @@ public class AutomaticReconnectTest {
 		Assert.assertTrue(isConnected);
 		client.disconnect();
 		Assert.assertFalse(client.isConnected());
+		client.close();
 	}
 
 	/**
@@ -154,7 +159,7 @@ public class AutomaticReconnectTest {
 		options.setAutomaticReconnect(true);
 		options.setConnectionTimeout(15);
 		final MqttClient client = new MqttClient("tcp://localhost:" + proxy.getLocalPort(),
-				clientId, DATA_STORE);
+				methodName, new MemoryPersistence());
 
 		// Make sure the proxy is disabled and give it a second to close everything down
 		proxy.disableProxy();
@@ -185,5 +190,8 @@ public class AutomaticReconnectTest {
 		log.info("Proxy Re-Enabled isConnected: " + isConnected);
 		Assert.assertFalse(isConnected);
 
+		log.info("Disconnect and close: ");
+		client.disconnect();
+		client.close();
 	}
 }

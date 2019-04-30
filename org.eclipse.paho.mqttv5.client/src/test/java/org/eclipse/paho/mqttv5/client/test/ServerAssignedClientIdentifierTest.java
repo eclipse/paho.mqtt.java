@@ -4,6 +4,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
@@ -12,7 +14,10 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class ServerAssignedClientIdentifierTest {
 	private static URI serverURI;
 	private static final String className = ServerAssignedClientIdentifierTest.class.getName();
@@ -30,7 +35,7 @@ public class ServerAssignedClientIdentifierTest {
 		TestMemoryPersistence memoryPersistence = new TestMemoryPersistence();
 
 		// Create an MqttAsyncClient with a null Client ID.
-		MqttAsyncClient client = new MqttAsyncClient(serverURI.toString(), null, memoryPersistence, null, null);
+		MqttAsyncClient client = new MqttAsyncClient(serverURI.toString(), null, memoryPersistence);
 
 		IMqttToken connectToken = client.connect();
 		connectToken.waitForCompletion(1000);

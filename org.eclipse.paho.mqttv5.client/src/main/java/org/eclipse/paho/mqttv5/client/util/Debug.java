@@ -18,7 +18,6 @@ package org.eclipse.paho.mqttv5.client.util;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import org.eclipse.paho.mqttv5.client.internal.ClientComms;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
 
@@ -33,22 +32,19 @@ import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
  */
 public class Debug {
 	
-	private static final String CLASS_NAME = ClientComms.class.getName();
+	private static final String CLASS_NAME = Debug.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 	private static final String separator = "==============";
 	private static final String lineSep = System.getProperty("line.separator","\n");
 	
 	private String clientID;
-	private ClientComms comms;
 	
 	/**
 	 * Set the debug facility up for a specific client
 	 * @param clientID  the ID of the client being debugged
-	 * @param comms    the ClientComms object of the client being debugged
 	 */
-	public Debug(String clientID, ClientComms comms) {
+	public Debug(String clientID) {
 		this.clientID = clientID;
-		this.comms = comms;
 		log.setResourceName(clientID);
 	}
 
@@ -89,10 +85,15 @@ public class Debug {
 	 */
 	protected void dumpVersion() {
 		StringBuffer vInfo = new StringBuffer();
-    	vInfo.append(lineSep+separator+" Version Info "+ separator+lineSep);
-    	vInfo.append(left("Version",20,' ') + ":  "+ ClientComms.VERSION + lineSep);
-    	vInfo.append(left("Build Level",20,' ') + ":  "+ ClientComms.BUILD_LEVEL + lineSep);
-    	vInfo.append(separator+separator+separator+lineSep);
+    	vInfo.append(lineSep)
+				.append(separator)
+				.append(" Version Info ")
+				.append(separator)
+				.append(lineSep);
+    //	vInfo.append(left("Version",20,' ') + ":  "+ ClientComms.VERSION + lineSep);
+    	//vInfo.append(left("Build Level",20,' ') + ":  "+ ClientComms.BUILD_LEVEL + lineSep);
+    	vInfo.append(separator + separator + separator)
+				.append(lineSep);
     	log.fine(CLASS_NAME,"dumpVersion", vInfo.toString());
 	}
 
@@ -110,10 +111,10 @@ public class Debug {
 	 */
 	public void dumpClientState() {
 		Properties props = null;
-	    if (comms != null && comms.getClientState() != null ) {
-	    	props = comms.getClientState().getDebug();
+	    //if (comms != null && comms.getClientState() != null ) {
+	    	//props = comms.getClientState().getDebug();
 	    	log.fine(CLASS_NAME,"dumpClientState", dumpProperties(props, clientID + " : ClientState").toString());
-	    }
+	    //}
 	}
 
 	/**
@@ -121,10 +122,10 @@ public class Debug {
 	 */
 	public void dumpClientComms() {
 		Properties props = null;
-	    if (comms != null) {
-	    	props = comms.getDebug();
+	    //if (comms != null) {
+	    	//props = comms.getDebug();
 	    	log.fine(CLASS_NAME,"dumpClientComms", dumpProperties(props, clientID + " : ClientComms").toString());
-	    }
+	    //}
 	}
 	
 	/**
@@ -132,10 +133,10 @@ public class Debug {
 	 */
 	public void dumpConOptions() {
 		Properties props = null;
-	    if (comms != null) {
-	    	props = comms.getConOptions().getDebug();
+	    //if (comms != null) {
+	    	//props = comms.getConOptions().getDebug();
 	    	log.fine(CLASS_NAME,"dumpConOptions", dumpProperties(props, clientID + " : Connect Options").toString());
-	    }
+	    //}
 	}
 
 
@@ -149,12 +150,12 @@ public class Debug {
 		
 		StringBuffer propStr = new StringBuffer();
 	    Enumeration propsE = props.propertyNames();
-    	propStr.append(lineSep+separator+" "+name+" "+ separator+lineSep);
+    	propStr.append(lineSep).append(separator).append(" ").append(name).append(" ").append(separator).append(lineSep);
 	    while (propsE.hasMoreElements()) {
 	    	String key = (String)propsE.nextElement();
-	    	propStr.append(left(key,28,' ') + ":  "+ props.get(key)+lineSep);
+	    	propStr.append(left(key, 28, ' ')).append(":  ").append(props.get(key)).append(lineSep);
 	    }
-    	propStr.append(separator+separator+separator+lineSep);
+    	propStr.append(separator + separator + separator).append(lineSep);
 
     	return propStr.toString();
 	}

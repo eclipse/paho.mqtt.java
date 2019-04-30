@@ -85,6 +85,7 @@ public class TestByteArrayMemoryPersistence implements MqttClientPersistence {
 		byte[] messageBytes = messageByteBuffer.array();
 		data.put(key, messageBytes);
 		dataCache.put(key,  messageBytes);
+		System.out.println("Persist data "+messageBytes);
 	}
 
 	/* (non-Javadoc)

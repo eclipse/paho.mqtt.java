@@ -19,25 +19,24 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.ExternalTest;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
-import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
-import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.test.client.MqttClientFactoryPaho;
+import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.junit.*;
+import org.junit.experimental.categories.Category;
 
-/**
- *
- */
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class SendReceiveAsyncTest {
 
   static final Class<?> cclass = SendReceiveAsyncTest.class;
@@ -494,7 +493,7 @@ public class SendReceiveAsyncTest {
       receivedMessage = mqttReceiver.receiveNext(100);
       if (receivedMessage != null) {
         log.fine("Message I shouldn't have: " + new String(receivedMessage.message.getPayload()));
-        Assert.fail("Receive messaqe:" + new String(receivedMessage.message.getPayload()));
+        Assert.fail("Receive message:" + new String(receivedMessage.message.getPayload()));
       }
     }
     catch (Exception exception) {
@@ -560,7 +559,7 @@ public class SendReceiveAsyncTest {
   
   		String topic = topicPrefix + "testLargeMsg/Topic";
   		//10MB
-  		int largeSize = 20000;// * (1 << 20);
+  		int largeSize = 20 * (1 << 20);
   		byte[] message = new byte[largeSize];
   
   		java.util.Arrays.fill(message, (byte) 's');
@@ -606,7 +605,8 @@ public class SendReceiveAsyncTest {
    * Test the behavior of the connection timeout when connecting to a non MQTT server.
    * i.e. ssh port 22
    */
-  @Test
+  @Ignore
+  @Category(ExternalTest.class)
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();
 	  LoggingUtilities.banner(log, cclass, methodName);
@@ -693,7 +693,6 @@ public class SendReceiveAsyncTest {
       mqttClient.setCallback(mqttReceiver);
 
       MqttConnectionOptions opts = new MqttConnectionOptions();
-      //opts.setMaxInflight(tokenCount);
       connectToken = mqttClient.connect(opts);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
       connectToken.waitForCompletion();
@@ -724,7 +723,7 @@ public class SendReceiveAsyncTest {
       Assert.assertEquals(0, errors);
       
       while (mqttReceiver.receivedMessageCount() < tokenCount) {
-    	    log.info("Expected "+tokenCount+" received "+mqttReceiver.receivedMessageCount());
+  	    log.info("Expected "+tokenCount+" received "+mqttReceiver.receivedMessageCount());
     	  	Thread.sleep(10);
       }
     }
