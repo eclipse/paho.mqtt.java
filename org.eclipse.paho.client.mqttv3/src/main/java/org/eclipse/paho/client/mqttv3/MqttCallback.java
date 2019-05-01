@@ -22,6 +22,7 @@ package org.eclipse.paho.client.mqttv3;
  * Classes implementing this interface
  * can be registered on both types of client: {@link IMqttClient#setCallback(MqttCallback)}
  * and {@link IMqttAsyncClient#setCallback(MqttCallback)}
+ * @see MqttCallbackExtended
  */
 public interface MqttCallback {
 	/**
