@@ -38,25 +38,33 @@ public class ConnectionManipulationProxyServer implements Runnable {
 		}
 		running = true;
 		proxyThread.start();
+		// Give it some time to start up
+		do {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while (!proxyThread.isAlive());
 	}
 	
 	public void enableProxy(){
 		log.info("[CMPS Proxy] - Enabling Proxy");
-		synchronized (enableLock) {
-			enableProxy = true;
-		}
-		running = true;
 		if (!proxyThread.isAlive()){
-			proxyThread.start();
-			// Give it some time to start up
-			do {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} while (!proxyThread.isAlive());
+			startProxy();
+		} else {
+			synchronized (enableLock) {
+				enableProxy = true;
+			}
+			running = true;
+			// Give it some time to enable
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
