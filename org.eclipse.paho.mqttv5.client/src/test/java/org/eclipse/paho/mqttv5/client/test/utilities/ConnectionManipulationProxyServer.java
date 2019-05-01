@@ -46,15 +46,17 @@ public class ConnectionManipulationProxyServer implements Runnable {
 			enableProxy = true;
 		}
 		running = true;
-		if(proxyThread.isAlive() == false){
+		if (!proxyThread.isAlive()){
 			proxyThread.start();
 			// Give it some time to start up
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			do {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} while (!proxyThread.isAlive());
 		}
 	}
 	
@@ -80,6 +82,14 @@ public class ConnectionManipulationProxyServer implements Runnable {
 		}
 		running = false;
 		killOpenSockets();
+		do {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while (proxyThread.isAlive());
 	}
 	
 	private void killOpenSockets(){
