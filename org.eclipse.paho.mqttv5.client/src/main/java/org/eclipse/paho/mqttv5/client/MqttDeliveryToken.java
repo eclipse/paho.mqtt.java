@@ -32,12 +32,12 @@ public class MqttDeliveryToken extends MqttToken implements IMqttDeliveryToken {
 	private MqttMessage msg = null;
 		
 	
-	public MqttDeliveryToken() {
-		super();
+	public MqttDeliveryToken(MqttAsyncClient client) {
+		super(client);
 	}
 	
-	public MqttDeliveryToken(String logContext) {
-		super(logContext);
+	public MqttDeliveryToken(MqttAsyncClient client, String logContext) {
+		super(client, logContext);
 	}
 
 	/**

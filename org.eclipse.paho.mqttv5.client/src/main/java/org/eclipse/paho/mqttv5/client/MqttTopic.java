@@ -89,7 +89,7 @@ public class MqttTopic {
 	 *             if an error occurs persisting the message
 	 */
 	public MqttDeliveryToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
-		MqttDeliveryToken token = new MqttDeliveryToken();
+		MqttDeliveryToken token = new MqttDeliveryToken(internal.getClient());
 		internal.publish(name, message, token);
 		return token;
 	}

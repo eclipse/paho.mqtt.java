@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.mqttv5.common.MqttPersistable;
+import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
@@ -95,7 +96,7 @@ public class SessionState {
 				}
 			}
 		}
-		System.out.println(result + " getMessageListener " + subId + " " + topic);
+		//System.out.println(result + " getMessageListener " + subId + " " + topic);
 		return result;
 	}
 	
@@ -103,12 +104,12 @@ public class SessionState {
 	
 	private boolean shouldBeConnected = false;
 	
-	public SessionState(MqttClientPersistence persistence, ToDoQueue todoQueue) {
+	public SessionState(MqttAsyncClient client, MqttClientPersistence persistence, ToDoQueue todoQueue) {
 		this.persistence = persistence;
 		retryQueue = new PersistedBuffer(persistence);
 		this.todoQueue = todoQueue;
 		try {
-			restore();
+			restore(client);
 		} catch (Exception e) {}
 	}
 	
@@ -187,7 +188,7 @@ public class SessionState {
 	 * Restores the state information from persistence.
 	 * @throws MqttException if an exception occurs whilst restoring state
 	 */
-	protected void restore() throws MqttException {
+	protected void restore(MqttAsyncClient client) throws MqttException {
 		final String methodName = "restoreState";
 		Enumeration messageKeys = persistence.keys();
 		System.out.println("restoreState "+messageKeys.hasMoreElements());
@@ -256,7 +257,7 @@ public class SessionState {
 					if(sendMessage.getMessage().getQos() != 0) {
 						//@TRACE 607=outbound QoS 2 publish key={0} message={1}
 						log.fine(CLASS_NAME,methodName, "607", new Object[]{key,message});
-						MqttToken newtoken = new MqttToken();
+						MqttToken newtoken = new MqttToken(client);
 						todoQueue.restore(Integer.valueOf(sendMessage.getMessageId()),
 								newtoken, sendMessage);
 						out_tokens.put(new Integer(sendMessage.getMessageId()), newtoken);
@@ -264,7 +265,7 @@ public class SessionState {
 						//@TRACE 511=outbound QoS 0 publish key={0} message={1}
 						log.fine(CLASS_NAME,methodName, "511", new Object[]{key,message});
 						todoQueue.restore(Integer.valueOf(sendMessage.getMessageId()), 
-								new MqttToken(), sendMessage);
+								new MqttToken(client), sendMessage);
 						// Because there is no Puback, we have to trust that this is enough to send the message
 						persistence.remove(key);
 					}

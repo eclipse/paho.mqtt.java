@@ -111,7 +111,7 @@ public class ToDoQueue {
 	
 	public void add(MqttWireMessage message, MqttToken token) 
 			throws MqttException {	
-		System.out.println("--- adding "+message);
+		//System.out.println("--- adding "+message);
 		if (queued >= consumer.getMaxBufferedMessages() - 1) { 
 			if (!internal.getClient().getBufferOpts().isDeleteOldestMessages()) {
 				throw new MqttException(MqttClientException.REASON_CODE_DISCONNECTED_BUFFER_FULL);
@@ -122,7 +122,7 @@ public class ToDoQueue {
 			}
 		}
 		if (persistence != null && message instanceof MqttPersistableWireMessage) {
-			System.out.println("--- persisting "+message);
+			//System.out.println("--- persisting "+message);
 			persistence.put(PERSISTENCE_SENT_BUFFERED_PREFIX + sequence_no, 
 					(MqttPersistableWireMessage)message);
 		}
@@ -133,13 +133,13 @@ public class ToDoQueue {
 	
 	// Stop processing messages temporarily 
 	public void pause() {
-		System.out.println("--- pause "+internal.getClientId());
+		//System.out.println("--- pause "+internal.getClientId());
 		consumer.pause();
 	}
 	
 	// Start processing messages again
 	public void resume() {
-		System.out.println("+++ resume "+internal.getClientId());
+		//System.out.println("+++ resume "+internal.getClientId());
 		consumer.resume();
 	}
 	
@@ -159,7 +159,7 @@ public class ToDoQueue {
 		}
 		MqttWireMessage mqttmessage = messages.remove(seqno);
 		MultiMap metadata = message.headers();
-		System.out.println("*** handle message "+internal.getClientId() + " "+mqttmessage);
+		//System.out.println("*** handle message "+internal.getClientId() + " "+mqttmessage);
 		try {
 			if (remove1message) {
 			
@@ -169,9 +169,9 @@ public class ToDoQueue {
 					mqttmessage instanceof MqttUnsubscribe) {
 				write(mqttmessage);
 			}	
-			System.out.println("*** unpersisting "+persistence + " " + (message instanceof MqttPersistableWireMessage));
+			//System.out.println("*** unpersisting "+persistence + " " + (message instanceof MqttPersistableWireMessage));
 			if (persistence != null && mqttmessage instanceof MqttPersistableWireMessage) {
-				System.out.println("*** unpersisting "+mqttmessage.getMessageId());
+				//System.out.println("*** unpersisting "+mqttmessage.getMessageId());
 				persistence.remove(PERSISTENCE_SENT_BUFFERED_PREFIX + seqno);
 			}
 		} catch (MqttException e) {
@@ -205,7 +205,7 @@ public class ToDoQueue {
 						token.setComplete();
 					}
 				} else {
-					System.out.println("publish fail");
+					System.out.println("publish fail" + res1);
 					// If the socket write fails, then we should remove it from persistence.
 					pause();
 				}
@@ -216,7 +216,7 @@ public class ToDoQueue {
 		internal.socket.write(Buffer.buffer(subscribe.serialize()),
 				res1 -> {
 					if (res1.succeeded()) {
-						System.out.println("*** "+internal.getClientId() + " " + connectionstate);
+						//System.out.println("*** "+internal.getClientId() + " " + connectionstate);
 						connectionstate.registerOutboundActivity();
 					} else {
 						System.out.println("subscribe fail");

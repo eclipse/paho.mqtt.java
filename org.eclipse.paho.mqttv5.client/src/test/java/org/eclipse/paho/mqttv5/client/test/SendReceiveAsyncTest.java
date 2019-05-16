@@ -33,6 +33,7 @@ import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.junit.*;
 import org.junit.experimental.categories.Category;
 
@@ -178,7 +179,7 @@ public class SendReceiveAsyncTest {
 
       String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
-      subToken = mqttClient.subscribe(topicNames, topicQos);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -243,7 +244,7 @@ public class SendReceiveAsyncTest {
 
       java.util.Arrays.fill(message, (byte) 's');
 
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -251,7 +252,7 @@ public class SendReceiveAsyncTest {
       log.info("Unsubscribing from..." + topicNames[0]);
       unsubToken.waitForCompletion();
 
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -328,7 +329,7 @@ public class SendReceiveAsyncTest {
         connectToken = mqttSubscriber[i].connect(null, null);
         log.info("Connecting...(serverURI:" + serverURI + ", ClientId: MultiSubscriber" + i);
         connectToken.waitForCompletion();
-        subToken = mqttSubscriber[i].subscribe(topicNames, topicQos, null, null);
+        subToken = mqttSubscriber[i].subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
         log.info("Subcribing to..." + topicNames[0]);
         subToken.waitForCompletion();
       } // for...
@@ -417,7 +418,7 @@ public class SendReceiveAsyncTest {
 
       String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -452,7 +453,7 @@ public class SendReceiveAsyncTest {
 
       // Receive the publication so that we can be sure the first client has also received it.
       // Otherwise the first client may reconnect with its clean session before the message has arrived.
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
       payload = ("Message payload " + className + "." + methodName + " Other client").getBytes();
@@ -564,7 +565,7 @@ public class SendReceiveAsyncTest {
   
   		java.util.Arrays.fill(message, (byte) 's');
   
-  		IMqttToken subToken = mqttClient.subscribe(topic, 0);
+  		IMqttToken subToken = mqttClient.subscribe(new MqttSubscription(topic, 0));
   		log.info("Subscribing to..." + topic);
   		subToken.waitForCompletion();
   
@@ -699,7 +700,7 @@ public class SendReceiveAsyncTest {
 
       String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
 
-      subToken = mqttClient.subscribe(topicNames[0], 2);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], 2));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 

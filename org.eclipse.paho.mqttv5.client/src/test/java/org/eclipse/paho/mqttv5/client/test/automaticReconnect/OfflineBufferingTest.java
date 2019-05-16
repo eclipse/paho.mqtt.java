@@ -23,6 +23,7 @@ import org.eclipse.paho.mqttv5.client.test.utilities.TestMemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
@@ -182,7 +183,7 @@ public class OfflineBufferingTest {
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion(5000);
 		// Subscribe to topic
-		subClient.subscribe(topicPrefix + methodName, 0);
+		subClient.subscribe(new MqttSubscription(topicPrefix + methodName, 0));
 
 		// Enable Proxy & Connect to server
 		proxy.enableProxy();
@@ -456,7 +457,7 @@ public class OfflineBufferingTest {
 		IMqttToken subConnectToken = subClient.connect();
 		subConnectToken.waitForCompletion(5000);
 		Assert.assertTrue(subClient.isConnected());
-		IMqttToken subToken = subClient.subscribe(topicPrefix + methodName, qos);
+		IMqttToken subToken = subClient.subscribe(new MqttSubscription(topicPrefix + methodName, qos));
 		subToken.waitForCompletion(5000);
 
 		// Create Real client

@@ -73,7 +73,7 @@ public class ClientInternal {
 		}
 		connectionstate = new ConnectionState(this);
 		todoQueue = new ToDoQueue(this, vertx, persistence, connectionstate);
-		sessionstate = new SessionState(persistence, todoQueue);
+		sessionstate = new SessionState(client, persistence, todoQueue);
 	}
 	
 	public void close() {
@@ -184,7 +184,7 @@ public class ClientInternal {
 	private void handlePacket(MqttWireMessage msg, MqttToken connectToken) {
 		try
 		{		
-			System.out.println("DEBUG - msg received "+msg.toString());
+			//System.out.println("DEBUG - msg received "+msg.toString());
 			if (msg instanceof MqttConnAck) {
 				connectToken.setResponse(msg);
 				connectionStart(msg.getProperties());
@@ -283,7 +283,7 @@ public class ClientInternal {
 	
 	
 	public void reconnect(MqttConnectionOptions connOpts) {
-		connect(connOpts, new MqttToken(), serverURIs, 0, null);
+		connect(connOpts, new MqttToken(client), serverURIs, 0, null);
 	}
 	
 	private int current_reconnect_delay = 0;
@@ -328,13 +328,13 @@ public class ClientInternal {
 			netclient.connect(uri.getPort(), uri.getHost(), uri.getHost(), res -> {
 			if (res.succeeded()) {
 				socket = res.result();
-				System.out.println("TCP connect succeeded "+getClient().getClientId() + " "+
-						socket.writeHandlerID());
+				/*System.out.println("TCP connect succeeded "+getClient().getClientId() + " "+
+						socket.writeHandlerID());*/
 				socket.handler(buffer -> {
 					handleData(buffer, userToken);
 				});
 				socket.closeHandler(v -> {
-					System.out.println("CloseHandler "+v);
+					//System.out.println("CloseHandler "+v);
 					connectionEnd();
 					System.out.println("The socket has been closed "+v);
 					if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
@@ -358,10 +358,10 @@ public class ClientInternal {
 						options.getConnectionProperties(), // properties
 						options.getWillMessageProperties());  // will properties
 				try {
-					System.out.println("Sending connect "+getClient().getClientId());
+					//System.out.println("Sending connect "+getClient().getClientId());
 					socket.write(Buffer.buffer(connect.serialize()),
 						res1 -> {
-							System.out.println("Connect sent "+getClient().getClientId());
+							//System.out.println("Connect sent "+getClient().getClientId());
 							if (res1.succeeded()) {
 								connectionstate.registerOutboundActivity();
 							} else {
@@ -397,7 +397,7 @@ public class ClientInternal {
 						// remove closeHandler to avoid any chance of recursive handler calls
 						socket.closeHandler(v -> {});   
 						if (res1.succeeded()) {
-							System.out.println("Disconnect sent - closing socket");
+							//System.out.println("Disconnect sent - closing socket");
 							if (socket != null) {
 								socket.close();
 								socket = null;
@@ -421,7 +421,7 @@ public class ClientInternal {
 	}
 	
 	private void connectionStart(MqttProperties properties) {
-		System.out.println("DEBUG - connectionStart");
+		//System.out.println("DEBUG - connectionStart");
 		sessionstate.setShouldBeConnected(true);
 		connected = true;
 		String assigned_clientid = properties.getAssignedClientIdentifier();	

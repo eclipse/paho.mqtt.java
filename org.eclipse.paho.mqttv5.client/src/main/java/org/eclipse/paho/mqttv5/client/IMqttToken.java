@@ -92,20 +92,20 @@ public interface IMqttToken {
 	 * </p>
 	 * @param listener to be invoked once the action completes
 	 */
-	public void setActionCallback(MqttActionListener listener);
+	public void setActionCallback(IMqttActionListener listener);
 
 	/**
 	 * Return the async listener for this token.
 	 * @return listener that is set on the token or null if a listener is not registered.
 	 */
-	public MqttActionListener getActionCallback();
+	public IMqttActionListener getActionCallback();
 
 	/**
 	 * Returns the MQTT client that is responsible for processing the asynchronous
 	 * action
 	 * @return the client
 	 */
-	public MqttClientInterface getClient();
+	public IMqttAsyncClient getClient();
 
 	/**
 	 * Returns the topic string(s) for the action being tracked by this

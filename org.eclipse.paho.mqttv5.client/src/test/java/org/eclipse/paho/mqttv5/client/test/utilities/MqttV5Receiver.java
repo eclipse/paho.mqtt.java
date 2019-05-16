@@ -426,7 +426,6 @@ public class MqttV5Receiver implements MqttCallback {
     log.entering(className, methodName, new Object[]{topic,
         message});
 
-    System.out.println("message arrived");
     // logger.fine(methodName + ": '" + new String(message.getPayload()) + "'");
     receivedMessages.add(new ReceivedMessage(topic, message));
     notify();

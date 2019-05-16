@@ -28,6 +28,7 @@ import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttPersistable;
+import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.junit.After;
@@ -97,7 +98,7 @@ public class PersistenceTests implements MqttCallback {
 		tok.waitForCompletion();
 		
 		String topic = "username/clientId/abc";
-		tok = client.subscribe(topic, 2);
+		tok = client.subscribe(new MqttSubscription(topic, 2));
 		tok.waitForCompletion();
 
 		log.info((new Date()) + " - Connected.");

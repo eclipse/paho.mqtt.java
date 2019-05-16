@@ -51,17 +51,23 @@ public class MqttToken implements IMqttToken {
 	private MqttWireMessage response = null;
 	private int messageId;
 	private int[] reasonCodes;
+	private IMqttActionListener listener = null;
+	private MqttAsyncClient client = null;
 		
-	public MqttToken() {
+	public MqttToken(MqttAsyncClient client) {
+		this.client = client;
 	}
 	
 	public void setComplete() {
 		countDownLatch.countDown();
+		if (listener != null) { 
+			listener.onSuccess(this);
+		}
 	}
 		
-	public MqttToken(String logContext) {
+	public MqttToken(MqttAsyncClient client, String logContext) {
 		//this.logContext = logContext;
-		this();
+		this(client);
 	}
 
 	public MqttException getException() {
@@ -69,17 +75,15 @@ public class MqttToken implements IMqttToken {
 	}
 
 	public boolean isComplete() {
-		//return netfuture.isComplete();
 		return countDownLatch.getCount() == 0;
 	}
 
-	public void setActionCallback(MqttActionListener listener) {
-		//internalTok.setActionCallback(listener);
-
+	public void setActionCallback(IMqttActionListener listener) {
+		this.listener = listener;
 	}
   
-	public MqttActionListener getActionCallback() {
-		return null; //internalTok.getActionCallback();
+	public IMqttActionListener getActionCallback() {
+		return listener;
 	}
 
 	public void waitForCompletion() throws MqttException {
@@ -104,8 +108,8 @@ public class MqttToken implements IMqttToken {
 		//System.out.println("wait complete");
 	}
 
-	public MqttClientInterface getClient() {
-		return null; //internalTok.getClient();
+	public IMqttAsyncClient getClient() {
+		return client;
 	}
 
 	public String[] getTopics() {
