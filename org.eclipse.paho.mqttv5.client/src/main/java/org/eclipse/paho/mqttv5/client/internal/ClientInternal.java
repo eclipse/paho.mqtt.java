@@ -35,8 +35,14 @@ import org.eclipse.paho.mqttv5.common.packet.MqttUnsubscribe;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 import org.eclipse.paho.mqttv5.common.packet.util.VariableByteInteger;
 
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.CaseInsensitiveHeaders;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.WebSocket;
+import io.vertx.core.http.WebsocketVersion;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetSocket;
 import io.vertx.core.net.JksOptions;
@@ -49,7 +55,9 @@ public class ClientInternal {
 	private static Object vertxLock = new Object(); // Simple lock
 	private static Vertx vertx = null;
 	private NetClient netclient = null;
+	private HttpClient wsclient = null;
 	public NetSocket socket = null;
+	public WebSocket websocket = null;
 	private boolean connected = false;
 	private long reconnect_timer = 0;
 
@@ -219,12 +227,17 @@ public class ClientInternal {
 				if (((MqttPublish) msg).getQoS() == 1) {
 					MqttPubAck puback = new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, 
 							msg.getMessageId(), null);
+					if (websocket != null) {
+						websocket.writeBinaryMessage(Buffer.buffer(puback.serialize()));
+						connectionstate.registerOutboundActivity();
+					} else {
 					socket.write(Buffer.buffer(puback.serialize()),
 							res1 -> {
 								if (!res1.succeeded()) {
 									connectionstate.registerOutboundActivity();
 								}
 							});
+					}
 					
 				}
 			} else if (msg instanceof MqttPubRec) {
@@ -277,8 +290,14 @@ public class ClientInternal {
 			}
 		}	
 		netopts.setIdleTimeout(100);
-		netopts.setConnectTimeout(100);	
+		netopts.setConnectTimeout(100);		
 		return vertx.createNetClient(netopts);
+	}
+	
+	
+	private HttpClient createWSClient() {
+		HttpClientOptions httpopts = new HttpClientOptions().setKeepAlive(false);
+		return vertx.createHttpClient(httpopts);
 	}
 	
 	
@@ -324,63 +343,128 @@ public class ClientInternal {
 		System.out.println(client.getClientId() + " Connecting to "+uri.toString());
 
 		try {
-			netclient = createNetClient(uri);
-			netclient.connect(uri.getPort(), uri.getHost(), uri.getHost(), res -> {
-			if (res.succeeded()) {
-				socket = res.result();
-				/*System.out.println("TCP connect succeeded "+getClient().getClientId() + " "+
-						socket.writeHandlerID());*/
-				socket.handler(buffer -> {
-					handleData(buffer, userToken);
-				});
-				socket.closeHandler(v -> {
-					//System.out.println("CloseHandler "+v);
-					connectionEnd();
-					System.out.println("The socket has been closed "+v);
-					if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
-						current_reconnect_delay = options.getAutomaticReconnectMinDelay();
-						reconnect_timer = vertx.setTimer(current_reconnect_delay, id -> {
-							reconnect(options);
-						});
-					}
-				});
-				socket.exceptionHandler(throwable -> {
-					connectionEnd();
-					System.out.println("The socket has an exception "+throwable.getMessage());
-					if (userToken != null) {
-						userToken.setComplete();
-					}
-				});
-				MqttConnect connect = new MqttConnect(client.getClientId(), 
-						options.getMqttVersion(),
-						options.isCleanStart(),
-						options.getKeepAliveInterval(),
-						options.getConnectionProperties(), // properties
-						options.getWillMessageProperties());  // will properties
-				try {
-					//System.out.println("Sending connect "+getClient().getClientId());
-					socket.write(Buffer.buffer(connect.serialize()),
-						res1 -> {
-							//System.out.println("Connect sent "+getClient().getClientId());
-							if (res1.succeeded()) {
-								connectionstate.registerOutboundActivity();
-							} else {
-								connect(options, userToken, serverURIs, index + 1, exc);
-							}
-						});
-				} catch (Exception e) {
-					e.printStackTrace();
-					connect(options, userToken, serverURIs, index + 1, e);
-				}
+			if (uri.getScheme().startsWith("ws")) {
+				WSConnect(options, userToken, uri, serverURIs, index, exc);
 			} else {
-				System.out.println("TCP connect failed "+getClient().getClientId());
-				connect(options, userToken, serverURIs, index + 1, exc);
+				TCPConnect(options, userToken, uri, serverURIs, index, exc);
 			}
-		});
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 			connect(options, userToken, serverURIs, index + 1, e);
 		}
+	}
+	
+	private void TCPConnect(MqttConnectionOptions options, MqttToken userToken, 
+			URI uri, String[] serverURIs, final int index, Exception exc) {
+		
+		netclient = createNetClient(uri);
+		netclient.connect(uri.getPort(), uri.getHost(), uri.getHost(), res -> {
+		if (res.succeeded()) {
+			socket = res.result();
+			/*System.out.println("TCP connect succeeded "+getClient().getClientId() + " "+
+					socket.writeHandlerID());*/
+			socket.handler(buffer -> {
+				handleData(buffer, userToken);
+			});
+			socket.closeHandler(v -> {
+				//System.out.println("CloseHandler "+v);
+				connectionEnd();
+				System.out.println("The socket has been closed "+v);
+				if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
+					current_reconnect_delay = options.getAutomaticReconnectMinDelay();
+					reconnect_timer = vertx.setTimer(current_reconnect_delay, id -> {
+						reconnect(options);
+					});
+				}
+			});
+			socket.exceptionHandler(throwable -> {
+				connectionEnd();
+				System.out.println("The socket has an exception "+throwable.getMessage());
+				if (userToken != null) {
+					userToken.setComplete();
+				}
+			});
+			MqttConnect connect = new MqttConnect(client.getClientId(), 
+					options.getMqttVersion(),
+					options.isCleanStart(),
+					options.getKeepAliveInterval(),
+					options.getConnectionProperties(), // properties
+					options.getWillMessageProperties());  // will properties
+			try {
+				//System.out.println("Sending connect "+getClient().getClientId());
+				socket.write(Buffer.buffer(connect.serialize()),
+					res1 -> {
+						//System.out.println("Connect sent "+getClient().getClientId());
+						if (res1.succeeded()) {
+							connectionstate.registerOutboundActivity();
+						} else {
+							connect(options, userToken, serverURIs, index + 1, exc);
+						}
+					});
+			} catch (Exception e) {
+				e.printStackTrace();
+				connect(options, userToken, serverURIs, index + 1, e);
+			}
+		} else {
+			System.out.println("TCP connect failed "+getClient().getClientId());
+			connect(options, userToken, serverURIs, index + 1, exc);
+		}});
+	}
+	
+	private void WSConnect(MqttConnectionOptions options, MqttToken userToken, 
+			URI uri, String[] serverURIs, final int index, Exception exc) {
+		
+		MultiMap headers = new CaseInsensitiveHeaders();
+		wsclient = createWSClient();
+		wsclient.websocket(uri.getPort(), uri.getHost(), "/mqtt", headers, 
+				WebsocketVersion.V13, "mqtt", 
+				websocket -> {
+			websocket.handler(buffer -> {
+				handleData(buffer, userToken);
+			});
+			websocket.closeHandler(v -> {
+				//System.out.println("CloseHandler "+v);
+				connectionEnd();
+				System.out.println("The websocket has been closed "+v);
+				if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
+					current_reconnect_delay = options.getAutomaticReconnectMinDelay();
+					reconnect_timer = vertx.setTimer(current_reconnect_delay, id -> {
+						reconnect(options);
+					});
+				}
+			});
+			websocket.exceptionHandler(throwable -> {
+				connectionEnd();
+				System.out.println("The websocket has an exception "+throwable.getMessage());
+				if (userToken != null) {
+					userToken.setComplete();
+				}
+			});
+			this.websocket = websocket;
+			MqttConnect connect = new MqttConnect(client.getClientId(), 
+					options.getMqttVersion(),
+					options.isCleanStart(),
+					options.getKeepAliveInterval(),
+					options.getConnectionProperties(), // properties
+					options.getWillMessageProperties());  // will properties
+			try {
+				//System.out.println("Sending connect "+getClient().getClientId());
+				websocket.writeBinaryMessage(Buffer.buffer(connect.serialize()));
+				/*
+					res1 -> {
+						//System.out.println("Connect sent "+getClient().getClientId());
+						if (res1.succeeded()) {
+							connectionstate.registerOutboundActivity();
+						} else {
+							connect(options, userToken, serverURIs, index + 1, exc);
+						}
+					});*/
+			} catch (Exception e) {
+				e.printStackTrace();
+				connect(options, userToken, serverURIs, index + 1, e);
+			}
+		});
 	}
 	
 	public void disconnect(int reasonCode, MqttProperties disconnectProperties, MqttToken token) {
@@ -392,6 +476,14 @@ public class ClientInternal {
 		}
 		try {
 			MqttDisconnect disconnect = new MqttDisconnect(reasonCode, disconnectProperties);
+			if (websocket != null) {
+				websocket.closeHandler(v -> {
+					connectionstate.registerOutboundActivity();
+					connectionEnd();
+					token.setComplete();
+				});
+				websocket.writeBinaryMessage(Buffer.buffer(disconnect.serialize()));
+			} else {
 			socket.write(Buffer.buffer(disconnect.serialize()),
 					res1 -> {
 						// remove closeHandler to avoid any chance of recursive handler calls
@@ -415,6 +507,7 @@ public class ClientInternal {
 							token.setComplete();
 						}
 					});
+			}
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}

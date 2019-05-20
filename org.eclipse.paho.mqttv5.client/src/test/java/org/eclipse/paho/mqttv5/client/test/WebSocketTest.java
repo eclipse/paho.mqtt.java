@@ -1,0 +1,378 @@
+/* Copyright (c) 2009, 2014 IBM Corp.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ *******************************************************************************/
+
+package org.eclipse.paho.mqttv5.client.test;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.eclipse.paho.mqttv5.client.IMqttClient;
+import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.MqttCallback;
+import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.MqttTopic;
+import org.eclipse.paho.mqttv5.client.test.client.MqttClientFactoryPaho;
+import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
+import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
+import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
+import org.eclipse.paho.common.test.categories.WebSockTest;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+
+/**
+ * Tests providing a basic general coverage for the MQTT WebSocket Functionality
+ */
+@Category({OnlineTest.class, MQTTV5Test.class, WebSockTest.class})
+public class WebSocketTest {
+  private static final Logger log = Logger.getLogger(WebSocketTest.class.getName());
+
+  private static URI serverURI;
+  private static MqttClientFactoryPaho clientFactory;
+  private static String topicPrefix;
+
+  /**
+   * @throws Exception 
+   */
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+
+    try {
+      String methodName = Utility.getMethodName();
+      LoggingUtilities.banner(log, WebSocketTest.class, methodName);
+
+      serverURI = TestProperties.getWebSocketServerURI();
+      clientFactory = new MqttClientFactoryPaho();
+      clientFactory.open();
+      topicPrefix = "WebSocketTest-" + UUID.randomUUID().toString() + "-";
+    }
+    catch (Exception exception) {
+      log.log(Level.SEVERE, "caught exception:", exception);
+      throw exception;
+    }
+  }
+
+  /**
+   * @throws Exception
+   */
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
+
+    try {
+      if (clientFactory != null) {
+        clientFactory.close();
+        clientFactory.disconnect();
+      }
+    }
+    catch (Exception exception) {
+      log.log(Level.SEVERE, "caught exception:", exception);
+    }
+  }
+
+  /**
+   * @throws Exception 
+   */
+  @Test()
+  public void testWebSocketConnect() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
+
+    IMqttClient client = null;
+    try {
+      String clientId = methodName;
+      client = clientFactory.createMqttClient(serverURI, clientId);
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect();
+
+      String clientId2 = client.getClientId();
+      log.info("clientId = " + clientId2);
+
+      boolean isConnected = client.isConnected();
+      log.info("isConnected = " + isConnected);
+
+      String id = client.getServerURI();
+      log.info("ServerURI = " + id);
+
+      log.info("Disconnecting...");
+      client.disconnect();
+
+      log.info("Re-Connecting...");
+      client.connect();
+
+      log.info("Disconnecting...");
+      client.disconnect();
+    }
+    catch (MqttException exception) {
+      log.log(Level.SEVERE, "caught exception:", exception);
+      Assert.fail("Unexpected exception: " + exception);
+    }
+    finally {
+      if (client != null) {
+    	  if(client.isConnected()){
+    		  client.disconnect();
+    	  }
+        log.info("Close...");
+        client.close();
+      }
+    }
+  }
+
+
+  /**
+   * @throws Exception 
+   */
+  @Test
+  public void testWebSocketPubSub() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
+
+    IMqttClient client = null;
+    try {
+      String topicStr = topicPrefix + "topic" + "_02";
+      String clientId = methodName;
+      client = clientFactory.createMqttClient(serverURI, clientId);
+
+      log.info("Assigning callback...");
+      MessageListener listener = new MessageListener();
+      client.setCallback(listener);
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect();
+
+      log.info("Subscribing to..." + topicStr);
+      client.subscribe(topicStr, 2);
+
+      log.info("Publishing to..." + topicStr);
+      MqttTopic topic = client.getTopic(topicStr);
+      MqttMessage message = new MqttMessage("foo".getBytes());
+      topic.publish(message);
+
+      log.info("Checking msg");
+      MqttMessage msg = listener.getNextMessage();
+      Assert.assertNotNull(msg);
+      Assert.assertEquals("foo", msg.toString());
+
+      log.info("getTopic name");
+      String topicName = topic.getName();
+      log.info("topicName = " + topicName);
+      Assert.assertEquals(topicName, topicStr);
+
+      log.info("Disconnecting...");
+      client.disconnect();
+    } catch (MqttException exception) {
+        log.log(Level.SEVERE, "caught exception:", exception);
+        Assert.fail("Unexpected exception: " + exception);
+      }
+    finally {
+      if (client != null) {
+    	  if(client.isConnected()){
+    		  client.disconnect();
+    	  }
+        log.info("Close...");
+        client.close();
+      }
+    }
+  }
+  
+  /**
+   * Tests Websocker support for packets over 16KB
+   * Prompted by Bug: 482432
+   * https://bugs.eclipse.org/bugs/show_bug.cgi?id=482432
+   * This test connects to a broker via WebSockets, subscribes
+   * to a topic, publishes a large payload to it and checks
+   * that it recieves the same payload.
+ * @throws Exception 
+   */
+  @Test(timeout=10000)
+  public void largePayloadTest() throws Exception{
+	  // Generate large byte array;
+	  byte[] largeByteArray = new byte[32000];
+	  new Random().nextBytes(largeByteArray);
+	  String methodName = Utility.getMethodName();
+	  LoggingUtilities.banner(log, WebSocketTest.class, methodName);
+
+	    IMqttClient client = null;
+	    try {
+	      String topicStr = topicPrefix + "topic_largeFile_01";
+	      String clientId = methodName;
+	      client = clientFactory.createMqttClient(serverURI, clientId);
+
+	      log.info("Assigning callback...");
+	      MessageListener listener = new MessageListener();
+	      client.setCallback(listener);
+
+	      log.info("Connecting... serverURI:" + serverURI + ", ClientId:" + clientId);
+	      client.connect();
+
+	      log.info("Subscribing to..." + topicStr);
+	      client.subscribe(topicStr, 2);
+
+	      log.info("Publishing to..." + topicStr);
+	      MqttTopic topic = client.getTopic(topicStr);
+	      MqttMessage message = new MqttMessage(largeByteArray);
+	      topic.publish(message);
+
+	      log.info("Checking msg");
+	      MqttMessage msg = listener.getNextMessage();
+	      Assert.assertNotNull(msg);
+	      Assert.assertTrue(Arrays.equals(largeByteArray, msg.getPayload()));
+	      log.info("Disconnecting...");
+	      client.disconnect();
+	      log.info("Disconnected...");
+	    } catch (MqttException exception) {
+	        log.log(Level.SEVERE, "caught exception:", exception);
+	        Assert.fail("Unexpected exception: " + exception);
+	      } finally {
+	      if (client != null) {
+	    	  if(client.isConnected()){
+	    		  client.disconnect();
+	    	  }
+	        log.info("Close...");
+	        client.close();
+	      }
+	    }
+	  
+  }
+
+  @Test(timeout=10000)
+  public void testBasicAuth() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, WebSocketTest.class, methodName);
+
+    String userInfo = "username:password";
+
+    String clientId = methodName;
+
+    URI serverURIWithUserInfo = new URI(serverURI.getScheme(),
+            userInfo,
+            serverURI.getHost(),
+            serverURI.getPort(),
+            serverURI.getPath(),
+            serverURI.getQuery(),
+            serverURI.getFragment());
+    IMqttClient client = null;
+    try {
+     client = clientFactory.createMqttClient(serverURIWithUserInfo, clientId);
+    	client.connect();
+    	client.disconnect();
+    }catch (MqttException exception) {
+        log.log(Level.SEVERE, "caught exception:", exception);
+        Assert.fail("Unexpected exception: " + exception);
+      } finally {
+      if (client != null) {
+    	  if(client.isConnected()){
+    		  client.disconnect();
+    	  }
+        log.info("Close...");
+        client.close();
+      }
+    }
+  }
+
+  /**
+   *
+   */
+  class MessageListener implements MqttCallback {
+    final Logger logger2 = Logger.getLogger(MessageListener.class.getCanonicalName());
+
+    ArrayList<MqttMessage> messages;
+
+    public MessageListener() {
+      messages = new ArrayList<MqttMessage>();
+    }
+
+    public MqttMessage getNextMessage() {
+      synchronized (messages) {
+        if (messages.size() == 0) {
+          try {
+        	// Wait a bit longer than usual because of the largePayloadTest
+            messages.wait(10000);
+          }
+          catch (InterruptedException e) {
+            // empty
+          }
+        }
+
+        if (messages.size() == 0) {
+          return null;
+        }
+        return messages.remove(0);
+      }
+    }
+
+    public void connectionLost(Throwable cause) {
+      logger2.info("connection lost: " + cause.getMessage());
+    }
+
+    /**
+     * @param token  
+     */
+    public void deliveryComplete(IMqttDeliveryToken token) {
+      logger2.info("delivery complete");
+    }
+
+    /**
+     * @param topic  
+     * @param message 
+     * @throws Exception 
+     */
+    public void messageArrived(String topic, MqttMessage message) throws Exception {
+      logger2.info("message arrived: " + message.getId() + "'");
+
+      synchronized (messages) {
+        messages.add(message);
+        messages.notifyAll();
+      }
+    }
+
+	@Override
+	public void disconnected(MqttDisconnectResponse disconnectResponse) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mqttErrorOccurred(MqttException exception) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connectComplete(boolean reconnect, String serverURI) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void authPacketArrived(int reasonCode, MqttProperties properties) {
+		// TODO Auto-generated method stub
+		
+	}
+  }
+}

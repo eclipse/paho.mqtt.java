@@ -196,6 +196,7 @@ public class ToDoQueue {
 			internal.getSessionState().addRetryQueue(publish, hashcode);
 		}
 		
+		if (internal.socket != null) {
 		internal.socket.write(Buffer.buffer(publish.serialize()),
 			res1 -> {
 				if (res1.succeeded()) {
@@ -210,9 +211,29 @@ public class ToDoQueue {
 					pause();
 				}
 			});
+		} else {
+			internal.websocket.writeBinaryMessage(Buffer.buffer(publish.serialize()));
+					/*res1 -> {
+						if (res1.succeeded()) {
+							connectionstate.registerOutboundActivity();
+							if (publish.getQoS() == 0) {
+								MqttToken token = internal.out_hash_tokens.remove(hashcode);
+								token.setComplete();
+							}
+						} else {
+							System.out.println("publish fail" + res1);
+							// If the socket write fails, then we should remove it from persistence.
+							pause();
+						}
+					});*/
+			
+		}
 	}
 	
 	private void write(MqttWireMessage subscribe) throws MqttException {
+		if (internal.websocket != null) {
+			internal.websocket.writeBinaryMessage(Buffer.buffer(subscribe.serialize()));
+		} else {
 		internal.socket.write(Buffer.buffer(subscribe.serialize()),
 				res1 -> {
 					if (res1.succeeded()) {
@@ -223,6 +244,7 @@ public class ToDoQueue {
 					}
 					
 				});
+		}
 	}
 	
 	
