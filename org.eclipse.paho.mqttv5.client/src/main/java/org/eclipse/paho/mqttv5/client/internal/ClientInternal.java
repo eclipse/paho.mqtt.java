@@ -300,9 +300,33 @@ public class ClientInternal {
 	}
 	
 	
-	private HttpClient createWSClient() {
+	private HttpClient createWSClient(URI uri) {
 		HttpClientOptions httpopts = new HttpClientOptions().setKeepAlive(false);
 		httpopts.setMaxWebsocketFrameSize(25000000);
+		if (uri.getScheme().equals("wss")) {
+			httpopts.setSsl(true);
+			httpopts.setForceSni(true);
+			String temp = System.getProperty("javax.net.ssl.keyStore");
+			if (temp != null) {
+				JksOptions keyopts = new JksOptions();
+				keyopts.setPath(temp);
+				temp = System.getProperty("javax.net.ssl.keyStorePassword");
+				if (temp != null) {
+					keyopts.setPassword(temp);
+				}
+				httpopts.setKeyStoreOptions(keyopts);
+			}
+			temp = System.getProperty("javax.net.ssl.trustStore");
+			if (temp != null) {
+				JksOptions trustopts = new JksOptions();
+				trustopts.setPath(temp);
+				temp = System.getProperty("javax.net.ssl.trustStorePassword");
+				if (temp != null) {
+					trustopts.setPassword(temp);
+				}
+				httpopts.setTrustStoreOptions(trustopts);
+			}
+		}
 		return vertx.createHttpClient(httpopts);
 	}
 	
@@ -422,7 +446,7 @@ public class ClientInternal {
 			URI uri, String[] serverURIs, final int index, Exception exc) {
 		
 		MultiMap headers = new CaseInsensitiveHeaders();
-		wsclient = createWSClient();
+		wsclient = createWSClient(uri);
 		wsclient.websocket(uri.getPort(), uri.getHost(), "/mqtt", headers, 
 				WebsocketVersion.V13, "mqtt", 
 				websocket -> {
