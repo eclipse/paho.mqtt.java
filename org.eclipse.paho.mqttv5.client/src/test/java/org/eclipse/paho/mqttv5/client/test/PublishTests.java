@@ -2,6 +2,7 @@ package org.eclipse.paho.mqttv5.client.test;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,18 +24,35 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 
 @Category({OnlineTest.class, MQTTV5Test.class})
+@RunWith(Parameterized.class)
 public class PublishTests {
 
 	static final Class<?> cclass = PublishTests.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 
-	private static URI serverURI;
+	private URI serverURI;
 	private static MqttClientFactoryPaho clientFactory;
 	private static String topicPrefix;
+	
+	@Parameters
+	public static Collection<Object[]> data() throws Exception {
+		
+		return Arrays.asList(new Object[][] {     
+            { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }  
+      });
+		
+	}
+	
+	public PublishTests(URI serverURI) {
+		this.serverURI = serverURI;
+	}
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -42,7 +60,6 @@ public class PublishTests {
 			String methodName = Utility.getMethodName();
 			LoggingUtilities.banner(log, cclass, methodName);
 
-			serverURI = TestProperties.getServerURI();
 			clientFactory = new MqttClientFactoryPaho();
 			clientFactory.open();
 			topicPrefix = "Mqttv5PublishTests-" + UUID.randomUUID().toString() + "-";

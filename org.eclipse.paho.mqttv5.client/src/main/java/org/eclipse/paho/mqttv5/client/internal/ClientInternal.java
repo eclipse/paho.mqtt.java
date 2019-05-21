@@ -231,14 +231,14 @@ public class ClientInternal {
 						websocket.writeBinaryMessage(Buffer.buffer(puback.serialize()));
 						connectionstate.registerOutboundActivity();
 					} else {
-					socket.write(Buffer.buffer(puback.serialize()),
-							res1 -> {
-								if (!res1.succeeded()) {
-									connectionstate.registerOutboundActivity();
-								}
-							});
+						socket.write(Buffer.buffer(puback.serialize()),
+								res1 -> {
+									if (!res1.succeeded()) {
+										connectionstate.registerOutboundActivity();
+									}
+								});
 					}
-					
+
 				}
 			} else if (msg instanceof MqttPubRec) {
 				MqttToken acktoken = sessionstate.out_tokens.get(new Integer(msg.getMessageId()));
@@ -246,12 +246,17 @@ public class ClientInternal {
 						msg.getMessageId(),
 						msg.getProperties());
 				acktoken.setReasonCodes(msg.getReasonCodes());
-				socket.write(Buffer.buffer(pubrel.serialize()),
-						res1 -> {
-							if (!res1.succeeded()) {
-								connectionstate.registerOutboundActivity();
-							}
-						});
+				if (websocket != null) {
+					websocket.writeBinaryMessage(Buffer.buffer(pubrel.serialize()));
+					connectionstate.registerOutboundActivity();
+				} else {
+					socket.write(Buffer.buffer(pubrel.serialize()),
+							res1 -> {
+								if (!res1.succeeded()) {
+									connectionstate.registerOutboundActivity();
+								}
+							});
+				}
 			} else if (msg instanceof MqttPingResp) {
 				connectionstate.pingReceived();
 			}
@@ -297,6 +302,7 @@ public class ClientInternal {
 	
 	private HttpClient createWSClient() {
 		HttpClientOptions httpopts = new HttpClientOptions().setKeepAlive(false);
+		httpopts.setMaxWebsocketFrameSize(25000000);
 		return vertx.createHttpClient(httpopts);
 	}
 	
@@ -449,17 +455,8 @@ public class ClientInternal {
 					options.getConnectionProperties(), // properties
 					options.getWillMessageProperties());  // will properties
 			try {
-				//System.out.println("Sending connect "+getClient().getClientId());
 				websocket.writeBinaryMessage(Buffer.buffer(connect.serialize()));
-				/*
-					res1 -> {
-						//System.out.println("Connect sent "+getClient().getClientId());
-						if (res1.succeeded()) {
-							connectionstate.registerOutboundActivity();
-						} else {
-							connect(options, userToken, serverURIs, index + 1, exc);
-						}
-					});*/
+				connectionstate.registerOutboundActivity();
 			} catch (Exception e) {
 				e.printStackTrace();
 				connect(options, userToken, serverURIs, index + 1, e);
@@ -483,30 +480,23 @@ public class ClientInternal {
 					token.setComplete();
 				});
 				websocket.writeBinaryMessage(Buffer.buffer(disconnect.serialize()));
+				websocket.close();
 			} else {
-			socket.write(Buffer.buffer(disconnect.serialize()),
-					res1 -> {
-						// remove closeHandler to avoid any chance of recursive handler calls
-						socket.closeHandler(v -> {});   
-						if (res1.succeeded()) {
-							//System.out.println("Disconnect sent - closing socket");
+				socket.write(Buffer.buffer(disconnect.serialize()),
+						res1 -> {
+							// remove closeHandler to avoid any chance of recursive handler calls
+							socket.closeHandler(v -> {});   
+							if (res1.failed()) {
+								System.out.println("write failed");
+							}
 							if (socket != null) {
 								socket.close();
 								socket = null;
 							}
 							connectionstate.registerOutboundActivity();
-							// we still need to close the socket and indicate the disconnect
-							// is finished if the packet write failed
 							connectionEnd();
 							token.setComplete();
-						} else {
-							System.out.println("write failed");
-							// we still need to close the socket and indicate the disconnect
-							// is finished if the packet write failed
-							connectionEnd();
-							token.setComplete();
-						}
-					});
+						});
 			}
 		} catch (Exception e) {
 			//e.printStackTrace();

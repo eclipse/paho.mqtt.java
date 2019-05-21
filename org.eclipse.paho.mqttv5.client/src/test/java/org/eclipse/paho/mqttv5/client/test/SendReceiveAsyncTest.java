@@ -15,6 +15,8 @@
 package org.eclipse.paho.mqttv5.client.test;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,17 +38,34 @@ import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.junit.*;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 @Category({OnlineTest.class, MQTTV5Test.class})
+@RunWith(Parameterized.class)
 public class SendReceiveAsyncTest {
 
   static final Class<?> cclass = SendReceiveAsyncTest.class;
   static final String className = cclass.getName();
   static final Logger log = Logger.getLogger(className);
 
-  private static URI serverURI;
+  private URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
   private static String topicPrefix;
+  
+	@Parameters
+	public static Collection<Object[]> data() throws Exception {
+		
+		return Arrays.asList(new Object[][] {     
+          { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }  
+    });
+		
+	}
+	
+	public SendReceiveAsyncTest(URI serverURI) {
+		this.serverURI = serverURI;
+	}
 
 
   /**
@@ -59,7 +78,6 @@ public class SendReceiveAsyncTest {
       String methodName = Utility.getMethodName();
       LoggingUtilities.banner(log, cclass, methodName);
 
-      serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
       topicPrefix = "SendReceiveAsyncTest-" + UUID.randomUUID().toString() + "-";
@@ -717,6 +735,7 @@ public class SendReceiveAsyncTest {
     	    try {
     	  	  pubTokens[i].waitForCompletion(10);
     	    } catch (Exception e) {
+    	    	  log.log(Level.INFO, "Token no not complete:" + i);
     	    	  errors += 1;
     	    }
       }
