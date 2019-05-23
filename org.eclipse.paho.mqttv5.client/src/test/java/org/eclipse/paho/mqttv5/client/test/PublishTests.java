@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.test.client.MqttClientFactoryPaho;
@@ -104,7 +103,7 @@ public class PublishTests {
 		// Publish a message to a random topic
 		MqttMessage testMessage = new MqttMessage("Test Payload".getBytes(), 2, false, new MqttProperties());
 		log.info("Publishing Message to: " + topicPrefix + methodName);
-		IMqttDeliveryToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
+		IMqttToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
 		deliveryToken.waitForCompletion(5000);
 		log.info(deliveryToken.getResponse().toString());
 		log.info("Return codes: " + Arrays.toString(deliveryToken.getReasonCodes()));
@@ -139,7 +138,7 @@ public class PublishTests {
 		long lStartTime = System.nanoTime();
 		int no_of_messages = 10000; // or 70000 
 		for(int i = 0; i < no_of_messages; i++) {
-			IMqttDeliveryToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
+			IMqttToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
 			try
 			{
 				deliveryToken.waitForCompletion(5000);

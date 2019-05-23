@@ -560,7 +560,7 @@ public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener me
 	 * set to false</P>
 	 * @return zero or more delivery tokens
 	 */
-	public IMqttDeliveryToken[] getPendingDeliveryTokens();
+	public IMqttToken[] getPendingTokens();
 	
 	/**
 	 * If manualAcks is set to true, then on completion of the messageArrived callback

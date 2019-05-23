@@ -96,7 +96,6 @@ public class SessionState {
 				}
 			}
 		}
-		//System.out.println(result + " getMessageListener " + subId + " " + topic);
 		return result;
 	}
 	
@@ -110,7 +109,10 @@ public class SessionState {
 		this.todoQueue = todoQueue;
 		try {
 			restore(client);
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void setShouldBeConnected(boolean value) {
@@ -127,11 +129,28 @@ public class SessionState {
 		} catch (Exception e) {}
 	}
 	
+	public MqttToken[] getPendingTokens() {
+		
+		Vector<MqttToken> list = new Vector<MqttToken>();
+		
+		Enumeration<Integer> keys = retryQueue.getKeys();	
+		while (keys.hasMoreElements()) {
+			Integer msgid = keys.nextElement();
+			MqttToken token = out_tokens.get(msgid);
+			list.addElement(out_tokens.get(msgid));
+		}
+		MqttToken[] result = new MqttToken[list.size()];
+		return (MqttToken[]) list.toArray(result);
+	}
+	
 	public void completeMessage(Integer msgid) {
 		out_tokens.remove(msgid);
 		try {
 			persistence.remove(PERSISTENCE_SENT_PREFIX + msgid.toString());
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		retryQueue.remove(msgid);
 	}
 
 	public void clear() {
@@ -190,12 +209,12 @@ public class SessionState {
 	 */
 	protected void restore(MqttAsyncClient client) throws MqttException {
 		final String methodName = "restoreState";
-		Enumeration messageKeys = persistence.keys();
+		Enumeration<String> messageKeys = persistence.keys();
 		System.out.println("restoreState "+messageKeys.hasMoreElements());
 		MqttPersistable persistable;
 		String key;
 		int highestMsgId = nextMsgId;
-		Vector orphanedPubRels = new Vector();
+		Vector<String> orphanedPubRels = new Vector<String>();
 		//@TRACE 600=>
 		log.fine(CLASS_NAME, methodName, "600");
 		
@@ -208,7 +227,6 @@ public class SessionState {
 				if (key.startsWith(PERSISTENCE_RECEIVED_PREFIX)) {
 					//@TRACE 604=inbound QoS 2 publish key={0} message={1}
 					log.fine(CLASS_NAME,methodName,"604", new Object[]{key,message});
-
 					// The inbound messages that we have persisted will be QoS 2 
 					inboundQoS2.restore( Integer.valueOf(message.getMessageId()),message);
 				} else if (key.startsWith(PERSISTENCE_SENT_PREFIX)) {
@@ -217,8 +235,7 @@ public class SessionState {
 					if (persistence.containsKey(getSendConfirmPersistenceKey(sendMessage))) {
 						MqttPersistable persistedConfirm = persistence.get(getSendConfirmPersistenceKey(sendMessage));
 						// QoS 2, and CONFIRM has already been sent...
-						// NO DUP flag is allowed for 3.1.1 spec while it's not clear for 3.1 spec
-						// So we just remove DUP
+						// NO DUP flag is allowed so we just remove DUP
 						MqttPubRel confirmMessage = (MqttPubRel) restoreMessage(key, persistedConfirm);
 						if (confirmMessage != null) {
 							// confirmMessage.setDuplicate(true); // REMOVED
@@ -238,18 +255,16 @@ public class SessionState {
 							//@TRACE 607=outbound QoS 2 publish key={0} message={1}
 							log.fine(CLASS_NAME,methodName, "607", new Object[]{key,message});
 							
-							retryQueue.restore( Integer.valueOf(sendMessage.getMessageId()),sendMessage);
+							retryQueue.restore(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 						} else {
 							//@TRACE 608=outbound QoS 1 publish key={0} message={1}
 							log.fine(CLASS_NAME,methodName, "608", new Object[]{key,message});
 
-							retryQueue.restore( Integer.valueOf(sendMessage.getMessageId()),sendMessage);
+							retryQueue.restore(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 						}
 					}
-					//MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
-					//tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put( Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
-				} else if(key.startsWith(PERSISTENCE_SENT_BUFFERED_PREFIX)){
+				} else if (key.startsWith(PERSISTENCE_SENT_BUFFERED_PREFIX)) {
 					
 					// Buffered outgoing messages that have not yet been sent at all
 					MqttPublish sendMessage = (MqttPublish) message;
@@ -269,9 +284,6 @@ public class SessionState {
 						// Because there is no Puback, we have to trust that this is enough to send the message
 						persistence.remove(key);
 					}
-					
-					//MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
-					//tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put( Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
 				} else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {
 					MqttPubRel pubRelMessage = (MqttPubRel) message;

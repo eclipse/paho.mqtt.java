@@ -22,6 +22,7 @@
  */
 package org.eclipse.paho.mqttv5.client.persist;
 
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
@@ -42,6 +43,7 @@ public class PersistedBuffer {
 		//log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "");
 		this.persistence = persistence;
+		buffer = new ConcurrentHashMap<Integer, MqttWireMessage>();
 	}
 	
 	public void clear() {
@@ -65,6 +67,14 @@ public class PersistedBuffer {
 			persistence.put(persistence_key_prefix + message.getMessageId(), message);
 		}
 		buffer.put(key, message);
+	}
+	
+	public void remove(Integer key) {
+		buffer.remove(key);
+	}
+	
+	public Enumeration<Integer> getKeys() {
+		return buffer.keys();
 	}
 
 }

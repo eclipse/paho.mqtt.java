@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.mqttv5.client.IMqttClient;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -333,7 +333,7 @@ public class WebSocketTest {
     /**
      * @param token  
      */
-    public void deliveryComplete(IMqttDeliveryToken token) {
+    public void deliveryComplete(IMqttToken token) {
       logger2.info("delivery complete");
     }
 

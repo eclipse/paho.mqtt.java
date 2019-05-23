@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -110,13 +109,13 @@ public class TopicAliasReconnectTest {
 			// 2.1 - Send first message, this will have a topic string AND a topic alias.
 			MqttMessage message = new MqttMessage(exampleContent.getBytes(), 2, false, new MqttProperties());
 			log.info("Sending first message, should have a topic String and a topic alias.");
-			IMqttDeliveryToken firstMessageToken = asyncClient.publish(exampleTopic, message);
+			IMqttToken firstMessageToken = asyncClient.publish(exampleTopic, message);
 			firstMessageToken.waitForCompletion(5000);
 
 			// 2.2 - Send second message, this won't have a topic string, but will have a
 			// topic Alias.
 			log.info("Sending second message, should have a blank topic String and a topic alias.");
-			IMqttDeliveryToken secondMessageToken = asyncClient.publish(exampleTopic, message);
+			IMqttToken secondMessageToken = asyncClient.publish(exampleTopic, message);
 			secondMessageToken.waitForCompletion(5000);
 
 			// 3 - Drop the connection
@@ -145,7 +144,7 @@ public class TopicAliasReconnectTest {
 			// 5 - Publish a final message, this message should have both a topic string AND
 			// a topic Alias.
 			log.info("Sending First message after reconnect, should have a topic String and a topic alias.");
-			IMqttDeliveryToken thirdMessageToken = asyncClient.publish(exampleTopic, message);
+			IMqttToken thirdMessageToken = asyncClient.publish(exampleTopic, message);
 			thirdMessageToken.waitForCompletion(5000);
 
 			// We should still be connected.

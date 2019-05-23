@@ -25,7 +25,6 @@ import org.eclipse.paho.common.test.categories.ExternalTest;
 import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -173,7 +172,7 @@ public class SendReceiveAsyncTest {
       mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       IMqttToken connectToken = null;
       IMqttToken subToken = null;
-      IMqttDeliveryToken pubToken = null;
+      IMqttToken pubToken = null;
       IMqttToken disconnectToken = null;
 
       connectToken = mqttClient.connect(null, null);
@@ -245,7 +244,7 @@ public class SendReceiveAsyncTest {
       IMqttToken connectToken;
       IMqttToken subToken;
       IMqttToken unsubToken;
-      IMqttDeliveryToken pubToken;
+      IMqttToken pubToken;
 
       MqttV5Receiver mqttReceiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
@@ -324,7 +323,7 @@ public class SendReceiveAsyncTest {
 
     IMqttToken connectToken;
     IMqttToken subToken;
-    IMqttDeliveryToken pubToken;
+    IMqttToken pubToken;
     IMqttToken disconnectToken;
 
     try {
@@ -415,7 +414,7 @@ public class SendReceiveAsyncTest {
 
     IMqttToken connectToken;
     IMqttToken subToken;
-    IMqttDeliveryToken pubToken;
+    IMqttToken pubToken;
     IMqttToken disconnectToken;
 
     try {
@@ -705,7 +704,7 @@ public class SendReceiveAsyncTest {
       mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       IMqttToken connectToken;
       IMqttToken subToken;
-      IMqttDeliveryToken[] pubTokens = new IMqttDeliveryToken[tokenCount];
+      IMqttToken[] pubTokens = new IMqttToken[tokenCount];
 
       MqttV5Receiver mqttReceiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");

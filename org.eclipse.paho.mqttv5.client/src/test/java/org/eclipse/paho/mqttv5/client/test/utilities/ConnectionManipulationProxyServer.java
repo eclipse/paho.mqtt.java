@@ -254,4 +254,8 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	public boolean isPortSet() {
 		return portSet;
 	}
+	
+	public String getHost() {
+		return host;
+	}
 }

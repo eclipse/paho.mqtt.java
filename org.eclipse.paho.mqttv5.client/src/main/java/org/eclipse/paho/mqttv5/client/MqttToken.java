@@ -41,14 +41,11 @@ import io.vertx.core.net.*;
  */
 
 public class MqttToken implements IMqttToken {
-	/**
-	 * A reference to the the class that provides most of the implementation of the
-	 * MqttToken. MQTT application programs must not use the internal class.
-	 */
 	private MqttException exception = null;
 	private final CountDownLatch countDownLatch = new CountDownLatch(1);
 	private Object userContext = null;
 	private MqttWireMessage response = null;
+	private MqttWireMessage pending = null;
 	private int messageId;
 	private int[] reasonCodes;
 	private IMqttActionListener listener = null;
@@ -95,7 +92,6 @@ public class MqttToken implements IMqttToken {
 	}
 
 	public void waitForCompletion(long timeout) throws MqttException {
-		//System.out.println("waiting for completion "+timeout);
 		boolean result = false;
 		try {
 			result = countDownLatch.await((timeout == -1) ? 99999 : timeout, TimeUnit.MILLISECONDS);
@@ -105,7 +101,6 @@ public class MqttToken implements IMqttToken {
 		if (result == false) {
 			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_TIMEOUT);
 		}
-		//System.out.println("wait complete");
 	}
 
 	public IMqttAsyncClient getClient() {
@@ -152,10 +147,17 @@ public class MqttToken implements IMqttToken {
 		this.response = response;
 	}
 
-	public MqttProperties getMessageProperties() {
+	public MqttProperties getResponseProperties() {
 		return (response == null) ? null : response.getProperties();
 	}
 	
+	public MqttWireMessage getPendingMessage() {
+		return pending;
+	}
+	
+	public void setPendingMessage(MqttWireMessage pending) {
+		this.pending = pending;
+	}	
 	
 	public void setReasonCodes(int[] codes) {
 		this.reasonCodes = codes;

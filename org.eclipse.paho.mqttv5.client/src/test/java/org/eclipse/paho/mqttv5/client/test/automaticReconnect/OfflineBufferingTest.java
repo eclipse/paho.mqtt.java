@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.DisconnectedBufferOptions;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -87,7 +86,7 @@ public class OfflineBufferingTest {
 
 		// Tokens
 		IMqttToken connectToken;
-		IMqttDeliveryToken pubToken;
+		IMqttToken pubToken;
 
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
@@ -377,7 +376,7 @@ public class OfflineBufferingTest {
 
 		// Tokens
 		IMqttToken connectToken;
-		IMqttDeliveryToken pubToken;
+		IMqttToken pubToken;
 
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();
@@ -505,7 +504,7 @@ public class OfflineBufferingTest {
 
 		// Tokens
 		IMqttToken connectToken;
-		IMqttDeliveryToken pubToken;
+		IMqttToken pubToken;
 
 		// Client Options
 		MqttConnectionOptions options = new MqttConnectionOptions();

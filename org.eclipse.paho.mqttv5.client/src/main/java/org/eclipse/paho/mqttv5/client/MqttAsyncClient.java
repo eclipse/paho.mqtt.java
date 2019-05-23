@@ -556,17 +556,16 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 		if (this.persistence == null) {
 			this.persistence = new MemoryPersistence();
 		}
+		if (persistence != null) {
+			this.persistence.open(clientId);
+		}
+		
 		internal = new ClientInternal(this, persistence);
 		internal.setClientId(clientId);
 		connectionstate = internal.getConnectionState();
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
-
-		if (persistence != null) {
-			this.persistence.open(clientId);
-		}
-
 				
 		this.topics = new Hashtable<String, MqttTopic>();
 	}
@@ -579,17 +578,6 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	protected static boolean Character_isHighSurrogate(char ch) {
 		return (ch >= MIN_HIGH_SURROGATE) && (ch <= MAX_HIGH_SURROGATE);
 	}
-
-	/*private String getHostName(String uri) {
-		int portIndex = uri.indexOf(':');
-		if (portIndex == -1) {
-			portIndex = uri.indexOf('/');
-		}
-		if (portIndex == -1) {
-			portIndex = uri.length();
-		}
-		return uri.substring(0, portIndex);
-	}*/
 
 	/*
 	 * (non-Javadoc)
@@ -663,87 +651,6 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 		return connectToken;
 	}
 	
-	/*
-	public static VariableByteInteger readVariableByteInteger(Buffer in) throws IOException {
-		byte digit;
-		int value = 0;
-		int multiplier = 1;
-		int count = 0;
-
-		do {
-			digit = in.getByte(count + 1);
-			count++;
-			value += ((digit & 0x7F) * multiplier);
-			multiplier *= 128;
-		} while ((digit & 0x80) != 0);
-
-		if (value < 0 || value > MqttDataTypes.VARIABLE_BYTE_INT_MAX) {
-			throw new IOException("This property must be a number between 0 and " + 
-					MqttDataTypes.VARIABLE_BYTE_INT_MAX
-					+ ". Read value was: " + value);
-		}
-		return new VariableByteInteger(value, count);
-	}
-	
-	Buffer tempBuffer = Buffer.buffer();
-	VariableByteInteger remlen = null;
-	int packet_len = 0;
-	
-	private MqttWireMessage getPacket(Buffer buffer) {
-		MqttWireMessage msg = null;
-		try {
-			if (tempBuffer.length() == 0) {
-				if (buffer == null) {
-					return null; // no more MQTT packets in the data
-				}
-				remlen = readVariableByteInteger(buffer);
-				packet_len = remlen.getValue() + remlen.getEncodedLength() + 1;
-				if (packet_len <= buffer.length()) { // we have at least 1 complete packet
-					msg = MqttWireMessage.createWireMessage(buffer.getBytes(0, packet_len));
-					// put any unused data into the temporary buffer
-					if (buffer.length() > packet_len) {
-						tempBuffer.appendBuffer(buffer, packet_len, buffer.length() - packet_len);
-						remlen = null; // just in case there aren't enough bytes for the VBI
-						remlen = readVariableByteInteger(tempBuffer);
-						packet_len = remlen.getValue() + remlen.getEncodedLength() + 1;
-					}
-				} else {
-					// incomplete packet
-					tempBuffer.appendBuffer(buffer);
-					return null;
-				}
-			} else {
-				if (buffer != null) {
-					tempBuffer.appendBuffer(buffer);
-				}
-				if (remlen == null) {
-					remlen = readVariableByteInteger(tempBuffer);
-					packet_len = remlen.getValue() + remlen.getEncodedLength() + 1;
-				}
-				if (tempBuffer.length() >= packet_len) {
-					msg = MqttWireMessage.createWireMessage(tempBuffer.getBytes(0, packet_len));
-					if (tempBuffer.length() > packet_len) {
-						// leave unused data in the temporary buffer
-						tempBuffer = tempBuffer.getBuffer(packet_len, tempBuffer.length());
-						remlen = null; // just in case there aren't enough bytes for the VBI
-						remlen = readVariableByteInteger(tempBuffer);
-						packet_len = remlen.getValue() + remlen.getEncodedLength() + 1;
-					} else {
-						tempBuffer = Buffer.buffer();
-					}
-				} else {
-					return null;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		return msg;
-	}
-		*/
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1254,7 +1161,7 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 
 	
 	@Override
-	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException {
+	public boolean removeMessage(IMqttToken token) throws MqttException {
 		return false;
 	}
 
@@ -1287,8 +1194,19 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	 * org.eclipse.paho.mqttv5.client.IMqttAsyncClient#getPendingDeliveryTokens()
 	 */
 	@Override
-	public IMqttDeliveryToken[] getPendingDeliveryTokens() {
-		return new IMqttDeliveryToken[] {};
+	public IMqttToken[] getPendingTokens() {
+		return internal.getSessionState().getPendingTokens();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.paho.mqttv5.client.IMqttAsyncClient#getInFlightMessageCount()
+	 */
+	@Override
+	public int getInFlightMessageCount() {
+		return getPendingTokens().length;
 	}
 
 	/*
@@ -1300,7 +1218,7 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	 * org.eclipse.paho.mqttv5.client.MqttActionListener)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
+	public IMqttToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
 			IMqttActionListener callback) throws MqttException, MqttPersistenceException {
 		MqttMessage message = new MqttMessage(payload);
 		message.setProperties(new MqttProperties());
@@ -1317,7 +1235,7 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	 * byte[], int, boolean)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained)
+	public IMqttToken publish(String topic, byte[] payload, int qos, boolean retained)
 			throws MqttException, MqttPersistenceException {
 		return this.publish(topic, payload, qos, retained, null, null);
 	}
@@ -1330,7 +1248,7 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	 * org.eclipse.paho.mqttv5.common.MqttMessage)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, MqttMessage message)
+	public IMqttToken publish(String topic, MqttMessage message)
 			throws MqttException, MqttPersistenceException {
 		return this.publish(topic, message, null, null);
 	}
@@ -1345,7 +1263,7 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	 * org.eclipse.paho.mqttv5.common.packet.MqttProperties)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext,
+	public IMqttToken publish(String topic, MqttMessage message, Object userContext,
 			IMqttActionListener callback) throws MqttException, MqttPersistenceException {
 		final String methodName = "publish";
 		// @TRACE 111=< topic={0} message={1}userContext={1} callback={2}
@@ -1354,10 +1272,10 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 		// Checks if a topic is valid when publishing a message.
 		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */, true);
 
-		MqttDeliveryToken token = new MqttDeliveryToken(this, getClientId());
+		MqttToken token = new MqttToken(this, getClientId());
 		token.setActionCallback(callback);
 		token.setUserContext(userContext);
-		token.setMessage(message);
+		//token.setMessage(message);
 
 		internal.publish(topic, message, token);
 
@@ -1430,17 +1348,6 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	@Override
 	public void deleteBufferedMessage(int bufferIndex) {
 		internal.deleteBufferedMessage(bufferIndex);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.paho.mqttv5.client.IMqttAsyncClient#getInFlightMessageCount()
-	 */
-	@Override
-	public int getInFlightMessageCount() {
-		return 0; //this.comms.getActualInFlight();
 	}
 
 	/*

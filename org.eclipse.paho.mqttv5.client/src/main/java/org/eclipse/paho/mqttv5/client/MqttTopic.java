@@ -64,7 +64,7 @@ public class MqttTopic {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public MqttDeliveryToken publish(byte[] payload, int qos, boolean retained)
+	public MqttToken publish(byte[] payload, int qos, boolean retained)
 			throws MqttException, MqttPersistenceException {
 		MqttMessage message = new MqttMessage(payload);
 		message.setQos(qos);
@@ -88,8 +88,8 @@ public class MqttTopic {
 	 * @throws MqttPersistenceException
 	 *             if an error occurs persisting the message
 	 */
-	public MqttDeliveryToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
-		MqttDeliveryToken token = new MqttDeliveryToken(internal.getClient());
+	public MqttToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
+		MqttToken token = new MqttToken(internal.getClient());
 		internal.publish(name, message, token);
 		return token;
 	}

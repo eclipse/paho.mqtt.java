@@ -2,6 +2,8 @@ package org.eclipse.paho.mqttv5.client.test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,7 +12,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
@@ -19,7 +20,6 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.internal.MqttPersistentData;
-import org.eclipse.paho.mqttv5.client.test.connectionLoss.ConnectionLossTest;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.ConnectionManipulationProxyServer;
@@ -37,33 +37,46 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 @Category({OnlineTest.class, MQTTV5Test.class})
+@RunWith(Parameterized.class)
 public class PersistenceTests implements MqttCallback {
 	static final Class<?> cclass = PersistenceTests.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 	
-	private static URI serverURI;
+	private URI serverURI;
 	static ConnectionManipulationProxyServer proxy;
+	
+	@Parameters
+	public static Collection<Object[]> data() throws Exception {
+		
+		return Arrays.asList(new Object[][] {     
+            { TestProperties.getServerURI() } /*, { TestProperties.getWebSocketServerURI() }  */
+      });
+		
+	}
+	
+	public PersistenceTests(URI serverURI) throws Exception {
+		this.serverURI = serverURI;
+		startProxy();
+	}
+	
+	public void startProxy() throws Exception{
+		// Use 0 for the first time.
+		proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 0);
+		proxy.startProxy();
+		while (!proxy.isPortSet()) {
+			Thread.sleep(0);
+		}
+		log.log(Level.INFO, "Proxy Started, port set to: " + proxy.getLocalPort());
+	}
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		try {
-			String methodName = Utility.getMethodName();
-			LoggingUtilities.banner(log, cclass, methodName);
-			serverURI = TestProperties.getServerURI();
-			// Use 0 for the first time.
-			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 0);
-			proxy.startProxy();
-			while (!proxy.isPortSet()) {
-				Thread.sleep(0);
-			}
-			log.log(Level.INFO, "Proxy Started, port set to: " + proxy.getLocalPort());
-		} catch (Exception exception) {
-			log.log(Level.SEVERE, "caught exception:", exception);
-			throw exception;
-		}
 
 	}
 
@@ -71,7 +84,6 @@ public class PersistenceTests implements MqttCallback {
 	public static void tearDownAfterClass() throws Exception {
 		log.info("Tests finished, stopping proxy");
 		proxy.stopProxy();
-
 	}
 	
 	@After
@@ -91,7 +103,8 @@ public class PersistenceTests implements MqttCallback {
 		options.setSessionExpiryInterval(99999L); // Ensure the session state is not cleaned up on disconnect
 		options.setKeepAliveInterval(keepAlive);
 
-		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), "testClientId");
+		MqttAsyncClient client = new MqttAsyncClient(serverURI.getScheme()+"://"
+				+ proxy.getHost()+":" + proxy.getLocalPort(), methodName);
 		client.setCallback(this);
 		proxy.enableProxy();
 		IMqttToken tok = client.connect(options);
@@ -112,13 +125,20 @@ public class PersistenceTests implements MqttCallback {
 			}
 		}, 200); // delay in milliseconds
 		
+		messagesArrived = 0;
+		int messagesSent = 0;
 		// send some messages
 		while (client.isConnected()) {
 			client.publish("username/clientId/abc", "test".getBytes(), 2, false);
+			messagesSent++;
 			Thread.sleep(10);
 		}
 		
 		// Now check that there are some inflight messages
+		Assert.assertTrue("There should be some inflight messages", 
+				client.getPendingTokens().length > 0);
+		
+		log.info("Number of tokens are "+client.getPendingTokens().length);
 		
 		// reconnect, so any inflight messages should be continued
 		proxy.enableProxy();
@@ -126,13 +146,18 @@ public class PersistenceTests implements MqttCallback {
 		tok = client.connect(options);
 		tok.waitForCompletion();
 
+		int limit = 5000, interval = 10;
+		int current_delay = 0;
 		// Now ensure that any outstanding messages are received
+		while (messagesArrived < messagesSent && current_delay < limit) {
+			Thread.sleep(interval);
+			current_delay += interval;
+		}
 		
 		client.disconnect(0);
 		client.close();
 	}
 
-	
 	
 	@Test
 	/**
@@ -140,11 +165,13 @@ public class PersistenceTests implements MqttCallback {
 	 * specifically that Topic Aliases are not persisted.
 	 */
 	public void persistMessageWithTopicAlias() throws URISyntaxException, MqttException {
-		serverURI = TestProperties.getServerURI();
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		
 		TestByteArrayMemoryPersistence memoryPersistence = new TestByteArrayMemoryPersistence();
 
 		// Create an MqttAsyncClient with a null Client ID.
-		MqttAsyncClient client = new MqttAsyncClient(serverURI.toString(), "testClientId", memoryPersistence);
+		MqttAsyncClient client = new MqttAsyncClient(serverURI.toString(), methodName, memoryPersistence);
 		
 		MqttConnectionOptions options = new MqttConnectionOptions();
 		options.setTopicAliasMaximum(10);
@@ -155,7 +182,7 @@ public class PersistenceTests implements MqttCallback {
 		
 		// Publish a message at QoS 2
 		MqttMessage message = new MqttMessage("Test Message".getBytes(), 2, false, null);
-		IMqttDeliveryToken deliveryToken = client.publish("testTopic", message);
+		IMqttToken deliveryToken = client.publish("testTopic", message);
 		deliveryToken.waitForCompletion(1000);
 		
 		// wouldn't that message have been removed from persistence by now? - IGC
@@ -177,13 +204,99 @@ public class PersistenceTests implements MqttCallback {
 		
 	}
 	
+	@Test
+	public void testClientRecreate() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		final int keepAlive = 15;
+
+		MqttConnectionOptions options = new MqttConnectionOptions();
+		options.setCleanStart(true);
+		options.setSessionExpiryInterval(99999L); // Ensure the session state is not cleaned up on disconnect
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttAsyncClient client = new MqttAsyncClient(serverURI.getScheme()+"://"
+				+ proxy.getHost()+":" + proxy.getLocalPort(), methodName);
+		client.setCallback(this);
+		proxy.enableProxy();
+		IMqttToken tok = client.connect(options);
+		tok.waitForCompletion();
+		
+		String topic = "username/clientId/abc";
+		tok = client.subscribe(new MqttSubscription(topic, 2));
+		tok.waitForCompletion();
+
+		log.info((new Date()) + " - Connected.");
+		
+		// start a background task to disconnect the proxy while messages are being sent
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+				log.info("Cutting connection");
+				proxy.disableProxy();
+			}
+		}, 200); // delay in milliseconds
+		
+		messagesArrived = 0;
+		int messagesSent = 0;
+		// send some messages
+		while (client.isConnected()) {
+			client.publish("username/clientId/abc", "test".getBytes(), 2, false);
+			messagesSent++;
+			Thread.sleep(10);
+		}
+		
+		// Now check that there are some inflight messages
+		int pending_token_count = client.getPendingTokens().length;
+		Assert.assertTrue("There should be some inflight messages", pending_token_count > 0);
+		
+		// Check that some messages have arrived
+		Assert.assertTrue("Some messages should have arrived", messagesArrived > 0);
+		
+		log.info("Number of tokens are "+pending_token_count);
+
+		// close and free the client
+		client.disconnect(0);
+		client.close();
+		
+		// recreate and connect, so any inflight messages should be continued
+		proxy.enableProxy();
+		client = new MqttAsyncClient(serverURI.getScheme()+"://"
+				+ proxy.getHost()+":" + proxy.getLocalPort(), methodName);
+		client.setCallback(this);
+		options.setCleanStart(false);
+		
+		// Now check that there are some inflight messages
+		Assert.assertTrue("There should be some inflight messages", 
+				client.getPendingTokens().length > 0);
+		Assert.assertTrue("Pending token count should equal that before recreate", 
+				client.getPendingTokens().length == pending_token_count);
+		
+		tok = client.connect(options);
+		tok.waitForCompletion();
+
+		int limit = 5000, interval = 10;
+		int current_delay = 0;
+		// Now ensure that any outstanding messages are received
+		while (messagesArrived < messagesSent && current_delay < limit) {
+			Thread.sleep(interval);
+			current_delay += interval;
+		}
+		
+		client.disconnect(0);
+		client.close();
+	}
+	
+	private int messagesArrived = 0;
+	
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		log.info("Message Arrived on " + topic + " with " + new String(message.getPayload()));
+		messagesArrived++;
 	}
 
 	@Override
-	public void deliveryComplete(IMqttDeliveryToken token) {
+	public void deliveryComplete(IMqttToken token) {
 		// log.info("Delivery Complete: " + token.getMessageId());
 	}
 	

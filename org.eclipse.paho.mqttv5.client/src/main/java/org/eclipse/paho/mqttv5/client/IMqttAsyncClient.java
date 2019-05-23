@@ -16,7 +16,7 @@
 
 package org.eclipse.paho.mqttv5.client;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.util.Debug;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -695,7 +695,7 @@ public interface IMqttAsyncClient {
 	 * @return if the message is removed then true, otherwise false
 	 * @throws MqttException if there was an error removing the message.
 	 */
-	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException;
+	public boolean removeMessage(IMqttToken token) throws MqttException;
 
 	/**
 	 * If manualAcks is set to true, then on completion of the messageArrived
@@ -724,7 +724,7 @@ public interface IMqttAsyncClient {
 	void messageArrivedComplete(int messageId, int qos) throws MqttException;
 
 	/**
-	 * Returns the delivery tokens for any outstanding publish operations.
+	 * Returns the tokens for any outstanding publish operations.
 	 * <p>
 	 * If a client has been restarted and there are messages that were in the
 	 * process of being delivered when the client stopped this method returns a
@@ -740,7 +740,7 @@ public interface IMqttAsyncClient {
 	 *
 	 * @return zero or more delivery tokens
 	 */
-	IMqttDeliveryToken[] getPendingDeliveryTokens();
+	IMqttToken[] getPendingTokens();
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -777,7 +777,7 @@ public interface IMqttAsyncClient {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
+	IMqttToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
 			IMqttActionListener callback) throws MqttException, MqttPersistenceException;
 
 	/**
@@ -809,7 +809,7 @@ public interface IMqttAsyncClient {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained)
+	IMqttToken publish(String topic, byte[] payload, int qos, boolean retained)
 			throws MqttException, MqttPersistenceException;
 
 	/**
@@ -831,7 +831,7 @@ public interface IMqttAsyncClient {
 	 *             instance client not connected.
 	 * @see #publish(String, MqttMessage, Object, IMqttActionListener)
 	 */
-	IMqttDeliveryToken publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException;
+	IMqttToken publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -919,7 +919,7 @@ public interface IMqttAsyncClient {
 	 *             instance client not connected.
 	 * @see MqttMessage
 	 */
-	IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext, IMqttActionListener callback)
+	IMqttToken publish(String topic, MqttMessage message, Object userContext, IMqttActionListener callback)
 			throws MqttException, MqttPersistenceException;
 
 	/**

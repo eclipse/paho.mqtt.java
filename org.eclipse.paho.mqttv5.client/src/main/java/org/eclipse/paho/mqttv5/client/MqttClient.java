@@ -474,8 +474,8 @@ public class MqttClient implements IMqttClient {
 	 * 
 	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#getPendingDeliveryTokens()
 	 */
-	public IMqttDeliveryToken[] getPendingDeliveryTokens() {
-		return aClient.getPendingDeliveryTokens();
+	public IMqttToken[] getPendingTokens() {
+		return aClient.getPendingTokens();
 	}
 
 	/*

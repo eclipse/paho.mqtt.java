@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -404,7 +404,7 @@ public class MqttV5Receiver implements MqttCallback {
   /**
    * @param arg0
    */
-  public void deliveryComplete(IMqttDeliveryToken arg0) {
+  public void deliveryComplete(IMqttToken arg0) {
     // Auto-generated method stub
   }
 
@@ -412,7 +412,7 @@ public class MqttV5Receiver implements MqttCallback {
    * @param arg0
    * @param arg1
    */
-  public void deliveryFailed(IMqttDeliveryToken arg0, MqttException arg1) {
+  public void deliveryFailed(IMqttToken arg0, MqttException arg1) {
     // Auto-generated method stub
   }
 

@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.common.test.categories.MQTTV5Test;
 import org.eclipse.paho.common.test.categories.OnlineTest;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.test.client.MqttClientFactoryPaho;
@@ -98,7 +97,7 @@ public class SubscribeTests {
 		messageProps.setUserProperties(userProps);
 		MqttMessage testMessage = new MqttMessage("Test Payload".getBytes(), 2, false, messageProps);
 		log.info("Publishing Message with User Properties to: " + topicPrefix + methodName);
-		IMqttDeliveryToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
+		IMqttToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
 		deliveryToken.waitForCompletion(5000);
 
 		log.info("Waiting for delivery and validating message.");

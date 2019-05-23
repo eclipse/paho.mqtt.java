@@ -581,6 +581,7 @@ public class ClientInternal {
 		}
 		
 		MqttPublish publish = new MqttPublish(topic, message, message.getProperties());
+		token.setPendingMessage(publish);
 		if (message.getQos() > 0) {
 			publish.setMessageId(sessionstate.getNextMessageId()); // getNextId
 			sessionstate.out_tokens.put(new Integer(publish.getMessageId()), token);
