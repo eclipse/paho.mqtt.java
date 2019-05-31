@@ -154,7 +154,7 @@ public class ToDoQueue {
 			remove1message = false;
 		}
 		if (!messages.containsKey(seqno)) {
-			// it was already removed, by deleteMsg
+			//System.out.println("it was already removed, by deleteMsg "+seqno);
 			return;
 		}
 		MqttWireMessage mqttmessage = messages.remove(seqno);
@@ -193,7 +193,7 @@ public class ToDoQueue {
 			sessionExpiry = new Long(0L);
 		}
 		if (sessionExpiry >= 0L /*&& this.persistence != null*/) {
-			internal.getSessionState().addRetryQueue(publish, hashcode);
+			internal.getSessionState().addRetryQueue(publish);
 		}
 
 		if (internal.socket != null) {
@@ -212,19 +212,34 @@ public class ToDoQueue {
 						}
 					});
 		} else {
-			internal.websocket.writeBinaryMessage(Buffer.buffer(publish.serialize()));
-			connectionstate.registerOutboundActivity();
-			if (publish.getQoS() == 0) {
-				MqttToken token = internal.out_hash_tokens.remove(hashcode);
-				token.setComplete();
-			}
+			internal.websocket.writeBinaryMessage(Buffer.buffer(publish.serialize()),
+					res1 -> {
+						if (res1.succeeded()) {
+							connectionstate.registerOutboundActivity();
+							if (publish.getQoS() == 0) {
+								MqttToken token = internal.out_hash_tokens.remove(hashcode);
+								token.setComplete();
+							}
+						} else {
+							System.out.println("publish fail" + res1);
+							// If the socket write fails, then we should remove it from persistence.
+							pause();
+						}
+					});
 
 		}
 	}
 	
 	private void write(MqttWireMessage subscribe) throws MqttException {
 		if (internal.websocket != null) {
-			internal.websocket.writeBinaryMessage(Buffer.buffer(subscribe.serialize()));
+			internal.websocket.writeBinaryMessage(Buffer.buffer(subscribe.serialize()),
+					res1 -> {
+						if (res1.succeeded()) {
+							connectionstate.registerOutboundActivity();
+						} else {
+							System.out.println("subscribe fail");
+						}
+					});
 			connectionstate.registerOutboundActivity();
 		} else {
 			internal.socket.write(Buffer.buffer(subscribe.serialize()),
@@ -242,6 +257,7 @@ public class ToDoQueue {
 	public MqttWireMessage removeOldest() {
 		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
 		Collections.sort(keys);
+		//System.out.println("removeOldest: removing key "+keys.get(0));
 		MqttWireMessage result = messages.remove(keys.get(0));
 		keys = new LinkedList<Integer>(messages.keySet()); 
 		return result;
@@ -252,6 +268,7 @@ public class ToDoQueue {
 		// for a new message if the buffer is full
 		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
 		Collections.sort(keys);
+		//System.out.println("removeMessage: removing key "+keys.get(index));
 		return messages.remove(keys.get(index));
 	}
 	

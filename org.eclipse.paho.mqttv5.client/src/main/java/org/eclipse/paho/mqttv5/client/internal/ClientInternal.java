@@ -2,6 +2,7 @@ package org.eclipse.paho.mqttv5.client.internal;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.eclipse.paho.mqttv5.client.DisconnectedBufferOptions;
@@ -11,6 +12,7 @@ import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttToken;
+import org.eclipse.paho.mqttv5.client.persist.PersistedBuffer;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.MqttSecurityException;
@@ -19,6 +21,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttConnAck;
 import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
+import org.eclipse.paho.mqttv5.common.packet.MqttPersistableWireMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingReq;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingResp;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
@@ -42,6 +45,7 @@ import io.vertx.core.http.CaseInsensitiveHeaders;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
+import io.vertx.core.http.WebSocketConnectOptions;
 import io.vertx.core.http.WebsocketVersion;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetSocket;
@@ -210,45 +214,83 @@ public class ClientInternal {
 						acktoken.setReasonCodes(c);
 					}
 					acktoken.setResponse(msg);
-					sessionstate.completeMessage(new Integer(msg.getMessageId()));
+					sessionstate.completeOutboundMessage(new Integer(msg.getMessageId()));
 					acktoken.setComplete();
 				}
 			} else if (msg instanceof MqttPublish) {
 				IMqttMessageListener listener = sessionstate.getMessageListener(((MqttPublish) msg).getProperties().getSubscriptionIdentifier(), 
 						((MqttPublish) msg).getTopicName());
-				if (listener != null) {
-					listener.messageArrived(((MqttPublish) msg).getTopicName(), 
-							((MqttPublish) msg).getMessage());
-				}	
-				if (client.getCallback() != null) {
-					client.getCallback().messageArrived(((MqttPublish) msg).getTopicName(), 
-							((MqttPublish) msg).getMessage());
+							
+				Enumeration<Integer> keys = sessionstate.getInboundQoS2().getKeys();
+				String keydata = new String();
+				while (keys.hasMoreElements()) {
+					keydata += keys.nextElement() + " ";
 				}
-				if (((MqttPublish) msg).getQoS() == 1) {
-					MqttPubAck puback = new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, 
-							msg.getMessageId(), null);
+				
+				//System.out.println("*** keys "+keydata);
+				//System.out.println("111 "+msg.getMessageId() + " " + sessionstate.getInboundQoS2().get(msg.getMessageId())
+				//		+ " " + ((MqttPublish) msg).getQoS());
+				
+				if (sessionstate.getInboundQoS2().get(msg.getMessageId()) == null) {
+					// Don't deliver messages if that's already been attempted
+					if (listener != null) {
+						listener.messageArrived(((MqttPublish) msg).getTopicName(), 
+								((MqttPublish) msg).getMessage());
+					}	
+					if (client.getCallback() != null) {
+						client.getCallback().messageArrived(((MqttPublish) msg).getTopicName(), 
+								((MqttPublish) msg).getMessage());
+					}
+				}
+				if (((MqttPublish) msg).getQoS() == 0) {
+				} else {
+					Buffer outbuffer = null;
+					if (((MqttPublish) msg).getQoS() == 1) {
+						MqttPubAck puback = new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS, 
+								msg.getMessageId(), null);
+						outbuffer = Buffer.buffer(puback.serialize());
+					} else if (((MqttPublish) msg).getQoS() == 2) {
+						MqttPubRec pubrec = new MqttPubRec(MqttReturnCode.RETURN_CODE_SUCCESS, 
+								msg.getMessageId(), null);
+						outbuffer = Buffer.buffer(pubrec.serialize());
+						sessionstate.addInboundQoS2((MqttPublish)msg);
+						//System.out.println("222 "+sessionstate.getInboundQoS2().get(msg.getMessageId()));
+					}
 					if (websocket != null) {
-						websocket.writeBinaryMessage(Buffer.buffer(puback.serialize()));
-						connectionstate.registerOutboundActivity();
+						websocket.writeBinaryMessage(outbuffer, 
+								res1 -> {
+									if (!res1.succeeded()) {
+										connectionstate.registerOutboundActivity();
+									}
+								});
 					} else {
-						socket.write(Buffer.buffer(puback.serialize()),
+						socket.write(outbuffer,
 								res1 -> {
 									if (!res1.succeeded()) {
 										connectionstate.registerOutboundActivity();
 									}
 								});
 					}
-
 				}
 			} else if (msg instanceof MqttPubRec) {
 				MqttToken acktoken = sessionstate.out_tokens.get(new Integer(msg.getMessageId()));
 				MqttPubRel pubrel = new MqttPubRel(MqttReturnCode.RETURN_CODE_SUCCESS, 
 						msg.getMessageId(),
 						msg.getProperties());
+				
+				// change publish message to pubrel in retry queue 
+				// ToDO: update persistence as well
+				sessionstate.getRetryQueue().remove(msg.getMessageId());
+				sessionstate.addRetryQueue(pubrel);
+				
 				acktoken.setReasonCodes(msg.getReasonCodes());
 				if (websocket != null) {
-					websocket.writeBinaryMessage(Buffer.buffer(pubrel.serialize()));
-					connectionstate.registerOutboundActivity();
+					websocket.writeBinaryMessage(Buffer.buffer(pubrel.serialize()),
+							res1 -> {
+								if (!res1.succeeded()) {
+									connectionstate.registerOutboundActivity();
+								}
+							});
 				} else {
 					socket.write(Buffer.buffer(pubrel.serialize()),
 							res1 -> {
@@ -256,6 +298,26 @@ public class ClientInternal {
 									connectionstate.registerOutboundActivity();
 								}
 							});
+				}
+			} else if (msg instanceof MqttPubRel) {
+				MqttPubComp pubcomp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, 
+						msg.getMessageId(),
+						msg.getProperties());
+				sessionstate.getInboundQoS2().remove(msg.getMessageId());
+				if (websocket != null) {
+						websocket.writeBinaryMessage(Buffer.buffer(pubcomp.serialize()),
+								res1 -> {
+									if (!res1.succeeded()) {
+										connectionstate.registerOutboundActivity();
+									}
+								});
+					} else {
+						socket.write(Buffer.buffer(pubcomp.serialize()),
+								res1 -> {
+									if (!res1.succeeded()) {
+										connectionstate.registerOutboundActivity();
+									}
+								});
 				}
 			} else if (msg instanceof MqttPingResp) {
 				connectionstate.pingReceived();
@@ -398,7 +460,6 @@ public class ClientInternal {
 				handleData(buffer, userToken);
 			});
 			socket.closeHandler(v -> {
-				//System.out.println("CloseHandler "+v);
 				connectionEnd();
 				System.out.println("The socket has been closed "+v);
 				if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
@@ -447,6 +508,14 @@ public class ClientInternal {
 		
 		MultiMap headers = new CaseInsensitiveHeaders();
 		wsclient = createWSClient(uri);
+		WebSocketConnectOptions wsopts = new WebSocketConnectOptions();
+		wsopts.setPort(uri.getPort());
+		wsopts.setHost(uri.getHost());
+		//wsopts.setVersion(WebsocketVersion.V13);
+		//wsopts.setHeaders(headers);
+		wsopts.setURI("/mqtt");
+		wsopts.addSubProtocol("mqtt");
+		//wsclient.websocket(wsopts, websocket -> {
 		wsclient.websocket(uri.getPort(), uri.getHost(), "/mqtt", headers, 
 				WebsocketVersion.V13, "mqtt", 
 				websocket -> {
@@ -454,7 +523,6 @@ public class ClientInternal {
 				handleData(buffer, userToken);
 			});
 			websocket.closeHandler(v -> {
-				//System.out.println("CloseHandler "+v);
 				connectionEnd();
 				System.out.println("The websocket has been closed "+v);
 				if (options.isAutomaticReconnect() && sessionstate.getShouldBeConnected()) {
@@ -529,6 +597,10 @@ public class ClientInternal {
 	
 	private void connectionStart(MqttProperties properties) {
 		//System.out.println("DEBUG - connectionStart");
+		connectionstate = new ConnectionState(this);
+		if (client.getConnectOpts().isCleanStart()) {
+			sessionstate.clear();
+		}
 		sessionstate.setShouldBeConnected(true);
 		connected = true;
 		String assigned_clientid = properties.getAssignedClientIdentifier();	
@@ -544,7 +616,8 @@ public class ClientInternal {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		todoQueue.resume();
+		retryMessages();
+		//System.out.println("**** Connected "+sessionstate.getInboundQoS2().size());
 	}
 	
 	private void connectionEnd() {
@@ -552,9 +625,63 @@ public class ClientInternal {
 		connected = false;
 		if (client.getConnectOpts().getSessionExpiryInterval() == null || 
 				client.getConnectOpts().getSessionExpiryInterval() == 0) {
+			connectionstate = new ConnectionState(this);
 			sessionstate.clear();
 		}
 	}
+	
+	public void retryMessages() {
+		
+		Enumeration<Integer> keys = sessionstate.getRetryQueue().getKeys();
+		
+		retryMessage(keys);
+		//System.out.println("====== retry queue " +sessionstate.getRetryQueue().size());
+	}
+	
+	
+	public void retryMessage(Enumeration<Integer> keys) {	
+		if (keys.hasMoreElements()) {
+			PersistedBuffer retryQueue = sessionstate.getRetryQueue();
+			Integer key = keys.nextElement();
+			byte[] message = null;
+			
+			try {
+				message = retryQueue.get(key).serialize();
+			} catch (MqttException e) {
+				e.printStackTrace();
+				return;
+			}
+			// TODO: this doesn't cater for the receive maximum setting, yet
+			if (websocket != null) {
+				websocket.writeBinaryMessage(Buffer.buffer(message),
+						res1 -> {
+							if (res1.succeeded()) {
+								connectionstate.registerOutboundActivity();
+								retryMessage(keys);
+							} else {
+								System.out.println("Retry message fail");
+							}
+						});
+				connectionstate.registerOutboundActivity();
+			} else {
+				//System.out.println("==== retrying "+retryQueue.get(key));
+				socket.write(Buffer.buffer(message),
+						res1 -> {
+							if (res1.succeeded()) {
+								System.out.println("Retry message succeeded");
+								connectionstate.registerOutboundActivity();
+								retryMessage(keys);
+							} else {
+								System.out.println("Retry message fail");
+							}
+						});
+			}
+		} else {
+			//System.out.println("Resume todo queue");
+			todoQueue.resume(); 
+		}
+	}
+	
 	
 	public void subscribe(MqttSubscription[] subscriptions, MqttProperties subscriptionProperties,
 			MqttToken token) throws MqttException {

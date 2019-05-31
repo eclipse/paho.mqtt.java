@@ -76,5 +76,13 @@ public class PersistedBuffer {
 	public Enumeration<Integer> getKeys() {
 		return buffer.keys();
 	}
+	
+	public MqttWireMessage get(Integer key) {
+		return buffer.get(key);
+	}
+	
+	public int size() {
+		return buffer.size();
+	}
 
 }

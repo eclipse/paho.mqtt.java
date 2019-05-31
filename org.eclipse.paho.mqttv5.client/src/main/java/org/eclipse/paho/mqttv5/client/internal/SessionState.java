@@ -56,8 +56,8 @@ public class SessionState {
 	private ConcurrentHashMap<Integer, Integer> inUseMsgIds = 
 			new ConcurrentHashMap<Integer, Integer>(); // Used to store a set of in-use message IDs
 	
-	private PersistedBuffer retryQueue;
-	private PersistedBuffer inboundQoS2;
+	private PersistedBuffer retryQueue;   // holds state for outgoing QoS 1 and 2 messages
+	private PersistedBuffer inboundQoS2;  // holds state for incoming QoS 2 messages
 	private MqttClientPersistence persistence;
 	private ToDoQueue todoQueue;
 	
@@ -65,6 +65,31 @@ public class SessionState {
 			new ConcurrentHashMap<String, IMqttMessageListener>();
 	private ConcurrentHashMap<Integer, IMqttMessageListener> topicIdToListeners = 
 			new ConcurrentHashMap<Integer, IMqttMessageListener>();
+	
+	public Hashtable<Integer, MqttToken> out_tokens = new Hashtable<Integer, MqttToken>();
+	
+	private boolean shouldBeConnected = false;
+	
+	public SessionState(MqttAsyncClient client, MqttClientPersistence persistence, ToDoQueue todoQueue) {
+		this.persistence = persistence;
+		retryQueue = new PersistedBuffer(persistence);
+		this.todoQueue = todoQueue;
+		inboundQoS2 = new PersistedBuffer(persistence);
+		try {
+			restore(client);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public PersistedBuffer getRetryQueue() {
+		return retryQueue;
+	}
+	
+	public PersistedBuffer getInboundQoS2() {
+		return inboundQoS2;
+	}
 	
 	public void removeMessageListener(Integer subId, String topic) { 
 		if (topicStringToListeners.keySet().contains(topic)) {
@@ -99,21 +124,6 @@ public class SessionState {
 		return result;
 	}
 	
-	public Hashtable<Integer, MqttToken> out_tokens = new Hashtable<Integer, MqttToken>();
-	
-	private boolean shouldBeConnected = false;
-	
-	public SessionState(MqttAsyncClient client, MqttClientPersistence persistence, ToDoQueue todoQueue) {
-		this.persistence = persistence;
-		retryQueue = new PersistedBuffer(persistence);
-		this.todoQueue = todoQueue;
-		try {
-			restore(client);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
 	
 	public void setShouldBeConnected(boolean value) {
 		shouldBeConnected = value;
@@ -123,9 +133,15 @@ public class SessionState {
 		return shouldBeConnected;
 	}
 	
-	public void addRetryQueue(MqttPersistableWireMessage message, Integer hashcode) {
+	public void addRetryQueue(MqttPersistableWireMessage message) {
 		try {
 			retryQueue.add(new Integer(message.getMessageId()), message, PERSISTENCE_SENT_PREFIX);
+		} catch (Exception e) {}
+	}
+	
+	public void addInboundQoS2(MqttPersistableWireMessage message) {
+		try {
+			inboundQoS2.add(new Integer(message.getMessageId()), message, PERSISTENCE_RECEIVED_PREFIX);
 		} catch (Exception e) {}
 	}
 	
@@ -136,14 +152,13 @@ public class SessionState {
 		Enumeration<Integer> keys = retryQueue.getKeys();	
 		while (keys.hasMoreElements()) {
 			Integer msgid = keys.nextElement();
-			MqttToken token = out_tokens.get(msgid);
 			list.addElement(out_tokens.get(msgid));
 		}
 		MqttToken[] result = new MqttToken[list.size()];
 		return (MqttToken[]) list.toArray(result);
 	}
 	
-	public void completeMessage(Integer msgid) {
+	public void completeOutboundMessage(Integer msgid) {
 		out_tokens.remove(msgid);
 		try {
 			persistence.remove(PERSISTENCE_SENT_PREFIX + msgid.toString());
@@ -156,9 +171,9 @@ public class SessionState {
 	public void clear() {
 		nextSubscriptionIdentifier.set(1);
 		try {
+			// Don't clear the Todo buffer because it's not part of the session state
 			persistence.clear();
 			retryQueue.clear();
-			todoQueue.clear();
 			inboundQoS2.clear();
 		} catch (Exception e) {
 			
@@ -205,6 +220,7 @@ public class SessionState {
 	
 	/**
 	 * Restores the state information from persistence.
+	 * 
 	 * @throws MqttException if an exception occurs whilst restoring state
 	 */
 	protected void restore(MqttAsyncClient client) throws MqttException {
@@ -228,7 +244,7 @@ public class SessionState {
 					//@TRACE 604=inbound QoS 2 publish key={0} message={1}
 					log.fine(CLASS_NAME,methodName,"604", new Object[]{key,message});
 					// The inbound messages that we have persisted will be QoS 2 
-					inboundQoS2.restore( Integer.valueOf(message.getMessageId()),message);
+					inboundQoS2.restore(Integer.valueOf(message.getMessageId()), message);
 				} else if (key.startsWith(PERSISTENCE_SENT_PREFIX)) {
 					MqttPublish sendMessage = (MqttPublish) message;
 					highestMsgId = Math.max(sendMessage.getMessageId(), highestMsgId);
@@ -242,7 +258,7 @@ public class SessionState {
 							//@TRACE 605=outbound QoS 2 pubrel key={0} message={1}
 							log.fine(CLASS_NAME,methodName, "605", new Object[]{key,message});
 
-							retryQueue.restore( Integer.valueOf(confirmMessage.getMessageId()), confirmMessage);
+							retryQueue.restore(Integer.valueOf(confirmMessage.getMessageId()), confirmMessage);
 						} else {
 							//@TRACE 606=outbound QoS 2 completed key={0} message={1}
 							log.fine(CLASS_NAME,methodName, "606", new Object[]{key,message});
