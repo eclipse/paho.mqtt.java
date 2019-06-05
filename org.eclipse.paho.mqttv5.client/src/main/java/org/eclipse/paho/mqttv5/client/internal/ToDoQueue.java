@@ -164,23 +164,22 @@ public class ToDoQueue {
 			if (remove1message) {
 			
 			} else if (mqttmessage instanceof MqttPublish) {
-				publish((MqttPublish)mqttmessage, new Integer(metadata.get("token hash")));
+				handlePublish((MqttPublish)mqttmessage, new Integer(metadata.get("token hash")));
 			} else if (mqttmessage instanceof MqttSubscribe || 
 					mqttmessage instanceof MqttUnsubscribe) {
 				write(mqttmessage);
 			}	
-			//System.out.println("*** unpersisting "+persistence + " " + (message instanceof MqttPersistableWireMessage));
-			if (persistence != null && mqttmessage instanceof MqttPersistableWireMessage) {
-				//System.out.println("*** unpersisting "+mqttmessage.getMessageId());
+			if (persistence != null) {
+				//System.out.println("*** unpersisting "+mqttmessage.getMessageId() + " " +seqno);
 				persistence.remove(PERSISTENCE_SENT_BUFFERED_PREFIX + seqno);
 			}
-		} catch (MqttException e) {
+		} catch (MqttPersistenceException e) {
 			e.printStackTrace();
 		}
 
 	}
 	
-	private void publish(MqttPublish publish, Integer hashcode) throws MqttException {
+	private void handlePublish(MqttPublish publish, Integer hashcode) throws MqttPersistenceException {
 		
 		// Add the info to the retry queue.  In the event of reconnecting, any outstanding publishes
 		// will need to be resent.
@@ -192,65 +191,76 @@ public class ToDoQueue {
 		if (sessionExpiry == null) {
 			sessionExpiry = new Long(0L);
 		}
-		if (sessionExpiry >= 0L /*&& this.persistence != null*/) {
+		if (sessionExpiry >= 0L) {
 			internal.getSessionState().addRetryQueue(publish);
 		}
 
-		if (internal.socket != null) {
-			internal.socket.write(Buffer.buffer(publish.serialize()),
-					res1 -> {
-						if (res1.succeeded()) {
-							connectionstate.registerOutboundActivity();
-							if (publish.getQoS() == 0) {
-								MqttToken token = internal.out_hash_tokens.remove(hashcode);
-								token.setComplete();
+		try {
+			if (internal.socket != null) {
+				internal.socket.write(Buffer.buffer(publish.serialize()),
+						res1 -> {
+							if (res1.succeeded()) {
+								connectionstate.registerOutboundActivity();
+								if (publish.getQoS() == 0) {
+									MqttToken token = internal.out_hash_tokens.remove(hashcode);
+									token.setComplete();
+								}
+							} else {
+								System.out.println("publish fail" + res1);
+								// If the socket write fails, then we should remove it from persistence.
+								pause();
 							}
-						} else {
-							System.out.println("publish fail" + res1);
-							// If the socket write fails, then we should remove it from persistence.
-							pause();
-						}
-					});
-		} else {
-			internal.websocket.writeBinaryMessage(Buffer.buffer(publish.serialize()),
-					res1 -> {
-						if (res1.succeeded()) {
-							connectionstate.registerOutboundActivity();
-							if (publish.getQoS() == 0) {
-								MqttToken token = internal.out_hash_tokens.remove(hashcode);
-								token.setComplete();
+						});
+			} else {
+				internal.websocket.writeBinaryMessage(Buffer.buffer(publish.serialize()),
+						res1 -> {
+							if (res1.succeeded()) {
+								connectionstate.registerOutboundActivity();
+								if (publish.getQoS() == 0) {
+									MqttToken token = internal.out_hash_tokens.remove(hashcode);
+									token.setComplete();
+								}
+							} else {
+								System.out.println("publish fail" + res1);
+								// If the socket write fails, then we should remove it from persistence.
+								pause();
 							}
-						} else {
-							System.out.println("publish fail" + res1);
-							// If the socket write fails, then we should remove it from persistence.
-							pause();
-						}
-					});
+						});
 
+			}
+		} catch (Exception e) {
+			// we've written the message to persistence for retrying before this,
+			// so it's ok to ignore 
 		}
 	}
 	
-	private void write(MqttWireMessage subscribe) throws MqttException {
-		if (internal.websocket != null) {
-			internal.websocket.writeBinaryMessage(Buffer.buffer(subscribe.serialize()),
-					res1 -> {
-						if (res1.succeeded()) {
-							connectionstate.registerOutboundActivity();
-						} else {
-							System.out.println("subscribe fail");
-						}
-					});
-			connectionstate.registerOutboundActivity();
-		} else {
-			internal.socket.write(Buffer.buffer(subscribe.serialize()),
-					res1 -> {
-						if (res1.succeeded()) {
-							connectionstate.registerOutboundActivity();
-						} else {
-							System.out.println("subscribe fail");
-						}
-					});
-		}
+	
+	private void write(MqttWireMessage subscribe) {
+		try {
+			if (internal.websocket != null) {
+				internal.websocket.writeBinaryMessage(Buffer.buffer(subscribe.serialize()),
+						res1 -> {
+							if (res1.succeeded()) {
+								connectionstate.registerOutboundActivity();
+							} else {
+								System.out.println("subscribe fail");
+							}
+						});
+				connectionstate.registerOutboundActivity();
+			} else {
+				internal.socket.write(Buffer.buffer(subscribe.serialize()),
+						res1 -> {
+							if (res1.succeeded()) {
+								connectionstate.registerOutboundActivity();
+							} else {
+								System.out.println("subscribe fail");
+							}
+						});
+			}
+		} catch (Exception e) {
+			// we've written the message to persistence for retrying before this,
+			// or it's not going to be retried, so it's ok to ignore error here 
+		} 
 	}
 	
 	

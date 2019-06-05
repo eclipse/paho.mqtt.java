@@ -205,7 +205,7 @@ public class ClientInternal {
 					|| msg instanceof MqttUnsubAck || msg instanceof MqttPubComp) {
 				MqttToken acktoken = sessionstate.out_tokens.get(new Integer(msg.getMessageId()));
 				if (acktoken != null) {
-					if (msg instanceof MqttPubComp) {
+					if (msg instanceof MqttPubComp || msg instanceof MqttPubAck) {
 						int[] a = acktoken.getReasonCodes();
 						int[] b = msg.getReasonCodes();					
 						int[] c = new int[a.length + b.length];
@@ -214,20 +214,23 @@ public class ClientInternal {
 						acktoken.setReasonCodes(c);
 					}
 					acktoken.setResponse(msg);
-					sessionstate.completeOutboundMessage(new Integer(msg.getMessageId()));
-					acktoken.setComplete();
 				}
+				// if the message has been restored from persistence, there are no tokens
+				sessionstate.completeOutboundMessage(new Integer(msg.getMessageId()));
+				if (acktoken != null) {
+					acktoken.setComplete();
+				} 
 			} else if (msg instanceof MqttPublish) {
 				IMqttMessageListener listener = sessionstate.getMessageListener(((MqttPublish) msg).getProperties().getSubscriptionIdentifier(), 
 						((MqttPublish) msg).getTopicName());
 							
-				Enumeration<Integer> keys = sessionstate.getInboundQoS2().getKeys();
+				/*Enumeration<Integer> keys = sessionstate.getInboundQoS2().getKeys();
 				String keydata = new String();
 				while (keys.hasMoreElements()) {
 					keydata += keys.nextElement() + " ";
 				}
+				System.out.println("*** keys "+keydata);*/
 				
-				//System.out.println("*** keys "+keydata);
 				//System.out.println("111 "+msg.getMessageId() + " " + sessionstate.getInboundQoS2().get(msg.getMessageId())
 				//		+ " " + ((MqttPublish) msg).getQoS());
 				
@@ -283,7 +286,11 @@ public class ClientInternal {
 				sessionstate.getRetryQueue().remove(msg.getMessageId());
 				sessionstate.addRetryQueue(pubrel);
 				
-				acktoken.setReasonCodes(msg.getReasonCodes());
+				if (acktoken != null) {
+					// if the message has been restored from persistence, then there are no tokens
+					// if the reason code is an error, then don't send the pubrel
+					acktoken.setReasonCodes(msg.getReasonCodes());
+				}
 				if (websocket != null) {
 					websocket.writeBinaryMessage(Buffer.buffer(pubrel.serialize()),
 							res1 -> {
@@ -303,7 +310,7 @@ public class ClientInternal {
 				MqttPubComp pubcomp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, 
 						msg.getMessageId(),
 						msg.getProperties());
-				sessionstate.getInboundQoS2().remove(msg.getMessageId());
+				sessionstate.completeInboundQoS2Message(msg.getMessageId());
 				if (websocket != null) {
 						websocket.writeBinaryMessage(Buffer.buffer(pubcomp.serialize()),
 								res1 -> {
@@ -668,7 +675,7 @@ public class ClientInternal {
 				socket.write(Buffer.buffer(message),
 						res1 -> {
 							if (res1.succeeded()) {
-								System.out.println("Retry message succeeded");
+								//System.out.println("Retry message succeeded "+ key);
 								connectionstate.registerOutboundActivity();
 								retryMessage(keys);
 							} else {

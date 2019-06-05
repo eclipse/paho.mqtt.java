@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -85,7 +85,7 @@ public class TestByteArrayMemoryPersistence implements MqttClientPersistence {
 		byte[] messageBytes = messageByteBuffer.array();
 		data.put(key, messageBytes);
 		dataCache.put(key,  messageBytes);
-		System.out.println("Persist data "+messageBytes);
+		//System.out.println("Persist data "+messageBytes);
 	}
 
 	/* (non-Javadoc)

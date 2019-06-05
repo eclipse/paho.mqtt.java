@@ -16,6 +16,7 @@ import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttClient;
+import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
@@ -55,7 +56,7 @@ public class PersistenceTests implements MqttCallback {
 	public static Collection<Object[]> data() throws Exception {
 		
 		return Arrays.asList(new Object[][] {     
-            { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }  
+            { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }
       });
 		
 	}
@@ -93,6 +94,94 @@ public class PersistenceTests implements MqttCallback {
 	}
 	
 	@Test
+	public void testConnectionResumeQoS1() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		final int keepAlive = 15;
+		final int qos = 1;
+
+		MqttConnectionOptions options = new MqttConnectionOptions();
+		options.setCleanStart(true);
+		options.setSessionExpiryInterval(99999L); // Ensure the session state is not cleaned up on disconnect
+		options.setKeepAliveInterval(keepAlive);
+
+		MqttAsyncClient client = new MqttAsyncClient(serverURI.getScheme()+"://"
+				+ proxy.getHost()+":" + proxy.getLocalPort(), methodName);
+		client.setCallback(this);
+
+		int inflight_tokens = 0, count = 0;
+		while (inflight_tokens == 0 && ++count < 10) {
+			proxy.enableProxy();
+			IMqttToken tok = client.connect(options);
+			tok.waitForCompletion();
+
+			String topic = "username/clientId/abc";
+			tok = client.subscribe(new MqttSubscription(topic, 2));
+			tok.waitForCompletion();
+
+			log.info((new Date()) + " - Connected.");
+
+			// start a background task to disconnect the proxy while messages are being sent
+			new Timer().schedule(new TimerTask() {
+				@Override
+				public void run() {
+					log.info("Cutting connection");
+					proxy.disableProxy();
+				}
+			}, 10); // delay in milliseconds
+
+			messagesArrived = 0;
+			int messagesSent = 0;
+			// send some messages
+			while (client.isConnected()) {
+				try {
+					client.publish("username/clientId/abc", ("test " + messagesSent).getBytes(), qos, false);
+				} catch (MqttException e) {
+					// we could be disconnected at this point, so the loop should end
+					continue;
+				}
+				messagesSent++;
+				log.info("Messages sent "+messagesSent);
+				Thread.sleep(2); 
+			}
+
+			inflight_tokens = client.getPendingTokens().length;	
+			log.info("Number of tokens are "+client.getPendingTokens().length);
+
+			// reconnect, so any inflight messages should be continued
+			proxy.enableProxy();
+			options.setCleanStart(false);
+			tok = client.connect(options);
+			tok.waitForCompletion();
+
+			int limit = 5000, interval = 10;
+			int current_delay = 0;
+			// Now ensure that any outstanding messages are received
+			while (messagesArrived < messagesSent && current_delay < limit) {
+				Thread.sleep(interval);
+				current_delay += interval;
+			}
+
+			Thread.sleep(1000);  // Allow any duplicates to arrive.
+			Assert.assertTrue("Should receive at least the same number of messages as were sent "+
+					messagesArrived + " " + messagesSent, messagesArrived >= messagesSent);
+
+			client.disconnect(0);
+		} 
+
+		// Now check that there were some inflight messages
+		Assert.assertTrue("There should be some inflight messages", inflight_tokens > 0);
+		
+		inflight_tokens = client.getPendingTokens().length;	
+		Assert.assertTrue("Number of outstanding tokens should be 0, is " + inflight_tokens,
+				inflight_tokens == 0);
+
+		MqttClientPersistence persistence = client.getPersistence();
+		Assert.assertTrue("Nothing should be left in persistence", !persistence.keys().hasMoreElements());
+		client.close();
+	}
+	
+	@Test
 	public void testConnectionResumeQoS2() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
@@ -107,71 +196,76 @@ public class PersistenceTests implements MqttCallback {
 		MqttAsyncClient client = new MqttAsyncClient(serverURI.getScheme()+"://"
 				+ proxy.getHost()+":" + proxy.getLocalPort(), methodName);
 		client.setCallback(this);
-		
-		int inflight_tokens = 0;
-		while (inflight_tokens == 0) {
-		proxy.enableProxy();
-		IMqttToken tok = client.connect(options);
-		tok.waitForCompletion();
-		
-		String topic = "username/clientId/abc";
-		tok = client.subscribe(new MqttSubscription(topic, 2));
-		tok.waitForCompletion();
 
-		log.info((new Date()) + " - Connected.");
-		
-		// start a background task to disconnect the proxy while messages are being sent
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run() {
-				log.info("Cutting connection");
-				proxy.disableProxy();
-			}
-		}, 200); // delay in milliseconds
-		
-		messagesArrived = 0;
-		int messagesSent = 0;
-		// send some messages
-		while (client.isConnected()) {
-			try {
-				client.publish("username/clientId/abc", ("test " + messagesSent).getBytes(), qos, false);
-			} catch (MqttException e) {
-				// we could be disconnected at this point, so the loop should end
-				continue;
-			}
-			messagesSent++;
-			log.info("Messages sent "+messagesSent);
-			Thread.sleep(2); 
-		}
-		
-		inflight_tokens = client.getPendingTokens().length;	
-		log.info("Number of tokens are "+client.getPendingTokens().length);
-		
-		// reconnect, so any inflight messages should be continued
-		proxy.enableProxy();
-		options.setCleanStart(false);
-		tok = client.connect(options);
-		tok.waitForCompletion();
+		int inflight_tokens = 0, count = 0;
+		while (inflight_tokens == 0 && ++count < 10) {
+			proxy.enableProxy();
+			IMqttToken tok = client.connect(options);
+			tok.waitForCompletion();
 
-		int limit = 5000, interval = 10;
-		int current_delay = 0;
-		// Now ensure that any outstanding messages are received
-		while (messagesArrived < messagesSent && current_delay < limit) {
-			Thread.sleep(interval);
-			current_delay += interval;
-		}
-		
-		Thread.sleep(1000);  // Allow any duplicates to arrive.
-		Assert.assertTrue("Should receive the same number of messages as were sent "+
-				messagesArrived + " " + messagesSent, messagesArrived == messagesSent);
-		
-		client.disconnect(0);
+			String topic = "username/clientId/abc";
+			tok = client.subscribe(new MqttSubscription(topic, 2));
+			tok.waitForCompletion();
+
+			log.info((new Date()) + " - Connected.");
+
+			// start a background task to disconnect the proxy while messages are being sent
+			new Timer().schedule(new TimerTask() {
+				@Override
+				public void run() {
+					log.info("Cutting connection");
+					proxy.disableProxy();
+				}
+			}, 10); // delay in milliseconds
+
+			messagesArrived = 0;
+			int messagesSent = 0;
+			// send some messages
+			while (client.isConnected()) {
+				try {
+					client.publish("username/clientId/abc", ("test " + messagesSent).getBytes(), qos, false);
+				} catch (MqttException e) {
+					// we could be disconnected at this point, so the loop should end
+					continue;
+				}
+				messagesSent++;
+				log.info("Messages sent "+messagesSent);
+				Thread.sleep(2); 
+			}
+
+			inflight_tokens = client.getPendingTokens().length;	
+			log.info("Number of tokens are "+client.getPendingTokens().length);
+
+			// reconnect, so any inflight messages should be continued
+			proxy.enableProxy();
+			options.setCleanStart(false);
+			tok = client.connect(options);
+			tok.waitForCompletion();
+
+			int limit = 5000, interval = 10;
+			int current_delay = 0;
+			// Now ensure that any outstanding messages are received
+			while (messagesArrived < messagesSent && current_delay < limit) {
+				Thread.sleep(interval);
+				current_delay += interval;
+			}
+
+			Thread.sleep(1000);  // Allow any duplicates to arrive.
+			Assert.assertTrue("Should receive the same number of messages as were sent "+
+					messagesArrived + " " + messagesSent, messagesArrived == messagesSent);
+
+			client.disconnect(0);
 		} 
-		
-		
-		// Now check that there are some inflight messages
+
+		// Now check that there were some inflight messages
 		Assert.assertTrue("There should be some inflight messages", inflight_tokens > 0);
 		
+		inflight_tokens = client.getPendingTokens().length;	
+		Assert.assertTrue("Number of outstanding tokens should be 0, is " + inflight_tokens,
+				inflight_tokens == 0);
+
+		MqttClientPersistence persistence = client.getPersistence();
+		Assert.assertTrue("Nothing should be left in persistence", !persistence.keys().hasMoreElements());
 		client.close();
 	}
 
@@ -305,7 +399,14 @@ public class PersistenceTests implements MqttCallback {
 		Assert.assertTrue("Should receive the same number of messages as were sent "+
 				messagesArrived + " " + messagesSent, messagesArrived == messagesSent);
 		
+		int inflight_tokens = client.getPendingTokens().length;	
+		Assert.assertTrue("Number of outstanding tokens should be 0, is " + inflight_tokens,
+				inflight_tokens == 0);
+		
 		client.disconnect(0);
+		
+		MqttClientPersistence persistence = client.getPersistence();
+		Assert.assertTrue("Nothing should be left in persistence", !persistence.keys().hasMoreElements());
 		client.close();
 	}
 	
@@ -398,7 +499,14 @@ public class PersistenceTests implements MqttCallback {
 		Assert.assertTrue("Should receive at least as many messages as were sent",
 				messagesArrived >= messagesSent);
 		
+		int inflight_tokens = client.getPendingTokens().length;	
+		Assert.assertTrue("Number of outstanding tokens should be 0, is " + inflight_tokens,
+				inflight_tokens == 0);
+		
 		client.disconnect(0);
+		
+		MqttClientPersistence persistence = client.getPersistence();
+		Assert.assertTrue("Nothing should be left in persistence", !persistence.keys().hasMoreElements());
 		client.close();
 	}
 	
@@ -406,7 +514,7 @@ public class PersistenceTests implements MqttCallback {
 	
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		log.info("Message Arrived on " + topic + " with " + new String(message.getPayload()));
+		log.fine("Message Arrived on " + topic + " with " + new String(message.getPayload()));
 		messagesArrived++;
 	}
 

@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.mqttv5.common.MqttPersistable;
+import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
@@ -133,16 +134,16 @@ public class SessionState {
 		return shouldBeConnected;
 	}
 	
-	public void addRetryQueue(MqttPersistableWireMessage message) {
-		try {
-			retryQueue.add(new Integer(message.getMessageId()), message, PERSISTENCE_SENT_PREFIX);
-		} catch (Exception e) {}
+	public void addRetryQueue(MqttPersistableWireMessage message) throws MqttPersistenceException {
+		String prefix = PERSISTENCE_SENT_PREFIX;
+		if (message instanceof MqttPubRel) {
+			prefix = PERSISTENCE_CONFIRMED_PREFIX;
+		}
+		retryQueue.add(new Integer(message.getMessageId()), message, prefix);
 	}
 	
-	public void addInboundQoS2(MqttPersistableWireMessage message) {
-		try {
-			inboundQoS2.add(new Integer(message.getMessageId()), message, PERSISTENCE_RECEIVED_PREFIX);
-		} catch (Exception e) {}
+	public void addInboundQoS2(MqttPersistableWireMessage message) throws MqttPersistenceException {
+		inboundQoS2.add(new Integer(message.getMessageId()), message, PERSISTENCE_RECEIVED_PREFIX);
 	}
 	
 	public MqttToken[] getPendingTokens() {
@@ -160,12 +161,31 @@ public class SessionState {
 	
 	public void completeOutboundMessage(Integer msgid) {
 		out_tokens.remove(msgid);
+		String key = PERSISTENCE_SENT_PREFIX + msgid.toString();
 		try {
-			persistence.remove(PERSISTENCE_SENT_PREFIX + msgid.toString());
+			if (persistence.containsKey(key)) {
+				persistence.remove(key);
+			}
+			key = PERSISTENCE_CONFIRMED_PREFIX + msgid.toString();
+			if (persistence.containsKey(key)) {
+				persistence.remove(key);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		retryQueue.remove(msgid);
+	}
+	
+	public void completeInboundQoS2Message(Integer msgid) {
+		String key = PERSISTENCE_RECEIVED_PREFIX + msgid.toString();
+		try {
+			if (persistence.containsKey(key)) {
+				persistence.remove(key);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		inboundQoS2.remove(msgid);
 	}
 
 	public void clear() {
@@ -226,7 +246,7 @@ public class SessionState {
 	protected void restore(MqttAsyncClient client) throws MqttException {
 		final String methodName = "restoreState";
 		Enumeration<String> messageKeys = persistence.keys();
-		System.out.println("restoreState "+messageKeys.hasMoreElements());
+		//System.out.println("restoreState "+messageKeys.hasMoreElements());
 		MqttPersistable persistable;
 		String key;
 		int highestMsgId = nextMsgId;
@@ -236,7 +256,7 @@ public class SessionState {
 		
 		while (messageKeys.hasMoreElements()) {
 			key = (String) messageKeys.nextElement();
-			System.out.println("restoreState key "+key);
+			//System.out.println("restoreState key "+key);
 			persistable = persistence.get(key);
 			MqttWireMessage message = restoreMessage(key, persistable);
 			if (message != null) {
@@ -281,24 +301,21 @@ public class SessionState {
 					}
 					inUseMsgIds.put( Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
 				} else if (key.startsWith(PERSISTENCE_SENT_BUFFERED_PREFIX)) {
-					
 					// Buffered outgoing messages that have not yet been sent at all
+					// These messages are persisted with a sequence number in the key
+					int seqno = new Integer(key.substring(PERSISTENCE_SENT_BUFFERED_PREFIX.length()));
 					MqttPublish sendMessage = (MqttPublish) message;
 					highestMsgId = Math.max(sendMessage.getMessageId(), highestMsgId);
 					if(sendMessage.getMessage().getQos() != 0) {
 						//@TRACE 607=outbound QoS 2 publish key={0} message={1}
 						log.fine(CLASS_NAME,methodName, "607", new Object[]{key,message});
 						MqttToken newtoken = new MqttToken(client);
-						todoQueue.restore(Integer.valueOf(sendMessage.getMessageId()),
-								newtoken, sendMessage);
+						todoQueue.restore(seqno, newtoken, sendMessage);
 						out_tokens.put(new Integer(sendMessage.getMessageId()), newtoken);
 					} else {
 						//@TRACE 511=outbound QoS 0 publish key={0} message={1}
 						log.fine(CLASS_NAME,methodName, "511", new Object[]{key,message});
-						todoQueue.restore(Integer.valueOf(sendMessage.getMessageId()), 
-								new MqttToken(client), sendMessage);
-						// Because there is no Puback, we have to trust that this is enough to send the message
-						persistence.remove(key);
+						todoQueue.restore(seqno, new MqttToken(client), sendMessage);
 					}
 					inUseMsgIds.put( Integer.valueOf(sendMessage.getMessageId()), Integer.valueOf(sendMessage.getMessageId()));
 				} else if (key.startsWith(PERSISTENCE_CONFIRMED_PREFIX)) {

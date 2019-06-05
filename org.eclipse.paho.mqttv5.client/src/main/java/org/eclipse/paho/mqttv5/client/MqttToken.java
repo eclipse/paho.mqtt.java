@@ -165,11 +165,13 @@ public class MqttToken implements IMqttToken {
 
 	@Override
 	public int[] getReasonCodes() {
-		if (this.reasonCodes == null) {
-			return response.getReasonCodes();
-		} else {
+		if (this.reasonCodes != null) {
 			return this.reasonCodes;
-		}
+		} else if (response != null) {
+			return response.getReasonCodes();
+		} 
+
+		return new int[0];
 	}
 
 }

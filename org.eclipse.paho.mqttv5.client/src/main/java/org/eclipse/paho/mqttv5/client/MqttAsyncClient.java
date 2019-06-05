@@ -760,6 +760,10 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	public String getCurrentServerURI() {
 		return null; //comms.getNetworkModules()[comms.getNetworkModuleIndex()].getServerURI();
 	}
+	
+	public MqttClientPersistence getPersistence() {
+		return persistence;
+	}
 
 	/**
 	 * Get a topic object which can be used to publish messages.
