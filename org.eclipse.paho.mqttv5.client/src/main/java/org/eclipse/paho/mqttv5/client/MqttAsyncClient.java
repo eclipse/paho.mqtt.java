@@ -1350,8 +1350,8 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 	 * org.eclipse.paho.mqttv5.client.IMqttAsyncClient#deleteBufferedMessage(int)
 	 */
 	@Override
-	public void deleteBufferedMessage(int bufferIndex) {
-		internal.deleteBufferedMessage(bufferIndex);
+	public MqttWireMessage deleteBufferedMessage(int bufferIndex) {
+		return internal.deleteBufferedMessage(bufferIndex);
 	}
 
 	/*
@@ -1375,6 +1375,9 @@ public class MqttAsyncClient implements /*MqttClientInterface,*/ IMqttAsyncClien
 		// @TRACE 113=<
 		log.fine(CLASS_NAME, methodName, "113");
 		internal.close();
+		if (persistence != null) {
+			persistence.close();
+		}
 		// @TRACE 114=>
 		log.fine(CLASS_NAME, methodName, "114");
 

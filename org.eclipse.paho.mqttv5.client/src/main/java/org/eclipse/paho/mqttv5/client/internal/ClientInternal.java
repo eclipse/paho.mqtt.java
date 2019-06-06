@@ -745,8 +745,8 @@ public class ClientInternal {
 		return todoQueue.getMessage(index);
 	}
 	
-	public void deleteBufferedMessage(int index) {
-		todoQueue.removeMessage(index);
+	public MqttWireMessage deleteBufferedMessage(int index) {
+		return todoQueue.removeMessage(index);
 	}
 	
 	public int getBufferedMessageCount() {

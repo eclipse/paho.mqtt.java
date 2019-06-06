@@ -245,6 +245,9 @@ public class SessionState {
 	 */
 	protected void restore(MqttAsyncClient client) throws MqttException {
 		final String methodName = "restoreState";
+		if (persistence == null) {
+			return;
+		}
 		Enumeration<String> messageKeys = persistence.keys();
 		//System.out.println("restoreState "+messageKeys.hasMoreElements());
 		MqttPersistable persistable;

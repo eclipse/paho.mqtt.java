@@ -1,6 +1,8 @@
 package org.eclipse.paho.mqttv5.client.test.automaticReconnect;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -31,36 +33,65 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 
 @Category({OnlineTest.class, MQTTV5Test.class})
+@RunWith(Parameterized.class)
 public class OfflineBufferingTest {
 
 	static final Class<?> cclass = OfflineBufferingTest.class;
 	private static final String className = cclass.getName();
 	private static final Logger log = Logger.getLogger(className);
 
-	private static URI serverURI;
-	private static String serverURIString;
+	private URI serverURI;
+	private String serverURIString;
 	static ConnectionManipulationProxyServer proxy;
 	private static String topicPrefix;
+	
+	@Parameters
+	public static Collection<Object[]> data() throws Exception {
+		
+		return Arrays.asList(new Object[][] {     
+            { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }
+      });
+		
+	}
+	
+	public OfflineBufferingTest(URI serverURI) throws Exception {
+		this.serverURI = serverURI;
+		this.serverURIString = "tcp://" + serverURI.getHost() + ":" + serverURI.getPort();
+		startProxy();
+	}
+	
+	public void startProxy() throws Exception{
+		// Use 0 for the first time.
+		proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 0);
+		proxy.startProxy();
+		while (!proxy.isPortSet()) {
+			Thread.sleep(0);
+		}
+		log.log(Level.INFO, "Proxy Started, port set to: " + proxy.getLocalPort());
+	}
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		try {
 			String methodName = Utility.getMethodName();
 			LoggingUtilities.banner(log, cclass, methodName);
-			serverURI = TestProperties.getServerURI();
-			serverURIString = "tcp://" + serverURI.getHost() + ":" + serverURI.getPort();
+			//serverURI = TestProperties.getServerURI();
+			//serverURIString = "tcp://" + serverURI.getHost() + ":" + serverURI.getPort();
 		    topicPrefix = "OfflineBufferingTest-" + UUID.randomUUID().toString() + "-";
 
 			// Use 0 for the first time.
-			proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 2883);
+			/*proxy = new ConnectionManipulationProxyServer(serverURI.getHost(), serverURI.getPort(), 2883);
 			proxy.startProxy();
 			while (!proxy.isPortSet()) {
 				Thread.sleep(0);
 			}
-			log.log(Level.INFO, "Proxy Started, port set to: " + proxy.getLocalPort());
+			log.log(Level.INFO, "Proxy Started, port set to: " + proxy.getLocalPort());*/
 		} catch (Exception exception) {
 			log.log(Level.SEVERE, "caught exception:", exception);
 			throw exception;
@@ -300,6 +331,12 @@ public class OfflineBufferingTest {
 		MqttWireMessage messageAt0 = client.getBufferedMessage(0);
 		String msg = new String(messageAt0.getPayload());
 		Assert.assertEquals("1", msg);
+		
+		client.deleteBufferedMessage(0);
+		messageAt0 = client.getBufferedMessage(0);
+		msg = new String(messageAt0.getPayload());
+		Assert.assertEquals("2", msg);
+		
 		client.close();
 		client = null;
 		proxy.disableProxy();

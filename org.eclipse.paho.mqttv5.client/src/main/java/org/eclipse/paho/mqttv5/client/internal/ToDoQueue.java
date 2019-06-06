@@ -109,9 +109,7 @@ public class ToDoQueue {
 		eb.send(ebtopic, sequence_no.toString(), options);
 	}
 	
-	public void add(MqttWireMessage message, MqttToken token) 
-			throws MqttException {	
-		//System.out.println("--- adding "+message);
+	public void add(MqttWireMessage message, MqttToken token) throws MqttException {	
 		if (queued >= consumer.getMaxBufferedMessages() - 1) { 
 			if (!internal.getClient().getBufferOpts().isDeleteOldestMessages()) {
 				throw new MqttException(MqttClientException.REASON_CODE_DISCONNECTED_BUFFER_FULL);
@@ -122,13 +120,50 @@ public class ToDoQueue {
 			}
 		}
 		if (persistence != null && message instanceof MqttPersistableWireMessage) {
-			//System.out.println("--- persisting "+message);
 			persistence.put(PERSISTENCE_SENT_BUFFERED_PREFIX + sequence_no, 
 					(MqttPersistableWireMessage)message);
 		}
 		queued++;
 		restore(new Integer(sequence_no), token, message);
 		sequence_no++; // ready for next time
+	}
+	
+	
+	public MqttWireMessage removeOldest() {
+		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
+		Collections.sort(keys);
+		Integer seqno = keys.get(0);
+		MqttWireMessage result = messages.remove(seqno);
+		if (persistence != null) {
+			try {
+				persistence.remove(PERSISTENCE_SENT_BUFFERED_PREFIX + seqno);
+			} catch (MqttPersistenceException e) {
+				// log error 
+			}
+		}
+		return result;
+	}
+	
+	public MqttWireMessage removeMessage(int index) {
+		// This doesn't remove it from the Vert.x queue, so it doesn't make space
+		// for a new message if the buffer is full
+		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
+		Collections.sort(keys);
+		Integer seqno = keys.get(index);
+		if (persistence != null) {
+			try {
+				persistence.remove(PERSISTENCE_SENT_BUFFERED_PREFIX + seqno);
+			} catch (MqttPersistenceException e) {
+				//log error
+			}
+		}
+		return messages.remove(seqno);
+	}
+	
+	public MqttWireMessage getMessage(int index) {
+		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
+		Collections.sort(keys);
+		return messages.get(keys.get(index));
 	}
 	
 	// Stop processing messages temporarily 
@@ -261,31 +296,6 @@ public class ToDoQueue {
 			// we've written the message to persistence for retrying before this,
 			// or it's not going to be retried, so it's ok to ignore error here 
 		} 
-	}
-	
-	
-	public MqttWireMessage removeOldest() {
-		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
-		Collections.sort(keys);
-		//System.out.println("removeOldest: removing key "+keys.get(0));
-		MqttWireMessage result = messages.remove(keys.get(0));
-		keys = new LinkedList<Integer>(messages.keySet()); 
-		return result;
-	}
-	
-	public MqttWireMessage removeMessage(int index) {
-		// This doesn't remove it from the Vert.x queue, so it doesn't make space
-		// for a new message if the buffer is full
-		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
-		Collections.sort(keys);
-		//System.out.println("removeMessage: removing key "+keys.get(index));
-		return messages.remove(keys.get(index));
-	}
-	
-	public MqttWireMessage getMessage(int index) {
-		LinkedList<Integer> keys = new LinkedList<Integer>(messages.keySet()); 
-		Collections.sort(keys);
-		return messages.get(keys.get(index));
 	}
 	
 	

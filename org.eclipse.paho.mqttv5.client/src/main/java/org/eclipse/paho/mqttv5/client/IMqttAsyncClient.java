@@ -982,7 +982,7 @@ public interface IMqttAsyncClient {
 	 * @param bufferIndex
 	 *            the index of the message to be deleted.
 	 */
-	void deleteBufferedMessage(int bufferIndex);
+	MqttWireMessage deleteBufferedMessage(int bufferIndex) throws MqttException;
 
 	/**
 	 * Returns the current number of outgoing in-flight messages being sent by the

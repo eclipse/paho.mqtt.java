@@ -732,7 +732,7 @@ public class SendReceiveAsyncTest {
       int errors = 0;
       for (int i = 0; i < tokenCount; ++i) {
     	    try {
-    	  	  pubTokens[i].waitForCompletion(10);
+    	  	  pubTokens[i].waitForCompletion(100);
     	    } catch (Exception e) {
     	    	  log.log(Level.INFO, "Token no not complete:" + i);
     	    	  errors += 1;
