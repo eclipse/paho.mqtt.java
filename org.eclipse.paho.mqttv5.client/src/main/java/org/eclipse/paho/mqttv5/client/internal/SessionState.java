@@ -374,15 +374,15 @@ public class SessionState {
 		return PERSISTENCE_SENT_PREFIX + message.getMessageId();
 	}
 	
-	private String getSendPersistenceKey(int messageId) {
+	/*private String getSendPersistenceKey(int messageId) {
 		return PERSISTENCE_SENT_PREFIX + messageId;
-	}
+	}*/
 	
 	private String getSendConfirmPersistenceKey(MqttWireMessage message) {
 		return PERSISTENCE_CONFIRMED_PREFIX + message.getMessageId();
 	}
 	
-	private String getReceivedPersistenceKey(MqttWireMessage message) {
+	/*private String getReceivedPersistenceKey(MqttWireMessage message) {
 		return PERSISTENCE_RECEIVED_PREFIX + message.getMessageId();
 	}
 	
@@ -392,5 +392,5 @@ public class SessionState {
 	
 	private String getSendBufferedPersistenceKey(MqttWireMessage message){
 		return PERSISTENCE_SENT_BUFFERED_PREFIX + message.getMessageId();
-	}
+	}*/
 }

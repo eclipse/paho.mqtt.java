@@ -128,7 +128,7 @@ public class PersistenceTests implements MqttCallback {
 					log.info("Cutting connection");
 					proxy.disableProxy();
 				}
-			}, 10); // delay in milliseconds
+			}, 200); // delay in milliseconds
 
 			messagesArrived = 0;
 			int messagesSent = 0;
@@ -216,7 +216,7 @@ public class PersistenceTests implements MqttCallback {
 					log.info("Cutting connection");
 					proxy.disableProxy();
 				}
-			}, 10); // delay in milliseconds
+			}, 200); // delay in milliseconds
 
 			messagesArrived = 0;
 			int messagesSent = 0;
@@ -330,6 +330,8 @@ public class PersistenceTests implements MqttCallback {
 		MqttAsyncClient client = new MqttAsyncClient(serverURI.getScheme()+"://"
 				+ proxy.getHost()+":" + proxy.getLocalPort(), methodName);
 		client.setCallback(this);
+		
+		for (int i = 0; i < 10; ++i) {
 		proxy.enableProxy();
 		IMqttToken tok = client.connect(options);
 		tok.waitForCompletion();
@@ -353,9 +355,15 @@ public class PersistenceTests implements MqttCallback {
 		int messagesSent = 0;
 		// send some messages
 		while (client.isConnected()) {
-			client.publish("username/clientId/abc", ("test " + messagesSent).getBytes(), qos, false);
+			try {
+				client.publish("username/clientId/abc", ("test " + messagesSent).getBytes(), qos, false);
+			} catch (MqttException e) {
+				// we could be disconnected at this point, so the loop should end
+				continue;
+			}
 			messagesSent++;
-			Thread.sleep(10);
+			log.info("Messages sent "+messagesSent);
+			Thread.sleep(2); 
 		}
 		
 		// Now check that there are some inflight messages
@@ -381,7 +389,8 @@ public class PersistenceTests implements MqttCallback {
 		// Now check that there are some inflight messages
 		Assert.assertTrue("There should be some inflight messages", 
 				client.getPendingTokens().length > 0);
-		Assert.assertTrue("Pending token count should equal that before recreate", 
+		Assert.assertTrue("Pending token count should equal that before recreate "+
+				client.getPendingTokens().length + " " +pending_token_count, 
 				client.getPendingTokens().length == pending_token_count);
 		
 		tok = client.connect(options);
@@ -407,6 +416,8 @@ public class PersistenceTests implements MqttCallback {
 		
 		MqttClientPersistence persistence = client.getPersistence();
 		Assert.assertTrue("Nothing should be left in persistence", !persistence.keys().hasMoreElements());
+		}
+		
 		client.close();
 	}
 	
