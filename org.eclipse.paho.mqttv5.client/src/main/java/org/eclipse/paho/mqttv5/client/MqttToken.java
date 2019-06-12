@@ -136,6 +136,9 @@ public class MqttToken implements IMqttToken {
 	}
 
 	public boolean getSessionPresent() {
+		if (response == null) {
+			return false;
+		}
 		return ((MqttConnAck)response).getSessionPresent();
 	}
 

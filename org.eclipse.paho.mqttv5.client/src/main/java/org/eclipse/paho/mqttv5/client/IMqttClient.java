@@ -72,6 +72,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems
 	 * @see #connect(MqttConnectionOptions)
+	 * @return the MqttToken used for the call
 	 */
   public IMqttToken connect() throws MqttSecurityException, MqttException;
  
@@ -138,6 +139,7 @@ public IMqttToken connect(MqttConnectionOptions options) throws MqttSecurityExce
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
 	 * @throws MqttException if there was an error registering the subscription.
+	 * @return token used to track and wait for the subscribe to complete.
 	 */
   public IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
 
@@ -236,6 +238,7 @@ public IMqttToken connect(MqttConnectionOptions options) throws MqttSecurityExce
 	 * the QoS specified on the subscribe.
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
+	 * @return the MqttToken used for the call.
 	 */
   public IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
   
@@ -245,8 +248,10 @@ public IMqttToken connect(MqttConnectionOptions options) throws MqttSecurityExce
 	 * @see #subscribe(String[], int[])
 	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
+	 * @param qos the maximum quality of service to subscribe the topic.
 	 * @param messageListener one callbacks to handle incoming messages
 	 * @throws MqttException if there was an error registering the subscription.
+	 * @return the MqttToken used for the call
 	 */
 public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
 
@@ -344,6 +349,7 @@ public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener me
 	 * @param messageListeners one or more callbacks to handle incoming messages
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
+	 * @return the MqttToken used for the call
 	 */
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
 	
@@ -418,9 +424,7 @@ public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener me
 	 * when the delivery of the message completes. Prior to re-establishing the connection to the server:</p>
 	 * <ul>
 	 * <li>Register a {@link #setCallback(MqttCallback)} callback on the client and the delivery complete
-	 * callback will be notified once a delivery of a message completes
-	 * <li>or call {@link #getPendingDeliveryTokens()} which will return a token for each message that
-	 * is in-flight.  The token can be used to wait for delivery to complete.
+	 * callback will be notified once a delivery of a message completes.
 	 * </ul>
 	 *
 	 * <p>When building an application,
@@ -482,7 +486,7 @@ public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener me
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:</p>
 	 * <ul>
 	 * <li>{@link MqttClient#publish(String, MqttMessage)} to publish a message in a blocking manner
-	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener)}
+	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, IMqttActionListener)}
 	 * </ul>
 	 * <p>When building an application,
 	 * the design of the topic tree should take into account the following principles
@@ -551,7 +555,7 @@ public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener me
 	 * <p>If a client has been restarted and there are messages that were in the
 	 * process of being delivered when the client stopped this method will
 	 * return a token for each message enabling the delivery to be tracked
-	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)}
+	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttToken)}
 	 * callback can be used to track the delivery of outstanding messages.
 	 * </p>
 	 * <p>If a client connects with cleanStart true then there will be no
