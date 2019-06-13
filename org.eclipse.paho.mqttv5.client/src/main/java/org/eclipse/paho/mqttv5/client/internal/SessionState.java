@@ -241,10 +241,13 @@ public class SessionState {
 	/**
 	 * Restores the state information from persistence.
 	 * 
+	 * @param client
+	 * 		the client object
+	 * 
 	 * @throws MqttException if an exception occurs whilst restoring state
 	 */
 	protected void restore(MqttAsyncClient client) throws MqttException {
-		final String methodName = "restoreState";
+		final String methodName = "restore";
 		if (persistence == null) {
 			return;
 		}
