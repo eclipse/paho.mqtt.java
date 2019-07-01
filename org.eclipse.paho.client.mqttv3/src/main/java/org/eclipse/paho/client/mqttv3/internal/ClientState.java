@@ -119,7 +119,7 @@ public class ClientState {
 	private CommsTokenStore tokenStore;
 	private ClientComms clientComms = null;
 	private CommsCallback callback = null;
-	private long keepAlive;
+	private long keepAliveNanos;
 	private boolean cleanSession;
 	private MqttClientPersistence persistence;
 	
@@ -131,9 +131,9 @@ public class ClientState {
 	private Object quiesceLock = new Object();
 	private boolean quiescing = false;
 	
-	private long lastOutboundActivity = 0;
-	private long lastInboundActivity = 0;
-	private long lastPing = 0;
+	private long lastOutboundActivityNanos = 0;
+	private long lastInboundActivityNanos = 0;
+	private long lastPingNanos = 0;
 	private MqttWireMessage pingCommand;
 	private Object pingOutstandingLock = new Object();
 	private int pingOutstanding = 0;
@@ -177,14 +177,14 @@ public class ClientState {
         pendingMessages = new Vector(this.maxInflight);
     }
     protected void setKeepAliveSecs(long keepAliveSecs) {
-		this.keepAlive = TimeUnit.SECONDS.toNanos(keepAliveSecs);
+		this.keepAliveNanos = TimeUnit.SECONDS.toNanos(keepAliveSecs);
 	}
     /**
      * Returns the keepAlive in Milliseconds
      * @return The KeepAlive value in Milliseconds
      */
 	protected long getKeepAlive() {
-		return TimeUnit.NANOSECONDS.toMillis(this.keepAlive);
+		return TimeUnit.NANOSECONDS.toMillis(this.keepAliveNanos);
 	}
 	protected void setCleanSession(boolean cleanSession) {
 		this.cleanSession = cleanSession;
@@ -715,26 +715,26 @@ public class ClientState {
         }
 
 		MqttToken token = null;
-		long nextPingTime = this.keepAlive;
+		long nextPingTimeNanos = this.keepAliveNanos;
 		
-		if (connected && this.keepAlive > 0) {
-			long time = System.nanoTime();
+		if (connected && this.keepAliveNanos > 0) {
+			long timeNanos = System.nanoTime();
 			// Below might not be necessary since move to nanoTime (Issue #278)
 			//Reduce schedule frequency since System.currentTimeMillis is no accurate, add a buffer
 			//It is 1/10 in minimum keepalive unit.
-			int delta = 100000;
+			int deltaNanos = 100000;
 			
 			// ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=446663
             synchronized (pingOutstandingLock) {
 
                 // Is the broker connection lost because the broker did not reply to my ping?                                                                                                                                 
-                if (pingOutstanding > 0 && (time - lastInboundActivity >= keepAlive + delta)) {
+                if (pingOutstanding > 0 && (timeNanos - lastInboundActivityNanos >= keepAliveNanos + deltaNanos)) {
                     // lastInboundActivity will be updated once receiving is done.                                                                                                                                        
                     // Add a delta, since the timer and System.currentTimeMillis() is not accurate.     
                 		// TODO - Remove Delta, maybe?
                 	// A ping is outstanding but no packet has been received in KA so connection is deemed broken                                                                                                         
                     //@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}                                                                           
-                    log.severe(CLASS_NAME,methodName,"619", new Object[]{ Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity),  Long.valueOf(time),  Long.valueOf(lastPing)});
+                    log.severe(CLASS_NAME,methodName,"619", new Object[]{ Long.valueOf(this.keepAliveNanos), Long.valueOf(lastOutboundActivityNanos), Long.valueOf(lastInboundActivityNanos),  Long.valueOf(timeNanos),  Long.valueOf(lastPingNanos)});
 
                     // A ping has already been sent. At this point, assume that the                                                                                                                                       
                     // broker has hung and the TCP layer hasn't noticed.                                                                                                                                                  
@@ -742,10 +742,10 @@ public class ClientState {
                 }
 
                 // Is the broker connection lost because I could not get any successful write for 2 keepAlive intervals?                                                                                                      
-                if (pingOutstanding == 0 && (time - lastOutboundActivity >= 2*keepAlive)) {
+                if (pingOutstanding == 0 && (timeNanos - lastOutboundActivityNanos >= 2*keepAliveNanos)) {
                     
                     // I am probably blocked on a write operations as I should have been able to write at least a ping message                                                                                                    
-                	log.severe(CLASS_NAME,methodName,"642", new Object[]{ Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity),  Long.valueOf(time),  Long.valueOf(lastPing)});
+                	log.severe(CLASS_NAME,methodName,"642", new Object[]{ Long.valueOf(this.keepAliveNanos), Long.valueOf(lastOutboundActivityNanos), Long.valueOf(lastInboundActivityNanos),  Long.valueOf(timeNanos),  Long.valueOf(lastPingNanos)});
 
                     // A ping has not been sent but I am not progressing on the current write operation. 
                 	// At this point, assume that the broker has hung and the TCP layer hasn't noticed.                                                                                                                                                  
@@ -761,11 +761,11 @@ public class ClientState {
                 //    This would be the case when receiving a large message;                                                                                                                                                  
                 //    the broker needs to keep receiving a regular ping even if the ping response are queued after the long message                                                                                           
                 //    If lacking to do so, the broker will consider my connection lost and cut my socket.                                                                                                                     
-                if ((pingOutstanding == 0 && (time - lastInboundActivity >= keepAlive - delta)) ||
-                    (time - lastOutboundActivity >= keepAlive - delta)) {
+                if ((pingOutstanding == 0 && (timeNanos - lastInboundActivityNanos >= keepAliveNanos - deltaNanos)) ||
+                    (timeNanos - lastOutboundActivityNanos >= keepAliveNanos - deltaNanos)) {
 
                     //@TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}                                                                                                              
-                    log.fine(CLASS_NAME,methodName,"620", new Object[]{ Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity)});
+                    log.fine(CLASS_NAME,methodName,"620", new Object[]{ Long.valueOf(this.keepAliveNanos), Long.valueOf(lastOutboundActivityNanos), Long.valueOf(lastInboundActivityNanos)});
 
                     // pingOutstanding++;  // it will be set after the ping has been written on the wire                                                                                                             
                     // lastPing = time;    // it will be set after the ping has been written on the wire                                                                                                             
@@ -776,7 +776,7 @@ public class ClientState {
                     tokenStore.saveToken(token, pingCommand);
                     pendingFlows.insertElementAt(pingCommand, 0);
 
-                    nextPingTime = getKeepAlive();
+                    nextPingTimeNanos = TimeUnit.MILLISECONDS.toNanos(getKeepAlive());
 
                     //Wake sender thread since it may be in wait state (in ClientState.get())                                                                                                                             
                     notifyQueueLock();
@@ -784,12 +784,12 @@ public class ClientState {
                 else {
                 		//@TRACE 634=ping not needed yet. Schedule next ping.
                     log.fine(CLASS_NAME, methodName, "634", null);
-                    nextPingTime = Math.max(1,  getKeepAlive() - (time - lastOutboundActivity));
+                    nextPingTimeNanos = Math.max(1,  TimeUnit.MILLISECONDS.toNanos(getKeepAlive()) - (timeNanos - lastOutboundActivityNanos));
                 }
             }
             //@TRACE 624=Schedule next ping at {0}                                                                                                                                                                                
-            log.fine(CLASS_NAME, methodName,"624", new Object[]{Long.valueOf(nextPingTime)});
-            pingSender.schedule(nextPingTime);
+            log.fine(CLASS_NAME, methodName,"624", new Object[]{Long.valueOf(nextPingTimeNanos)});
+            pingSender.schedule(nextPingTimeNanos);
 		}
 		
 		return token;
@@ -882,14 +882,14 @@ public class ClientState {
 		return result;
 	}
 	
-	public void setKeepAliveInterval(long interval) {
-		this.keepAlive = interval;
+	public void setKeepAliveInterval(long intervalNanos) {
+		this.keepAliveNanos = intervalNanos;
 	}
 	
     public void notifySentBytes(int sentBytesCount) {
         final String methodName = "notifySentBytes";
         if (sentBytesCount > 0) {
-        	this.lastOutboundActivity = System.nanoTime();
+        	this.lastOutboundActivityNanos = System.nanoTime();
         }
         // @TRACE 643=sent bytes count={0}                                                                                                                                                                                            
         log.fine(CLASS_NAME, methodName, "643", new Object[] {
@@ -904,7 +904,7 @@ public class ClientState {
 	protected void notifySent(MqttWireMessage message) {
 		final String methodName = "notifySent";
 		
-		this.lastOutboundActivity = System.nanoTime();
+		this.lastOutboundActivityNanos = System.nanoTime();
 		//@TRACE 625=key={0}
 		log.fine(CLASS_NAME,methodName,"625",new Object[]{message.getKey()});
 		
@@ -916,9 +916,9 @@ public class ClientState {
 		token.internalTok.notifySent();
         if (message instanceof MqttPingReq) {
             synchronized (pingOutstandingLock) {
-            	long time = System.nanoTime();
+            	long timeNanos = System.nanoTime();
                 synchronized (pingOutstandingLock) {
-                	lastPing = time;
+                	lastPingNanos = timeNanos;
                 	pingOutstanding++;
                 }
                 //@TRACE 635=ping sent. pingOutstanding: {0}                                                                                                                                                                  
@@ -970,7 +970,7 @@ public class ClientState {
     public void notifyReceivedBytes(int receivedBytesCount) {
         final String methodName = "notifyReceivedBytes";
         if (receivedBytesCount > 0) {
-            this.lastInboundActivity = System.nanoTime();
+            this.lastInboundActivityNanos = System.nanoTime();
         }
         // @TRACE 630=received bytes count={0}                                                                                                                                                                                        
         log.fine(CLASS_NAME, methodName, "630", new Object[] {
@@ -985,7 +985,7 @@ public class ClientState {
 	 */
 	protected void notifyReceivedAck(MqttAck ack) throws MqttException {
 		final String methodName = "notifyReceivedAck";
-		this.lastInboundActivity = System.nanoTime();
+		this.lastInboundActivityNanos = System.nanoTime();
 
 		// @TRACE 627=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "627", new Object[] {
@@ -1067,7 +1067,7 @@ public class ClientState {
 	 */
 	protected void notifyReceivedMsg(MqttWireMessage message) throws MqttException {
 		final String methodName = "notifyReceivedMsg";
-		this.lastInboundActivity = System.nanoTime();
+		this.lastInboundActivityNanos = System.nanoTime();
 
 		// @TRACE 651=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "651", new Object[] {
@@ -1315,14 +1315,14 @@ public class ClientState {
 	 * and preventing the callback on any newly received messages.
 	 * After the timeout expires, delete any pending messages except for
 	 * outbound ACKs, and wait for those ACKs to complete.
-	 * @param timeout How long to wait during Quiescing
+	 * @param timeoutMs How long to wait during Quiescing (in milliseconds)
 	 */
-	public void quiesce(long timeout) {
+	public void quiesce(long timeoutMs) {
 		final String methodName = "quiesce";
 		// If the timeout is greater than zero t
-		if (timeout > 0 ) {
+		if (timeoutMs > 0 ) {
 			//@TRACE 637=timeout={0}
-			log.fine(CLASS_NAME,methodName, "637",new Object[]{ Long.valueOf(timeout)});
+			log.fine(CLASS_NAME,methodName, "637",new Object[]{ Long.valueOf(timeoutMs)});
 			synchronized (queueLock) {
 				this.quiescing = true;
 			}
@@ -1342,7 +1342,7 @@ public class ClientState {
 
 						// wait for outstanding in flight messages to complete and
 						// any pending flows to complete
-						quiesceLock.wait(timeout);
+						quiesceLock.wait(timeoutMs);
 					}
 				}
 				catch (InterruptedException ex) {
@@ -1441,8 +1441,8 @@ public class ClientState {
 		props.put("inFlightPubRels",  Integer.valueOf(inFlightPubRels));
 		props.put("quiescing", Boolean.valueOf(quiescing));
 		props.put("pingoutstanding",  Integer.valueOf(pingOutstanding));
-		props.put("lastOutboundActivity",  Long.valueOf(lastOutboundActivity));
-		props.put("lastInboundActivity",  Long.valueOf(lastInboundActivity));
+		props.put("lastOutboundActivity",  Long.valueOf(lastOutboundActivityNanos));
+		props.put("lastInboundActivity",  Long.valueOf(lastInboundActivityNanos));
 		props.put("outboundQoS2", outboundQoS2);
 		props.put("outboundQoS1", outboundQoS1);
 		props.put("outboundQoS0", outboundQoS0);
