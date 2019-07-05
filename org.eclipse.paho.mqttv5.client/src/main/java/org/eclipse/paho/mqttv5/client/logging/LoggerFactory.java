@@ -87,7 +87,7 @@ public class LoggerFactory {
 	/**
 	 * Return an instance of a logger
 	 * 
-	 * @param the class name of the load to load
+	 * @param loggerClassName the class name of the load to load
 	 * @param messageCatalog  the resource bundle containing messages 
 	 * @param loggerID  an identifier for the logger 
 	 * @param resourceName a name or context to associate with this logger instance.  

@@ -246,7 +246,7 @@ public class WebSocketFrame {
 	 * 
 	 * @param buffer
 	 * @param length
-	 * @param b
+	 * @param masked
 	 */
 	private static void appendLength(ByteBuffer buffer, int length, boolean masked) {
 
