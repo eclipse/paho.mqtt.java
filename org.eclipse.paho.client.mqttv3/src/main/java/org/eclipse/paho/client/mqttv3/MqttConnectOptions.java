@@ -77,6 +77,7 @@ public class MqttConnectOptions {
 
 	// Client Operation Parameters
 	private int executorServiceTimeout = 1; // How long to wait in seconds when terminating the executor service.
+	private int soTimeout = 1000;
 
 	/**
 	 * Constructs a new <code>MqttConnectOptions</code> object using the default
@@ -647,6 +648,28 @@ public class MqttConnectOptions {
 	}
 
 	/**
+	 * *  With this option set
+	 * *  to a non-zero timeout, a read() call on the InputStream associated with
+	 * *  this Socket will block for only this amount of time.  If the timeout
+	 * *  expires, a <B>java.net.SocketTimeoutException</B> is raised, though the
+	 * *  Socket is still valid. The option <B>must</B> be enabled
+	 * *  prior to entering the blocking operation to have effect. The
+	 * *  timeout must be {@code > 0}.
+	 * *  A timeout of zero is interpreted as an infinite timeout.
+	 * *  Default value is 1000
+	 *
+	 * @param soTimeout The connection timeout
+	 */
+	public void setSoTimeout(int soTimeout) {
+		this.soTimeout = soTimeout;
+	}
+
+
+	public int getSoTimeout() {
+		return soTimeout;
+	}
+
+	/**
 	 * Set the time in seconds that the executor service should wait when
 	 * terminating before forcefully terminating. It is not recommended to change
 	 * this value unless you are absolutely sure that you need to.
@@ -700,5 +723,5 @@ public class MqttConnectOptions {
 	public String toString() {
 		return Debug.dumpProperties(getDebug(), "Connection options");
 	}
-	
+
 }
