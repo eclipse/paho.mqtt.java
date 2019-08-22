@@ -31,7 +31,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	private DisconnectedBufferOptions bufferOpts;
 	private ArrayList<BufferedMessage> buffer;
-	private Object bufLock = new Object(); // Used to synchronise the buffer
+	private final Object bufLock = new Object(); // Used to synchronise the buffer
 	private IDisconnectedBufferCallback callback;
 
 	public DisconnectedMessageBuffer(DisconnectedBufferOptions options) {
