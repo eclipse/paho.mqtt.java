@@ -37,7 +37,7 @@ import javax.swing.border.EtchedBorder;
  */
 public class MQTTHist extends JDialog implements ActionListener, Runnable {
     private ConnOpts connOptions;
-    private JTextArea histData;
+    private final JTextArea histData;
     private JScrollPane scroller; // Remember the scroll pane object so that we can auto scroll
     private boolean running = true;
     private boolean logEnabled = true;

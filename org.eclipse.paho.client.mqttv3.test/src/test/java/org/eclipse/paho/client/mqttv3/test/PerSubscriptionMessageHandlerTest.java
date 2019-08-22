@@ -93,7 +93,7 @@ public class PerSubscriptionMessageHandlerTest {
 	  
 	  class listener implements IMqttMessageListener {
 
-		  ArrayList<MqttMessage> messages;
+		  final ArrayList<MqttMessage> messages;
 
 		  public listener() {
 			  messages = new ArrayList<MqttMessage>();

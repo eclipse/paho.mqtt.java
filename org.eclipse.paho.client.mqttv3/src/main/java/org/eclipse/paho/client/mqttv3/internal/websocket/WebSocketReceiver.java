@@ -30,7 +30,7 @@ public class WebSocketReceiver implements Runnable{
 
 	private boolean running = false;
 	private boolean stopping = false;
-	private Object lifecycle = new Object();
+	private final Object lifecycle = new Object();
 	private InputStream input;
 	private Thread receiverThread = null;
 	private volatile boolean receiving;

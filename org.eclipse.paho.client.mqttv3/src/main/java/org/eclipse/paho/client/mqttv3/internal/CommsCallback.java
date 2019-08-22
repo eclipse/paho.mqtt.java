@@ -54,20 +54,20 @@ public class CommsCallback implements Runnable {
 	private MqttCallbackExtended reconnectInternalCallback;
 	private Hashtable<String, IMqttMessageListener> callbacks; // topicFilter -> messageHandler
 	private ClientComms clientComms;
-	private Vector<MqttWireMessage> messageQueue;
-	private Vector<MqttToken> completeQueue;
+	private final Vector<MqttWireMessage> messageQueue;
+	private final Vector<MqttToken> completeQueue;
 	
 	private enum State {STOPPED, RUNNING, QUIESCING}
 
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;
-	private Object lifecycle = new Object();
+	private final Object lifecycle = new Object();
 	private Thread callbackThread;
 	private String threadName;
 	private Future<?> callbackFuture;
 	
-	private Object workAvailable = new Object();
-	private Object spaceAvailable = new Object();
+	private final Object workAvailable = new Object();
+	private final Object spaceAvailable = new Object();
 	private ClientState clientState;
 	private boolean manualAcks = false;
 

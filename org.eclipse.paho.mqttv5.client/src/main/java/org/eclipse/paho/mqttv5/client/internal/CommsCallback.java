@@ -69,13 +69,13 @@ public class CommsCallback implements Runnable {
 
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;	
-	private Object lifecycle = new Object();
+	private final Object lifecycle = new Object();
 	private Thread callbackThread;
 	private String threadName;
 	private Future<?> callbackFuture;
 	
-	private Object workAvailable = new Object();
-	private Object spaceAvailable = new Object();
+	private final Object workAvailable = new Object();
+	private final Object spaceAvailable = new Object();
 	private ClientState clientState;
 	private boolean manualAcks = false;
 

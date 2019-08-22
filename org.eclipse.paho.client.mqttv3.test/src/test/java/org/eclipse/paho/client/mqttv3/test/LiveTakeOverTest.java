@@ -193,7 +193,7 @@ public class LiveTakeOverTest {
   class FirstClient implements Runnable {
 
     private FirstClientState state = FirstClientState.INITIAL;
-    public Object stateLock = new Object();
+    public final Object stateLock = new Object();
     IMqttClient mqttClient = null;
     MqttV3Receiver mqttV3Receiver = null;
 

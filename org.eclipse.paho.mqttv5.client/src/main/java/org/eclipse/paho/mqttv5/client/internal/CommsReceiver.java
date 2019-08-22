@@ -41,7 +41,7 @@ public class CommsReceiver implements Runnable {
 
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;
-	private Object lifecycle = new Object();
+	private final Object lifecycle = new Object();
 	private String threadName;
 	private Future<?> receiverFuture;
 	

@@ -48,7 +48,7 @@ public class CommsTokenStore {
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	// Maps message-specific data (usually message IDs) to tokens
-	private Hashtable tokens;
+	private final Hashtable tokens;
 	private String logContext;
 	private MqttException closedResponse = null;
 
