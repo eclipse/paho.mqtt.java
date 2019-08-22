@@ -49,7 +49,7 @@ public class SendReceiveTest {
   private static final String className = cclass.getName();
   private static final Logger log = Logger.getLogger(className);
 
-  private static URI serverURI;
+  private URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
   private static String topicPrefix;
   
@@ -62,9 +62,9 @@ public class SendReceiveTest {
 		
   }
   
-	public SendReceiveTest(URI serverURI) {
-		this.serverURI = serverURI;
-	}
+  public SendReceiveTest(URI serverURI) {
+	  this.serverURI = serverURI;
+  }
 
 
   /**

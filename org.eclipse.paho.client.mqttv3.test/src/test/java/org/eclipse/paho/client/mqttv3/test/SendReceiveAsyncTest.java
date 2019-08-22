@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,8 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,19 +37,37 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 /**
  *
  */
+@RunWith(Parameterized.class)
 public class SendReceiveAsyncTest {
 
   static final Class<?> cclass = SendReceiveAsyncTest.class;
   static final String className = cclass.getName();
   static final Logger log = Logger.getLogger(className);
 
-  private static URI serverURI;
+  private URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
   private static String topicPrefix;
+  
+  
+  @Parameters
+  public static Collection<Object[]> data() throws Exception {
+		
+	  return Arrays.asList(new Object[][] {     
+        { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }  
+	  });
+		
+  }
+  
+  public SendReceiveAsyncTest(URI serverURI) {
+		this.serverURI = serverURI;
+  }
 
 
   /**
@@ -60,7 +80,6 @@ public class SendReceiveAsyncTest {
       String methodName = Utility.getMethodName();
       LoggingUtilities.banner(log, cclass, methodName);
 
-      serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
       topicPrefix = "SendReceiveAsyncTest-" + UUID.randomUUID().toString() + "-";
