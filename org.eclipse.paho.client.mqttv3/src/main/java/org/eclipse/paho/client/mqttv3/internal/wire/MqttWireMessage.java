@@ -51,9 +51,9 @@ public abstract class MqttWireMessage {
 
 	protected static final Charset STRING_ENCODING = StandardCharsets.UTF_8;
 
-	private static final String PACKET_NAMES[] = { "reserved", "CONNECT", "CONNACK", "PUBLISH", "PUBACK", "PUBREC",
+	private static final String[] PACKET_NAMES = {"reserved", "CONNECT", "CONNACK", "PUBLISH", "PUBACK", "PUBREC",
 			"PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK", "UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP",
-			"DISCONNECT" };
+			"DISCONNECT"};
 	
 
 	private static final long FOUR_BYTE_INT_MAX = 4294967295L;

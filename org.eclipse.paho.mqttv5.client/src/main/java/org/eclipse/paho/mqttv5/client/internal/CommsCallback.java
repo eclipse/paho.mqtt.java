@@ -65,7 +65,8 @@ public class CommsCallback implements Runnable {
 	private ArrayList<MqttPublish> messageQueue;
 	private ArrayList<MqttToken> completeQueue;
 
-	private enum State {STOPPED, RUNNING, QUIESCING};
+	private enum State {STOPPED, RUNNING, QUIESCING}
+
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;	
 	private Object lifecycle = new Object();
@@ -477,7 +478,7 @@ public class CommsCallback implements Runnable {
 		String destName = publishMessage.getTopicName();
 
 		// @TRACE 713=call messageArrived key={0} topic={1}
-		log.fine(CLASS_NAME, methodName, "713", new Object[] { new Integer(publishMessage.getMessageId()), destName });
+		log.fine(CLASS_NAME, methodName, "713", new Object[] { Integer.valueOf(publishMessage.getMessageId()), destName });
 		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage());
 
 		// If we are not in manual ACK mode:

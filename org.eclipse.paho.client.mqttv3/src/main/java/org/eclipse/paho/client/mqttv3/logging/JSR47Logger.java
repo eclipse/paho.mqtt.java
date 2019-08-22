@@ -190,7 +190,7 @@ public class JSR47Logger implements Logger {
 			ResourceBundle messageCatalog, String msg, Object[] inserts, Throwable thrown) {
 //		LogRecord logRecord = new LogRecord(julLevel, msg);
 		String formattedWithArgs = msg;
-		if (msg.indexOf("=====")== -1) {
+		if (!msg.contains("=====")) {
 			formattedWithArgs = MessageFormat.format(getResourceMessage(messageCatalog, msg), inserts);
 		}
 		LogRecord logRecord = new LogRecord(julLevel, resourceName + ": " +formattedWithArgs);
@@ -261,16 +261,16 @@ public class JSR47Logger implements Logger {
 
 		if (logger!= null) {
 			Handler[] handlers = logger.getHandlers();
-			
-		    for (int i=0; i<handlers.length; i++) {
-		      if (handlers[i] instanceof java.util.logging.MemoryHandler) {
-		        synchronized (handlers[i]) {
-		        	mHand = ((java.util.logging.MemoryHandler)handlers[i]);
-		        	mHand.push();
-		        	return;
-		        } // synchronized (handler).
-		      }      
-		    } // for handlers...
+
+			for (Handler handler : handlers) {
+				if (handler instanceof MemoryHandler) {
+					synchronized (handler) {
+						mHand = ((MemoryHandler) handler);
+						mHand.push();
+						return;
+					} // synchronized (handler).
+				}
+			} // for handlers...
 		    dumpMemoryTrace47(logger.getParent());
 		}
 	}

@@ -29,6 +29,6 @@ public interface MqttCallbackExtended extends MqttCallback {
 	 * @param reconnect If true, the connection was the result of automatic reconnect.
 	 * @param serverURI The server URI that the connection was made to.
 	 */
-	public void connectComplete(boolean reconnect, String serverURI);
+    void connectComplete(boolean reconnect, String serverURI);
 
 }

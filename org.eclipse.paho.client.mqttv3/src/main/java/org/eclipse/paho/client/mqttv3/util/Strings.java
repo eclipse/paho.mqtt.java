@@ -36,8 +36,8 @@ public final class Strings {
 		}
 
 		if (strs != null) {
-			for (int i = 0; i < strs.length; i++) {
-				eq = eq || strs[i].equals(cs);
+			for (CharSequence str : strs) {
+				eq = eq || str.equals(cs);
 			}
 		}
 

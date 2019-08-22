@@ -289,22 +289,22 @@ public class PubPanel implements ActionListener, DocumentListener {
     	
     	byte[] pubBytes = pubText.getBytes();
 
-    	for( int i=0; i<pubBytes.length; i++ ) {
-    		int byteValue = pubBytes[i];
+		for (int pubByte : pubBytes) {
+			int byteValue = pubByte;
 
-            // Change the byte value from a signed to unsigned value
-            // e.g. A byte of value 0xAA is treated as -86 and displayed incorrectly as 0xFFFFFFAA
-            // Adding 256 to this value changes it to 170 which is displayed correctly as 0xAA
-    		if (byteValue < 0) {
-    			byteValue += 256;
-    		}	
+			// Change the byte value from a signed to unsigned value
+			// e.g. A byte of value 0xAA is treated as -86 and displayed incorrectly as 0xFFFFFFAA
+			// Adding 256 to this value changes it to 170 which is displayed correctly as 0xAA
+			if (byteValue < 0) {
+				byteValue += 256;
+			}
 
-    		if ( byteValue < 16 ) {
-        		hexText.append( "0" + Integer.toHexString(byteValue) );
-    		} else {
-        		hexText.append( Integer.toHexString(byteValue) );
-    		}		
-    	}	
+			if (byteValue < 16) {
+				hexText.append("0" + Integer.toHexString(byteValue));
+			} else {
+				hexText.append(Integer.toHexString(byteValue));
+			}
+		}
     	
         hexDisplay = true;
         pubLabel.setText( PANEL_TITLE + " - hexadecimal display" );

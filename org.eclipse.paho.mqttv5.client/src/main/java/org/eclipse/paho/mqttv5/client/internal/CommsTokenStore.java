@@ -109,7 +109,7 @@ public class CommsTokenStore {
 		final String methodName = "restoreToken";
 		MqttDeliveryToken token;
 		synchronized(tokens) {
-			String key = new Integer(message.getMessageId()).toString();
+			String key = Integer.valueOf(message.getMessageId()).toString();
 			if (this.tokens.containsKey(key)) {
 				token = (MqttDeliveryToken)this.tokens.get(key);
 				//@TRACE 302=existing key={0} message={1} token={2}
@@ -227,7 +227,7 @@ public class CommsTokenStore {
 	public void clear() {
 		final String methodName = "clear";
 		//@TRACE 305=> {0} tokens
-		log.fine(CLASS_NAME, methodName, "305", new Object[] {new Integer(tokens.size())});
+		log.fine(CLASS_NAME, methodName, "305", new Object[] { Integer.valueOf(tokens.size())});
 		synchronized(tokens) {
 			tokens.clear();
 		}

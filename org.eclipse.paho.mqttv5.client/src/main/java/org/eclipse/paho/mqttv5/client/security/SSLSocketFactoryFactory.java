@@ -133,10 +133,10 @@ public class SSLSocketFactoryFactory {
 	
 
 	public static final String DEFAULT_PROTOCOL = "TLS";  // "SSL_TLS" is not supported by DesktopEE
-	
-	private static final String propertyKeys[] = { SSLPROTOCOL, JSSEPROVIDER,
-			KEYSTORE, KEYSTOREPWD, KEYSTORETYPE, KEYSTOREPROVIDER, KEYSTOREMGR, 
-			TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER, 
+
+	private static final String[] propertyKeys = {SSLPROTOCOL, JSSEPROVIDER,
+			KEYSTORE, KEYSTOREPWD, KEYSTORETYPE, KEYSTOREPROVIDER, KEYSTOREMGR,
+			TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER,
 			TRUSTSTOREMGR, CIPHERSUITES, CLIENTAUTH};
 
 	private Hashtable<String, Properties> configs; // a hashtable that maps configIDs to properties.
@@ -818,7 +818,7 @@ public class SSLSocketFactoryFactory {
 	private String getPropertyFromConfig(String configID, String ibmKey) {
 		String res = null;
 		Properties p =null;
-		if(configID!=null) {;
+		if(configID!=null) {
 			p = (Properties) configs.get(configID);
 		}
 		if (p != null) {

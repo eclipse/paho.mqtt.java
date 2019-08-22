@@ -57,7 +57,8 @@ public class CommsCallback implements Runnable {
 	private Vector<MqttWireMessage> messageQueue;
 	private Vector<MqttToken> completeQueue;
 	
-	private enum State {STOPPED, RUNNING, QUIESCING};
+	private enum State {STOPPED, RUNNING, QUIESCING}
+
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;
 	private Object lifecycle = new Object();

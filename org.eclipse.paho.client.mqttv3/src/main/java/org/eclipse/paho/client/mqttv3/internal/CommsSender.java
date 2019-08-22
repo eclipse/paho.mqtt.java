@@ -35,8 +35,9 @@ public class CommsSender implements Runnable {
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	//Sends MQTT packets to the server on its own thread
-	private enum State {STOPPED, RUNNING, STARTING};
-	private State current_state = State.STOPPED;
+	private enum State {STOPPED, RUNNING, STARTING}
+
+    private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;
 	private Object lifecycle = new Object();
 	private Thread 	sendThread		= null;

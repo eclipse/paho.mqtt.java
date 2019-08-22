@@ -85,8 +85,8 @@ public class MqttSubscribe extends MqttWireMessage {
 
 		this.count = names.length;
 
-		for (int i = 0; i < qos.length; i++) {
-			MqttMessage.validateQos(qos[i]);
+		for (int qo : qos) {
+			MqttMessage.validateQos(qo);
 		}
 	}
 

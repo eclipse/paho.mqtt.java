@@ -319,7 +319,7 @@ public class BasicTest {
 
     log.info("Check MqttConnectOptions defaults");
     MqttConnectOptions connOpts = new MqttConnectOptions();
-    Assert.assertEquals(new Integer(connOpts.getKeepAliveInterval()), new Integer(60));
+    Assert.assertEquals(Integer.valueOf(connOpts.getKeepAliveInterval()), Integer.valueOf(60));
     Assert.assertNull(connOpts.getPassword());
     Assert.assertNull(connOpts.getUserName());
     Assert.assertNull(connOpts.getSocketFactory());

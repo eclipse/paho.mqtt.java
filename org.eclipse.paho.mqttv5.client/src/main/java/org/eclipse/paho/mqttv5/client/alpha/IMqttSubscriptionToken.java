@@ -47,7 +47,7 @@ public interface IMqttSubscriptionToken<C> extends IMqttToken<IMqttSubscriptionR
 	 * @return A stream of messages for this subscription
 	 * @throws MqttException if an exception occurs whilsr returning the stream.
 	 */
-	public PushStream<IReceivedMessage<C>> getStream() throws MqttException;
+    PushStream<IReceivedMessage<C>> getStream() throws MqttException;
 	
 	/**
 	 * Returns the topic string(s) for the action being tracked by this
@@ -56,7 +56,7 @@ public interface IMqttSubscriptionToken<C> extends IMqttToken<IMqttSubscriptionR
 	 *
 	 * @return the topic string(s) for the subscribe being tracked by this token or null
 	 */
-	public List<String> getTopics();
+    List<String> getTopics();
 
 	Promise<IMqttUnsubscriptionResult<C>> getUnsubscribePromise() throws MqttException;
 }

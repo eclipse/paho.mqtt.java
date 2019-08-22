@@ -73,8 +73,7 @@ public class LoggerDumper {
       parentNode = findParentNode(parent);
 
       LoggerNode found = null;
-      for (Iterator<LoggerNode> iterator = parentNode.getChildren().iterator(); iterator.hasNext();) {
-        LoggerNode childNode = iterator.next();
+      for (LoggerNode childNode : parentNode.getChildren()) {
         if (childNode.getLogger() == logger) {
           found = childNode;
           break;
@@ -125,8 +124,7 @@ public class LoggerDumper {
       sb.append(StringUtilities.NL);
     }
 
-    for (Iterator<LoggerNode> iterator = node.getChildren().iterator(); iterator.hasNext();) {
-      LoggerNode child = iterator.next();
+    for (LoggerNode child : node.getChildren()) {
       dumpLoggerNode(child, indent + 1, sb);
     }
   }
