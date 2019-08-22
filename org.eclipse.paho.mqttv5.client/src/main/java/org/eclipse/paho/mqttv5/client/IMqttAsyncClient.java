@@ -729,7 +729,7 @@ public interface IMqttAsyncClient {
 	 * If a client has been restarted and there are messages that were in the
 	 * process of being delivered when the client stopped this method returns a
 	 * token for each in-flight message enabling the delivery to be tracked
-	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)}
+	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttToken)}
 	 * callback can be used to track the delivery of outstanding messages.
 	 * </p>
 	 * <p>
@@ -891,7 +891,7 @@ public interface IMqttAsyncClient {
 	 * </p>
 	 * <ul>
 	 * <li>Setting an {@link IMqttAsyncClient#setCallback(MqttCallback)} where the
-	 * {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)} method will be
+	 * {@link MqttCallback#deliveryComplete(IMqttToken)} method will be
 	 * called.</li>
 	 * <li>Waiting on the returned token {@link MqttToken#waitForCompletion()}
 	 * or</li>
