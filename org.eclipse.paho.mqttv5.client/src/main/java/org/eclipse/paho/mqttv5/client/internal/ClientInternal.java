@@ -22,7 +22,6 @@ import org.eclipse.paho.mqttv5.common.packet.MqttConnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttDataTypes;
 import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
 import org.eclipse.paho.mqttv5.common.packet.MqttPersistableWireMessage;
-import org.eclipse.paho.mqttv5.common.packet.MqttPingReq;
 import org.eclipse.paho.mqttv5.common.packet.MqttPingResp;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttPubAck;
@@ -223,16 +222,6 @@ public class ClientInternal {
 			} else if (msg instanceof MqttPublish) {
 				IMqttMessageListener listener = sessionstate.getMessageListener(((MqttPublish) msg).getProperties().getSubscriptionIdentifier(), 
 						((MqttPublish) msg).getTopicName());
-							
-				/*Enumeration<Integer> keys = sessionstate.getInboundQoS2().getKeys();
-				String keydata = new String();
-				while (keys.hasMoreElements()) {
-					keydata += keys.nextElement() + " ";
-				}
-				System.out.println("*** keys "+keydata);*/
-				
-				//System.out.println("111 "+msg.getMessageId() + " " + sessionstate.getInboundQoS2().get(msg.getMessageId())
-				//		+ " " + ((MqttPublish) msg).getQoS());
 				
 				if (sessionstate.getInboundQoS2().get(msg.getMessageId()) == null) {
 					// Don't deliver messages if that's already been attempted
@@ -257,7 +246,6 @@ public class ClientInternal {
 								msg.getMessageId(), null);
 						outbuffer = Buffer.buffer(pubrec.serialize());
 						sessionstate.addInboundQoS2((MqttPublish)msg);
-						//System.out.println("222 "+sessionstate.getInboundQoS2().get(msg.getMessageId()));
 					}
 					if (websocket != null) {
 						websocket.writeBinaryMessage(outbuffer, 
@@ -282,7 +270,6 @@ public class ClientInternal {
 						msg.getProperties());
 				
 				// change publish message to pubrel in retry queue 
-				// ToDO: update persistence as well
 				sessionstate.getRetryQueue().remove(msg.getMessageId());
 				sessionstate.addRetryQueue(pubrel);
 				
@@ -692,18 +679,23 @@ public class ClientInternal {
 	
 	public void subscribe(MqttSubscription[] subscriptions, MqttProperties subscriptionProperties,
 			MqttToken token) throws MqttException {
+		
+		int msgid = sessionstate.getNextMessageId(); // throws exception if none available
+		
 		MqttSubscribe subscribe = new MqttSubscribe(subscriptions, subscriptionProperties);
-		subscribe.setMessageId(sessionstate.getNextMessageId());
-		sessionstate.out_tokens.put(new Integer(subscribe.getMessageId()), token);
+		subscribe.setMessageId(msgid);
+		sessionstate.out_tokens.put(new Integer(msgid), token);
 		todoQueue.add(subscribe, token);
 	}
 	
 	public void unsubscribe(String[] topicFilters, MqttProperties unsubscribeProperties,
 			MqttToken token) throws MqttException {
 
+		int msgid = sessionstate.getNextMessageId(); // throws exception if none available
+		
 		MqttUnsubscribe unsubscribe = new MqttUnsubscribe(topicFilters, unsubscribeProperties);
-		unsubscribe.setMessageId(sessionstate.getNextMessageId());
-		sessionstate.out_tokens.put(new Integer(unsubscribe.getMessageId()), token);
+		unsubscribe.setMessageId(msgid);
+		sessionstate.out_tokens.put(new Integer(msgid), token);
 		todoQueue.add(unsubscribe, token);
 	}
 		
@@ -714,11 +706,16 @@ public class ClientInternal {
 			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_NOT_CONNECTED);
 		}
 		
+		int msgid = -1;
+		if (message.getQos() > 0) {
+			sessionstate.getNextMessageId(); // throws exception if none available
+		}
+		
 		MqttPublish publish = new MqttPublish(topic, message, message.getProperties());
 		token.setPendingMessage(publish);
 		if (message.getQos() > 0) {
-			publish.setMessageId(sessionstate.getNextMessageId()); // getNextId
-			sessionstate.out_tokens.put(new Integer(publish.getMessageId()), token);
+			publish.setMessageId(msgid); 
+			sessionstate.out_tokens.put(new Integer(msgid), token);
 		} else {
 			// QoS 0 messages have no message id
 			out_hash_tokens.put(new Integer(token.hashCode()), token);
