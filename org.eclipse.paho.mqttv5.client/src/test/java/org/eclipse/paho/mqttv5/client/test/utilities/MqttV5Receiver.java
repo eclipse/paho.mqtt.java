@@ -61,7 +61,7 @@ public class MqttV5Receiver implements MqttCallback {
   List<ReceivedMessage> receivedMessages = new ArrayList<ReceivedMessage>();
 
   /**
-   * @param mqttClient
+   * @param clientId
    * @param reportStream
    */
   public MqttV5Receiver(String clientId, PrintStream reportStream) {

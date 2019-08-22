@@ -204,7 +204,7 @@ import javax.net.SocketFactory;
  * To understand when the delivery of a message is complete either of the two
  * methods above can be used to either wait on or be notified when the publish
  * completes. An alternative is to use the
- * {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)} method which will
+ * {@link MqttCallback#deliveryComplete(IMqttToken)} method which will
  * also be notified when a message has been delivered to the requested quality
  * of service.
  * </p>

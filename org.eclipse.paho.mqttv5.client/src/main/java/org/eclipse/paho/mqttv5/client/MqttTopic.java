@@ -53,7 +53,7 @@ public class MqttTopic {
 	 *            the Quality of Service. Valid values are 0, 1 or 2.
 	 * @param retained
 	 *            whether or not this message should be retained by the server.
-	 * @return {@link MqttDeliveryToken}
+	 * @return {@link MqttToken}
 	 * @throws MqttException
 	 *             If an error occurs publishing the message
 	 * @throws MqttPersistenceException
@@ -74,7 +74,7 @@ public class MqttTopic {
 
 	/**
 	 * Publishes the specified message to this topic, but does not wait for delivery
-	 * of the message to complete. The returned {@link MqttDeliveryToken token} can
+	 * of the message to complete. The returned {@link MqttToken token} can
 	 * be used to track the delivery status of the message. Once this method has
 	 * returned cleanly, the message has been accepted for publication by the
 	 * client. Message delivery will be completed in the background when a
