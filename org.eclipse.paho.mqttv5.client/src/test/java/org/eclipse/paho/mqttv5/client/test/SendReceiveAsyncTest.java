@@ -336,8 +336,8 @@ public class SendReceiveAsyncTest {
 
       for (int iMessage = 0; iMessage < 10; iMessage++) {
         byte[] payload = ("Message " + iMessage).getBytes();
-        for (int i = 0; i < mqttPublisher.length; i++) {
-          pubToken = mqttPublisher[i].publish(topicNames[0], payload, 0, false, null, null);
+        for (IMqttAsyncClient iMqttAsyncClient : mqttPublisher) {
+          pubToken = iMqttAsyncClient.publish(topicNames[0], payload, 0, false, null, null);
           log.info("Publishing to..." + topicNames[0]);
           pubToken.waitForCompletion();
         }

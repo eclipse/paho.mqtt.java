@@ -41,14 +41,14 @@ import org.osgi.util.promise.Promise;
  */
 public interface IMqttToken<T extends IMqttResult<C>, C> {
 	
-	public Promise<T> getPromise();
+	Promise<T> getPromise();
 
 	/**
 	 * Returns the MQTT client that is responsible for processing the asynchronous
 	 * action
 	 * @return the client
 	 */
-	public IMqttCommonClient getClient();
+    IMqttCommonClient getClient();
 
 
 	/**
@@ -59,7 +59,7 @@ public interface IMqttToken<T extends IMqttResult<C>, C> {
 
 	 * @return Object context associated with an action or null if there is none.
 	 */
-	public Object getUserContext();
+    Object getUserContext();
 
 	/**
 	 * Returns the message ID of the message that is associated with the token.
@@ -69,5 +69,5 @@ public interface IMqttToken<T extends IMqttResult<C>, C> {
 	 * the MQTT message id flowed over the network.
 	 * @return the message ID of the message that is associated with the token
 	 */
-	public int getMessageId();
+    int getMessageId();
 }

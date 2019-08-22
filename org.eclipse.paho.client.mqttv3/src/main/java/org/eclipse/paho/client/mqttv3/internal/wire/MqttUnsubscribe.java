@@ -110,8 +110,8 @@ public class MqttUnsubscribe extends MqttWireMessage {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			for (int i = 0; i < names.length; i++) {
-				encodeUTF8(dos, names[i]);
+			for (String name : names) {
+				encodeUTF8(dos, name);
 			}
 			dos.flush();
 			return baos.toByteArray();

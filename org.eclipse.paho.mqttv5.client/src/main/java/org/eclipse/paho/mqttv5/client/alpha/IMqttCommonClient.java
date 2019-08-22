@@ -9,7 +9,7 @@ public interface IMqttCommonClient {
 	 *
 	 * @return <code>true</code> if connected, <code>false</code> otherwise.
 	 */
-	public boolean isConnected();
+    boolean isConnected();
 
 	/**
 	 * Returns the client ID used by this client.
@@ -19,7 +19,7 @@ public interface IMqttCommonClient {
 	 *
 	 * @return the client ID used by this client.
 	 */
-	public String getClientId();
+    String getClientId();
 
 	/**
 	 * Returns the address of the server used by this client, as a URI.
@@ -29,14 +29,14 @@ public interface IMqttCommonClient {
 	 * @return the server's address, as a URI String.
 	 * @see MqttAsyncClient#MqttAsyncClient(String, String)
 	 */
-	public String getServerURI();
+    String getServerURI();
 	
 	/**
 	 * Requests the Subscriptions known to this client
 	 * 
 	 * @return The open and pending subscriptions known to this client
 	 */
-	public IMqttSubscriptionToken<?>[] getSubscribers();
+    IMqttSubscriptionToken<?>[] getSubscribers();
 	
 	/**
 	 * Requests the Subscriptions known by this client which match the
@@ -45,7 +45,7 @@ public interface IMqttCommonClient {
 	 * @param topicFilter the topic to search for
 	 * @return The subscriptions which use this topic filter
 	 */
-	public IMqttSubscriptionToken<?>[] getSubscribers(String topicFilter);
+    IMqttSubscriptionToken<?>[] getSubscribers(String topicFilter);
 	
 	/**
 	 * Requests the Subscriptions known by this client which match any
@@ -54,7 +54,7 @@ public interface IMqttCommonClient {
 	 * @param topicFilters the topics to search for
 	 * @return The subscriptions which use these topic filters
 	 */
-	public IMqttSubscriptionToken<?>[] getSubscribers(String[] topicFilters);
+    IMqttSubscriptionToken<?>[] getSubscribers(String[] topicFilters);
 
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
@@ -68,7 +68,7 @@ public interface IMqttCommonClient {
 	 * set to false</P>
 	 * @return zero or more delivery tokens
 	 */
-	public IMqttDeliveryToken<?>[] getPendingDeliveryTokens();
+    IMqttDeliveryToken<?>[] getPendingDeliveryTokens();
 	
 	/**
 	 * If manualAcks is set to true, then on completion of the messageArrived callback
@@ -79,7 +79,7 @@ public interface IMqttCommonClient {
 	 * callback method.
 	 * @param manualAcks if set to true MQTT acknowledgements are not sent
 	 */
-	public void setManualAcks(boolean manualAcks);
+    void setManualAcks(boolean manualAcks);
 	
 	/**
 	 * Indicate that the application has completed processing the message with id messageId.
@@ -88,7 +88,7 @@ public interface IMqttCommonClient {
 	 * @param qos the MQTT QoS of the message to be acknowledged
 	 * @throws MqttException if there was a problem sending the acknowledgement
 	 */
-	public void messageArrivedComplete(int messageId, int qos) throws MqttException;
+    void messageArrivedComplete(int messageId, int qos) throws MqttException;
 
 	/**
 	 * Close the client
@@ -96,6 +96,6 @@ public interface IMqttCommonClient {
 	 * been closed it cannot be reused. For instance attempts to connect will fail.
 	 * @throws MqttException  if the client is not disconnected.
 	 */
-	public void close() throws MqttException;
+    void close() throws MqttException;
 	
 }

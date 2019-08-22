@@ -53,8 +53,8 @@ public class MqttSuback extends MqttAck {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(super.toString()).append(" granted Qos");
-		for (int i = 0; i < grantedQos.length; ++i) {
-			sb.append(" ").append(grantedQos[i]);
+		for (int grantedQo : grantedQos) {
+			sb.append(" ").append(grantedQo);
 		}
 		return sb.toString();
 	}

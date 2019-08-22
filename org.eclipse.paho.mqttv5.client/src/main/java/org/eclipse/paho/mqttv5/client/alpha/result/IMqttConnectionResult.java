@@ -5,6 +5,6 @@ public interface IMqttConnectionResult<C> extends IMqttResult<C> {
 	/**
 	 * @return the session present flag from a connack 
 	 */
-	public boolean getSessionPresent();
+    boolean getSessionPresent();
 	
 }

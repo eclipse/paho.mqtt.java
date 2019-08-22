@@ -470,7 +470,7 @@ public class ModelTestCase implements MqttCallback {
   public void subscribe(String topic, int qos, boolean expectRetained) throws Exception {
     logToFile("subscribe [topic:" + topic + "][qos:" + qos + "][expectRetained:" + expectRetained
               + "]");
-    subscribedTopics.put(topic, new Integer(qos));
+    subscribedTopics.put(topic, Integer.valueOf(qos));
     client.subscribe(topic, qos);
     if (expectRetained) {
       waitForMessage(topic, retainedPublishes.get(topic), true);

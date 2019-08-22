@@ -36,5 +36,5 @@ public interface IMqttDeliveryToken<C> extends IMqttToken<IMqttDeliveryResult<C>
 	 * @return the message associated with this token or null if already delivered.
 	 * @throws MqttException if there was a problem completing retrieving the message
 	 */
-	public IMqttMessage getMessage() throws MqttException;
+    IMqttMessage getMessage() throws MqttException;
 }

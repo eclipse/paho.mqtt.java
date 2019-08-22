@@ -12,6 +12,6 @@ public interface IReceivedMessage<C> extends IMqttMessage {
 	 * 
 	 * @return <code>true</code> if the message might be a duplicate.
 	 */
-	public boolean isDuplicate();
+    boolean isDuplicate();
 
 }

@@ -38,7 +38,8 @@ public class CommsReceiver implements Runnable {
 	private static final String CLASS_NAME = CommsReceiver.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
-	private enum State {STOPPED, RUNNING, STARTING, RECEIVING};
+	private enum State {STOPPED, RUNNING, STARTING, RECEIVING}
+
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;
 	private Object lifecycle = new Object();
