@@ -110,7 +110,7 @@ public class MqttPubAck extends MqttAck {
 
 	@Override
 	public String toString() {
-		return "MqttPubAck [returnCode=" + reasonCode + ", properties=" + properties + "]";
+		return "MqttPubAck [msgId=" + msgId +" returnCode=" + reasonCode + ", properties=" + properties + "]";
 	}
 
 }

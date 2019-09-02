@@ -195,7 +195,7 @@ public class ClientInternal {
 	private void handlePacket(MqttWireMessage msg, MqttToken connectToken) {
 		try
 		{		
-			//System.out.println("DEBUG - msg received "+msg.toString());
+			System.out.println("DEBUG - msg received "+msg.toString());
 			if (msg instanceof MqttConnAck) {
 				connectToken.setResponse(msg);
 				connectionStart(msg.getProperties());
@@ -708,7 +708,7 @@ public class ClientInternal {
 		
 		int msgid = -1;
 		if (message.getQos() > 0) {
-			sessionstate.getNextMessageId(); // throws exception if none available
+			msgid = sessionstate.getNextMessageId(); // throws exception if none available
 		}
 		
 		MqttPublish publish = new MqttPublish(topic, message, message.getProperties());
