@@ -793,7 +793,7 @@ public class SendReceiveAsyncTest {
 
 		log.info("Disconnecting...");
 		IMqttToken disconnectToken = asyncClient.disconnect();
-		disconnectToken.waitForCompletion(5000);
+		disconnectToken.waitForCompletion(10000);
 		Assert.assertFalse(asyncClient.isConnected());
 		asyncClient.close();
 
