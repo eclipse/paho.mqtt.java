@@ -99,7 +99,7 @@ public class WebSocketHandshake {
 
 			PrintWriter pw = new PrintWriter(output);
 			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
-			if (port != 80 && port != 443) {
+			if (port != 80) {
 				pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
 			}
 			else {
