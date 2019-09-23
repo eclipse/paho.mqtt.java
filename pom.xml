@@ -25,7 +25,7 @@
 	<name>Eclipse Paho</name>
 	<url>http://www.eclipse.org/paho</url>
 	<description>
-		The Paho project provides scalable open-source implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine to Machine (M2M) and Internet of Things (IoT).
+		The Paho project provides open-source implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine to Machine (M2M) and Internet of Things (IoT).
 	</description>
 
 	<organization>
@@ -35,9 +35,9 @@
 
 	<developers>
 		<developer>
-			<id>jsutton</id>
-			<name>James Sutton</name>
-			<email>james.sutton@uk.ibm.com</email>
+			<id>icraggs</id>
+			<name>Ian Craggs</name>
+			<email>icraggs@uk.ibm.com</email>
 			<organization>IBM</organization>
 			<organizationUrl>http://www.ibm.com</organizationUrl>
 			<roles>
@@ -47,8 +47,8 @@
 	</developers>
 	<licenses>
 		<license>
-			<name>Eclipse Public License - Version 1.0</name>
-			<url>http://www.eclipse.org/org/documents/epl-v10.php</url>
+			<name>Eclipse Public License - Version 2.0</name>
+			<url>https://www.eclipse.org/legal/epl-2.0</url>
 		</license>
 	</licenses>
 
