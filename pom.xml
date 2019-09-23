@@ -4,7 +4,7 @@
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.2.2-SNAPSHOT</version>
+	<version>1.2.2</version>
 
 	<properties>
 		<!-- source & target java version for MQTT Client -->
@@ -55,7 +55,7 @@
 	<scm>
 		<url>http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.java.git</url>
 		<connection>scm:git://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.java.git</connection>
-	  <tag>java-parent-1.2.1</tag>
+	  <tag>java-parent-1.2.2</tag>
   </scm>
 
 	<distributionManagement>
