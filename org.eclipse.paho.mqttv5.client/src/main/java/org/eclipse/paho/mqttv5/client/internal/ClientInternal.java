@@ -640,7 +640,9 @@ public class ClientInternal {
 			byte[] message = null;
 			
 			try {
-				message = retryQueue.get(key).serialize();
+				MqttWireMessage wireMessage = retryQueue.get(key);
+				wireMessage.setDuplicate(true); // when retrying a message, set the dup flag
+				message = wireMessage.serialize();
 			} catch (MqttException e) {
 				e.printStackTrace();
 				return;
