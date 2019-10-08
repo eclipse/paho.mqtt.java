@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2019 IBM Corp.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ *
+ * The Eclipse Public License is available at 
+ *    http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at 
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   
+ * Contributions:
+ *   Ian Craggs - initial implementation
+ */
+
 package org.eclipse.paho.mqttv5.client.internal;
 
 import java.io.IOException;
@@ -448,8 +464,6 @@ public class ClientInternal {
 		netclient.connect(uri.getPort(), uri.getHost(), uri.getHost(), res -> {
 		if (res.succeeded()) {
 			socket = res.result();
-			/*System.out.println("TCP connect succeeded "+getClient().getClientId() + " "+
-					socket.writeHandlerID());*/
 			socket.handler(buffer -> {
 				handleData(buffer, userToken);
 			});
@@ -476,6 +490,14 @@ public class ClientInternal {
 					options.getKeepAliveInterval(),
 					options.getConnectionProperties(), // properties
 					options.getWillMessageProperties());  // will properties
+			String userName = null;
+			if ((userName = options.getUserName()) != null) {
+				connect.setUserName(userName);
+			}
+			byte[] password = null;
+			if ((userName = options.getUserName()) != null) {
+				connect.setPassword(password);
+			}
 			try {
 				//System.out.println("Sending connect "+getClient().getClientId());
 				socket.write(Buffer.buffer(connect.serialize()),
@@ -540,6 +562,14 @@ public class ClientInternal {
 					options.getKeepAliveInterval(),
 					options.getConnectionProperties(), // properties
 					options.getWillMessageProperties());  // will properties
+			String userName = null;
+			if ((userName = options.getUserName()) != null) {
+				connect.setUserName(userName);
+			}
+			byte[] password = null;
+			if ((userName = options.getUserName()) != null) {
+				connect.setPassword(password);
+			}
 			try {
 				websocket.writeBinaryMessage(Buffer.buffer(connect.serialize()));
 				connectionstate.registerOutboundActivity();
@@ -685,6 +715,7 @@ public class ClientInternal {
 		int msgid = sessionstate.getNextMessageId(); // throws exception if none available
 		
 		MqttSubscribe subscribe = new MqttSubscribe(subscriptions, subscriptionProperties);
+		token.setRequestMessage(subscribe);
 		subscribe.setMessageId(msgid);
 		sessionstate.out_tokens.put(new Integer(msgid), token);
 		todoQueue.add(subscribe, token);
@@ -696,6 +727,7 @@ public class ClientInternal {
 		int msgid = sessionstate.getNextMessageId(); // throws exception if none available
 		
 		MqttUnsubscribe unsubscribe = new MqttUnsubscribe(topicFilters, unsubscribeProperties);
+		token.setRequestMessage(unsubscribe);
 		unsubscribe.setMessageId(msgid);
 		sessionstate.out_tokens.put(new Integer(msgid), token);
 		todoQueue.add(unsubscribe, token);
@@ -714,7 +746,7 @@ public class ClientInternal {
 		}
 		
 		MqttPublish publish = new MqttPublish(topic, message, message.getProperties());
-		token.setPendingMessage(publish);
+		token.setRequestMessage(publish);
 		if (message.getQos() > 0) {
 			publish.setMessageId(msgid); 
 			sessionstate.out_tokens.put(new Integer(msgid), token);

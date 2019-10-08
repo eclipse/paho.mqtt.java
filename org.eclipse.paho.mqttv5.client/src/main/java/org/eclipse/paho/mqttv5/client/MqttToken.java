@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corp.
+ * Copyright (c) 2014, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,7 +45,7 @@ public class MqttToken implements IMqttToken {
 	private final CountDownLatch countDownLatch = new CountDownLatch(1);
 	private Object userContext = null;
 	private MqttWireMessage response = null;
-	private MqttWireMessage pending = null;
+	private MqttWireMessage request = null;
 	private int messageId;
 	private int[] reasonCodes;
 	private IMqttActionListener listener = null;
@@ -151,13 +151,17 @@ public class MqttToken implements IMqttToken {
 		return (response == null) ? null : response.getProperties();
 	}
 	
-	public MqttWireMessage getPendingMessage() {
-		return pending;
+	public MqttWireMessage getRequestMessage() {
+		return request;
 	}
 	
-	public void setPendingMessage(MqttWireMessage pending) {
-		this.pending = pending;
+	public void setRequestMessage(MqttWireMessage request) {
+		this.request = request;
 	}	
+	
+	public MqttProperties getRequestProperties() {
+		return (request == null) ? null : request.getProperties();
+	}
 	
 	public void setReasonCodes(int[] codes) {
 		this.reasonCodes = codes;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2017 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -97,8 +97,8 @@ public class MqttConnectionOptions {
 	private boolean cleanStart = true; // Clean Session
 	private String willDestination = null; // Will Topic
 	private MqttMessage willMessage = null; // Will Message
-	private String userName; // Username
-	private byte[] password; // Password
+	private String userName = null; // Username
+	private byte[] password = null; // Password
 	private Long sessionExpiryInterval = null; // The Session expiry Interval in seconds, null is the default of
 												// never.
 	private Integer receiveMaximum = null; // The Receive Maximum, null defaults to 65,535, cannot be 0.

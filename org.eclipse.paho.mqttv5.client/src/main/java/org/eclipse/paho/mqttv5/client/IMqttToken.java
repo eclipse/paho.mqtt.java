@@ -17,6 +17,7 @@
 package org.eclipse.paho.mqttv5.client;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
@@ -175,5 +176,20 @@ public interface IMqttToken {
 	 * @return the response wire message
 	 */
 	public MqttWireMessage getResponse();
-
+	
+	/**
+	 * @return the response wire message properties
+	 */
+	public MqttProperties getResponseProperties();
+	
+	/**
+	 * @return the request wire message
+	 */
+	public MqttWireMessage getRequestMessage();
+	
+	/**
+	 * @return the request wire message properties
+	 */
+	public MqttProperties getRequestProperties();
+	
 }
