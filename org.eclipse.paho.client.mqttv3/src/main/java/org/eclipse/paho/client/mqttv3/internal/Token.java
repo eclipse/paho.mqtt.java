@@ -2,13 +2,13 @@
  * Copyright (c) 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *   
  * Contributors:
  *   Ian Craggs - MQTT 3.1.1 support
@@ -35,8 +35,8 @@ public class Token {
 	private boolean pendingComplete = false;
 	private boolean sent = false;
 	
-	private Object responseLock = new Object();
-	private Object sentLock = new Object();
+	private final Object responseLock = new Object();
+	private final Object sentLock = new Object();
 	
 	protected MqttMessage message = null; 
 	private MqttWireMessage response = null;
@@ -137,7 +137,7 @@ public class Token {
 				if (this.exception == null) {
 					try {
 						//@TRACE 408=key={0} wait max={1}
-						log.fine(CLASS_NAME,methodName,"408",new Object[] {getKey(),new Long(timeout)});
+						log.fine(CLASS_NAME,methodName,"408",new Object[] {getKey(), Long.valueOf(timeout)});
 	
 						if (timeout <= 0) {
 							responseLock.wait();

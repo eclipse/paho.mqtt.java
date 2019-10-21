@@ -2,13 +2,13 @@
  * Copyright (c) 2002, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Description: Contains the main method for starting the MQTT swing user interface
  *
@@ -74,7 +74,7 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
     private MqttConnectOptions opts = null;
 	private boolean connected = false;
 	private boolean traceEnabled = false;
-	private Object    connLostWait = new Object(); // Object to coordinated ConnectionLost and disconnect threads if
+	private final Object    connLostWait = new Object(); // Object to coordinated ConnectionLost and disconnect threads if
                 	                                // disconnect is hit during connectionLost
 	private JFrame frame= null;
 	
@@ -475,12 +475,12 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
 			// If the entry in the IP Address drop down list contains '://' then assume
 			// the connection has been explicitly entered as tcp://ip_address:port or local://broker_name.
 			// Otherwise read the ip address and port number from their respective drop downs.
-			if ( ipAddr.indexOf("://") < 0 ) {
+			if (!ipAddr.contains("://")) {
     			connStr = "tcp://" + ipAddr + ":" + portNum;
    	 		} else {
    	 			connStr = ipAddr;
    	 		}
-	
+
     		connect( connStr, optionsComp.isPersistenceSelected() );
 			
 			// Successful connect(no exception). Remember the ipAddress and port in the drop downs
@@ -752,8 +752,8 @@ public class MQTTFrame implements ActionListener, MqttCallback, Runnable {
     public void stopTrace() {
     	traceEnabled = false;
     	if ( mqtt != null ) {
-	    /*mqtt.stopTrace()*/;
-     		JOptionPane.showMessageDialog( frame, "Trace file mqe0.trc generated in the current directory",
+	    /*mqtt.stopTrace()*/
+			JOptionPane.showMessageDialog( frame, "Trace file mqe0.trc generated in the current directory",
         		 "MQTT Trace", JOptionPane.INFORMATION_MESSAGE );
     	}	
     }	

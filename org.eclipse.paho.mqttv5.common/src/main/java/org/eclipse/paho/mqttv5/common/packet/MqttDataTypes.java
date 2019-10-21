@@ -71,7 +71,7 @@ public class MqttDataTypes {
 	 *             if an exception occurs whilst reading from the Input Stream
 	 */
 	public static Long readUnsignedFourByteInt(DataInputStream inputStream) throws IOException {
-		byte readBuffer[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+		byte[] readBuffer = {0, 0, 0, 0, 0, 0, 0, 0};
 		inputStream.readFully(readBuffer, 4, 4);
 		return (((long) readBuffer[0] << 56) + ((long) (readBuffer[1] & 255) << 48)
 				+ ((long) (readBuffer[2] & 255) << 40) + ((long) (readBuffer[3] & 255) << 32)

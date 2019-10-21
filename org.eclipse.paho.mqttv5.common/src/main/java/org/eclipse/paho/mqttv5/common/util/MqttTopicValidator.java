@@ -65,7 +65,7 @@ public class MqttTopicValidator {
 		// NOT encode to more than 65535 bytes
 		if (topicLen < MIN_TOPIC_LEN || topicLen > MAX_TOPIC_LEN) {
 			throw new IllegalArgumentException(String.format("Invalid topic length, should be in range[%d, %d]!",
-					new Object[] { new Integer(MIN_TOPIC_LEN), new Integer(MAX_TOPIC_LEN) }));
+					new Object[] { Integer.valueOf(MIN_TOPIC_LEN), Integer.valueOf(MAX_TOPIC_LEN) }));
 		}
 
 		// *******************************************************************************

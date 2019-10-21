@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2018 IBM Corp and others.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -127,15 +127,15 @@ public class ClientState {
 	private int actualInFlight = 0;
 	private int inFlightPubRels = 0;
 	
-	private Object queueLock = new Object();
-	private Object quiesceLock = new Object();
+	private final Object queueLock = new Object();
+	private final Object quiesceLock = new Object();
 	private boolean quiescing = false;
 	
 	private long lastOutboundActivity = 0;
 	private long lastInboundActivity = 0;
 	private long lastPing = 0;
 	private MqttWireMessage pingCommand;
-	private Object pingOutstandingLock = new Object();
+	private final Object pingOutstandingLock = new Object();
 	private int pingOutstanding = 0;
 
 	private boolean connected = false;

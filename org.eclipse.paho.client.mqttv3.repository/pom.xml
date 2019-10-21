@@ -5,12 +5,12 @@
 		<artifactId>java-parent</artifactId>
 		<version>1.2.2-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>org.eclipse.paho.client.mqttv3.repository</artifactId>
 	<packaging>eclipse-repository</packaging>
-	
+
 	<name>Paho P2 Repository</name>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -60,7 +60,7 @@
 							<sourceLocation>${project.build.directory}/repository</sourceLocation>
 						</configuration>
 					</execution>
-				</executions> 
+				</executions>
 			</plugin> -->
 		</plugins>
 	</build>

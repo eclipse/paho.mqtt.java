@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2012 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -47,7 +47,7 @@ public interface IMqttToken {
 	 * @throws MqttException if there was a problem with the action associated with the token.
 	 * @see #waitForCompletion(long)
 	 */
-	public void waitForCompletion() throws MqttException;
+    void waitForCompletion() throws MqttException;
 
 	/**
 	 * Blocks the current thread until the action this token is associated with has
@@ -62,7 +62,7 @@ public interface IMqttToken {
 	 * @param timeout the maximum amount of time to wait for, in milliseconds.
 	 * @throws MqttException if there was a problem with the action associated with the token.
 	 */
-	public void waitForCompletion(long timeout) throws MqttException;
+    void waitForCompletion(long timeout) throws MqttException;
 
 	/**
 	 * Returns whether or not the action has finished.
@@ -72,7 +72,7 @@ public interface IMqttToken {
 	 * </p>
 	 * @return whether or not the action has finished.
 	 */
-	public boolean isComplete();
+    boolean isComplete();
 
 	/**
 	 * Returns an exception providing more detail if an operation failed.
@@ -83,7 +83,7 @@ public interface IMqttToken {
 	 * @return exception may return an exception if the operation failed. Null will be
 	 * returned while action is in progress and if action completes successfully.
 	 */
-	public MqttException getException();
+    MqttException getException();
 
 	/**
 	 * Register a listener to be notified when an action completes.
@@ -92,20 +92,20 @@ public interface IMqttToken {
 	 * </p>
 	 * @param listener to be invoked once the action completes
 	 */
-	public void setActionCallback(MqttActionListener listener);
+    void setActionCallback(MqttActionListener listener);
 
 	/**
 	 * Return the async listener for this token.
 	 * @return listener that is set on the token or null if a listener is not registered.
 	 */
-	public MqttActionListener getActionCallback();
+    MqttActionListener getActionCallback();
 
 	/**
 	 * Returns the MQTT client that is responsible for processing the asynchronous
 	 * action
 	 * @return the client
 	 */
-	public MqttClientInterface getClient();
+    MqttClientInterface getClient();
 
 	/**
 	 * Returns the topic string(s) for the action being tracked by this
@@ -114,7 +114,7 @@ public interface IMqttToken {
 	 *
 	 * @return the topic string(s) for the subscribe being tracked by this token or null
 	 */
-	public String[] getTopics();
+    String[] getTopics();
 
 	/**
 	 * Store some context associated with an action.
@@ -124,7 +124,7 @@ public interface IMqttToken {
 	 * actions</p>
 	 * @param userContext to associate with an action
 	 */
-	public void setUserContext(Object userContext);
+    void setUserContext(Object userContext);
 
 	/**
 	 * Retrieve the context associated with an action.
@@ -134,7 +134,7 @@ public interface IMqttToken {
 
 	 * @return Object context associated with an action or null if there is none.
 	 */
-	public Object getUserContext();
+    Object getUserContext();
 
 	/**
 	 * Returns the message ID of the message that is associated with the token.
@@ -144,12 +144,12 @@ public interface IMqttToken {
 	 * the MQTT message id flowed over the network.
 	 * @return the message ID of the message that is associated with the token
 	 */
-	public int getMessageId();
+    int getMessageId();
 	
 	/**
 	 * @return the granted QoS list from a suback 
 	 */
-	public int[] getGrantedQos();
+    int[] getGrantedQos();
 	
 	/**
 	 * Returns a list of reason codes that were returned as a result of this token's action.
@@ -164,16 +164,16 @@ public interface IMqttToken {
 	 * @return the reason code(s) from the response for this token's action.
 	 * 
 	 */
-	public int[] getReasonCodes();                                           
+    int[] getReasonCodes();
 	
 	/**
 	 * @return the session present flag from a connack 
 	 */
-	public boolean getSessionPresent();
+    boolean getSessionPresent();
 	
 	/**
 	 * @return the response wire message
 	 */
-	public MqttWireMessage getResponse();
+    MqttWireMessage getResponse();
 
 }

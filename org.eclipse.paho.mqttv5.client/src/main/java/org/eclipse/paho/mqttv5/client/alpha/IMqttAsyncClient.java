@@ -2,13 +2,13 @@
  * Copyright (c) 2013, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -131,7 +131,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @return token used to track and wait for the connect to complete.
 	 * @see #connect(MqttConnectionOptions, Object)
 	 */
-	public IMqttToken<IMqttConnectionResult<Void>, Void> connect() throws MqttException, MqttSecurityException;
+    IMqttToken<IMqttConnectionResult<Void>, Void> connect() throws MqttException, MqttSecurityException;
 
 	/**
 	 * Connects to an MQTT server using the provided connect options.
@@ -145,7 +145,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @return token used to track and wait for the connect to complete.
 	 * @see #connect(MqttConnectionOptions, Object)
 	 */
-	public IMqttToken<IMqttConnectionResult<Void>, Void> connect(MqttConnectionOptions options) throws MqttException, MqttSecurityException ;
+    IMqttToken<IMqttConnectionResult<Void>, Void> connect(MqttConnectionOptions options) throws MqttException, MqttSecurityException ;
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * <p>The default options are specified in {@link MqttConnectionOptions} class.
@@ -158,7 +158,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @return token used to track and wait for the connect to complete.
 	 * @see #connect(MqttConnectionOptions, Object)
 	 */
-	public <C> IMqttToken<IMqttConnectionResult<C>, C> connect(C userContext) throws MqttException, MqttSecurityException;
+    <C> IMqttToken<IMqttConnectionResult<C>, C> connect(C userContext) throws MqttException, MqttSecurityException;
 
 
 	/**
@@ -181,7 +181,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttSecurityException  for security related problems
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-	public <C> IMqttToken<IMqttConnectionResult<C>, C> connect(MqttConnectionOptions options, C userContext) throws MqttException, MqttSecurityException;
+    <C> IMqttToken<IMqttConnectionResult<C>, C> connect(MqttConnectionOptions options, C userContext) throws MqttException, MqttSecurityException;
 
 	/**
 	 * Disconnects from the server.
@@ -195,7 +195,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, MqttProperties)
 	 */
-	public IMqttToken<IMqttResult<Void>, Void> disconnect( ) throws MqttException;
+    IMqttToken<IMqttResult<Void>, Void> disconnect() throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -211,7 +211,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, MqttProperties)
 	 */
-	public IMqttToken<IMqttResult<Void>, Void> disconnect(long quiesceTimeout) throws MqttException;
+    IMqttToken<IMqttResult<Void>, Void> disconnect(long quiesceTimeout) throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -228,7 +228,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @see #disconnect(long, Object, MqttProperties)
 
 	 */
-	public <C> IMqttToken<IMqttResult<C>, C> disconnect( C userContext) throws MqttException;
+    <C> IMqttToken<IMqttResult<C>, C> disconnect(C userContext) throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -263,7 +263,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * will be passed to any callback that has been set.
 	 * @throws MqttException for problems encountered while disconnecting
 	 */
-	public <C> IMqttToken<IMqttResult<C>, C> disconnect(long quiesceTimeout, C userContext, MqttProperties disconnectProperties) throws MqttException;
+    <C> IMqttToken<IMqttResult<C>, C> disconnect(long quiesceTimeout, C userContext, MqttProperties disconnectProperties) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -275,7 +275,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly() throws MqttException;
+    void disconnectForcibly() throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -287,7 +287,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long disconnectTimeout) throws MqttException;
+    void disconnectForcibly(long disconnectTimeout) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -301,7 +301,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
+    void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -323,8 +323,8 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public IMqttDeliveryToken<Void> publish(String topic, byte[] payload, int qos,
-			boolean retained ) throws MqttException, MqttPersistenceException;
+    IMqttDeliveryToken<Void> publish(String topic, byte[] payload, int qos,
+                                     boolean retained) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -349,8 +349,8 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public <C> IMqttDeliveryToken<C> publish(String topic, byte[] payload, int qos,
-			boolean retained, C userContext ) throws MqttException, MqttPersistenceException;
+    <C> IMqttDeliveryToken<C> publish(String topic, byte[] payload, int qos,
+                                      boolean retained, C userContext) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -367,7 +367,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * For instance client not connected.
 	 * @see #publish(String, IMqttMessage, Object)
 	 */
-	public IMqttDeliveryToken<Void> publish(String topic, IMqttMessage message ) throws MqttException, MqttPersistenceException;
+    IMqttDeliveryToken<Void> publish(String topic, IMqttMessage message) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -432,8 +432,8 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * For instance client not connected.
 	 * @see MqttMessage
 	 */
-	public <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message,
-			C userContext) throws MqttException, MqttPersistenceException;
+    <C> IMqttDeliveryToken<C> publish(String topic, IMqttMessage message,
+                                      C userContext) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -449,7 +449,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttSubscriptionToken<Void> subscribe(String topicFilter, int qos) throws MqttException;
+    IMqttSubscriptionToken<Void> subscribe(String topicFilter, int qos) throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -468,7 +468,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public <C> IMqttSubscriptionToken<C> subscribe(String topicFilter, int qos, C userContext)
+    <C> IMqttSubscriptionToken<C> subscribe(String topicFilter, int qos, C userContext)
 	throws MqttException;
 
 	/**
@@ -484,7 +484,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttSubscriptionToken<Void> subscribe(MqttSubscription[] subscriptions) throws MqttException;
+    IMqttSubscriptionToken<Void> subscribe(MqttSubscription[] subscriptions) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -589,7 +589,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, MqttProperties subscribeProperties)
+    <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription[] subscriptions, C userContext, MqttProperties subscribeProperties)
 			throws MqttException;
 	
 	/**
@@ -605,7 +605,7 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription subscription, C userContext) throws MqttException;
+    <C> IMqttSubscriptionToken<C> subscribe(MqttSubscription subscription, C userContext) throws MqttException;
 
 
 	/**
@@ -618,6 +618,6 @@ public interface IMqttAsyncClient extends IMqttCommonClient {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttSubscriptionToken<Void> subscribe(MqttSubscription subscription) throws MqttException;
+    IMqttSubscriptionToken<Void> subscribe(MqttSubscription subscription) throws MqttException;
 
 }

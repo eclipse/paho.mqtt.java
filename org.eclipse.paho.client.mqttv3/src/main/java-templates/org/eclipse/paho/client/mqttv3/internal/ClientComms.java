@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -79,7 +79,7 @@ public class ClientComms {
 	private boolean 				stoppingComms = false;
 
 	private byte	conState = DISCONNECTED;
-	private Object	conLock = new Object();  	// Used to synchronize connection state
+	private final Object	conLock = new Object();  	// Used to synchronize connection state
 	private boolean	closePending = false;
 	private boolean resting = false;
 	private DisconnectedMessageBuffer disconnectedMessageBuffer;
@@ -667,7 +667,7 @@ public class ClientComms {
 		props.put("conState", Integer.valueOf(conState));
 		props.put("serverURI", getClient().getServerURI());
 		props.put("callback", callback);
-		props.put("stoppingComms", new Boolean(stoppingComms));
+		props.put("stoppingComms", Boolean.valueOf(stoppingComms));
 		return props;
 	}
 
@@ -708,8 +708,8 @@ public class ClientComms {
 				// This will have been set if disconnect occurred before delivery was
 				// fully processed.
 				MqttDeliveryToken[] toks = tokenStore.getOutstandingDelTokens();
-				for (int i=0; i<toks.length; i++) {
-					toks[i].internalTok.setException(null);
+				for (MqttDeliveryToken tok : toks) {
+					tok.internalTok.setException(null);
 				}
 
 				// Save the connect token in tokenStore as failure can occur before send

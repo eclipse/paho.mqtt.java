@@ -2,13 +2,13 @@
  * Copyright (c) 2002, 2013 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Description: MQTT connect options dialog box
  *
@@ -89,7 +89,7 @@ public class ConnOpts extends JPanel implements ActionListener {
 
         // Should persistence be used for the WMQtt connection?
         persistEnable = new JCheckBox();
-        Boolean b = new Boolean( props.getProperty( "Persistence", String.valueOf(false) ) );
+        Boolean b = Boolean.valueOf( props.getProperty( "Persistence", String.valueOf(false) ) );
         persistEnable.setSelected( b.booleanValue() );
         persistEnable.setToolTipText("Persist publications to ensure delivery");
                 
@@ -268,7 +268,7 @@ public class ConnOpts extends JPanel implements ActionListener {
     public short getKeepAlive() {
     	Integer i;
     	try {
-    		i = new Integer( keepAlive.getText() );
+    		i = Integer.valueOf( keepAlive.getText() );
     	} catch ( NumberFormatException e) {
     		// Invalid entry set - use the default
     		keepAlive.setText(KEEP_ALIVE);
@@ -284,7 +284,7 @@ public class ConnOpts extends JPanel implements ActionListener {
     public int getRetryInterval() {
     	Integer i;
     	try {
-    		i = new Integer( retryInterval.getText() );
+    		i = Integer.valueOf( retryInterval.getText() );
     	} catch ( NumberFormatException e) {
     		// Invalid entry set - use the default
     		retryInterval.setText(RETRY_INT);

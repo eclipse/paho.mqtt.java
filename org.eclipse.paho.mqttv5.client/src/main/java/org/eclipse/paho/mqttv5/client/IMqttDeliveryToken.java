@@ -40,5 +40,5 @@ public interface IMqttDeliveryToken extends IMqttToken {
 	 * @return the message associated with this token or null if already delivered.
 	 * @throws MqttException if there was a problem completing retrieving the message
 	 */
-	public MqttMessage getMessage() throws MqttException;
+    MqttMessage getMessage() throws MqttException;
 }
