@@ -891,7 +891,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @throws IllegalArgumentException if the topic contains a '+' or '#'
 	 * wildcard character.
 	 */
-	public MqttTopic getTopic(String topic);
+	public MqttTopic getTopic(String topic) throws MqttException;
 
 	/**
 	 * Determines if this client is currently connected to the server.

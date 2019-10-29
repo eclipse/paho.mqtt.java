@@ -661,7 +661,7 @@ public class MqttClient implements IMqttClient {
 	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#getTopic(java.lang.String)
 	 */
-	public MqttTopic getTopic(String topic) {
+	public MqttTopic getTopic(String topic) throws MqttException{
 		return aClient.getTopic(topic);
 	}
 
