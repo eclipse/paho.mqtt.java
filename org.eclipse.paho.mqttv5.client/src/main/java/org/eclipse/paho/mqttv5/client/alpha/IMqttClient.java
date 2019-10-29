@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -75,7 +75,7 @@ public interface IMqttClient extends IMqttCommonClient {
 	 * @throws MqttException  for non security related problems
 	 * @see #connect(MqttConnectionOptions)
 	 */
-  public void connect() throws MqttSecurityException, MqttException;
+    void connect() throws MqttSecurityException, MqttException;
 
 	/**
 	 * Connects to an MQTT server using the specified options.
@@ -87,7 +87,7 @@ public interface IMqttClient extends IMqttCommonClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-  public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
+    void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
   
 	/**
 	 * Connects to an MQTT server using the specified options.
@@ -100,7 +100,7 @@ public interface IMqttClient extends IMqttCommonClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
+    IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -109,7 +109,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 *
 	 * @throws MqttException if a problem is encountered while disconnecting
 	 */
-  public void disconnect() throws MqttException;
+    void disconnect() throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -130,7 +130,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * means the client will not quiesce.
 	 * @throws MqttException if a problem is encountered while disconnecting
 	 */
-  public void disconnect(long quiesceTimeout) throws MqttException;
+    void disconnect(long quiesceTimeout) throws MqttException;
   
   /**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -142,7 +142,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly() throws MqttException;
+  void disconnectForcibly() throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -154,7 +154,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long disconnectTimeout) throws MqttException;
+    void disconnectForcibly(long disconnectTimeout) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -168,7 +168,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
+    void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
@@ -180,7 +180,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws MqttSecurityException if the client is not authorized to register the subscription
 	 */
-  public IMqttSubscriptionToken<Void> subscribe(String topicFilter) throws MqttException, MqttSecurityException;
+    IMqttSubscriptionToken<Void> subscribe(String topicFilter) throws MqttException, MqttSecurityException;
 
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using a QoS of 1.
@@ -191,7 +191,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @return The Subscription Token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-  public IMqttSubscriptionToken<Void> subscribe(String[] topicFilters) throws MqttException;
+    IMqttSubscriptionToken<Void> subscribe(String[] topicFilters) throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -206,7 +206,7 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @return The Subscription Token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-  public IMqttSubscriptionToken<Void> subscribe(String topicFilter, int qos) throws MqttException;
+    IMqttSubscriptionToken<Void> subscribe(String topicFilter, int qos) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -301,6 +301,6 @@ public IMqttConnectionResult<Void> connectWithResult(MqttConnectionOptions optio
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-  public IMqttSubscriptionToken<Void> subscribe(String[] topicFilters, int[] qos) throws MqttException;
+    IMqttSubscriptionToken<Void> subscribe(String[] topicFilters, int[] qos) throws MqttException;
 
 }

@@ -1,4 +1,4 @@
 #!/bin/bash
 currentDir=`dirname "$0"`
 trace="-Djava.util.logging.config.file=/Users/jsutton/ibm/paho/trace/mqttv5trace.properties"
-java "$trace" -jar "$currentDir/"org.eclipse.paho.sample.mqttclient-1.0-SNAPSHOT-jar-with-dependencies.jar "$@"
+java "$trace" -jar "$currentDir/"org.eclipse.paho.sample.mqttclient-1.2.3-SNAPSHOT-jar-with-dependencies.jar "$@"

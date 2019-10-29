@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -65,16 +65,17 @@ public class CommsCallback implements Runnable {
 	private ArrayList<MqttPublish> messageQueue;
 	private ArrayList<MqttToken> completeQueue;
 
-	private enum State {STOPPED, RUNNING, QUIESCING};
+	private enum State {STOPPED, RUNNING, QUIESCING}
+
 	private State current_state = State.STOPPED;
 	private State target_state = State.STOPPED;	
-	private Object lifecycle = new Object();
+	private final Object lifecycle = new Object();
 	private Thread callbackThread;
 	private String threadName;
 	private Future<?> callbackFuture;
 	
-	private Object workAvailable = new Object();
-	private Object spaceAvailable = new Object();
+	private final Object workAvailable = new Object();
+	private final Object spaceAvailable = new Object();
 	private ClientState clientState;
 	private boolean manualAcks = false;
 
@@ -477,7 +478,7 @@ public class CommsCallback implements Runnable {
 		String destName = publishMessage.getTopicName();
 
 		// @TRACE 713=call messageArrived key={0} topic={1}
-		log.fine(CLASS_NAME, methodName, "713", new Object[] { new Integer(publishMessage.getMessageId()), destName });
+		log.fine(CLASS_NAME, methodName, "713", new Object[] { Integer.valueOf(publishMessage.getMessageId()), destName });
 		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage());
 
 		// If we are not in manual ACK mode:

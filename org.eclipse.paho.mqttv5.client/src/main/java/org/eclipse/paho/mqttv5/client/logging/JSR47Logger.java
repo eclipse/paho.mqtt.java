@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -190,7 +190,7 @@ public class JSR47Logger implements Logger {
 			ResourceBundle messageCatalog, String msg, Object[] inserts, Throwable thrown) {
 //		LogRecord logRecord = new LogRecord(julLevel, msg);
 		String formattedWithArgs = msg;
-		if (msg.indexOf("=====")== -1) {
+		if (!msg.contains("=====")) {
 			formattedWithArgs = MessageFormat.format(getResourceMessage(messageCatalog, msg), inserts);
 		}
 		LogRecord logRecord = new LogRecord(julLevel, resourceName + ": " +formattedWithArgs);
@@ -261,16 +261,16 @@ public class JSR47Logger implements Logger {
 
 		if (logger!= null) {
 			Handler[] handlers = logger.getHandlers();
-			
-		    for (int i=0; i<handlers.length; i++) {
-		      if (handlers[i] instanceof java.util.logging.MemoryHandler) {
-		        synchronized (handlers[i]) {
-		        	mHand = ((java.util.logging.MemoryHandler)handlers[i]);
-		        	mHand.push();
-		        	return;
-		        } // synchronized (handler).
-		      }      
-		    } // for handlers...
+
+			for (Handler handler : handlers) {
+				if (handler instanceof MemoryHandler) {
+					synchronized (handler) {
+						mHand = ((MemoryHandler) handler);
+						mHand.push();
+						return;
+					} // synchronized (handler).
+				}
+			} // for handlers...
 		    dumpMemoryTrace47(logger.getParent());
 		}
 	}

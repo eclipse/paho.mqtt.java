@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2012 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -41,14 +41,14 @@ import org.osgi.util.promise.Promise;
  */
 public interface IMqttToken<T extends IMqttResult<C>, C> {
 	
-	public Promise<T> getPromise();
+	Promise<T> getPromise();
 
 	/**
 	 * Returns the MQTT client that is responsible for processing the asynchronous
 	 * action
 	 * @return the client
 	 */
-	public IMqttCommonClient getClient();
+    IMqttCommonClient getClient();
 
 
 	/**
@@ -59,7 +59,7 @@ public interface IMqttToken<T extends IMqttResult<C>, C> {
 
 	 * @return Object context associated with an action or null if there is none.
 	 */
-	public Object getUserContext();
+    Object getUserContext();
 
 	/**
 	 * Returns the message ID of the message that is associated with the token.
@@ -69,5 +69,5 @@ public interface IMqttToken<T extends IMqttResult<C>, C> {
 	 * the MQTT message id flowed over the network.
 	 * @return the message ID of the message that is associated with the token
 	 */
-	public int getMessageId();
+    int getMessageId();
 }

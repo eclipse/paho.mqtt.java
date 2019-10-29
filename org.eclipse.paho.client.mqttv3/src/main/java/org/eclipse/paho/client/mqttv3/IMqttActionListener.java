@@ -15,7 +15,7 @@ public interface IMqttActionListener {
 	 * This method is invoked when an action has completed successfully.  
 	 * @param asyncActionToken associated with the action that has completed
 	 */
-	public void onSuccess(IMqttToken asyncActionToken );
+    void onSuccess(IMqttToken asyncActionToken);
 	/**
 	 * This method is invoked when an action fails.  
 	 * If a client is disconnected while an action is in progress 
@@ -26,5 +26,5 @@ public interface IMqttActionListener {
 	 * @param asyncActionToken associated with the action that has failed
 	 * @param exception thrown by the action that has failed
 	 */
-	public void onFailure(IMqttToken asyncActionToken, Throwable exception);
+    void onFailure(IMqttToken asyncActionToken, Throwable exception);
 }

@@ -1,20 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  *******************************************************************************/
 
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,20 +33,38 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 /**
  * This test expects an MQTT Server to be listening on the port 
  * given by the SERVER_URI property (which is 1883 by default)
  */
+@RunWith(Parameterized.class)
 public class SendReceiveTest {
 
   static final Class<?> cclass = SendReceiveTest.class;
   private static final String className = cclass.getName();
   private static final Logger log = Logger.getLogger(className);
 
-  private static URI serverURI;
+  private URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
   private static String topicPrefix;
+  
+  @Parameters
+  public static Collection<Object[]> data() throws Exception {
+		
+	  return Arrays.asList(new Object[][] {     
+        { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }  
+	  });
+		
+  }
+  
+  public SendReceiveTest(URI serverURI) {
+	  this.serverURI = serverURI;
+  }
 
 
   /**
@@ -57,7 +77,6 @@ public class SendReceiveTest {
       String methodName = Utility.getMethodName();
       LoggingUtilities.banner(log, cclass, methodName);
 
-      serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
       topicPrefix = "SendReceiveTest-" + UUID.randomUUID().toString() + "-";

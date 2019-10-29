@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -47,14 +47,14 @@ public interface MqttClientPersistence {
 	 * @param clientId The client for which the persistent store should be opened.
 	 * @throws MqttPersistenceException if there was a problem opening the persistent store.
 	 */
-	public void open(String clientId) throws MqttPersistenceException;
+    void open(String clientId) throws MqttPersistenceException;
 
 	/**
 	 * Close the persistent store that was previously opened.
 	 * This will be called when a client application disconnects from the broker.
 	 * @throws MqttPersistenceException if an error occurs closing the persistence store.
-	 */	
-	public void close() throws MqttPersistenceException;
+	 */
+    void close() throws MqttPersistenceException;
 
 	/**
 	 * Puts the specified data into the persistent store.
@@ -63,7 +63,7 @@ public interface MqttClientPersistence {
 	 * @throws MqttPersistenceException if there was a problem putting the data
 	 * into the persistent store.
 	 */
-	public void put(String key, MqttPersistable persistable) throws MqttPersistenceException;
+    void put(String key, MqttPersistable persistable) throws MqttPersistenceException;
 	
 	/**
 	 * Gets the specified data out of the persistent store.
@@ -72,27 +72,27 @@ public interface MqttClientPersistence {
 	 * @throws MqttPersistenceException if there was a problem getting the data
 	 * from the persistent store.
 	 */
-	public MqttPersistable get(String key) throws MqttPersistenceException;
+    MqttPersistable get(String key) throws MqttPersistenceException;
 	
 	/**
 	 * Remove the data for the specified key.
 	 * @param key The key for the data to remove
 	 * @throws MqttPersistenceException if there was a problem removing the data.
 	 */
-	public void remove(String key) throws MqttPersistenceException;
+    void remove(String key) throws MqttPersistenceException;
 
 	/**
 	 * Returns an Enumeration over the keys in this persistent data store.
 	 * @return an enumeration of {@link String} objects.
 	 * @throws MqttPersistenceException if there was a problem getting they keys
 	 */
-	public Enumeration<String> keys() throws MqttPersistenceException;
+    Enumeration<String> keys() throws MqttPersistenceException;
 	
 	/**
 	 * Clears persistence, so that it no longer contains any persisted data.
 	 * @throws MqttPersistenceException if there was a problem clearing all data from the persistence store
 	 */
-	public void clear() throws MqttPersistenceException;
+    void clear() throws MqttPersistenceException;
 	
 	/**
 	 * Returns whether or not data is persisted using the specified key.
@@ -100,5 +100,5 @@ public interface MqttClientPersistence {
 	 * @return True if the persistence store contains the key
 	 * @throws MqttPersistenceException if there was a problem checking whether they key existed.
 	 */
-	public boolean containsKey(String key) throws MqttPersistenceException;
+    boolean containsKey(String key) throws MqttPersistenceException;
 }
