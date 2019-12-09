@@ -9,7 +9,7 @@ public interface IMqttResult<C> {
 	 * action
 	 * @return the client
 	 */
-	public IMqttCommonClient getClient();
+    IMqttCommonClient getClient();
 	
 	/**
 	 * Retrieve the context associated with an action.
@@ -19,5 +19,5 @@ public interface IMqttResult<C> {
      *
 	 * @return Object context associated with an action or null if there is none.
 	 */
-	public C getUserContext();
+    C getUserContext();
 }

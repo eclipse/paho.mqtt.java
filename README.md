@@ -3,7 +3,7 @@
 
 The Paho Java Client is an MQTT client library written in Java for developing applications that run on the JVM or other Java compatible platforms such as Android
 
-The Paho Java Client provides two APIs: MqttAsyncClient provides a fully asychronous API where completion of activities is notified via registered callbacks. MqttClient is a synchronous wrapper around MqttAsyncClient where functions appear synchronous to the application.
+The Paho Java Client provides two APIs: MqttAsyncClient provides a fully asynchronous API where completion of activities is notified via registered callbacks. MqttClient is a synchronous wrapper around MqttAsyncClient where functions appear synchronous to the application.
 
 
 ## Project description:
@@ -32,7 +32,7 @@ Add the repository definition and the dependency definition shown below to your 
 
 Replace %REPOURL% with either ``` https://repo.eclipse.org/content/repositories/paho-releases/ ``` for the official releases, or ``` https://repo.eclipse.org/content/repositories/paho-snapshots/  ``` for the nightly snapshots. Replace %VERSION% with the level required .
 
-The latest release version is ```1.2.0``` and the current snapshot version is ```1.2.1-SNAPSHOT```.
+The latest release version is ```1.2.1``` and the current snapshot version is ```1.2.2-SNAPSHOT```.
 
 
 ```

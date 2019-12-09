@@ -1,13 +1,13 @@
 /* Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * are made available under the terms of the Eclipse Public License v2.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ * The Eclipse Public License is available at
+ *    https://www.eclipse.org/legal/epl-2.0
+ * and the Eclipse Distribution License is available at
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  *******************************************************************************/
 
@@ -52,7 +52,7 @@ public class WebSocketTest {
   private static String topicPrefix;
 
   /**
-   * @throws Exception 
+   * @throws Exception
    */
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -92,7 +92,7 @@ public class WebSocketTest {
   }
 
   /**
-   * @throws Exception 
+   * @throws Exception
    */
   @Test()
   public void testWebSocketConnect() throws Exception {
@@ -142,7 +142,7 @@ public class WebSocketTest {
 
 
   /**
-   * @throws Exception 
+   * @throws Exception
    */
   @Test
   public void testWebSocketPubSub() throws Exception {
@@ -196,7 +196,7 @@ public class WebSocketTest {
       }
     }
   }
-  
+
   /**
    * Tests Websocker support for packets over 16KB
    * Prompted by Bug: 482432
@@ -204,7 +204,7 @@ public class WebSocketTest {
    * This test connects to a broker via WebSockets, subscribes
    * to a topic, publishes a large payload to it and checks
    * that it recieves the same payload.
- * @throws Exception 
+ * @throws Exception
    */
   @Test(timeout=10000)
   public void largePayloadTest() throws Exception{
@@ -216,7 +216,7 @@ public class WebSocketTest {
 
 	    IMqttClient client = null;
 	    try {
-	      String topicStr = topicPrefix + "topic_largeFile_01";
+	      String topicStr = UUID.randomUUID() + "/topic_largeFile_01";
 	      String clientId = methodName;
 	      client = clientFactory.createMqttClient(serverURI, clientId);
 
@@ -254,7 +254,7 @@ public class WebSocketTest {
 	        client.close();
 	      }
 	    }
-	  
+
   }
 
   @Test(timeout=10000)
@@ -306,7 +306,7 @@ public class WebSocketTest {
    */
   class MessageListener implements MqttCallback {
 
-    ArrayList<MqttMessage> messages;
+    final ArrayList<MqttMessage> messages;
 
     public MessageListener() {
       messages = new ArrayList<MqttMessage>();
@@ -336,16 +336,16 @@ public class WebSocketTest {
     }
 
     /**
-     * @param token  
+     * @param token
      */
     public void deliveryComplete(IMqttDeliveryToken token) {
       logger2.info("delivery complete");
     }
 
     /**
-     * @param topic  
-     * @param message 
-     * @throws Exception 
+     * @param topic
+     * @param message
+     * @throws Exception
      */
     public void messageArrived(String topic, MqttMessage message) throws Exception {
       logger2.info("message arrived: " + message.getId() + "'");

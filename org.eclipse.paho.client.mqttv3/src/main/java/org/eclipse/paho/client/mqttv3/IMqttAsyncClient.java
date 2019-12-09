@@ -2,13 +2,13 @@
  * Copyright (c) 2013, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -128,7 +128,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to the callback methods if a callback is set.
 	 * @see #connect(MqttConnectOptions, Object, IMqttActionListener)
 	 */
-	public IMqttToken connect() throws MqttException, MqttSecurityException;
+    IMqttToken connect() throws MqttException, MqttSecurityException;
 
 	/**
 	 * Connects to an MQTT server using the provided connect options.
@@ -143,7 +143,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to any callback that has been set.
 	 * @see #connect(MqttConnectOptions, Object, IMqttActionListener)
 	 */
-	public IMqttToken connect(MqttConnectOptions options) throws MqttException, MqttSecurityException ;
+    IMqttToken connect(MqttConnectOptions options) throws MqttException, MqttSecurityException ;
 	/**
 	 * Connects to an MQTT server using the default options.
 	 * <p>The default options are specified in {@link MqttConnectOptions} class.
@@ -159,7 +159,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to any callback that has been set.
 	 * @see #connect(MqttConnectOptions, Object, IMqttActionListener)
 	 */
-	public IMqttToken connect(Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
+    IMqttToken connect(Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
 
 
 	/**
@@ -187,7 +187,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttSecurityException  for security related problems
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-	public IMqttToken connect(MqttConnectOptions options, Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
+    IMqttToken connect(MqttConnectOptions options, Object userContext, IMqttActionListener callback) throws MqttException, MqttSecurityException;
 
 	/**
 	 * Disconnects from the server.
@@ -202,7 +202,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, IMqttActionListener)
 	 */
-	public IMqttToken disconnect( ) throws MqttException;
+    IMqttToken disconnect() throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -219,7 +219,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, IMqttActionListener)
 	 */
-	public IMqttToken disconnect(long quiesceTimeout) throws MqttException;
+    IMqttToken disconnect(long quiesceTimeout) throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -238,7 +238,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttException for problems encountered while disconnecting
 	 * @see #disconnect(long, Object, IMqttActionListener)
 	 */
-	public IMqttToken disconnect( Object userContext, IMqttActionListener callback) throws MqttException;
+    IMqttToken disconnect(Object userContext, IMqttActionListener callback) throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -273,7 +273,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to any callback that has been set.
 	 * @throws MqttException for problems encountered while disconnecting
 	 */
-	public IMqttToken disconnect(long quiesceTimeout, Object userContext, IMqttActionListener callback) throws MqttException;
+    IMqttToken disconnect(long quiesceTimeout, Object userContext, IMqttActionListener callback) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -285,7 +285,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly() throws MqttException;
+    void disconnectForcibly() throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -297,7 +297,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long disconnectTimeout) throws MqttException;
+    void disconnectForcibly(long disconnectTimeout) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -311,14 +311,14 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
+    void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
 
 	/**
 	 * Determines if this client is currently connected to the server.
 	 *
 	 * @return <code>true</code> if connected, <code>false</code> otherwise.
 	 */
-	public boolean isConnected();
+    boolean isConnected();
 
 	/**
 	 * Returns the client ID used by this client.
@@ -328,7 +328,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 *
 	 * @return the client ID used by this client.
 	 */
-	public String getClientId();
+    String getClientId();
 
 	/**
 	 * Returns the address of the server used by this client.
@@ -338,7 +338,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @return the server's address, as a URI String.
 	 * @see MqttAsyncClient#MqttAsyncClient(String, String)
 	 */
-	public String getServerURI();
+    String getServerURI();
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -361,8 +361,8 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
-			boolean retained ) throws MqttException, MqttPersistenceException;
+    IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
+                               boolean retained) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -389,8 +389,8 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
-			boolean retained, Object userContext, IMqttActionListener callback ) throws MqttException, MqttPersistenceException;
+    IMqttDeliveryToken publish(String topic, byte[] payload, int qos,
+                               boolean retained, Object userContext, IMqttActionListener callback) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -407,7 +407,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * For instance client not connected.
 	 * @see #publish(String, MqttMessage, Object, IMqttActionListener)
 	 */
-	public IMqttDeliveryToken publish(String topic, MqttMessage message ) throws MqttException, MqttPersistenceException;
+    IMqttDeliveryToken publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -477,8 +477,8 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * For instance client not connected.
 	 * @see MqttMessage
 	 */
-	public IMqttDeliveryToken publish(String topic, MqttMessage message,
-			Object userContext, IMqttActionListener callback) throws MqttException, MqttPersistenceException;
+    IMqttDeliveryToken publish(String topic, MqttMessage message,
+                               Object userContext, IMqttActionListener callback) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -494,7 +494,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
+    IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -514,7 +514,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback)
+    IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback)
 	throws MqttException;
 
 	/**
@@ -534,7 +534,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
+    IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -644,7 +644,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
+    IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
 			throws MqttException;
 	
 	/**
@@ -666,7 +666,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException;
+    IMqttToken subscribe(String topicFilter, int qos, Object userContext, IMqttActionListener callback, IMqttMessageListener messageListener) throws MqttException;
 
 
 	/**
@@ -684,7 +684,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
+    IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
 
 	
 	/**
@@ -705,7 +705,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
+    IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
 
 
 	/**
@@ -730,7 +730,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener[] messageListeners) throws MqttException;
+    IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback, IMqttMessageListener[] messageListeners) throws MqttException;
 
 
 	/**
@@ -743,7 +743,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String topicFilter) throws MqttException;
+    IMqttToken unsubscribe(String topicFilter) throws MqttException;
 
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
@@ -756,7 +756,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String[] topicFilters) throws MqttException;
+    IMqttToken unsubscribe(String[] topicFilters) throws MqttException;
 
 	/**
 	 * Requests the server unsubscribe the client from a topics.
@@ -773,7 +773,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String topicFilter, Object userContext, IMqttActionListener callback)
+    IMqttToken unsubscribe(String topicFilter, Object userContext, IMqttActionListener callback)
 			throws MqttException;
 
 	/**
@@ -806,7 +806,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * will be passed to callback methods if set.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-	public IMqttToken unsubscribe(String[] topicFilters, Object userContext, IMqttActionListener callback)
+    IMqttToken unsubscribe(String[] topicFilters, Object userContext, IMqttActionListener callback)
 			throws MqttException;
 
 	/**
@@ -824,7 +824,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @return if the message is removed then true, otherwise false
 	 * @throws MqttException if there was an error removing the message.
 	 */
-	public boolean removeMessage(IMqttDeliveryToken token) throws MqttException;
+    boolean removeMessage(IMqttDeliveryToken token) throws MqttException;
 
 	/**
 	 * Sets a callback listener to use for events that happen asynchronously.
@@ -843,7 +843,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @see MqttCallback
 	 * @param callback which will be invoked for certain asynchronous events
 	 */
-	public void setCallback(MqttCallback callback);
+    void setCallback(MqttCallback callback);
 
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
@@ -859,7 +859,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * set to false</P>
 	 * @return zero or more delivery tokens
 	 */
-	public IMqttDeliveryToken[] getPendingDeliveryTokens();
+    IMqttDeliveryToken[] getPendingDeliveryTokens();
 	
 	/**
 	 * If manualAcks is set to true, then on completion of the messageArrived callback
@@ -870,13 +870,13 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * callback method.
 	 * @param manualAcks if set to true MQTT acknowledgements are not sent
 	 */
-	public void setManualAcks(boolean manualAcks);
+    void setManualAcks(boolean manualAcks);
 	
 	/**
 	 * Will attempt to reconnect to the server after the client has lost connection.
 	 * @throws MqttException if an error occurs attempting to reconnect
 	 */
-	public void reconnect() throws MqttException;
+    void reconnect() throws MqttException;
 
 	/**
 	 * Indicate that the application has completed processing the message with id messageId.
@@ -885,7 +885,7 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * @param qos the MQTT QoS of the message to be acknowledged
 	 * @throws MqttException if there was a problem sending the acknowledgement
 	 */
-	public void messageArrivedComplete(int messageId, int qos) throws MqttException;
+    void messageArrivedComplete(int messageId, int qos) throws MqttException;
 
 	/**
 	 * Close the client
@@ -893,5 +893,5 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 * been closed it cannot be reused. For instance attempts to connect will fail.
 	 * @throws MqttException  if the client is not disconnected.
 	 */
-	public void close() throws MqttException;
+    void close() throws MqttException;
 }

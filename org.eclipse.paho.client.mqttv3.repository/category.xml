@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-	<bundle id="org.eclipse.paho.client.mqttv3" version="1.2.1.qualifier">
+	<bundle id="org.eclipse.paho.client.mqttv3" version="1.2.2.qualifier">
 		<category name="Paho MQTT Java"/>
 	</bundle>
 	<category-def name="Paho MQTT Java" label="Paho MQTT Java">
 		<description>
-			The Paho project provides scalable open-source implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine to Machine (M2M) and Internet of Things (IoT).
+The Eclipse Paho project provides open-source client implementations of MQTT and MQTT-SN messaging protocols aimed at new, existing, and emerging applications for the Internet of Things (IoT).
 		</description>
 	</category-def>
 </site>

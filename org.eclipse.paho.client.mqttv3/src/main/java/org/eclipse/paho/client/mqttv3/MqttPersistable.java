@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -59,14 +59,14 @@ public interface MqttPersistable {
 	 * @return the header bytes. 
 	 * @throws MqttPersistenceException if an error occurs getting the Header Bytes
 	 */
-	public byte[] getHeaderBytes() throws MqttPersistenceException;
+    byte[] getHeaderBytes() throws MqttPersistenceException;
 
 	/**
 	 * Returns the length of the header.
 	 * @return the header length
 	 * @throws MqttPersistenceException if an error occurs getting the Header length
 	 */
-	public int getHeaderLength() throws MqttPersistenceException;
+    int getHeaderLength() throws MqttPersistenceException;
 
 	/**
 	 * Returns the offset of the header within the byte array returned by {@link #getHeaderBytes()}.
@@ -74,7 +74,7 @@ public interface MqttPersistable {
 	 * @throws MqttPersistenceException if an error occurs getting the Header offset
 	 * 
 	 */
-	public int getHeaderOffset() throws MqttPersistenceException;
+    int getHeaderOffset() throws MqttPersistenceException;
 
 	/**
 	 * Returns the payload bytes in an array.
@@ -83,14 +83,14 @@ public interface MqttPersistable {
 	 * @return the payload bytes.  
 	 * @throws MqttPersistenceException if an error occurs getting the Payload Bytes
 	 */
-	public byte[] getPayloadBytes() throws MqttPersistenceException;
+    byte[] getPayloadBytes() throws MqttPersistenceException;
 
 	/**
 	 * Returns the length of the payload.
 	 * @return the payload length.
 	 * @throws MqttPersistenceException if an error occurs getting the Payload length
 	 */
-	public int getPayloadLength() throws MqttPersistenceException;
+    int getPayloadLength() throws MqttPersistenceException;
 
 	/**
 	 * Returns the offset of the payload within the byte array returned by {@link #getPayloadBytes()}.
@@ -98,5 +98,5 @@ public interface MqttPersistable {
 	 * @throws MqttPersistenceException if an error occurs getting the Payload Offset
 	 * 
 	 */
-	public int getPayloadOffset() throws MqttPersistenceException;
+    int getPayloadOffset() throws MqttPersistenceException;
 }

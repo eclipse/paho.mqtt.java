@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  *******************************************************************************/
 
@@ -470,7 +470,7 @@ public class ModelTestCase implements MqttCallback {
   public void subscribe(String topic, int qos, boolean expectRetained) throws Exception {
     logToFile("subscribe [topic:" + topic + "][qos:" + qos + "][expectRetained:" + expectRetained
               + "]");
-    subscribedTopics.put(topic, new Integer(qos));
+    subscribedTopics.put(topic, Integer.valueOf(qos));
     client.subscribe(topic, qos);
     if (expectRetained) {
       waitForMessage(topic, retainedPublishes.get(topic), true);

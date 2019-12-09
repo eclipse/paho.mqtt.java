@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -238,9 +238,9 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 		checkIsOpen();
 		File[] files = getFiles();
 		Vector<String> result = new Vector<String>(files.length);
-		for (int i=0;i<files.length;i++) {
-			String filename = files[i].getName();
-			String key = filename.substring(0,filename.length()-MESSAGE_FILE_EXTENSION.length());
+		for (File file : files) {
+			String filename = file.getName();
+			String key = filename.substring(0, filename.length() - MESSAGE_FILE_EXTENSION.length());
 			result.addElement(key);
 		}
 		return result.elements();
@@ -273,12 +273,12 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 			throw new MqttPersistenceException();
 		}
 
-		for (int i=0;i<files.length;i++) {
-			File originalFile = new File(dir,files[i].getName().substring(0,files[i].getName().length()-MESSAGE_BACKUP_FILE_EXTENSION.length()));
-			boolean result = files[i].renameTo(originalFile);
+		for (File file : files) {
+			File originalFile = new File(dir, file.getName().substring(0, file.getName().length() - MESSAGE_BACKUP_FILE_EXTENSION.length()));
+			boolean result = file.renameTo(originalFile);
 			if (!result) {
 				originalFile.delete();
-				files[i].renameTo(originalFile);
+				file.renameTo(originalFile);
 			}
 		}
 	}
@@ -292,8 +292,8 @@ public class MqttDefaultFilePersistence implements MqttClientPersistence {
 	public void clear() throws MqttPersistenceException {
 		checkIsOpen();
 		File[] files = getFiles();
-		for (int i=0; i<files.length; i++) {
-			files[i].delete();
+		for (File file : files) {
+			file.delete();
 		}
 		clientDir.delete();
 	}

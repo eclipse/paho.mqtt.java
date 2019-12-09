@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    James Sutton - Bug 459142 - WebSocket support for the Java client.
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.net.SocketTimeoutException;
 
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -30,7 +31,7 @@ public class WebSocketReceiver implements Runnable{
 
 	private boolean running = false;
 	private boolean stopping = false;
-	private Object lifecycle = new Object();
+	private final Object lifecycle = new Object();
 	private InputStream input;
 	private Thread receiverThread = null;
 	private volatile boolean receiving;
@@ -114,7 +115,8 @@ public class WebSocketReceiver implements Runnable{
 				}
 
 				receiving = false;
-
+			} catch (SocketTimeoutException ex) {
+				// Ignore SocketTimeoutException 
 			} catch (IOException ex) {
 				// Exception occurred whilst reading the stream.
 				this.stop();
