@@ -180,14 +180,16 @@ public class CommsReceiver implements Runnable {
 				catch (IOException ioe) {
 					//@TRACE 853=Stopping due to IOException
 					log.fine(CLASS_NAME,methodName,"853");
-					synchronized (lifecycle) {
-						target_state = State.STOPPED;
-					}
-					// An EOFException could be raised if the broker processes the
-					// DISCONNECT and ends the socket before we complete. As such,
-					// only shutdown the connection if we're not already shutting down.
-					if (!clientComms.isDisconnecting()) {
-						clientComms.shutdownConnection(token, new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
+					if (target_state != State.STOPPED) {
+						synchronized (lifecycle) {
+							target_state = State.STOPPED;
+						}
+						// An EOFException could be raised if the broker processes the
+						// DISCONNECT and ends the socket before we complete. As such,
+						// only shutdown the connection if we're not already shutting down.
+						if (!clientComms.isDisconnecting()) {
+							clientComms.shutdownConnection(token, new MqttException(MqttException.REASON_CODE_CONNECTION_LOST, ioe));
+						}
 					}
 				}
 				finally {
