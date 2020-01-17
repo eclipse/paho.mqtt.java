@@ -582,8 +582,9 @@ public class ClientState {
 	 * Persists a buffered message to the persistence layer
 	 * 
 	 * @param message The {@link MqttWireMessage} to persist
+	 * @throws MqttException if an exception occurs when no message ids available.
 	 */
-	public void persistBufferedMessage(MqttWireMessage message) {
+	public void persistBufferedMessage(MqttWireMessage message) throws MqttException {
 		final String methodName = "persistBufferedMessage";
 		String key = getSendBufferedPersistenceKey(message);
 		
@@ -603,7 +604,8 @@ public class ClientState {
 			log.fine(CLASS_NAME,methodName, "513", new Object[]{key});
 		} catch (MqttException ex){
 			//@TRACE 514=Failed to persist buffered message key={0}
-			log.warning(CLASS_NAME,methodName, "513", new Object[]{key});
+			log.warning(CLASS_NAME,methodName, "514", new Object[]{key});
+			throw ex;
 		} 
 	}
 	
