@@ -165,7 +165,11 @@ public class CommsReceiver implements Runnable {
 						if (message != null) {
 							// A new message has arrived
 							clientState.notifyReceivedMsg(message);
-						}
+						} else {
+                                                    if (!clientComms.isConnected()) {
+                                                        throw new MqttException(MqttException.REASON_CODE_CONNECTION_LOST);
+                                                    }
+                                                }
 					}
 				}
 				catch (MqttException ex) {
