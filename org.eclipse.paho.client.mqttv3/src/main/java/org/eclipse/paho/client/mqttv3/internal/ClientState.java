@@ -719,19 +719,13 @@ public class ClientState {
 		
 		if (connected && this.keepAlive > 0) {
 			long time = System.nanoTime();
-			// Below might not be necessary since move to nanoTime (Issue #278)
-			//Reduce schedule frequency since System.currentTimeMillis is no accurate, add a buffer
-			//It is 1/10 in minimum keepalive unit.
-			int delta = 100000;
 			
 			// ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=446663
             synchronized (pingOutstandingLock) {
 
                 // Is the broker connection lost because the broker did not reply to my ping?                                                                                                                                 
-                if (pingOutstanding > 0 && (time - lastInboundActivity >= keepAlive + delta)) {
+                if (pingOutstanding > 0 && (time - lastInboundActivity >= keepAlive)) {
                     // lastInboundActivity will be updated once receiving is done.                                                                                                                                        
-                    // Add a delta, since the timer and System.currentTimeMillis() is not accurate.     
-                		// TODO - Remove Delta, maybe?
                 	// A ping is outstanding but no packet has been received in KA so connection is deemed broken                                                                                                         
                     //@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}                                                                           
                     log.severe(CLASS_NAME,methodName,"619", new Object[]{ Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity),  Long.valueOf(time),  Long.valueOf(lastPing)});
@@ -753,16 +747,16 @@ public class ClientState {
                 }
 
                 // 1. Is a ping required by the client to verify whether the broker is down?                                                                                                                                  
-                //    Condition: ((pingOutstanding == 0 && (time - lastInboundActivity >= keepAlive + delta)))                                                                                                                
+                //    Condition: ((pingOutstanding == 0 && (time - lastInboundActivity >= keepAlive)))                                                                                                                
                 //    In this case only one ping is sent. If not confirmed, client will assume a lost connection to the broker.                                                                                               
                 // 2. Is a ping required by the broker to keep the client alive?                                                                                                                                              
-                //    Condition: (time - lastOutboundActivity >= keepAlive - delta)                                                                                                                                           
+                //    Condition: (time - lastOutboundActivity >= keepAlive)                                                                                                                                           
                 //    In this case more than one ping outstanding may be necessary.                                                                                                                                           
                 //    This would be the case when receiving a large message;                                                                                                                                                  
                 //    the broker needs to keep receiving a regular ping even if the ping response are queued after the long message                                                                                           
                 //    If lacking to do so, the broker will consider my connection lost and cut my socket.                                                                                                                     
-                if ((pingOutstanding == 0 && (time - lastInboundActivity >= keepAlive - delta)) ||
-                    (time - lastOutboundActivity >= keepAlive - delta)) {
+                if ((pingOutstanding == 0 && (time - lastInboundActivity >= keepAlive)) ||
+                    (time - lastOutboundActivity >= keepAlive)) {
 
                     //@TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}                                                                                                              
                     log.fine(CLASS_NAME,methodName,"620", new Object[]{ Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity)});
@@ -776,7 +770,7 @@ public class ClientState {
                     tokenStore.saveToken(token, pingCommand);
                     pendingFlows.insertElementAt(pingCommand, 0);
 
-                    nextPingTime = getKeepAlive();
+                    nextPingTime = keepAlive;
 
                     //Wake sender thread since it may be in wait state (in ClientState.get())                                                                                                                             
                     notifyQueueLock();
@@ -784,7 +778,7 @@ public class ClientState {
                 else {
                 		//@TRACE 634=ping not needed yet. Schedule next ping.
                     log.fine(CLASS_NAME, methodName, "634", null);
-                    nextPingTime = Math.max(1,  getKeepAlive() - (time - lastOutboundActivity));
+                    nextPingTime = Math.max(1,  keepAlive - (time - lastOutboundActivity));
                 }
             }
             //@TRACE 624=Schedule next ping at {0}                                                                                                                                                                                
