@@ -501,9 +501,14 @@ public class CommsCallback implements Runnable {
 		Enumeration<String> keys = callbacks.keys();
 		while (keys.hasMoreElements()) {
 			String topicFilter = (String)keys.nextElement();
+			// callback may already have been removed in the meantime, so a null check is necessary
+			IMqttMessageListener callback = callbacks.get(topicFilter);
+			if(callback == null) {
+				continue;
+			}
 			if (MqttTopic.isMatched(topicFilter, topicName)) {
 				aMessage.setId(messageId);
-				((IMqttMessageListener)(callbacks.get(topicFilter))).messageArrived(topicName, aMessage);
+				((IMqttMessageListener)callback).messageArrived(topicName, aMessage);
 				delivered = true;
 			}
 		}
