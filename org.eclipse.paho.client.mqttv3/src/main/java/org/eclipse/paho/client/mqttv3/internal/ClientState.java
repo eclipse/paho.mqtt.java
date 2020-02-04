@@ -719,12 +719,13 @@ public class ClientState {
             
             if (connected && this.keepAlive > 0) {
                 long time = System.nanoTime();
+                int delta = 100000;
                 
                 // ref bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=446663
                 synchronized (pingOutstandingLock) {
     
                     // Is the broker connection lost because the broker did not reply to my ping? 
-                    if (pingOutstanding > 0 && (time - lastInboundActivity >= keepAlive)) {
+                    if (pingOutstanding > 0 && (time - lastInboundActivity >= keepAlive + delta)) {
                         // lastInboundActivity will be updated once receiving is done.
                         // A ping is outstanding but no packet has been received in KA so connection is deemed broken
                         //@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}                                                                           
@@ -756,7 +757,7 @@ public class ClientState {
                     //    This would be the case when receiving a large message;
                     //    the broker needs to keep receiving a regular ping even if the ping response are queued after the long message 
                     //    If lacking to do so, the broker will consider my connection lost and cut my socket. 
-                    if ((pingOutstanding == 0 && (time - lastInboundActivity >= keepAlive)) ||
+                    if ((pingOutstanding == 0 && (time - lastInboundActivity >= keepAlive - delta)) ||
                         (time - lastOutboundActivity >= keepAlive)) {
     
                         //@TRACE 620=ping needed. keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2}                                                                                                              
