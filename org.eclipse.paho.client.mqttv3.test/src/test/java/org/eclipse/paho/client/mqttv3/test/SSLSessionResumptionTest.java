@@ -170,7 +170,7 @@ public class SSLSessionResumptionTest {
 		}
 	}
 
-	private static SSLSocketFactory getSocketFactory() throws Exception {
+	private static SSLSocketFactory    getSocketFactory() throws Exception {
 		InputStream keyStoreStream = new FileInputStream(TestProperties.getClientKeyStore());
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		TrustManagerFactory trustManagerFactory = TrustManagerFactory
