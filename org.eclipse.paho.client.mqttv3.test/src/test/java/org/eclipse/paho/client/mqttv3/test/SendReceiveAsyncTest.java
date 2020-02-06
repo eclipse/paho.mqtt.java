@@ -640,7 +640,7 @@ public class SendReceiveAsyncTest {
 		  Assert.fail("Should throw an timeout exception.");
 	  }
 	  catch (Exception exception) {
-		  log.log(Level.INFO, "Connect action failed at expected.");
+		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
 		  Assert.assertEquals(MqttException.REASON_CODE_CLIENT_TIMEOUT, ((MqttException) exception).getReasonCode());
 	  }
@@ -658,7 +658,7 @@ public class SendReceiveAsyncTest {
 		  connectToken.waitForCompletion(5000);
 	  }
 	  catch (Exception exception) {
-		  log.log(Level.INFO, "Connect action failed at expected.");
+		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
 		  Assert.assertEquals(
 				  (MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() ||
