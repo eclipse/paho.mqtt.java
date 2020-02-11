@@ -168,7 +168,7 @@ public class CommsReceiver implements Runnable {
 						}  else {
                                                     // fix for bug 719
                                                     if (!clientComms.isConnected()) {
-                                                        throw new MqttException(MqttException.REASON_CODE_CONNECTION_LOST);
+                                                        throw new IOException(MqttException.REASON_CODE_CONNECTION_LOST);
                                                     }
                                                 }
 					}
