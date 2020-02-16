@@ -647,7 +647,7 @@ public class SendReceiveAsyncTest {
 	  finally {
 		  if (mqttClient != null) {
 			  log.info("Close..." + mqttClient);
-			  mqttClient.disconnectForcibly(5000, 5000);
+			  mqttClient.disconnectForcibly(20000, 10000);
 		  }
 	  }
 
