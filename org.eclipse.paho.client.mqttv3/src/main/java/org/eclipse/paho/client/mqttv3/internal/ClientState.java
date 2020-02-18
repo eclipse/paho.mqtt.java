@@ -735,6 +735,7 @@ public class ClientState {
                 	// A ping is outstanding but no packet has been received in KA so connection is deemed broken                                                                                                         
                     //@TRACE 619=Timed out as no activity, keepAlive={0} lastOutboundActivity={1} lastInboundActivity={2} time={3} lastPing={4}                                                                           
                     log.severe(CLASS_NAME,methodName,"619", new Object[]{ Long.valueOf(this.keepAlive), Long.valueOf(lastOutboundActivity), Long.valueOf(lastInboundActivity),  Long.valueOf(time),  Long.valueOf(lastPing)});
+					callback.connectionLost(ExceptionHelper.createMqttException(MqttException.REASON_CODE_CLIENT_TIMEOUT));
 
                     // A ping has already been sent. At this point, assume that the                                                                                                                                       
                     // broker has hung and the TCP layer hasn't noticed.                                                                                                                                                  
