@@ -275,6 +275,9 @@ public class MqttTopic {
 		}
 
 		while (filterPos < filterLen && topicPos < topicLen) {
+                        if (topicFilter.charAt(filterPos) == '#')
+                                topicPos = topicLen - 1; // skip until end of string
+
 			if (topicName.charAt(topicPos) == '/' && topicFilter.charAt(filterPos) != '/')
 
 				break;
@@ -285,8 +288,8 @@ public class MqttTopic {
 				int nextpos = topicPos + 1;
 				while (nextpos < topicLen && topicName.charAt(nextpos) != '/')
 					nextpos = ++topicPos + 1;
-			} else if (topicFilter.charAt(filterPos) == '#')
-				topicPos = topicLen - 1; // skip until end of string
+			}
+
 			filterPos++;
 			topicPos++;
 		}
