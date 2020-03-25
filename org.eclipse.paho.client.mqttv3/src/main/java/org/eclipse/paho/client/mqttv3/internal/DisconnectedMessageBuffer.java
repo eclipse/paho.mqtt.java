@@ -53,6 +53,11 @@ public class DisconnectedMessageBuffer implements Runnable {
 	 *             if the Buffer is full
 	 */
 	public void putMessage(MqttWireMessage message, MqttToken token) throws MqttException {
+		if (token != null) {
+			message.setToken(token);
+			token.internalTok.setMessageID(message.getMessageId());
+		}
+		
 		BufferedMessage bufferedMessage = new BufferedMessage(message, token);
 		synchronized (bufLock) {
 			if (buffer.size() < bufferOpts.getBufferSize()) {
