@@ -60,10 +60,18 @@ public class MqttTopicTest {
 	public void testMatchedTopicFilterWildcards() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
-		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player1" },
-				{ "sport/tennis/player1/#", "sport/tennis/player1/ranking" },
-				{ "sport/tennis/player1/#", "sport/tennis/player1/score/wimbledon" }, { "sport/#", "sport" },
-				{ "#", "sport/tennis/player1" } };
+		String[][] matchingTopics = new String[][] {
+                        { "+/+", "sport/hockey" },
+                        { "/+", "/sport" },
+                        { "sport/tennis/player1/#", "sport/tennis/player1" },
+                        { "sport/tennis/player1/#", "sport/tennis/player1/ranking" },
+                        { "sport/tennis/player1/#", "sport/tennis/player1/score/wimbledon" },
+                        { "sport/#", "sport" },
+                        { "#", "sport/tennis/player1" },
+                        { "sport/tennis/player1/#", "sport/tennis/player1//wimbledon" },
+                        { "sport/+/player1/#", "sport/tennis/player1/wimbledon" },
+                        { "sport/+/player1/#", "sport/soccer/player1/UEFA" }
+                        };
 
 		for (String[] pair : matchingTopics) {
 			Assert.assertTrue(pair[0] + " should match " + pair[1], MqttTopic.isMatched(pair[0], pair[1]));
@@ -74,8 +82,15 @@ public class MqttTopicTest {
 	public void testNonMatchedTopicFilterWildcards() throws Exception {
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
-		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player2" },
-				{ "sport1/#", "sport2" }, { "sport/tennis1/player/#", "sport/tennis2/player" } };
+		String[][] matchingTopics = new String[][] {
+                        { "+/+", "/sport" },
+                        { "+/+", "a/b/c" },
+                        { "/sport/+", "/sport/" },
+                        { "sport/tennis/player1/#", "sport/tennis/player2" },
+                        { "sport1/#", "sport2" },
+                        { "sport/tennis1/player/#", "sport/tennis2/player" },
+                        { "sport//tennis/player1/#", "sport/tennis/player1//wimbledon" }
+                        };
 
 		for (String[] pair : matchingTopics) {
 			Assert.assertFalse(pair[0] + " should NOT match " + pair[1], MqttTopic.isMatched(pair[0], pair[1]));

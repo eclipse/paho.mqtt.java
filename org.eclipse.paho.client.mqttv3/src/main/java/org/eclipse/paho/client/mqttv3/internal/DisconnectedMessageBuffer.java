@@ -27,7 +27,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 public class DisconnectedMessageBuffer implements Runnable {
 
-	private final String CLASS_NAME = "DisconnectedMessageBuffer";
+	private final String CLASS_NAME = DisconnectedMessageBuffer.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 	private DisconnectedBufferOptions bufferOpts;
 	private ArrayList<BufferedMessage> buffer;
@@ -53,6 +53,11 @@ public class DisconnectedMessageBuffer implements Runnable {
 	 *             if the Buffer is full
 	 */
 	public void putMessage(MqttWireMessage message, MqttToken token) throws MqttException {
+		if (token != null) {
+			message.setToken(token);
+			token.internalTok.setMessageID(message.getMessageId());
+		}
+		
 		BufferedMessage bufferedMessage = new BufferedMessage(message, token);
 		synchronized (bufLock) {
 			if (buffer.size() < bufferOpts.getBufferSize()) {
