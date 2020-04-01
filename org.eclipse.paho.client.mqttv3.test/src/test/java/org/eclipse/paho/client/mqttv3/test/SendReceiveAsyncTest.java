@@ -158,6 +158,40 @@ public class SendReceiveAsyncTest {
     log.exiting(className, methodName);
   }
 
+  @Test
+  public void testConAndDiscon() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttAsyncClient client = null;
+    int max_loop_count = 100;
+
+    try {
+      String clientId = methodName;
+      client = new MqttAsyncClient(serverURI.toString(), clientId);
+      log.info("Connecting: [serverURI: " + serverURI + ", ClientId: " + clientId + "]");
+      IMqttToken token = null;
+
+      for (int i = 0 ; i < max_loop_count; i++ ) {
+        token = client.connect();
+        token.waitForCompletion();
+        token = client.disconnect();
+        token.waitForCompletion();
+      }
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+    finally {
+      if (client.isConnected()) {
+        client.disconnectForcibly();;
+      }
+      client.close();
+    }
+  }
+
+
   /**
    * Test connection using a remote host name for the local host.
    * 
