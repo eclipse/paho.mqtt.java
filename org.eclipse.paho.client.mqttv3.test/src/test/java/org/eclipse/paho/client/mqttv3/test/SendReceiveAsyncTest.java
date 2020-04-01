@@ -164,7 +164,7 @@ public class SendReceiveAsyncTest {
     LoggingUtilities.banner(log, cclass, methodName);
 
     IMqttAsyncClient client = null;
-    int max_loop_count = 500;
+    int max_loop_count = 100;
 
     try {
       String clientId = methodName;
