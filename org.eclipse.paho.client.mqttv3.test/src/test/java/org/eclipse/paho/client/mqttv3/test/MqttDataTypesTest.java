@@ -1,13 +1,8 @@
 package org.eclipse.paho.client.mqttv3.test;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
@@ -127,7 +122,18 @@ public class MqttDataTypesTest {
 	@Test
 	public void testICanEatGlass() throws IOException, MqttException {
 		ClassLoader classLoader = getClass().getClassLoader();
-		File file = new File(classLoader.getResource("i_can_eat_glass.txt").getFile());
+		String encodedFileName = classLoader.getResource("i_can_eat_glass.txt").getFile();
+		String decodedFileName;
+		try {
+			decodedFileName = java.net.URLDecoder.decode( encodedFileName, StandardCharsets.UTF_8.name() );
+		}
+		catch ( UnsupportedEncodingException e ) {
+			// can't decode the URL, passing on the encoded name hoping that it
+			// actually contains something that exists in the filesystem with
+			// that name.
+			decodedFileName = encodedFileName;
+		}
+		File file = new File(decodedFileName);
 
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 			for (String line; (line = br.readLine()) != null;) {

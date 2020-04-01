@@ -18,6 +18,8 @@ package org.eclipse.paho.client.mqttv3.internal.security;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -1005,7 +1007,14 @@ public class SSLSocketFactoryFactory {
 	 * @return The name of the file that contains the truststore.
 	 */
 	public String getTrustStore(String configID) {
-		return getProperty(configID, TRUSTSTORE, SYSTRUSTSTORE);
+		String encodedPath = getProperty(configID, TRUSTSTORE, SYSTRUSTSTORE);
+		try {
+			String decodedPath = java.net.URLDecoder.decode( encodedPath, StandardCharsets.UTF_8.name());
+			return decodedPath;
+		}
+		catch( UnsupportedEncodingException e ) {
+			return encodedPath;
+		}
 	}
 
 	/**
