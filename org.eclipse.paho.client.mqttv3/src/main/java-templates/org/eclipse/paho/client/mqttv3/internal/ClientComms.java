@@ -874,6 +874,7 @@ public class ClientComms {
 			log.fine(CLASS_NAME, methodName, "509", null);
 
 			disconnectedMessageBuffer.setPublishCallback(new ReconnectDisconnectedBufferCallback(methodName));
+                        disconnectedMessageBuffer.setMessageDiscardedCallBack(new MessageDiscardedCallback());
 			if (executorService == null) {
 				new Thread(disconnectedMessageBuffer).start();
 			} else {
@@ -881,6 +882,18 @@ public class ClientComms {
 			}
 		}
 	}
+
+
+	class MessageDiscardedCallback implements IDiscardedBufferMessageCallback {
+
+		@Override
+		public void messageDiscarded(MqttWireMessage message) {
+			if(disconnectedMessageBuffer.isPersistBuffer()) {
+				clientState.unPersistBufferedMessage(message);
+			}
+		}
+	}
+
 	
 	class ReconnectDisconnectedBufferCallback implements IDisconnectedBufferCallback{
 		

@@ -33,6 +33,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 	private ArrayList<BufferedMessage> buffer;
 	private final Object bufLock = new Object(); // Used to synchronise the buffer
 	private IDisconnectedBufferCallback callback;
+        private IDiscardedBufferMessageCallback messageDiscardedCallBack;
 
 	public DisconnectedMessageBuffer(DisconnectedBufferOptions options) {
 		this.bufferOpts = options;
@@ -63,6 +64,10 @@ public class DisconnectedMessageBuffer implements Runnable {
 			if (buffer.size() < bufferOpts.getBufferSize()) {
 				buffer.add(bufferedMessage);
 			} else if (bufferOpts.isDeleteOldestMessages() == true) {
+				if(messageDiscardedCallBack != null){
+					BufferedMessage discardedMessage = (BufferedMessage) buffer.get(0);
+					messageDiscardedCallBack.messageDiscarded(discardedMessage.getMessage());
+				}
 				buffer.remove(0);
 				buffer.add(bufferedMessage);
 			} else {
@@ -144,6 +149,10 @@ public class DisconnectedMessageBuffer implements Runnable {
 
 	public boolean isPersistBuffer() {
 		return bufferOpts.isPersistBuffer();
+	}
+
+        public void setMessageDiscardedCallBack(IDiscardedBufferMessageCallback callback) {
+		this.messageDiscardedCallBack = callback;
 	}
 
 }
