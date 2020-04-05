@@ -487,6 +487,43 @@ public class BasicTest {
     Assert.assertEquals(after_count, before_thread_count + pool_size);
   }
 
+  @Test
+  public void testDisconnectForcibly() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttClient client = null;
+    try {
+      String clientId = methodName;
+      client = clientFactory.createMqttClient(serverURI, clientId);
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect();
+      boolean isConnected = client.isConnected();
+      log.info("isConnected = " + isConnected);
+      log.info("Disconnecting Forcibly with no timeout");
+      client.disconnectForcibly();
+
+      log.info("Re-Connecting...");
+      client.connect();
+      isConnected = client.isConnected();
+      log.info("isConnected = " + isConnected);
+      log.info("Disconnecting Forcibly with 2 sec timeout");
+      client.disconnectForcibly(2000, 2000);
+    }
+    catch (MqttException exception) {
+      log.log(Level.SEVERE, "caught exception:", exception);
+      Assert.fail("Unexpected exception: " + exception);
+    }
+    finally {
+      if (client != null) {
+        log.info("Close...");
+        client.close();
+      }
+    }
+  }
+
+
 
   // -------------------------------------------------------------
   // Helper methods/classes
