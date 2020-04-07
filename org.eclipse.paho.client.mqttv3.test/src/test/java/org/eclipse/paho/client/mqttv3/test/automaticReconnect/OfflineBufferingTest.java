@@ -29,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
@@ -302,6 +303,75 @@ public class OfflineBufferingTest {
 		// Publish one message too many
 		log.info("About to publish one message too many");
 		client.publish(topicPrefix + methodName, new MqttMessage(Integer.toString(101).getBytes()));
+		// Make sure that the message now at index 0 in the buffer is '1'
+		// instead of '0'
+		MqttMessage messageAt0 = client.getBufferedMessage(0);
+		String msg = new String(messageAt0.getPayload());
+		Assert.assertEquals("1", msg);
+		client.close();
+		client = null;
+		proxy.disableProxy();
+	}
+
+
+        /**
+	 * Tests that the buffer correctly handles persisted messages being buffered when the
+	 * buffer is full and deleteOldestBufferedMessage is set to true.
+	 */
+	@Test
+	public void testDeleteOldestBufferedMessagesWithPersistance() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		int maxMessages = 10;
+
+		// Tokens
+		IMqttToken connectToken;
+
+		MqttClientPersistence persistence = new MemoryPersistence();
+
+		// Client Options
+		MqttConnectOptions options = new MqttConnectOptions();
+		options.setCleanSession(false);
+		options.setAutomaticReconnect(false);
+		MqttAsyncClient client = new MqttAsyncClient("tcp://localhost:" + proxy.getLocalPort(), methodName, persistence);
+		DisconnectedBufferOptions disconnectedOpts = new DisconnectedBufferOptions();
+		disconnectedOpts.setBufferEnabled(true);
+		// Set buffer to 100 to save time
+		disconnectedOpts.setBufferSize(maxMessages);
+		disconnectedOpts.setPersistBuffer(true);
+		disconnectedOpts.setDeleteOldestMessages(true);
+		client.setBufferOpts(disconnectedOpts);
+
+		// Enable Proxy & Connect to server
+		proxy.enableProxy();
+		connectToken = client.connect(options);
+		connectToken.waitForCompletion();
+		boolean isConnected = client.isConnected();
+		log.info("First Connection isConnected: " + isConnected);
+		Assert.assertTrue(isConnected);
+
+		// Disable Proxy and cause disconnect
+		proxy.disableProxy();
+		isConnected = client.isConnected();
+		log.info("Proxy Disconnect isConnected: " + isConnected);
+		Assert.assertFalse(isConnected);
+
+		int x;
+
+		// Publish 10 messages
+		for (x = 0; x < maxMessages; x++) {
+			MqttMessage message = new MqttMessage(Integer.toString(x).getBytes());
+			client.publish(topicPrefix + methodName, message);
+		}
+
+		// Publish one message too many
+		log.info("About to publish one message too many");
+		client.publish(topicPrefix + methodName, new MqttMessage(Integer.toString(x).getBytes()));
+
+		Assert.assertFalse(persistence.containsKey("sb-1"));
+		Assert.assertTrue(persistence.containsKey("sb-2"));
+		Assert.assertTrue(persistence.containsKey("sb-11"));
+
 		// Make sure that the message now at index 0 in the buffer is '1'
 		// instead of '0'
 		MqttMessage messageAt0 = client.getBufferedMessage(0);

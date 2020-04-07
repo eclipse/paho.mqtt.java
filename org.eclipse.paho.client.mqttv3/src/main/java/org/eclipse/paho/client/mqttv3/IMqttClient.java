@@ -847,6 +847,7 @@ public interface IMqttClient extends AutoCloseable { //extends IMqttAsyncClient 
 	 * as connect and subscribe can be tracked using the {@link MqttToken} passed to the
 	 * operation<p>
 	 * @see MqttCallback
+	 * @see MqttCallbackExtended
 	 * @param callback the class to callback when for events related to the client
 	 */
     void setCallback(MqttCallback callback);

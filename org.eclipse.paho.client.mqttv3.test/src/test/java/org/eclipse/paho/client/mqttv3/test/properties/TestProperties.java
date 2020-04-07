@@ -14,15 +14,13 @@
 
 package org.eclipse.paho.client.mqttv3.test.properties;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -336,7 +334,15 @@ public class TestProperties {
 
   public static String getClientKeyStore() {
     URL keyStore = cclass.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_KEY_STORE));
-    return keyStore.getPath();
+    String encodedPath=keyStore.getPath();
+    try {
+      return java.net.URLDecoder.decode( encodedPath, StandardCharsets.UTF_8.name());
+    }
+    catch (UnsupportedEncodingException e ) {
+      // likely the property value is malformed. Return it as is, hoping that
+      // the requester knows what to make of it.
+      return encodedPath;
+    }
   }
 
   /**

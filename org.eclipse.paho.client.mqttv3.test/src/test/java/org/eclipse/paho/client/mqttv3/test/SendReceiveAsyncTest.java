@@ -158,6 +158,40 @@ public class SendReceiveAsyncTest {
     log.exiting(className, methodName);
   }
 
+  @Test
+  public void testConAndDiscon() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttAsyncClient client = null;
+    int max_loop_count = 100;
+
+    try {
+      String clientId = methodName;
+      client = new MqttAsyncClient(serverURI.toString(), clientId);
+      log.info("Connecting: [serverURI: " + serverURI + ", ClientId: " + clientId + "]");
+      IMqttToken token = null;
+
+      for (int i = 0 ; i < max_loop_count; i++ ) {
+        token = client.connect();
+        token.waitForCompletion();
+        token = client.disconnect();
+        token.waitForCompletion();
+      }
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+    finally {
+      if (client.isConnected()) {
+        client.disconnectForcibly();;
+      }
+      client.close();
+    }
+  }
+
+
   /**
    * Test connection using a remote host name for the local host.
    * 
@@ -640,9 +674,12 @@ public class SendReceiveAsyncTest {
 		  Assert.fail("Should throw an timeout exception.");
 	  }
 	  catch (Exception exception) {
-		  log.log(Level.INFO, "Connect action failed at expected.");
+		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
-		  Assert.assertEquals(MqttException.REASON_CODE_CLIENT_TIMEOUT, ((MqttException) exception).getReasonCode());
+		  Assert.assertEquals((
+                      MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() || 
+                      MqttException.REASON_CODE_CLIENT_EXCEPTION == ((MqttException) exception).getReasonCode()),
+                      true);
 	  }
 	  finally {
 		  if (mqttClient != null) {
@@ -658,12 +695,13 @@ public class SendReceiveAsyncTest {
 		  connectToken.waitForCompletion(5000);
 	  }
 	  catch (Exception exception) {
-		  log.log(Level.INFO, "Connect action failed at expected.");
+		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
-		  Assert.assertEquals(
-				  (MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() ||
-				   MqttException.REASON_CODE_CONNECT_IN_PROGRESS == ((MqttException) exception).getReasonCode())
-				  , true);
+		  Assert.assertEquals((
+                      MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() || 
+                      MqttException.REASON_CODE_CLIENT_EXCEPTION == ((MqttException) exception).getReasonCode() ||
+		      MqttException.REASON_CODE_CONNECT_IN_PROGRESS == ((MqttException) exception).getReasonCode()),
+		      true);
 	  }
 	  finally {
 		  if (mqttClient != null) {
