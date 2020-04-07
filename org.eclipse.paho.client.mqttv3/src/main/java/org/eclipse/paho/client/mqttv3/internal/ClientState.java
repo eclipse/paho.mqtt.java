@@ -682,6 +682,7 @@ public class ClientState {
 			String key =  Integer.toString(messageId);
 			tokenStore.removeToken(key);
 			releaseMessageId(messageId);
+			decrementInFlight();
 		}
 		return result;
 	}
