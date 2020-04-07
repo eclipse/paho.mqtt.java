@@ -676,7 +676,10 @@ public class SendReceiveAsyncTest {
 	  catch (Exception exception) {
 		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
-		  Assert.assertEquals(MqttException.REASON_CODE_CLIENT_TIMEOUT, ((MqttException) exception).getReasonCode());
+		  Assert.assertEquals((
+                      MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() || 
+                      MqttException.REASON_CODE_CLIENT_EXCEPTION == ((MqttException) exception).getReasonCode()),
+                      true);
 	  }
 	  finally {
 		  if (mqttClient != null) {
@@ -694,10 +697,11 @@ public class SendReceiveAsyncTest {
 	  catch (Exception exception) {
 		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
-		  Assert.assertEquals(
-				  (MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() ||
-				   MqttException.REASON_CODE_CONNECT_IN_PROGRESS == ((MqttException) exception).getReasonCode())
-				  , true);
+		  Assert.assertEquals((
+                      MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() || 
+                      MqttException.REASON_CODE_CLIENT_EXCEPTION == ((MqttException) exception).getReasonCode() ||
+		      MqttException.REASON_CODE_CONNECT_IN_PROGRESS == ((MqttException) exception).getReasonCode()),
+		      true);
 	  }
 	  finally {
 		  if (mqttClient != null) {
