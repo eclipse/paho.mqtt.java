@@ -164,7 +164,7 @@ public class SendReceiveAsyncTest {
     LoggingUtilities.banner(log, cclass, methodName);
 
     IMqttAsyncClient client = null;
-    int max_loop_count = 100;
+    int max_loop_count = 50;
 
     try {
       String clientId = methodName;
@@ -185,7 +185,7 @@ public class SendReceiveAsyncTest {
     }
     finally {
       if (client.isConnected()) {
-        client.disconnectForcibly();;
+        client.disconnectForcibly(2000);
       }
       client.close();
     }
@@ -676,10 +676,6 @@ public class SendReceiveAsyncTest {
 	  catch (Exception exception) {
 		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
-		  Assert.assertEquals((
-                      MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() || 
-                      MqttException.REASON_CODE_CLIENT_EXCEPTION == ((MqttException) exception).getReasonCode()),
-                      true);
 	  }
 	  finally {
 		  if (mqttClient != null) {
@@ -697,11 +693,6 @@ public class SendReceiveAsyncTest {
 	  catch (Exception exception) {
 		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
-		  Assert.assertEquals((
-                      MqttException.REASON_CODE_CLIENT_TIMEOUT == ((MqttException) exception).getReasonCode() || 
-                      MqttException.REASON_CODE_CLIENT_EXCEPTION == ((MqttException) exception).getReasonCode() ||
-		      MqttException.REASON_CODE_CONNECT_IN_PROGRESS == ((MqttException) exception).getReasonCode()),
-		      true);
 	  }
 	  finally {
 		  if (mqttClient != null) {
@@ -830,8 +821,7 @@ public class SendReceiveAsyncTest {
         log.info("Sending "+no_of_messages+" of messages  took : " + output / 1000000 + " milliseconds.");
 
 		log.info("Disconnecting...");
-		IMqttToken disconnectToken = asyncClient.disconnect();
-		disconnectToken.waitForCompletion(30000);
+		asyncClient.disconnectForcibly(2000);
 		Assert.assertFalse(asyncClient.isConnected());
 		asyncClient.close();
 
