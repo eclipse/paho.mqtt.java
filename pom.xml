@@ -52,11 +52,10 @@
 		</license>
 	</licenses>
 
-	<scm>
-		<url>http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.java.git</url>
-		<connection>scm:git://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.java.git</connection>
-	  <tag>java-parent-1.2.2</tag>
-  </scm>
+        <scm>
+                <url>https://github.com/eclipse/paho.mqtt.java.git</url>
+                <connection>scm:git:git@github.com:eclipse/paho.mqtt.java.git</connection>
+        </scm>
 
 	<distributionManagement>
 		<repository>
