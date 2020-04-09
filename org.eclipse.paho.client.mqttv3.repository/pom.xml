@@ -7,7 +7,7 @@
 	</parent>
 
 	<artifactId>org.eclipse.paho.client.mqttv3.repository</artifactId>
-  <version>1.2.2</version>
+            <version>1.2.3</version>
 	<packaging>eclipse-repository</packaging>
 
 	<name>Paho P2 Repository</name>
