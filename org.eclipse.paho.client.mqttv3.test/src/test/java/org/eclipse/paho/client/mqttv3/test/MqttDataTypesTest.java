@@ -127,7 +127,7 @@ public class MqttDataTypesTest {
 		try {
 			decodedFileName = java.net.URLDecoder.decode( encodedFileName, StandardCharsets.UTF_8.name() );
 		}
-		catch ( UnsupportedEncodingException e ) {
+		catch ( Exception e ) {
 			// can't decode the URL, passing on the encoded name hoping that it
 			// actually contains something that exists in the filesystem with
 			// that name.

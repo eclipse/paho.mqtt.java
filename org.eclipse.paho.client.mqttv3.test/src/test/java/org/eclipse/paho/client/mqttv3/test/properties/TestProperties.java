@@ -338,7 +338,7 @@ public class TestProperties {
     try {
       return java.net.URLDecoder.decode( encodedPath, StandardCharsets.UTF_8.name());
     }
-    catch (UnsupportedEncodingException e ) {
+    catch (Exception e ) {
       // likely the property value is malformed. Return it as is, hoping that
       // the requester knows what to make of it.
       return encodedPath;

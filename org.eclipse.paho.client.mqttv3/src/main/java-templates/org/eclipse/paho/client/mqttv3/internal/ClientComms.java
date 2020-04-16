@@ -465,7 +465,7 @@ public class ClientComms {
 			// First the token that was related to the disconnect / shutdown may
 			// not be in the token table - temporarily add it if not
 			if (token != null) {
-				if (tokenStore.getToken(token.internalTok.getKey())==null) {
+				if (!token.isComplete() && tokenStore.getToken(token.internalTok.getKey())==null) {
 					tokenStore.saveToken(token, token.internalTok.getKey());
 				}
 			}

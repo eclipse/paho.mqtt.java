@@ -1012,7 +1012,8 @@ public class SSLSocketFactoryFactory {
 			String decodedPath = java.net.URLDecoder.decode( encodedPath, StandardCharsets.UTF_8.name());
 			return decodedPath;
 		}
-		catch( UnsupportedEncodingException e ) {
+		catch( Exception e ) {
+                        // To maintain backword compatibility, return encodedPath for any exception
 			return encodedPath;
 		}
 	}
