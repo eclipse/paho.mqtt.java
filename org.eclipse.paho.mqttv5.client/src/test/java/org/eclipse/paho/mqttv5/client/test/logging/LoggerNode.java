@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  *******************************************************************************/
 
@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import org.eclipse.paho.mqttv5.client.test.logging.LoggerNode;
 
 /**
  * The Java Util Logger package does not provide public method to dump its handlers and formatters in a useful way

@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  *******************************************************************************/
 
@@ -20,12 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
 
 /**
  * Listen for in bound messages and connection loss.
@@ -61,7 +61,7 @@ public class MqttV5Receiver implements MqttCallback {
   List<ReceivedMessage> receivedMessages = new ArrayList<ReceivedMessage>();
 
   /**
-   * @param mqttClient
+   * @param clientId
    * @param reportStream
    */
   public MqttV5Receiver(String clientId, PrintStream reportStream) {
@@ -200,7 +200,7 @@ public class MqttV5Receiver implements MqttCallback {
     log.entering(className, methodName, new Object[]{
         sendTopics, expectedQosList, sentBytes});
 
-    int[] expectedMessageNumbers = new int[nPublishers];
+    int expectedMessageNumbers[] = new int[nPublishers];
     for (int i = 0; i < nPublishers; i++) {
       expectedMessageNumbers[i] = 0;
     }
@@ -404,7 +404,7 @@ public class MqttV5Receiver implements MqttCallback {
   /**
    * @param arg0
    */
-  public void deliveryComplete(IMqttDeliveryToken arg0) {
+  public void deliveryComplete(IMqttToken arg0) {
     // Auto-generated method stub
   }
 
@@ -412,7 +412,7 @@ public class MqttV5Receiver implements MqttCallback {
    * @param arg0
    * @param arg1
    */
-  public void deliveryFailed(IMqttDeliveryToken arg0, MqttException arg1) {
+  public void deliveryFailed(IMqttToken arg0, MqttException arg1) {
     // Auto-generated method stub
   }
 

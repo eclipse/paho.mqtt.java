@@ -16,7 +16,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 	private String host;
 	private int remotePort;
 	private Thread proxyThread;
-	private final Object enableLock = new Object();
+	private Object enableLock = new Object();
 	private boolean enableProxy = true;
 	private boolean running = true;
 	Socket client = null, server = null;
@@ -38,16 +38,33 @@ public class ConnectionManipulationProxyServer implements Runnable {
 		}
 		running = true;
 		proxyThread.start();
+		// Give it some time to start up
+		do {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while (!proxyThread.isAlive());
 	}
 	
 	public void enableProxy(){
 		log.info("[CMPS Proxy] - Enabling Proxy");
-		synchronized (enableLock) {
-			enableProxy = true;
-		}
-		running  = true;
-		if(proxyThread.isAlive() == false){
-			proxyThread.start();
+		if (!proxyThread.isAlive()){
+			startProxy();
+		} else {
+			synchronized (enableLock) {
+				enableProxy = true;
+			}
+			running = true;
+			// Give it some time to enable
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -57,7 +74,7 @@ public class ConnectionManipulationProxyServer implements Runnable {
 			enableProxy = false;
 		}
 		killOpenSockets();
-		// Give it a second to close down
+		// Give it some time to close down
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
@@ -73,6 +90,14 @@ public class ConnectionManipulationProxyServer implements Runnable {
 		}
 		running = false;
 		killOpenSockets();
+		do {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while (proxyThread.isAlive());
 	}
 	
 	private void killOpenSockets(){
@@ -228,5 +253,9 @@ public class ConnectionManipulationProxyServer implements Runnable {
 
 	public boolean isPortSet() {
 		return portSet;
+	}
+	
+	public String getHost() {
+		return host;
 	}
 }

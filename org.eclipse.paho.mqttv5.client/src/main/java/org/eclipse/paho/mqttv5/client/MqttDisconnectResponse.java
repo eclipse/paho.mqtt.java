@@ -2,9 +2,9 @@ package org.eclipse.paho.mqttv5.client;
 
 import java.util.ArrayList;
 
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttDisconnect;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttDisconnect;
+import org.eclipse.paho.mqttv5.client.common.packet.UserProperty;
 
 /**
  * This Object holds relevant properties for the client to use once the TCP

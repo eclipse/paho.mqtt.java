@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  *******************************************************************************/
 
@@ -21,6 +21,8 @@ import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.mqttv5.client.test.logging.LoggerDumper;
+import org.eclipse.paho.mqttv5.client.test.logging.LoggerNode;
 import org.eclipse.paho.mqttv5.client.test.utilities.StringUtilities;
 
 /**
@@ -73,7 +75,8 @@ public class LoggerDumper {
       parentNode = findParentNode(parent);
 
       LoggerNode found = null;
-      for (LoggerNode childNode : parentNode.getChildren()) {
+      for (Iterator<LoggerNode> iterator = parentNode.getChildren().iterator(); iterator.hasNext();) {
+        LoggerNode childNode = iterator.next();
         if (childNode.getLogger() == logger) {
           found = childNode;
           break;
@@ -93,7 +96,7 @@ public class LoggerDumper {
    */
   public void dump() {
     StringBuilder sb = new StringBuilder();
-    sb.append("-----------------------------------------------------------------" + StringUtilities.NL);
+    sb.append("-----------------------------------------------------------------").append(StringUtilities.NL);
     dumpLoggerNode(rootNode, 0, sb);
     sb.append("-----------------------------------------------------------------");
     System.out.println(sb.toString());
@@ -109,7 +112,7 @@ public class LoggerDumper {
 
     sb.append(padding);
     // sb.append("@" + Integer.toHexString(System.identityHashCode(l)) + " ");
-    sb.append("\"" + l.getName() + "\" ");
+    sb.append("\"").append(l.getName()).append("\" ");
     sb.append(l.getLevel());
     sb.append(StringUtilities.NL);
 
@@ -124,7 +127,8 @@ public class LoggerDumper {
       sb.append(StringUtilities.NL);
     }
 
-    for (LoggerNode child : node.getChildren()) {
+    for (Iterator<LoggerNode> iterator = node.getChildren().iterator(); iterator.hasNext();) {
+      LoggerNode child = iterator.next();
       dumpLoggerNode(child, indent + 1, sb);
     }
   }

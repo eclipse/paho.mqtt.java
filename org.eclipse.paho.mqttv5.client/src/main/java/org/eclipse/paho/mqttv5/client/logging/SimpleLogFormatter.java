@@ -2,13 +2,13 @@
  * Copyright (c) 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  */
 
 package org.eclipse.paho.mqttv5.client.logging;
@@ -41,7 +41,7 @@ public class SimpleLogFormatter extends Formatter {
 		StringBuffer sb = new StringBuffer();
 		sb.append(r.getLevel().getName()).append("\t");
 		sb.append(MessageFormat.format("{0, date, yy-MM-dd} {0, time, kk:mm:ss.SSSS} ",
-			new Object[] { new Date(r.getMillis()) })+"\t");
+                new Object[]{new Date(r.getMillis())})).append("\t");
 		String cnm = r.getSourceClassName();
 		String cn="";
 		if (cnm != null) {
@@ -49,7 +49,7 @@ public class SimpleLogFormatter extends Formatter {
 			if (cnl>20) {
 				cn = r.getSourceClassName().substring(cnl-19);
 			} else {
-				char[] sp = {' '};
+				char sp[] = {' '};
 				StringBuffer sb1= new StringBuffer().append(cnm);
 				cn = sb1.append(sp,0, 1).toString();
 			}

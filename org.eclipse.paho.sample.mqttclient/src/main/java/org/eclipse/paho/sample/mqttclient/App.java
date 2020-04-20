@@ -7,7 +7,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.eclipse.paho.sample.mqttclient.mqttv3.MqttV3Executor;
-import org.eclipse.paho.sample.mqttclient.mqttv5.MqttV5Executor;
+import org.eclipse.paho.sample.mqttclient.mqtt.MqttV5Executor;
 
 /**
  * A sample application that demonstrates how to use the Eclipse Paho MQTT v3.1

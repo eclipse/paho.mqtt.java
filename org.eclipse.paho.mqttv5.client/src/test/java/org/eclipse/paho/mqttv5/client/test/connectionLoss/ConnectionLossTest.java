@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  *******************************************************************************/
 
@@ -21,25 +21,28 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
+import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
-import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.ConnectionManipulationProxyServer;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * These tests verify whether paho can successfully detect a loss of connection
@@ -55,6 +58,8 @@ import org.junit.Test;
  * @author mcarrer
  */
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class ConnectionLossTest implements MqttCallback {
 	static final Class<?> cclass = ConnectionLossTest.class;
 	private static final String className = cclass.getName();
@@ -440,7 +445,7 @@ public class ConnectionLossTest implements MqttCallback {
 		log.info("Message Arrived on " + topic + " with " + new String(message.getPayload()));
 	}
 
-	public void deliveryComplete(IMqttDeliveryToken token) {
+	public void deliveryComplete(IMqttToken token) {
 		// log.info("Delivery Complete: " + token.getMessageId());
 	}
 

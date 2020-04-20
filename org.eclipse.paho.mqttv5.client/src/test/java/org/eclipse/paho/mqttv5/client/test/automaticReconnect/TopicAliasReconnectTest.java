@@ -4,23 +4,29 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.client.test.automaticReconnect.TopicAliasReconnectTest;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.ConnectionManipulationProxyServer;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class TopicAliasReconnectTest {
 
 	static final Class<?> cclass = TopicAliasReconnectTest.class;
@@ -103,13 +109,13 @@ public class TopicAliasReconnectTest {
 			// 2.1 - Send first message, this will have a topic string AND a topic alias.
 			MqttMessage message = new MqttMessage(exampleContent.getBytes(), 2, false, new MqttProperties());
 			log.info("Sending first message, should have a topic String and a topic alias.");
-			IMqttDeliveryToken firstMessageToken = asyncClient.publish(exampleTopic, message);
+			IMqttToken firstMessageToken = asyncClient.publish(exampleTopic, message);
 			firstMessageToken.waitForCompletion(5000);
 
 			// 2.2 - Send second message, this won't have a topic string, but will have a
 			// topic Alias.
 			log.info("Sending second message, should have a blank topic String and a topic alias.");
-			IMqttDeliveryToken secondMessageToken = asyncClient.publish(exampleTopic, message);
+			IMqttToken secondMessageToken = asyncClient.publish(exampleTopic, message);
 			secondMessageToken.waitForCompletion(5000);
 
 			// 3 - Drop the connection
@@ -138,7 +144,7 @@ public class TopicAliasReconnectTest {
 			// 5 - Publish a final message, this message should have both a topic string AND
 			// a topic Alias.
 			log.info("Sending First message after reconnect, should have a topic String and a topic alias.");
-			IMqttDeliveryToken thirdMessageToken = asyncClient.publish(exampleTopic, message);
+			IMqttToken thirdMessageToken = asyncClient.publish(exampleTopic, message);
 			thirdMessageToken.waitForCompletion(5000);
 
 			// We should still be connected.
@@ -146,7 +152,8 @@ public class TopicAliasReconnectTest {
 			log.info("The client should still be connected: " + isConnected);
 			Assert.assertTrue(isConnected);
 
-			asyncClient.disconnect();
+			IMqttToken token = asyncClient.disconnect();
+			token.waitForCompletion();
 			Assert.assertFalse(asyncClient.isConnected());
 		} catch (MqttException ex) {
 			Assert.fail("An unexpected exception occurred during this test: " + ex.getMessage());

@@ -1,7 +1,7 @@
 package org.eclipse.paho.mqttv5.client;
 
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
 
 public class MqttClientException {
 

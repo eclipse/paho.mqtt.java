@@ -7,25 +7,29 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
-import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver.ReceivedMessage;
 import org.eclipse.paho.mqttv5.client.test.utilities.TestClientUtilities;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.MqttSubscription;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
+import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver.ReceivedMessage;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.MqttSubscription;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.packet.UserProperty;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+
+@Category({OnlineTest.class, MQTTV5Test.class})
 public class SubscribeTests {
 
 	static final Class<?> cclass = SubscribeTests.class;
@@ -93,7 +97,7 @@ public class SubscribeTests {
 		messageProps.setUserProperties(userProps);
 		MqttMessage testMessage = new MqttMessage("Test Payload".getBytes(), 2, false, messageProps);
 		log.info("Publishing Message with User Properties to: " + topicPrefix + methodName);
-		IMqttDeliveryToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
+		IMqttToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
 		deliveryToken.waitForCompletion(5000);
 
 		log.info("Waiting for delivery and validating message.");

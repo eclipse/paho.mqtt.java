@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -16,9 +16,9 @@
  */
 package org.eclipse.paho.mqttv5.client;
 
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
 
 /**
  * Enables an application to be notified when asynchronous events related to the
@@ -37,7 +37,7 @@ public interface MqttCallback {
 	 *            a {@link MqttDisconnectResponse} containing relevant properties
 	 *            related to the cause of the disconnection.
 	 */
-    void disconnected(MqttDisconnectResponse disconnectResponse);
+	public void disconnected(MqttDisconnectResponse disconnectResponse);
 
 	/**
 	 * This method is called when an exception is thrown within the MQTT client. The
@@ -53,7 +53,7 @@ public interface MqttCallback {
 	 * @param exception
 	 *            - The exception thrown causing the error.
 	 */
-    void mqttErrorOccurred(MqttException exception);
+	public void mqttErrorOccurred(MqttException exception);
 
 	/**
 	 * This method is called when a message arrives from the server.
@@ -92,7 +92,7 @@ public interface MqttCallback {
 	 *             if a terminal error has occurred, and the client should be shut
 	 *             down.
 	 */
-    void messageArrived(String topic, MqttMessage message) throws Exception;
+	public void messageArrived(String topic, MqttMessage message) throws Exception;
 
 	/**
 	 * Called when delivery for a message has been completed, and all
@@ -104,7 +104,7 @@ public interface MqttCallback {
 	 * @param token
 	 *            the delivery token associated with the message.
 	 */
-    void deliveryComplete(IMqttDeliveryToken token);
+	public void deliveryComplete(IMqttToken token);
 
 	/**
 	 * Called when the connection to the server is completed successfully.
@@ -114,7 +114,7 @@ public interface MqttCallback {
 	 * @param serverURI
 	 *            The server URI that the connection was made to.
 	 */
-    void connectComplete(boolean reconnect, String serverURI);
+	public void connectComplete(boolean reconnect, String serverURI);
 
 	/**
 	 * Called when an AUTH packet is received by the client.
@@ -127,6 +127,6 @@ public interface MqttCallback {
 	 *            Authentication Method, Authentication Data and any required User
 	 *            Defined Properties.
 	 */
-    void authPacketArrived(int reasonCode, MqttProperties properties);
+	public void authPacketArrived(int reasonCode, MqttProperties properties);
 
 }

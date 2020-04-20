@@ -2,51 +2,69 @@
  * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  *******************************************************************************/
 
 package org.eclipse.paho.mqttv5.client.test;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.ExternalTest;
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
 import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
-import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
-import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.test.client.MqttClientFactoryPaho;
+import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttSubscription;
+import org.junit.*;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-/**
- *
- */
+@Category({OnlineTest.class, MQTTV5Test.class})
+@RunWith(Parameterized.class)
 public class SendReceiveAsyncTest {
 
   static final Class<?> cclass = SendReceiveAsyncTest.class;
   static final String className = cclass.getName();
   static final Logger log = Logger.getLogger(className);
 
-  private static URI serverURI;
+  private URI serverURI;
   private static MqttClientFactoryPaho clientFactory;
   private static String topicPrefix;
+  
+	@Parameters
+	public static Collection<Object[]> data() throws Exception {
+		
+		return Arrays.asList(new Object[][] {     
+          { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }  
+    });
+		
+	}
+	
+	public SendReceiveAsyncTest(URI serverURI) {
+		this.serverURI = serverURI;
+	}
 
 
   /**
@@ -59,7 +77,6 @@ public class SendReceiveAsyncTest {
       String methodName = Utility.getMethodName();
       LoggingUtilities.banner(log, cclass, methodName);
 
-      serverURI = TestProperties.getServerURI();
       clientFactory = new MqttClientFactoryPaho();
       clientFactory.open();
       topicPrefix = "SendReceiveAsyncTest-" + UUID.randomUUID().toString() + "-";
@@ -155,7 +172,7 @@ public class SendReceiveAsyncTest {
       mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       IMqttToken connectToken = null;
       IMqttToken subToken = null;
-      IMqttDeliveryToken pubToken = null;
+      IMqttToken pubToken = null;
       IMqttToken disconnectToken = null;
 
       connectToken = mqttClient.connect(null, null);
@@ -179,7 +196,7 @@ public class SendReceiveAsyncTest {
 
       String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
-      subToken = mqttClient.subscribe(topicNames, topicQos);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -227,7 +244,7 @@ public class SendReceiveAsyncTest {
       IMqttToken connectToken;
       IMqttToken subToken;
       IMqttToken unsubToken;
-      IMqttDeliveryToken pubToken;
+      IMqttToken pubToken;
 
       MqttV5Receiver mqttReceiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
@@ -244,7 +261,7 @@ public class SendReceiveAsyncTest {
 
       java.util.Arrays.fill(message, (byte) 's');
 
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -252,7 +269,7 @@ public class SendReceiveAsyncTest {
       log.info("Unsubscribing from..." + topicNames[0]);
       unsubToken.waitForCompletion();
 
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -306,7 +323,7 @@ public class SendReceiveAsyncTest {
 
     IMqttToken connectToken;
     IMqttToken subToken;
-    IMqttDeliveryToken pubToken;
+    IMqttToken pubToken;
     IMqttToken disconnectToken;
 
     try {
@@ -329,15 +346,15 @@ public class SendReceiveAsyncTest {
         connectToken = mqttSubscriber[i].connect(null, null);
         log.info("Connecting...(serverURI:" + serverURI + ", ClientId: MultiSubscriber" + i);
         connectToken.waitForCompletion();
-        subToken = mqttSubscriber[i].subscribe(topicNames, topicQos, null, null);
+        subToken = mqttSubscriber[i].subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
         log.info("Subcribing to..." + topicNames[0]);
         subToken.waitForCompletion();
       } // for...
 
       for (int iMessage = 0; iMessage < 10; iMessage++) {
         byte[] payload = ("Message " + iMessage).getBytes();
-        for (IMqttAsyncClient iMqttAsyncClient : mqttPublisher) {
-          pubToken = iMqttAsyncClient.publish(topicNames[0], payload, 0, false, null, null);
+        for (int i = 0; i < mqttPublisher.length; i++) {
+          pubToken = mqttPublisher[i].publish(topicNames[0], payload, 0, false, null, null);
           log.info("Publishing to..." + topicNames[0]);
           pubToken.waitForCompletion();
         }
@@ -397,7 +414,7 @@ public class SendReceiveAsyncTest {
 
     IMqttToken connectToken;
     IMqttToken subToken;
-    IMqttDeliveryToken pubToken;
+    IMqttToken pubToken;
     IMqttToken disconnectToken;
 
     try {
@@ -418,7 +435,7 @@ public class SendReceiveAsyncTest {
 
       String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -453,7 +470,7 @@ public class SendReceiveAsyncTest {
 
       // Receive the publication so that we can be sure the first client has also received it.
       // Otherwise the first client may reconnect with its clean session before the message has arrived.
-      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], topicQos[0]));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
       payload = ("Message payload " + className + "." + methodName + " Other client").getBytes();
@@ -494,7 +511,7 @@ public class SendReceiveAsyncTest {
       receivedMessage = mqttReceiver.receiveNext(100);
       if (receivedMessage != null) {
         log.fine("Message I shouldn't have: " + new String(receivedMessage.message.getPayload()));
-        Assert.fail("Receive messaqe:" + new String(receivedMessage.message.getPayload()));
+        Assert.fail("Receive message:" + new String(receivedMessage.message.getPayload()));
       }
     }
     catch (Exception exception) {
@@ -560,12 +577,12 @@ public class SendReceiveAsyncTest {
   
   		String topic = topicPrefix + "testLargeMsg/Topic";
   		//10MB
-  		int largeSize = 20000;// * (1 << 20);
+  		int largeSize = 20 * (1 << 20);
   		byte[] message = new byte[largeSize];
   
   		java.util.Arrays.fill(message, (byte) 's');
   
-  		IMqttToken subToken = mqttClient.subscribe(topic, 0);
+  		IMqttToken subToken = mqttClient.subscribe(new MqttSubscription(topic, 0));
   		log.info("Subscribing to..." + topic);
   		subToken.waitForCompletion();
   
@@ -606,7 +623,8 @@ public class SendReceiveAsyncTest {
    * Test the behavior of the connection timeout when connecting to a non MQTT server.
    * i.e. ssh port 22
    */
-  @Test
+  @Ignore
+  @Category(ExternalTest.class)
   public void testConnectTimeout() throws Exception {
 	  final String methodName = Utility.getMethodName();
 	  LoggingUtilities.banner(log, cclass, methodName);
@@ -624,7 +642,7 @@ public class SendReceiveAsyncTest {
 		  Assert.fail("Should throw a timeout exception.");
 	  }
 	  catch (Exception exception) {
-		  log.log(Level.INFO, "Connect action failed as expected.");
+		  log.log(Level.INFO, "Connect action failed at expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
 		  Assert.assertEquals(MqttException.REASON_CODE_MALFORMED_PACKET, ((MqttException) exception).getReasonCode());
 	  }
@@ -646,7 +664,7 @@ public class SendReceiveAsyncTest {
 		  connectToken.waitForCompletion(5000);
 	  }
 	  catch (Exception exception) {
-		  log.log(Level.INFO, "Connect action failed as expected.");
+		  log.log(Level.INFO, "Connect action failed at expected.");
 		  //Assert.assertTrue(exception instanceof MqttException);
 		  Assert.assertEquals(
 				  (MqttClientException.REASON_CODE_CLIENT_CLOSED == ((MqttException) exception).getReasonCode() ||
@@ -679,28 +697,27 @@ public class SendReceiveAsyncTest {
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
     
-    int tokenCount = 1000;  // how many QoS 0 tokens shall we track?
+    int tokenCount = 100;  // how many QoS 0 tokens shall we track?
 
     IMqttAsyncClient mqttClient = null;
     try {
       mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       IMqttToken connectToken;
       IMqttToken subToken;
-      IMqttDeliveryToken[] pubTokens = new IMqttDeliveryToken[tokenCount];
+      IMqttToken[] pubTokens = new IMqttToken[tokenCount];
 
       MqttV5Receiver mqttReceiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
       mqttClient.setCallback(mqttReceiver);
 
       MqttConnectionOptions opts = new MqttConnectionOptions();
-      //opts.setMaxInflight(tokenCount);
       connectToken = mqttClient.connect(opts);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
       connectToken.waitForCompletion();
 
       String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
 
-      subToken = mqttClient.subscribe(topicNames[0], 2);
+      subToken = mqttClient.subscribe(new MqttSubscription(topicNames[0], 2));
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -715,8 +732,9 @@ public class SendReceiveAsyncTest {
       int errors = 0;
       for (int i = 0; i < tokenCount; ++i) {
     	    try {
-    	  	  pubTokens[i].waitForCompletion(10);
+    	  	  pubTokens[i].waitForCompletion(100);
     	    } catch (Exception e) {
+    	    	  log.log(Level.INFO, "Token no not complete:" + i);
     	    	  errors += 1;
     	    }
       }
@@ -724,7 +742,7 @@ public class SendReceiveAsyncTest {
       Assert.assertEquals(0, errors);
       
       while (mqttReceiver.receivedMessageCount() < tokenCount) {
-    	    log.info("Expected "+tokenCount+" received "+mqttReceiver.receivedMessageCount());
+  	    log.info("Expected "+tokenCount+" received "+mqttReceiver.receivedMessageCount());
     	  	Thread.sleep(10);
       }
     }

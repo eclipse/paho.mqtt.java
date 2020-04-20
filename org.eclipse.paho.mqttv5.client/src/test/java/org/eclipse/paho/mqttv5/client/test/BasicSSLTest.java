@@ -1,13 +1,13 @@
 /* Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  *******************************************************************************/
 
@@ -15,10 +15,15 @@ package org.eclipse.paho.mqttv5.client.test;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.common.test.categories.MQTTV5Test;
+import org.eclipse.paho.common.test.categories.OnlineTest;
+import org.eclipse.paho.common.test.categories.SSLTest;
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
@@ -26,27 +31,49 @@ import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
 import org.eclipse.paho.mqttv5.client.test.properties.TestProperties;
 import org.eclipse.paho.mqttv5.client.test.utilities.MqttV5Receiver;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 
 /**
  * This test aims to run some basic SSL functionality tests of the MQTT client
  */
-
+@Category({OnlineTest.class, MQTTV5Test.class, SSLTest.class})
+@RunWith(Parameterized.class)
 public class BasicSSLTest {
 
   static final Class<?> cclass = BasicSSLTest.class;
   private static final String className = cclass.getName();
   private static final Logger log = Logger.getLogger(className);
 
-  private static URI serverURI;
+  private URI serverURI;
   private static String serverHost;
   private static File keystorePath;
   private static int messageSize = 100000;
   private static String topicPrefix;
+  
+	@Parameters
+	public static Collection<Object[]> data() throws Exception {
+		
+		return Arrays.asList(new Object[][] {     
+          { TestProperties.getServerURI() }, { TestProperties.getWebSocketServerURI() }  
+    });
+		
+	}
+	
+	public BasicSSLTest(URI serverURI) throws Exception {	    
+		this.serverHost = serverURI.getHost();
+	    if (serverURI.getScheme().equals("ws")) {
+	    	this.serverURI = new URI("wss://" + serverHost + ":" + TestProperties.getServerSSLPort());
+	    } else {
+	    	this.serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
+	    }
+	}
 
 
   /**
@@ -59,8 +86,6 @@ public class BasicSSLTest {
       String methodName = Utility.getMethodName();
       LoggingUtilities.banner(log, cclass, methodName);
 
-      serverURI = TestProperties.getServerURI();
-      serverHost = serverURI.getHost();
       topicPrefix = "BasicSSLTest-" + UUID.randomUUID().toString() + "-";
 
     }
@@ -77,7 +102,6 @@ public class BasicSSLTest {
    */
   @Test(timeout=10000)
   public void testSSL() throws Exception {
-    URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
@@ -140,7 +164,6 @@ public class BasicSSLTest {
    */
   @Test(timeout=60000)
   public void testSSLWorkload() throws Exception {
-    URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);
@@ -235,7 +258,6 @@ public class BasicSSLTest {
    */
   @Test(timeout=10000)
   public void testSSLLargeMessage() throws Exception {
-    URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
     String methodName = Utility.getMethodName();
     LoggingUtilities.banner(log, cclass, methodName);
     log.entering(className, methodName);

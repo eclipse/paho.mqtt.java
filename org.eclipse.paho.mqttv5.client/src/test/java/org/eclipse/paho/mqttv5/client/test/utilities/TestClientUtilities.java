@@ -7,7 +7,7 @@ import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.test.SubscribeTests;
-import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
 import org.junit.Assert;
 
 public class TestClientUtilities {

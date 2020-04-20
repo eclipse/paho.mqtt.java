@@ -2,44 +2,43 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
  */
 package org.eclipse.paho.mqttv5.client;
 
-import org.eclipse.paho.mqttv5.client.internal.ClientComms;
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
-import org.eclipse.paho.mqttv5.common.packet.MqttPublish;
+import org.eclipse.paho.mqttv5.client.internal.ClientInternal;
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.MqttPersistenceException;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttPublish;
 
 /**
  * Represents a topic destination, used for publish/subscribe messaging.
  */
 public class MqttTopic {
 
-
-	private ClientComms comms;
 	private String name;
+	private ClientInternal internal;
 
 	/**
 	 * @param name
 	 *            The Name of the topic
-	 * @param comms
-	 *            The {@link ClientComms}
+	 * @param internal
+	 *            The {@link ClientInternal}
 	 */
-	public MqttTopic(String name, ClientComms comms) {
-		this.comms = comms;
+	public MqttTopic(String name, ClientInternal internal) {
 		this.name = name;
+		this.internal = internal;
 	}
 
 	/**
@@ -54,7 +53,7 @@ public class MqttTopic {
 	 *            the Quality of Service. Valid values are 0, 1 or 2.
 	 * @param retained
 	 *            whether or not this message should be retained by the server.
-	 * @return {@link MqttDeliveryToken}
+	 * @return {@link MqttToken}
 	 * @throws MqttException
 	 *             If an error occurs publishing the message
 	 * @throws MqttPersistenceException
@@ -65,7 +64,7 @@ public class MqttTopic {
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public MqttDeliveryToken publish(byte[] payload, int qos, boolean retained)
+	public MqttToken publish(byte[] payload, int qos, boolean retained)
 			throws MqttException, MqttPersistenceException {
 		MqttMessage message = new MqttMessage(payload);
 		message.setQos(qos);
@@ -75,7 +74,7 @@ public class MqttTopic {
 
 	/**
 	 * Publishes the specified message to this topic, but does not wait for delivery
-	 * of the message to complete. The returned {@link MqttDeliveryToken token} can
+	 * of the message to complete. The returned {@link MqttToken token} can
 	 * be used to track the delivery status of the message. Once this method has
 	 * returned cleanly, the message has been accepted for publication by the
 	 * client. Message delivery will be completed in the background when a
@@ -89,11 +88,9 @@ public class MqttTopic {
 	 * @throws MqttPersistenceException
 	 *             if an error occurs persisting the message
 	 */
-	public MqttDeliveryToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
-		MqttDeliveryToken token = new MqttDeliveryToken(comms.getClient().getClientId());
-		token.setMessage(message);
-		comms.sendNoWait(createPublish(message, new MqttProperties()), token);
-		token.internalTok.waitUntilSent();
+	public MqttToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
+		MqttToken token = new MqttToken(internal.getClient());
+		internal.publish(name, message, token);
 		return token;
 	}
 

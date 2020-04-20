@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2017 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -26,12 +26,12 @@ import java.util.Properties;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 
-import org.eclipse.paho.mqttv5.client.internal.NetworkModuleService;
-import org.eclipse.paho.mqttv5.client.util.Debug;
-import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
-import org.eclipse.paho.mqttv5.common.packet.UserProperty;
-import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
+//import org.eclipse.paho.mqttv5.client.internal.NetworkModuleService;
+//import org.eclipse.paho.mqttv5.client.vertx.util.Debug;
+import org.eclipse.paho.mqttv5.client.common.MqttMessage;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.packet.UserProperty;
+import org.eclipse.paho.mqttv5.client.common.util.MqttTopicValidator;
 
 /**
  * Holds the set of options that control how the client connects to a server.
@@ -97,8 +97,8 @@ public class MqttConnectionOptions {
 	private boolean cleanStart = true; // Clean Session
 	private String willDestination = null; // Will Topic
 	private MqttMessage willMessage = null; // Will Message
-	private String userName; // Username
-	private byte[] password; // Password
+	private String userName = null; // Username
+	private byte[] password = null; // Password
 	private Long sessionExpiryInterval = null; // The Session expiry Interval in seconds, null is the default of
 												// never.
 	private Integer receiveMaximum = null; // The Receive Maximum, null defaults to 65,535, cannot be 0.
@@ -419,7 +419,7 @@ public class MqttConnectionOptions {
 	 */
 	public void setServerURIs(String[] serverURIs) {
 		for (String serverURI : serverURIs) {
-			NetworkModuleService.validateURI(serverURI);
+			//NetworkModuleService.validateURI(serverURI);
 		}
 		this.serverURIs = serverURIs.clone();
 	}
@@ -943,7 +943,7 @@ public class MqttConnectionOptions {
 	}
 
 	public String toString() {
-		return Debug.dumpProperties(getDebug(), "Connection options");
+		return null; //Debug.dumpProperties(getDebug(), "Connection options");
 	}
 
 	public boolean isSendReasonMessages() {

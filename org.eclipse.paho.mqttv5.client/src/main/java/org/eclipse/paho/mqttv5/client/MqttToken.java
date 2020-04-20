@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corp.
+ * Copyright (c) 2014, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
+ * are made available under the terms of the Eclipse Public License v1.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    https://www.eclipse.org/legal/epl-2.0
+ *    http://www.eclipse.org/legal/epl-v10.html
  * and the Eclipse Distribution License is available at 
- *   https://www.eclipse.org/org/documents/edl-v10.php
+ *   http://www.eclipse.org/org/documents/edl-v10.php.
  *   
  * Contributions:
  *   Ian Craggs - MQTT 3.1.1 support
@@ -16,10 +16,19 @@
 
 package org.eclipse.paho.mqttv5.client;
 
-import org.eclipse.paho.mqttv5.client.internal.Token;
-import org.eclipse.paho.mqttv5.common.MqttException;
-import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
-import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.paho.mqttv5.client.common.MqttException;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttConnAck;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttPublish;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttSubAck;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttSubscribe;
+import org.eclipse.paho.mqttv5.client.common.packet.MqttWireMessage;
+
+import io.vertx.core.*;
+import io.vertx.core.net.*;
 
 /**
  * Provides a mechanism for tracking the completion of an asynchronous action.
@@ -32,83 +41,144 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
  */
 
 public class MqttToken implements IMqttToken {
-	/**
-	 * A reference to the the class that provides most of the implementation of the
-	 * MqttToken. MQTT application programs must not use the internal class.
-	 */
-	public Token internalTok = null;
-
-	public MqttToken() {
+	private MqttException exception = null;
+	private final CountDownLatch countDownLatch = new CountDownLatch(1);
+	private Object userContext = null;
+	private MqttWireMessage response = null;
+	private MqttWireMessage request = null;
+	private int messageId;
+	private int[] reasonCodes;
+	private IMqttActionListener listener = null;
+	private MqttAsyncClient client = null;
+		
+	public MqttToken(MqttAsyncClient client) {
+		this.client = client;
 	}
-
-	public MqttToken(String logContext) {
-		internalTok = new Token(logContext);
+	
+	public void setComplete() {
+		countDownLatch.countDown();
+		if (listener != null) { 
+			listener.onSuccess(this);
+		}
+	}
+		
+	public MqttToken(MqttAsyncClient client, String logContext) {
+		//this.logContext = logContext;
+		this(client);
 	}
 
 	public MqttException getException() {
-		return internalTok.getException();
+		return exception;
 	}
 
 	public boolean isComplete() {
-		return internalTok.isComplete();
+		return countDownLatch.getCount() == 0;
 	}
 
-	public void setActionCallback(MqttActionListener listener) {
-		internalTok.setActionCallback(listener);
-
+	public void setActionCallback(IMqttActionListener listener) {
+		this.listener = listener;
 	}
   
-	public MqttActionListener getActionCallback() {
-		return internalTok.getActionCallback();
+	public IMqttActionListener getActionCallback() {
+		return listener;
 	}
 
 	public void waitForCompletion() throws MqttException {
-		internalTok.waitForCompletion(-1);
+		try {
+			countDownLatch.await();
+		} catch (Exception e) {
+			throw new MqttException(e);
+		}
 	}
 
 	public void waitForCompletion(long timeout) throws MqttException {
-		internalTok.waitForCompletion(timeout);
+		boolean result = false;
+		try {
+			result = countDownLatch.await((timeout == -1) ? 99999 : timeout, TimeUnit.MILLISECONDS);
+		} catch (Exception e) {
+		}
+		
+		if (result == false) {
+			throw new MqttException(MqttClientException.REASON_CODE_CLIENT_TIMEOUT);
+		}
 	}
 
-	public MqttClientInterface getClient() {
-		return internalTok.getClient();
+	public IMqttAsyncClient getClient() {
+		return client;
 	}
 
 	public String[] getTopics() {
-		return internalTok.getTopics();
+		return null; //((MqttSubscribe)response).getSubscriptions().getTopics();
 	}
 
 	public Object getUserContext() {
-		return internalTok.getUserContext();
+		return this.userContext;
 	}
 
 	public void setUserContext(Object userContext) {
-		internalTok.setUserContext(userContext);
+		this.userContext = userContext;
 	}
 
+	public void setMessageId(int msgid) {
+		this.messageId = msgid;
+	}
+	
 	public int getMessageId() {
-		return internalTok.getMessageID();
+		return messageId;
 	}
 
 	public int[] getGrantedQos() {
-		return internalTok.getGrantedQos();
+		int[] val = new int[0];
+		if (response instanceof MqttSubAck) {
+			val = ((MqttSubAck)response).getReturnCodes();
+		}
+		return val;
 	}
 
 	public boolean getSessionPresent() {
-		return internalTok.getSessionPresent();
+                if (response == null) {
+			return false;
+		}
+		return ((MqttConnAck)response).getSessionPresent();
 	}
 
 	public MqttWireMessage getResponse() {
-		return internalTok.getResponse();
+		return response;
+	}
+	
+	public void setResponse(MqttWireMessage response) {
+		this.response = response;
 	}
 
-	public MqttProperties getMessageProperties() {
-		return (internalTok.getWireMessage() == null) ? null : internalTok.getWireMessage().getProperties();
+	public MqttProperties getResponseProperties() {
+		return (response == null) ? null : response.getProperties();
+	}
+	
+	public MqttWireMessage getRequestMessage() {
+		return request;
+	}
+	
+	public void setRequestMessage(MqttWireMessage request) {
+		this.request = request;
+	}	
+	
+	public MqttProperties getRequestProperties() {
+		return (request == null) ? null : request.getProperties();
+	}
+	
+	public void setReasonCodes(int[] codes) {
+		this.reasonCodes = codes;
 	}
 
 	@Override
 	public int[] getReasonCodes() {
-		return internalTok.getReasonCodes();
+		if (this.reasonCodes != null) {
+			return this.reasonCodes;
+		} else if (response != null) {
+			return response.getReasonCodes();
+		} 
+
+		return new int[0];
 	}
 
 }
