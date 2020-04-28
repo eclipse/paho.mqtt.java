@@ -887,6 +887,49 @@ public interface IMqttAsyncClient extends AutoCloseable {
 	 */
     void messageArrivedComplete(int messageId, int qos) throws MqttException;
 
+
+	/**
+	 * Sets the DisconnectedBufferOptions for this client
+	 *
+	 * @param bufferOpts
+	 *            the {@link DisconnectedBufferOptions}
+	 */
+    void setBufferOpts(DisconnectedBufferOptions bufferOpts);
+
+	/**
+	 * Returns the number of messages in the Disconnected Message Buffer
+	 *
+	 * @return Count of messages in the buffer
+	 */
+    int getBufferedMessageCount();
+
+	/**
+	 * Returns a message from the Disconnected Message Buffer
+	 *
+	 * @param bufferIndex
+	 *            the index of the message to be retrieved.
+	 * @return the message located at the bufferIndex
+	 */
+    MqttMessage getBufferedMessage(int bufferIndex);
+
+	/**
+	 * Deletes a message from the Disconnected Message Buffer
+	 *
+	 * @param bufferIndex
+	 *            the index of the message to be deleted.
+	 */
+    void deleteBufferedMessage(int bufferIndex);
+
+	/**
+	 * Returns the current number of outgoing in-flight messages being sent by the
+	 * client. Note that this number cannot be guaranteed to be 100% accurate as
+	 * some messages may have been sent or queued in the time taken for this method
+	 * to return.
+	 *
+	 * @return the current number of in-flight messages.
+	 */
+    int getInFlightMessageCount();
+
 	/**
 	 * Close the client
 	 * Releases all resource associated with the client. After the client has
