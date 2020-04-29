@@ -223,11 +223,13 @@ public class PerSubscriptionMessageHandlerTest {
 		    opts.setCleanStart(false);
 		    opts.setSessionExpiryInterval(99999L);
 		    
-		    mqttClient.connect(opts);
 		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
-		    
+		    mqttClient.connect(opts);
+
+		    log.info("Subscribing to topic: " + mytopic);
 		    mqttClient.subscribe(mytopic, 2, mylistener);
 		    
+		    log.info("Publish message: testSyncCleanSessionFalse");
 		    MqttMessage message = new MqttMessage();
 		    message.setPayload("testSyncCleanSessionFalse".getBytes());
 		    mqttClient.publish(mytopic, message);
@@ -238,12 +240,15 @@ public class PerSubscriptionMessageHandlerTest {
 		    Assert.assertEquals("testSyncCleanSessionFalse", msg.toString());
 		    
 		    mqttClient.disconnect();
+                    try {
+                        Thread.sleep(1000);
+                    } catch(Exception e) {}
 		    
 		    /* subscription handler should still exist on reconnect */
-		    
-		    mqttClient.connect(opts);
 		    log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+		    mqttClient.connect(opts);
 		    
+		    log.info("Publish message: testSyncCleanSessionFalse1");
 		    message = new MqttMessage();
 		    message.setPayload("testSyncCleanSessionFalse1".getBytes());
 		    mqttClient.publish(mytopic, message);
