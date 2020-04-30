@@ -107,6 +107,11 @@ public class MqttDisconnect extends MqttWireMessage {
 		}
 	}
 	
+	@Override
+	public String getKey() {
+		return KEY;
+	}
+	
 	public int getReturnCode() {
 		return returnCode;
 	}
