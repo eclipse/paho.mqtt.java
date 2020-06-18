@@ -57,6 +57,7 @@ public class TCPNetworkModuleFactory implements NetworkModuleFactory {
 			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 		}
 		TCPNetworkModule networkModule = new TCPNetworkModule(factory, host, port, clientId);
+		networkModule.setNetworkInterface(options.getNetworkInterface());
 		networkModule.setConnectTimeout(options.getConnectionTimeout());
 		return networkModule;
 	}

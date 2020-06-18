@@ -74,6 +74,7 @@ public class MqttConnectOptions {
 	private boolean automaticReconnect = false;
 	private int maxReconnectDelay = 128000;
 	private Properties customWebSocketHeaders = null;
+	private String networkInterface;
 
 	// Client Operation Parameters
 	private int executorServiceTimeout = 1; // How long to wait in seconds when terminating the executor service.
@@ -696,6 +697,23 @@ public class MqttConnectOptions {
 	public Properties getCustomWebSocketHeaders() {
 		return customWebSocketHeaders;
 	}
+
+	/**
+	 * Returns the network interface to bind for the connection.
+	 *
+	 * @return the network interface to bind for the connection.
+	 */
+	public String getNetworkInterface() {
+		return networkInterface;
+	}
+
+	/**
+	 * Sets the network interface to bind for the connection.
+	 *
+	 * @param networkInterface
+	 *            The networkInterface as a String
+	 */
+	public void setNetworkInterface(String networkInterface) { this.networkInterface = networkInterface; }
 
 	public String toString() {
 		return Debug.dumpProperties(getDebug(), "Connection options");

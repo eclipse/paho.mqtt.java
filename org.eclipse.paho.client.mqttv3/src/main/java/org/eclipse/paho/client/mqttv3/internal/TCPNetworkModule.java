@@ -22,6 +22,10 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.NetworkInterface;
+import java.net.InetAddress;
+
+import java.util.Enumeration;
 
 import javax.net.SocketFactory;
 
@@ -41,6 +45,7 @@ public class TCPNetworkModule implements NetworkModule {
 	private String host;
 	private int port;
 	private int conTimeout;
+	private String networkInterface;
 
 	/**
 	 * Constructs a new TCPNetworkModule using the specified host and
@@ -71,6 +76,14 @@ public class TCPNetworkModule implements NetworkModule {
 			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, Integer.valueOf(port), Long.valueOf(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
 			socket = factory.createSocket();
+
+			/* Bind to the network interface */
+			if (networkInterface != null && !networkInterface.isEmpty()) {
+				NetworkInterface nif = NetworkInterface.getByName(networkInterface);
+				Enumeration<InetAddress> nifAddresses = nif.getInetAddresses();
+				socket.bind(new InetSocketAddress(nifAddresses.nextElement(), 0));
+			}
+
 			socket.connect(sockaddr, conTimeout*1000);
 			socket.setSoTimeout(1000);
 		}
@@ -105,6 +118,14 @@ public class TCPNetworkModule implements NetworkModule {
 	 */
 	public void setConnectTimeout(int timeout) {
 		this.conTimeout = timeout;
+	}
+
+	/**
+	 * Set the Network Interface for Socket bind
+	 * @param timeout  The connection timeout
+	 */
+	public void setNetworkInterface(String networkInterface) {
+		this.networkInterface = networkInterface;
 	}
 
 	public String getServerURI() {
