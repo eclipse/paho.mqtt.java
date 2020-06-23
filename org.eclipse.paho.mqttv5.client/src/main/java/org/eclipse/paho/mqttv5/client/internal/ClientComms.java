@@ -32,7 +32,6 @@ import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientInterface;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
-import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
@@ -694,7 +693,7 @@ public class ClientComms {
 		this.networkModules = networkModules;
 	}
 
-	public MqttDeliveryToken[] getPendingDeliveryTokens() {
+	public MqttToken[] getPendingTokens() {
 		return tokenStore.getOutstandingDelTokens();
 	}
 
@@ -766,8 +765,8 @@ public class ClientComms {
 				// Reset an exception on existing delivery tokens.
 				// This will have been set if disconnect occurred before delivery was
 				// fully processed.
-				MqttDeliveryToken[] toks = tokenStore.getOutstandingDelTokens();
-				for (MqttDeliveryToken tok : toks) {
+				MqttToken[] toks = tokenStore.getOutstandingDelTokens();
+				for (MqttToken tok : toks) {
 					tok.internalTok.setException(null);
 				}
 

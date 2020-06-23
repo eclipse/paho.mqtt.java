@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -45,7 +44,7 @@ public class PersistenceTests {
 		
 		// Publish a message at QoS 2
 		MqttMessage message = new MqttMessage("Test Message".getBytes(), 2, false, null);
-		IMqttDeliveryToken deliveryToken = client.publish("testTopic", message);
+		IMqttToken deliveryToken = client.publish("testTopic", message);
 		deliveryToken.waitForCompletion(1000);
 		
 		// Validate that the message that was persisted does not have a topic alias.

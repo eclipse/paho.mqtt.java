@@ -62,3 +62,10 @@ target/
 
 
 *.log.*
+
+# Test files
+Bug443142Test-*-tcplocalhost*
+client-1-tcpioteclipseorg1882
+testConnectTimeout
+
+

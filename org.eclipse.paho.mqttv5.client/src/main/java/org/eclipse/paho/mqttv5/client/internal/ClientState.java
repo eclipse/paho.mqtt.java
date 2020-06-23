@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
-import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
@@ -396,7 +395,7 @@ public class ClientState implements MqttState {
 							outboundQoS1.put(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 						}
 					}
-					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
+					MqttToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()),
 							Integer.valueOf(sendMessage.getMessageId()));
@@ -425,7 +424,7 @@ public class ClientState implements MqttState {
 
 					}
 
-					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
+					MqttToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()),
 							Integer.valueOf(sendMessage.getMessageId()));
@@ -1380,7 +1379,7 @@ public class ClientState implements MqttState {
 					tok.internalTok.setException(shutReason);
 				}
 			}
-			if (!(tok instanceof MqttDeliveryToken)) {
+			if (!(tok.isDeliveryToken())) {
 				// If not a delivery token it is not valid on
 				// restart so remove
 				tokenStore.removeToken(tok.internalTok.getKey());

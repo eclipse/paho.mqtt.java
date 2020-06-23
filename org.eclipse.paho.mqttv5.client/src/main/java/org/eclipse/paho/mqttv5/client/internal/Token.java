@@ -450,7 +450,9 @@ public class Token {
 		int[] val = new int[0];
 		if (response instanceof MqttSubAck) {
 			// TODO - Work out how to map multiple returncodes
-			val = ((MqttSubAck) response).getReturnCodes();
+                        if (response != null) {
+			        val = ((MqttSubAck) response).getReturnCodes();
+                        }
 		}
 		return val;
 	}
@@ -458,7 +460,9 @@ public class Token {
 	public boolean getSessionPresent() {
 		boolean val = false;
 		if (response instanceof MqttConnAck) {
-			val = ((MqttConnAck) response).getSessionPresent();
+                        if (response != null) {
+			     val = ((MqttConnAck) response).getSessionPresent();
+                        }
 		}
 		return val;
 	}

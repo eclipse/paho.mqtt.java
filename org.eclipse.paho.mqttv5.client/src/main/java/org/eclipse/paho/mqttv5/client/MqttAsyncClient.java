@@ -211,7 +211,7 @@ import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
  * To understand when the delivery of a message is complete either of the two
  * methods above can be used to either wait on or be notified when the publish
  * completes. An alternative is to use the
- * {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)} method which will
+ * {@link MqttCallback#deliveryComplete(IMqttToken)} method which will
  * also be notified when a message has been delivered to the requested quality
  * of service.
  * </p>
@@ -838,11 +838,12 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 
 		try {
 			comms.disconnect(disconnect, quiesceTimeout, token);
+                        Thread.sleep(100);
 		} catch (MqttException ex) {
 			// @TRACE 105=< exception
 			log.fine(CLASS_NAME, methodName, "105", null, ex);
 			throw ex;
-		}
+		} catch (Exception tex) {}
 		// @TRACE 108=<
 		log.fine(CLASS_NAME, methodName, "108");
 
@@ -880,7 +881,17 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	@Override
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, int reasonCode,
 			MqttProperties disconnectProperties) throws MqttException {
-		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, reasonCode, disconnectProperties);
+		final String methodName = "disconnectForcibly";
+		try {
+		        comms.disconnectForcibly(quiesceTimeout, disconnectTimeout, reasonCode, disconnectProperties);
+                        Thread.sleep(100);
+		} catch (MqttException ex) {
+			// @TRACE 105=< exception
+			log.fine(CLASS_NAME, methodName, "105", null, ex);
+			throw ex;
+		} catch (Exception tex) {}
+		// @TRACE 108=<
+		log.fine(CLASS_NAME, methodName, "108");
 	}
 
 	/*
@@ -1434,11 +1445,11 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.eclipse.paho.mqttv5.client.IMqttAsyncClient#getPendingDeliveryTokens()
+	 * org.eclipse.paho.mqttv5.client.IMqttAsyncClient#getPendingTokens()
 	 */
 	@Override
-	public IMqttDeliveryToken[] getPendingDeliveryTokens() {
-		return comms.getPendingDeliveryTokens();
+	public IMqttToken[] getPendingTokens() {
+		return comms.getPendingTokens();
 	}
 
 	/*
@@ -1450,7 +1461,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * org.eclipse.paho.mqttv5.client.MqttActionListener)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
+	public IMqttToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
 			MqttActionListener callback) throws MqttException, MqttPersistenceException {
 		MqttMessage message = new MqttMessage(payload);
 		message.setProperties(new MqttProperties());
@@ -1467,7 +1478,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * byte[], int, boolean)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained)
+	public IMqttToken publish(String topic, byte[] payload, int qos, boolean retained)
 			throws MqttException, MqttPersistenceException {
 		return this.publish(topic, payload, qos, retained, null, null);
 	}
@@ -1480,7 +1491,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * org.eclipse.paho.mqttv5.common.MqttMessage)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, MqttMessage message)
+	public IMqttToken publish(String topic, MqttMessage message)
 			throws MqttException, MqttPersistenceException {
 		return this.publish(topic, message, null, null);
 	}
@@ -1495,7 +1506,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	 * org.eclipse.paho.mqttv5.common.packet.MqttProperties)
 	 */
 	@Override
-	public IMqttDeliveryToken publish(String topic, MqttMessage message, Object userContext,
+	public IMqttToken publish(String topic, MqttMessage message, Object userContext,
 			MqttActionListener callback) throws MqttException, MqttPersistenceException {
 		final String methodName = "publish";
 		// @TRACE 111=< topic={0} message={1}userContext={1} callback={2}
@@ -1504,7 +1515,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		// Checks if a topic is valid when publishing a message.
 		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */, true);
 
-		MqttDeliveryToken token = new MqttDeliveryToken(getClientId());
+		MqttToken token = new MqttToken(getClientId(), true);
 		token.setActionCallback(callback);
 		token.setUserContext(userContext);
 		token.setMessage(message);
@@ -1619,7 +1630,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		public void messageArrived(String topic, MqttMessage message) throws Exception {
 		}
 
-		public void deliveryComplete(IMqttDeliveryToken token) {
+		public void deliveryComplete(IMqttToken token) {
 		}
 
 		public void connectComplete(boolean reconnect, String serverURI) {
