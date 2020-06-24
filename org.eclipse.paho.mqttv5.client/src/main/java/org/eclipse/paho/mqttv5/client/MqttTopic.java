@@ -90,7 +90,8 @@ public class MqttTopic {
 	 *             if an error occurs persisting the message
 	 */
 	public MqttToken publish(MqttMessage message) throws MqttException, MqttPersistenceException {
-		MqttToken token = new MqttToken(comms.getClient().getClientId(), true);
+		MqttToken token = new MqttToken(comms.getClient().getClientId());
+                token.internalTok.setDeliveryToken(true);
 		token.setMessage(message);
 		comms.sendNoWait(createPublish(message, new MqttProperties()), token);
 		token.internalTok.waitUntilSent();

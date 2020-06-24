@@ -18,6 +18,7 @@ package org.eclipse.paho.mqttv5.client;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
@@ -178,6 +179,11 @@ public interface IMqttToken {
         public MqttWireMessage getResponse();
 
         /**
+         * @return the response wire message properties
+         */
+        public MqttProperties getResponseProperties();
+
+        /**
          * Returns the message associated with this token.
          * <p>Until the message has been delivered, the message being delivered will
          * be returned. Once the message has been delivered <code>null</code> will be
@@ -187,6 +193,14 @@ public interface IMqttToken {
          */
         public MqttMessage getMessage() throws MqttException;
 
-        public boolean isDeliveryToken();
+        /**
+         * @return the request wire message
+         */
+        public MqttWireMessage getRequestMessage();
+
+        /**
+         * @return the request wire message properties
+         */
+        public MqttProperties getRequestProperties();
 
 }

@@ -46,6 +46,7 @@ public class Token {
 
 	protected MqttMessage message = null;
 	private MqttWireMessage response = null;
+	private MqttWireMessage request = null;
 	private MqttException exception = null;
 	private String[] topics = null;
 
@@ -61,6 +62,8 @@ public class Token {
 
 	private int[] reasonCodes = null;
 
+        private boolean deliveryToken = false;
+
 	public Token(String logContext) {
 		log.setResourceName(logContext);
 	}
@@ -72,6 +75,14 @@ public class Token {
 	public void setMessageID(int messageID) {
 		this.messageID = messageID;
 	}
+
+	public void setDeliveryToken(boolean deliveryToken) {
+		this.deliveryToken = deliveryToken;
+	}
+
+        public boolean isDeliveryToken() {
+                return this.deliveryToken;
+        }
 
 	public boolean checkResult() throws MqttException {
 		if (getException() != null) {
@@ -493,5 +504,13 @@ public class Token {
 	public int[] getReasonCodes() {
 		return reasonCodes;
 	}
+
+        public void setRequestMessage(MqttWireMessage requestMessage) {
+                this.request = requestMessage;
+        }
+
+        public MqttWireMessage getRequestMessage() {
+                return this.request;
+        }
 
 }

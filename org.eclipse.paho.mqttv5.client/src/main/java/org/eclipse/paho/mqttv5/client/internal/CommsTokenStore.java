@@ -114,7 +114,8 @@ public class CommsTokenStore {
 				//@TRACE 302=existing key={0} message={1} token={2}
 				log.fine(CLASS_NAME,methodName, "302",new Object[]{key, message,token});
 			} else {
-				token = new MqttToken(logContext, true);
+				token = new MqttToken(logContext);
+                                token.internalTok.setDeliveryToken(true);
 				token.internalTok.setKey(key);
 				this.tokens.put(key, token);
 				//@TRACE 303=creating new token key={0} message={1} token={2}
@@ -188,7 +189,7 @@ public class CommsTokenStore {
 			while(enumeration.hasMoreElements()) {
 				token = (MqttToken)enumeration.nextElement();
 				if (token != null 
-					&& token.isDeliveryToken() == true
+					&& token.internalTok.isDeliveryToken() == true
 					&& !token.internalTok.isNotified()) {
 					
 					list.addElement(token);

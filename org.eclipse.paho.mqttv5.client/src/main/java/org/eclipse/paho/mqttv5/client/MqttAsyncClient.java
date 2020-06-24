@@ -244,7 +244,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	private MqttSessionState mqttSession = new MqttSessionState();
 
 	// Variables that exist within the life of an MQTT connection.
-	private MqttConnectionState mqttConnection = new MqttConnectionState(); 
+	private MqttConnectionState mqttConnection; 
 	
 	private ScheduledExecutorService executorService;
 	private MqttPingSender pingSender;
@@ -568,6 +568,8 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 			clientId = "";
 		}
 
+	        mqttConnection = new MqttConnectionState(clientId);
+
 		NetworkModuleService.validateURI(serverURI);
 
 		this.serverURI = serverURI;
@@ -758,7 +760,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		// succeeds
 		MqttToken userToken = new MqttToken(getClientId());
 		ConnectActionListener connectActionListener = new ConnectActionListener(this, persistence, comms, options,
-				userToken, userContext, callback, reconnecting, mqttSession, mqttConnection);
+				userToken, userContext, callback, reconnecting, mqttSession, this.mqttConnection);
 		userToken.setActionCallback(connectActionListener);
 		userToken.setUserContext(this);
 
@@ -1163,7 +1165,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		// TODO - Build up MQTT Subscriptions properly here
 
 		MqttSubscribe register = new MqttSubscribe(subscriptions, subscriptionProperties);
-
+                token.setRequestMessage(register);
 		comms.sendNoWait(register, token);
 		// @TRACE 109=<
 		log.fine(CLASS_NAME, methodName, "109");
@@ -1398,6 +1400,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		token.internalTok.setTopics(topicFilters);
 
 		MqttUnsubscribe unregister = new MqttUnsubscribe(topicFilters, unsubscribeProperties);
+                token.setRequestMessage(unregister);
 
 		comms.sendNoWait(unregister, token);
 		// @TRACE 110=<
@@ -1515,13 +1518,15 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		// Checks if a topic is valid when publishing a message.
 		MqttTopicValidator.validate(topic, false/* wildcards NOT allowed */, true);
 
-		MqttToken token = new MqttToken(getClientId(), true);
+		MqttToken token = new MqttToken(getClientId());
+                token.internalTok.setDeliveryToken(true);
 		token.setActionCallback(callback);
 		token.setUserContext(userContext);
 		token.setMessage(message);
 		token.internalTok.setTopics(new String[] { topic });
 
 		MqttPublish pubMsg = new MqttPublish(topic, message, message.getProperties());
+                token.setRequestMessage(pubMsg);
 		comms.sendNoWait(pubMsg, token);
 
 		// @TRACE 112=<

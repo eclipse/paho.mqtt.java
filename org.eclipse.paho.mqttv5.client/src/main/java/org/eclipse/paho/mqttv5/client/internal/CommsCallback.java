@@ -272,7 +272,7 @@ public class CommsCallback implements Runnable {
 			if (!token.internalTok.isNotified()) {
 				// If a callback is registered and delivery has finished
 				// call delivery complete callback.
-				if (mqttCallback != null && token.isDeliveryToken() == true && token.isComplete()) {
+				if (mqttCallback != null && token.internalTok.isDeliveryToken() == true && token.isComplete()) {
 					try {
 						mqttCallback.deliveryComplete(token);
 					} catch (Throwable ex) {
@@ -287,7 +287,7 @@ public class CommsCallback implements Runnable {
 
 			// Set notified so we don't tell the user again about this action.
 			if (token.isComplete()) {
-				if (token.isDeliveryToken() == true || token.getActionCallback() instanceof MqttActionListener) {
+				if (token.internalTok.isDeliveryToken() == true || token.getActionCallback() instanceof MqttActionListener) {
 					token.internalTok.setNotified(true);
 				}
 			}

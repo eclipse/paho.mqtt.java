@@ -175,8 +175,10 @@ public class ClientComms {
 	 */
 	public void sendNoWait(MqttWireMessage message, MqttToken token) throws MqttException {
 		final String methodName = "sendNoWait";
+
 		if (isConnected() || (!isConnected() && message instanceof MqttConnect)
 				|| (isDisconnecting() && message instanceof MqttDisconnect)) {
+
 			if (disconnectedMessageBuffer != null && disconnectedMessageBuffer.getMessageCount() != 0) {
 				// @TRACE 507=Client Connected, Offline Buffer available, but not empty. Adding
 				// message to buffer. message={0}
@@ -191,6 +193,7 @@ public class ClientComms {
 					this.clientState.persistBufferedMessage(message);
 				}
 				disconnectedMessageBuffer.putMessage(message, token);
+
 			} else {
 
 				if (message instanceof MqttPublish) {
