@@ -78,7 +78,7 @@ public class TCPNetworkModule implements NetworkModule {
 			socket = factory.createSocket();
 
 			/* Bind to the network interface */
-			if (networkInterface != null && !networkInterface.isEmpty()) {
+			if (networkInterface != null) {
 				NetworkInterface nif = NetworkInterface.getByName(networkInterface);
 				Enumeration<InetAddress> nifAddresses = nif.getInetAddresses();
 				socket.bind(new InetSocketAddress(nifAddresses.nextElement(), 0));
