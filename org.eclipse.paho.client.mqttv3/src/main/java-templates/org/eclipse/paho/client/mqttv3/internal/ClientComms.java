@@ -95,7 +95,8 @@ public class ClientComms {
 	 * @param executorService the {@link ExecutorService}
 	 * @throws MqttException if an exception occurs whilst communicating with the server
 	 */
-	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
+	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender,
+					   ExecutorService executorService, HighResolutionTimer highResolutionTimer) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client 	= client;
 		this.persistence = persistence;
@@ -105,7 +106,7 @@ public class ClientComms {
 
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback 	= new CommsCallback(this);
-		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender);
+		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, highResolutionTimer);
 
 		callback.setClientState(clientState);
 		log.setResourceName(getClient().getClientId());
