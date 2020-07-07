@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
-import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
@@ -273,9 +272,9 @@ public class CommsCallback implements Runnable {
 			if (!token.internalTok.isNotified()) {
 				// If a callback is registered and delivery has finished
 				// call delivery complete callback.
-				if (mqttCallback != null && token instanceof MqttDeliveryToken && token.isComplete()) {
+				if (mqttCallback != null && token.internalTok.isDeliveryToken() == true && token.isComplete()) {
 					try {
-						mqttCallback.deliveryComplete((MqttDeliveryToken) token);
+						mqttCallback.deliveryComplete(token);
 					} catch (Throwable ex) {
 						// Just log the fact that an exception was thrown
 						// @TRACE 726=Ignoring Exception thrown from deliveryComplete {0}
@@ -288,7 +287,7 @@ public class CommsCallback implements Runnable {
 
 			// Set notified so we don't tell the user again about this action.
 			if (token.isComplete()) {
-				if (token instanceof MqttDeliveryToken || token.getActionCallback() instanceof MqttActionListener) {
+				if (token.internalTok.isDeliveryToken() == true || token.getActionCallback() instanceof MqttActionListener) {
 					token.internalTok.setNotified(true);
 				}
 			}

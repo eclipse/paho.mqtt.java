@@ -6,7 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.test.logging.LoggingUtilities;
@@ -105,7 +104,7 @@ public class BasicTest {
 			String messagePayload = "Test Payload at QoS : " + qos;
 			MqttMessage testMessage = new MqttMessage(messagePayload.getBytes(), qos, false, null);
 			log.info(String.format("Publishing Message %s to: %s at QoS: %d", testMessage.toDebugString(), topic, qos));
-			IMqttDeliveryToken deliveryToken = asyncClient.publish(topic, testMessage);
+			IMqttToken deliveryToken = asyncClient.publish(topic, testMessage);
 			deliveryToken.waitForCompletion(timeout);
 
 			log.info("Waiting for delivery and validating message.");
@@ -164,7 +163,7 @@ public class BasicTest {
 		MqttMessage testMessage = new MqttMessage(payload.getBytes(), qos, false, null);
 		log.info(String.format("Publishing Message %s to: %s at QoS: %d", testMessage.toDebugString(), topic,
 				qos));
-		IMqttDeliveryToken deliveryToken = client.publish(topic, testMessage);
+		IMqttToken deliveryToken = client.publish(topic, testMessage);
 		deliveryToken.waitForCompletion(timeout);
 	}
 	

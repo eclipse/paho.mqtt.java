@@ -17,6 +17,8 @@
 package org.eclipse.paho.mqttv5.client;
 
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 /**
@@ -47,7 +49,7 @@ public interface IMqttToken {
 	 * @throws MqttException if there was a problem with the action associated with the token.
 	 * @see #waitForCompletion(long)
 	 */
-    void waitForCompletion() throws MqttException;
+        public void waitForCompletion() throws MqttException;
 
 	/**
 	 * Blocks the current thread until the action this token is associated with has
@@ -62,7 +64,7 @@ public interface IMqttToken {
 	 * @param timeout the maximum amount of time to wait for, in milliseconds.
 	 * @throws MqttException if there was a problem with the action associated with the token.
 	 */
-    void waitForCompletion(long timeout) throws MqttException;
+        public void waitForCompletion(long timeout) throws MqttException;
 
 	/**
 	 * Returns whether or not the action has finished.
@@ -72,7 +74,7 @@ public interface IMqttToken {
 	 * </p>
 	 * @return whether or not the action has finished.
 	 */
-    boolean isComplete();
+        public boolean isComplete();
 
 	/**
 	 * Returns an exception providing more detail if an operation failed.
@@ -83,7 +85,7 @@ public interface IMqttToken {
 	 * @return exception may return an exception if the operation failed. Null will be
 	 * returned while action is in progress and if action completes successfully.
 	 */
-    MqttException getException();
+        public MqttException getException();
 
 	/**
 	 * Register a listener to be notified when an action completes.
@@ -92,20 +94,20 @@ public interface IMqttToken {
 	 * </p>
 	 * @param listener to be invoked once the action completes
 	 */
-    void setActionCallback(MqttActionListener listener);
+        public void setActionCallback(MqttActionListener listener);
 
 	/**
 	 * Return the async listener for this token.
 	 * @return listener that is set on the token or null if a listener is not registered.
 	 */
-    MqttActionListener getActionCallback();
+        public MqttActionListener getActionCallback();
 
 	/**
 	 * Returns the MQTT client that is responsible for processing the asynchronous
 	 * action
 	 * @return the client
 	 */
-    MqttClientInterface getClient();
+        public MqttClientInterface getClient();
 
 	/**
 	 * Returns the topic string(s) for the action being tracked by this
@@ -114,7 +116,7 @@ public interface IMqttToken {
 	 *
 	 * @return the topic string(s) for the subscribe being tracked by this token or null
 	 */
-    String[] getTopics();
+        public String[] getTopics();
 
 	/**
 	 * Store some context associated with an action.
@@ -124,7 +126,7 @@ public interface IMqttToken {
 	 * actions</p>
 	 * @param userContext to associate with an action
 	 */
-    void setUserContext(Object userContext);
+        public void setUserContext(Object userContext);
 
 	/**
 	 * Retrieve the context associated with an action.
@@ -134,7 +136,7 @@ public interface IMqttToken {
 
 	 * @return Object context associated with an action or null if there is none.
 	 */
-    Object getUserContext();
+        public Object getUserContext();
 
 	/**
 	 * Returns the message ID of the message that is associated with the token.
@@ -144,12 +146,12 @@ public interface IMqttToken {
 	 * the MQTT message id flowed over the network.
 	 * @return the message ID of the message that is associated with the token
 	 */
-    int getMessageId();
+        public int getMessageId();
 	
 	/**
 	 * @return the granted QoS list from a suback 
 	 */
-    int[] getGrantedQos();
+        public int[] getGrantedQos();
 	
 	/**
 	 * Returns a list of reason codes that were returned as a result of this token's action.
@@ -164,16 +166,41 @@ public interface IMqttToken {
 	 * @return the reason code(s) from the response for this token's action.
 	 * 
 	 */
-    int[] getReasonCodes();
+        public int[] getReasonCodes();
 	
 	/**
 	 * @return the session present flag from a connack 
 	 */
-    boolean getSessionPresent();
+        public boolean getSessionPresent();
 	
 	/**
 	 * @return the response wire message
 	 */
-    MqttWireMessage getResponse();
+        public MqttWireMessage getResponse();
+
+        /**
+         * @return the response wire message properties
+         */
+        public MqttProperties getResponseProperties();
+
+        /**
+         * Returns the message associated with this token.
+         * <p>Until the message has been delivered, the message being delivered will
+         * be returned. Once the message has been delivered <code>null</code> will be
+         * returned.
+         * @return the message associated with this token or null if already delivered.
+         * @throws MqttException if there was a problem completing retrieving the message
+         */
+        public MqttMessage getMessage() throws MqttException;
+
+        /**
+         * @return the request wire message
+         */
+        public MqttWireMessage getRequestMessage();
+
+        /**
+         * @return the request wire message properties
+         */
+        public MqttProperties getRequestProperties();
 
 }

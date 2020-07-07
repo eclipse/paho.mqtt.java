@@ -46,6 +46,7 @@ public class Token {
 
 	protected MqttMessage message = null;
 	private MqttWireMessage response = null;
+	private MqttWireMessage request = null;
 	private MqttException exception = null;
 	private String[] topics = null;
 
@@ -61,6 +62,8 @@ public class Token {
 
 	private int[] reasonCodes = null;
 
+        private boolean deliveryToken = false;
+
 	public Token(String logContext) {
 		log.setResourceName(logContext);
 	}
@@ -72,6 +75,14 @@ public class Token {
 	public void setMessageID(int messageID) {
 		this.messageID = messageID;
 	}
+
+	public void setDeliveryToken(boolean deliveryToken) {
+		this.deliveryToken = deliveryToken;
+	}
+
+        public boolean isDeliveryToken() {
+                return this.deliveryToken;
+        }
 
 	public boolean checkResult() throws MqttException {
 		if (getException() != null) {
@@ -450,7 +461,9 @@ public class Token {
 		int[] val = new int[0];
 		if (response instanceof MqttSubAck) {
 			// TODO - Work out how to map multiple returncodes
-			val = ((MqttSubAck) response).getReturnCodes();
+                        if (response != null) {
+			        val = ((MqttSubAck) response).getReturnCodes();
+                        }
 		}
 		return val;
 	}
@@ -458,7 +471,9 @@ public class Token {
 	public boolean getSessionPresent() {
 		boolean val = false;
 		if (response instanceof MqttConnAck) {
-			val = ((MqttConnAck) response).getSessionPresent();
+                        if (response != null) {
+			     val = ((MqttConnAck) response).getSessionPresent();
+                        }
 		}
 		return val;
 	}
@@ -489,5 +504,13 @@ public class Token {
 	public int[] getReasonCodes() {
 		return reasonCodes;
 	}
+
+        public void setRequestMessage(MqttWireMessage requestMessage) {
+                this.request = requestMessage;
+        }
+
+        public MqttWireMessage getRequestMessage() {
+                return this.request;
+        }
 
 }

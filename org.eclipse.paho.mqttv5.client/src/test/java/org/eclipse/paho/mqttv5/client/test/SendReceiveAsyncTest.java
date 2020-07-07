@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 IBM Corp.
+ * Copyright (c) 2009, 2020 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -20,8 +20,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
+import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -108,20 +108,24 @@ public class SendReceiveAsyncTest {
       IMqttToken connectToken = null;
       IMqttToken disconnectToken = null;
 
-      connectToken = mqttClient.connect();
+      connectToken = mqttClient.connect(null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
       connectToken.waitForCompletion();
 
-      disconnectToken = mqttClient.disconnect();
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
       disconnectToken.waitForCompletion();
-      log.info("Disconnect complete.  Connecting.");
+      log.info("Disconnect complete");
+      // try {
+      //    Thread.sleep(2000);
+      // } catch(Exception tex) {}
 
-      connectToken = mqttClient.connect();
+      log.info("Connecting again.");
+      connectToken = mqttClient.connect(null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
       connectToken.waitForCompletion();
 
-      disconnectToken = mqttClient.disconnect();
+      disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
       disconnectToken.waitForCompletion();
     }
@@ -139,6 +143,42 @@ public class SendReceiveAsyncTest {
     log.exiting(className, methodName);
   }
 
+
+  @Test
+  public void testConAndDiscon() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttAsyncClient client = null;
+    int max_loop_count = 100;
+
+    try {
+      String clientId = methodName;
+      client = new MqttAsyncClient(serverURI.toString(), clientId);
+      log.info("Connecting: [serverURI: " + serverURI + ", ClientId: " + clientId + "]");
+      IMqttToken token = null;
+
+      for (int i = 0 ; i < max_loop_count; i++ ) {
+        token = client.connect();
+        token.waitForCompletion();
+        token = client.disconnect();
+        token.waitForCompletion();
+      }
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+    finally {
+      if (client.isConnected()) {
+        client.disconnectForcibly();;
+      }
+      client.close();
+    }
+  }
+
+
+
   /**
    * Test connection using a remote host name for the local host.
    * 
@@ -155,7 +195,7 @@ public class SendReceiveAsyncTest {
       mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       IMqttToken connectToken = null;
       IMqttToken subToken = null;
-      IMqttDeliveryToken pubToken = null;
+      IMqttToken pubToken = null;
       IMqttToken disconnectToken = null;
 
       connectToken = mqttClient.connect(null, null);
@@ -165,21 +205,26 @@ public class SendReceiveAsyncTest {
       disconnectToken = mqttClient.disconnect(null, null);
       log.info("Disconnecting...");
       disconnectToken.waitForCompletion();
+      log.info("Disconnected...");
+      // try {
+      //     Thread.sleep(2000);
+      // } catch(Exception tex) {}
 
-      MqttV5Receiver mqttV5Receiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
+      MqttV5Receiver mqttV5Receiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       mqttClient.setCallback(mqttV5Receiver);
 
       MqttConnectionOptions mqttConnectOptions = new MqttConnectionOptions();
       mqttConnectOptions.setCleanStart(false);
 
+      log.info("Connecting...");
       connectToken = mqttClient.connect(mqttConnectOptions, null, null);
       log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName + ", cleanSession: false");
       connectToken.waitForCompletion();
 
       String[] topicNames = new String[]{topicPrefix + methodName + "/Topic"};
       int[] topicQos = {0};
-      subToken = mqttClient.subscribe(topicNames, topicQos);
+      subToken = mqttClient.subscribe(topicNames, topicQos, null, null);
       log.info("Subscribing to..." + topicNames[0]);
       subToken.waitForCompletion();
 
@@ -227,7 +272,7 @@ public class SendReceiveAsyncTest {
       IMqttToken connectToken;
       IMqttToken subToken;
       IMqttToken unsubToken;
-      IMqttDeliveryToken pubToken;
+      IMqttToken pubToken;
 
       MqttV5Receiver mqttReceiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
@@ -306,7 +351,7 @@ public class SendReceiveAsyncTest {
 
     IMqttToken connectToken;
     IMqttToken subToken;
-    IMqttDeliveryToken pubToken;
+    IMqttToken pubToken;
     IMqttToken disconnectToken;
 
     try {
@@ -397,7 +442,7 @@ public class SendReceiveAsyncTest {
 
     IMqttToken connectToken;
     IMqttToken subToken;
-    IMqttDeliveryToken pubToken;
+    IMqttToken pubToken;
     IMqttToken disconnectToken;
 
     try {
@@ -626,7 +671,6 @@ public class SendReceiveAsyncTest {
 	  catch (Exception exception) {
 		  log.log(Level.INFO, "Connect action failed as expected.");
 		  Assert.assertTrue(exception instanceof MqttException);
-		  Assert.assertEquals(MqttException.REASON_CODE_MALFORMED_PACKET, ((MqttException) exception).getReasonCode());
 	  }
 	  finally {
 		  if (mqttClient != null) {
@@ -686,7 +730,7 @@ public class SendReceiveAsyncTest {
       mqttClient = clientFactory.createMqttAsyncClient(serverURI, methodName);
       IMqttToken connectToken;
       IMqttToken subToken;
-      IMqttDeliveryToken[] pubTokens = new IMqttDeliveryToken[tokenCount];
+      IMqttToken[] pubTokens = new IMqttToken[tokenCount];
 
       MqttV5Receiver mqttReceiver = new MqttV5Receiver(mqttClient.getClientId(), LoggingUtilities.getPrintStream());
       log.info("Assigning callback...");
@@ -715,7 +759,7 @@ public class SendReceiveAsyncTest {
       int errors = 0;
       for (int i = 0; i < tokenCount; ++i) {
     	    try {
-    	  	  pubTokens[i].waitForCompletion(10);
+    	  	  pubTokens[i].waitForCompletion(20);
     	    } catch (Exception e) {
     	    	  errors += 1;
     	    }
@@ -725,7 +769,7 @@ public class SendReceiveAsyncTest {
       
       while (mqttReceiver.receivedMessageCount() < tokenCount) {
     	    log.info("Expected "+tokenCount+" received "+mqttReceiver.receivedMessageCount());
-    	  	Thread.sleep(10);
+    	    Thread.sleep(10);
       }
     }
     catch (Exception exception) {

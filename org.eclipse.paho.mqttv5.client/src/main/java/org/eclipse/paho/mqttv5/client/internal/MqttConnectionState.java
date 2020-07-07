@@ -38,10 +38,18 @@ public class MqttConnectionState {
 	private Boolean sharedSubscriptionsAvailable = true;
 	private boolean sendReasonMessages = false;
 	private long keepAlive = 60;
+        private String clientId = "";
 
 	// ******* Counters ******//
 	private AtomicInteger nextOutgoingTopicAlias = new AtomicInteger(1);
 
+        public MqttConnectionState(String clientId) {
+            this.clientId = clientId;
+        }
+
+        public String getClientId() {
+                return clientId;
+        }
 
 	/**
 	 * Clears the session and resets. This would be called when the connection has
@@ -51,7 +59,6 @@ public class MqttConnectionState {
 		nextOutgoingTopicAlias.set(1);
 	}
 
-
 	public Integer getReceiveMaximum() {
 		if (receiveMaximum == null) {
 			return 65535;
@@ -60,7 +67,8 @@ public class MqttConnectionState {
 	}
 
 	public void setReceiveMaximum(Integer receiveMaximum) {
-		this.receiveMaximum = receiveMaximum;
+                if (receiveMaximum != null)
+		    this.receiveMaximum = receiveMaximum;
 	}
 
 	public Integer getMaximumQoS() {
@@ -68,7 +76,8 @@ public class MqttConnectionState {
 	}
 
 	public void setMaximumQoS(Integer maximumQoS) {
-		this.maximumQoS = maximumQoS;
+                if (maximumQoS != null)  
+		    this.maximumQoS = maximumQoS;
 	}
 
 	public Boolean isRetainAvailable() {
@@ -76,7 +85,8 @@ public class MqttConnectionState {
 	}
 
 	public void setRetainAvailable(Boolean retainAvailable) {
-		this.retainAvailable = retainAvailable;
+                if (retainAvailable != null)
+		    this.retainAvailable = retainAvailable;
 	}
 
 	public Long getOutgoingMaximumPacketSize() {
@@ -84,7 +94,8 @@ public class MqttConnectionState {
 	}
 
 	public void setOutgoingMaximumPacketSize(Long maximumPacketSize) {
-		this.outgoingMaximumPacketSize = maximumPacketSize;
+                if (maximumPacketSize != null)
+		    this.outgoingMaximumPacketSize = maximumPacketSize;
 	}
 	
 	public Long getIncomingMaximumPacketSize() {
@@ -93,7 +104,8 @@ public class MqttConnectionState {
 
 
 	public void setIncomingMaximumPacketSize(Long incomingMaximumPacketSize) {
-		this.incomingMaximumPacketSize = incomingMaximumPacketSize;
+                if (incomingMaximumPacketSize != null) 
+		    this.incomingMaximumPacketSize = incomingMaximumPacketSize;
 	}
 
 
@@ -102,7 +114,8 @@ public class MqttConnectionState {
 	}
 
 	public void setOutgoingTopicAliasMaximum(Integer topicAliasMaximum) {
-		this.outgoingTopicAliasMaximum = topicAliasMaximum;
+                if (topicAliasMaximum != null)
+		    this.outgoingTopicAliasMaximum = topicAliasMaximum;
 	}
 
 	public Boolean isWildcardSubscriptionsAvailable() {
@@ -110,7 +123,8 @@ public class MqttConnectionState {
 	}
 
 	public void setWildcardSubscriptionsAvailable(Boolean wildcardSubscriptionsAvailable) {
-		this.wildcardSubscriptionsAvailable = wildcardSubscriptionsAvailable;
+                if (wildcardSubscriptionsAvailable != null)
+		    this.wildcardSubscriptionsAvailable = wildcardSubscriptionsAvailable;
 	}
 
 	public Boolean isSubscriptionIdentifiersAvailable() {
@@ -118,7 +132,8 @@ public class MqttConnectionState {
 	}
 
 	public void setSubscriptionIdentifiersAvailable(Boolean subscriptionIdentifiersAvailable) {
-		this.subscriptionIdentifiersAvailable = subscriptionIdentifiersAvailable;
+                if (subscriptionIdentifiersAvailable != null)
+		    this.subscriptionIdentifiersAvailable = subscriptionIdentifiersAvailable;
 	}
 
 	public Boolean isSharedSubscriptionsAvailable() {
@@ -126,7 +141,8 @@ public class MqttConnectionState {
 	}
 
 	public void setSharedSubscriptionsAvailable(Boolean sharedSubscriptionsAvailable) {
-		this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
+                if (sharedSubscriptionsAvailable != null)
+		    this.sharedSubscriptionsAvailable = sharedSubscriptionsAvailable;
 	}
 	
 	public Integer getNextOutgoingTopicAlias() {
@@ -140,7 +156,8 @@ public class MqttConnectionState {
 
 
 	public void setIncomingTopicAliasMax(Integer incomingTopicAliasMax) {
-		this.incomingTopicAliasMax = incomingTopicAliasMax;
+                if (incomingTopicAliasMax != null)
+		    this.incomingTopicAliasMax = incomingTopicAliasMax;
 	}
 
 
