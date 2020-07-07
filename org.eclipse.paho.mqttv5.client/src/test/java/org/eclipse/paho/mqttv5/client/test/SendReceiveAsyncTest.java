@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 IBM Corp.
+ * Copyright (c) 2009, 2020 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -759,7 +759,7 @@ public class SendReceiveAsyncTest {
       int errors = 0;
       for (int i = 0; i < tokenCount; ++i) {
     	    try {
-    	  	  pubTokens[i].waitForCompletion(10);
+    	  	  pubTokens[i].waitForCompletion(20);
     	    } catch (Exception e) {
     	    	  errors += 1;
     	    }
