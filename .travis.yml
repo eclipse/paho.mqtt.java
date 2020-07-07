@@ -5,7 +5,7 @@ install: true
 jobs:
   include:
     - os: linux
-      dist: xenial
+      dist: trusty
       jdk: oraclejdk8
 
 before_install:
