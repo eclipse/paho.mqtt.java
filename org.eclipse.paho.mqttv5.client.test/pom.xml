@@ -6,12 +6,12 @@
     <parent>
         <groupId>org.eclipse.paho</groupId>
         <artifactId>java-parent</artifactId>
-        <version>1.2.5-SNAPSHOT</version>
+        <version>1.2.5</version>
     </parent>
 
     <groupId>org.eclipse.paho.mqttv5.client.test</groupId>
     <artifactId>org.eclipse.paho.mqttv5.client.test</artifactId>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>1.2.5</version>
     <name>org.eclipse.paho.mqttv5.client.test</name>
 
     <url>http://maven.apache.org</url>
@@ -30,12 +30,12 @@
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.mqttv5.common</artifactId>
-            <version>1.2.5-SNAPSHOT</version>
+            <version>1.2.5</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
-            <version>1.2.5-SNAPSHOT</version>
+            <version>1.2.5</version>
         </dependency>
     </dependencies>
   
