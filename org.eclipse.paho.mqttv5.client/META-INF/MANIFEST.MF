@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundle.name
+Bundle-SymbolicName: org.eclipse.paho.mqttv5.client
+Bundle-Version: 1.2.5
+Bundle-Localization: bundle
+Export-Package: org.eclipse.paho.mqttv5.client;version="1.2.5"
+Bundle-Vendor: %bundle.provider
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: javax.net;resolution:=optional,
+ javax.net.ssl;resolution:=optional

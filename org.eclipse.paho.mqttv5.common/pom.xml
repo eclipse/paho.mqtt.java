@@ -12,6 +12,7 @@
 
     <artifactId>org.eclipse.paho.mqttv5.common</artifactId>
     <name>org.eclipse.paho.mqttv5.common</name>
+    <packaging>eclipse-plugin</packaging>
 
     <dependencies>
         <dependency>
@@ -121,19 +122,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>${mvnsource.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
         <pluginManagement>
