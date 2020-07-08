@@ -122,6 +122,7 @@ public class ClientState {
 	private long keepAliveNanos;					// nanoseconds time
 	private boolean cleanSession;
 	private MqttClientPersistence persistence;
+	private HighResolutionTimer highResolutionTimer;
 	
 	private int maxInflight = 0;	
 	private int actualInFlight = 0;
@@ -148,7 +149,8 @@ public class ClientState {
 	private MqttPingSender pingSender = null;
 
 	protected ClientState(MqttClientPersistence persistence, CommsTokenStore tokenStore, 
-			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender) throws MqttException {
+			CommsCallback callback, ClientComms clientComms, MqttPingSender pingSender,
+		    HighResolutionTimer highResolutionTimer) throws MqttException {
 		
 		log.setResourceName(clientComms.getClient().getClientId());
 		log.finer(CLASS_NAME, "<Init>", "" );
@@ -168,6 +170,7 @@ public class ClientState {
 		this.tokenStore = tokenStore;
 		this.clientComms = clientComms;
 		this.pingSender = pingSender;
+		this.highResolutionTimer = highResolutionTimer;
 		
 		restoreState();
 	}
@@ -582,8 +585,9 @@ public class ClientState {
 	 * Persists a buffered message to the persistence layer
 	 * 
 	 * @param message The {@link MqttWireMessage} to persist
+	 * @throws MqttException if an exception occurs when no message ids available.
 	 */
-	public void persistBufferedMessage(MqttWireMessage message) {
+	public void persistBufferedMessage(MqttWireMessage message) throws MqttException {
 		final String methodName = "persistBufferedMessage";
 		String key = getSendBufferedPersistenceKey(message);
 		
@@ -603,7 +607,8 @@ public class ClientState {
 			log.fine(CLASS_NAME,methodName, "513", new Object[]{key});
 		} catch (MqttException ex){
 			//@TRACE 514=Failed to persist buffered message key={0}
-			log.warning(CLASS_NAME,methodName, "513", new Object[]{key});
+			log.warning(CLASS_NAME,methodName, "514", new Object[]{key});
+			throw ex;
 		} 
 	}
 	
@@ -719,7 +724,7 @@ public class ClientState {
 		long nextPingTime = TimeUnit.NANOSECONDS.toMillis(this.keepAliveNanos);		// milliseconds relative time
 		
 		if (connected && this.keepAliveNanos > 0) {
-			long time = System.nanoTime();
+			long time = highResolutionTimer.nanoTime();
 			// Below might not be necessary since move to nanoTime (Issue #278)
 			//Reduce schedule frequency since System.currentTimeMillis is no accurate, add a buffer
 			//It is 1/10 in minimum keepalive unit.
@@ -897,7 +902,7 @@ public class ClientState {
     public void notifySentBytes(int sentBytesCount) {
         final String methodName = "notifySentBytes";
         if (sentBytesCount > 0) {
-        	this.lastOutboundActivity = System.nanoTime();
+        	this.lastOutboundActivity = highResolutionTimer.nanoTime();
         }
         // @TRACE 643=sent bytes count={0}                                                                                                                                                                                            
         log.fine(CLASS_NAME, methodName, "643", new Object[] {
@@ -912,7 +917,7 @@ public class ClientState {
 	protected void notifySent(MqttWireMessage message) {
 		final String methodName = "notifySent";
 		
-		this.lastOutboundActivity = System.nanoTime();
+		this.lastOutboundActivity = highResolutionTimer.nanoTime();
 		//@TRACE 625=key={0}
 		log.fine(CLASS_NAME,methodName,"625",new Object[]{message.getKey()});
 		
@@ -924,7 +929,7 @@ public class ClientState {
 		token.internalTok.notifySent();
         if (message instanceof MqttPingReq) {
             synchronized (pingOutstandingLock) {
-            	long time = System.nanoTime();
+            	long time = highResolutionTimer.nanoTime();
                 synchronized (pingOutstandingLock) {
                 	lastPing = time;
                 	pingOutstanding++;
@@ -978,7 +983,7 @@ public class ClientState {
     public void notifyReceivedBytes(int receivedBytesCount) {
         final String methodName = "notifyReceivedBytes";
         if (receivedBytesCount > 0) {
-            this.lastInboundActivity = System.nanoTime();
+            this.lastInboundActivity = highResolutionTimer.nanoTime();
         }
         // @TRACE 630=received bytes count={0}                                                                                                                                                                                        
         log.fine(CLASS_NAME, methodName, "630", new Object[] {
@@ -993,7 +998,7 @@ public class ClientState {
 	 */
 	protected void notifyReceivedAck(MqttAck ack) throws MqttException {
 		final String methodName = "notifyReceivedAck";
-		this.lastInboundActivity = System.nanoTime();
+		this.lastInboundActivity = highResolutionTimer.nanoTime();
 
 		// @TRACE 627=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "627", new Object[] {
@@ -1075,7 +1080,7 @@ public class ClientState {
 	 */
 	protected void notifyReceivedMsg(MqttWireMessage message) throws MqttException {
 		final String methodName = "notifyReceivedMsg";
-		this.lastInboundActivity = System.nanoTime();
+		this.lastInboundActivity = highResolutionTimer.nanoTime();
 
 		// @TRACE 651=received key={0} message={1}
 		log.fine(CLASS_NAME, methodName, "651", new Object[] {
@@ -1435,7 +1440,8 @@ public class ClientState {
 		callback = null;
 		clientComms = null;
 		persistence = null;
-		pingCommand = null;	
+		pingCommand = null;
+		highResolutionTimer = null;
 	}
 	
 	public Properties getDebug() {

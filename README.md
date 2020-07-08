@@ -32,9 +32,9 @@ Add the repository definition and the dependency definition shown below to your 
 
 Replace %REPOURL% with either ``` https://repo.eclipse.org/content/repositories/paho-releases/ ``` for the official releases, or ``` https://repo.eclipse.org/content/repositories/paho-snapshots/  ``` for the nightly snapshots. Replace %VERSION% with the level required .
 
-The latest release version is ```1.2.4``` and the current snapshot version is ```1.2.5-SNAPSHOT```.
+The latest release version is ```1.2.5``` and the current snapshot version is ```1.2.6-SNAPSHOT```.
 
-
+** Dependency definition for MQTTv3 client **
 ```
 <project ...>
 <repositories>
@@ -52,7 +52,31 @@ The latest release version is ```1.2.4``` and the current snapshot version is ``
     </dependency>
 </dependencies>
 </project>
+```
 
+** Dependency definition for MQTTv5 client **
+```
+<project ...>
+<repositories>
+    <repository>
+        <id>Eclipse Paho Repo</id>
+        <url>%REPOURL%</url>
+    </repository>
+</repositories>
+...
+<dependencies>
+    <dependency>
+        <groupId>org.eclipse.paho</groupId>
+        <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
+        <version>%VERSION%</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.paho</groupId>
+        <artifactId>org.eclipse.paho.mqttv5.common</artifactId>
+        <version>%VERSION%</version>
+    </dependency>
+</dependencies>
+</project>
 ```
 
 If you find that there is functionality missing or bugs in the release version, you may want to try using the snapshot version to see if this helps before raising a feature request or an issue.
@@ -63,16 +87,21 @@ There are two active branches on the Paho Java git repository, ```master``` whic
 
 To then build the library run the following maven command: ```mvn package -DskipTests```
 
-This will build the client library without running the tests. The jars for the library, source and javadoc can be found in the ```org.eclipse.paho.client.mqttv3/target``` directory.
+This will build the client library without running the tests. The jars for the library, source and javadoc can be found in the following directories:
+```
+org.eclipse.paho.client.mqttv3/target
+org.eclipse.paho.mqttv5.client/target
+org.eclipse.paho.mqttv5.common/target
+```
 
 ## Documentation
-Reference documentation is online at: [http://www.eclipse.org/paho/files/javadoc/index.html](http://www.eclipse.org/paho/files/javadoc/index.html)
+MQTTv3 reference documentation is online at: [http://www.eclipse.org/paho/files/javadoc/index.html](http://www.eclipse.org/paho/files/javadoc/index.html)
 
 Log and Debug in the Java Client: [https://wiki.eclipse.org/Paho/Log_and_Debug_in_the_Java_client](https://wiki.eclipse.org/Paho/Log_and_Debug_in_the_Java_client)
 
 ## Getting Started
 
-The included code below is a very basic sample that connects to a server and publishes a message using the MqttClient synchronous API. More extensive samples demonstrating the use of the Asynchronous API can be found in the ```org.eclipse.paho.sample.mqttv3app``` directory of the source.
+The included code below is a very basic sample that connects to a server and publishes a message using the MQTTv3 synchronous API. More extensive samples demonstrating the use of the MQTTv3 and MQTTv5 Asynchronous API can be found in the ```org.eclipse.paho.sample``` directory of the source.
 
 
 ```

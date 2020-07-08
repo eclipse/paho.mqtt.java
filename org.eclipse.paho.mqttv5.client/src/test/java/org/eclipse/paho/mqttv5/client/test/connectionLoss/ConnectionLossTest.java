@@ -21,7 +21,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -440,7 +440,7 @@ public class ConnectionLossTest implements MqttCallback {
 		log.info("Message Arrived on " + topic + " with " + new String(message.getPayload()));
 	}
 
-	public void deliveryComplete(IMqttDeliveryToken token) {
+	public void deliveryComplete(IMqttToken token) {
 		// log.info("Delivery Complete: " + token.getMessageId());
 	}
 

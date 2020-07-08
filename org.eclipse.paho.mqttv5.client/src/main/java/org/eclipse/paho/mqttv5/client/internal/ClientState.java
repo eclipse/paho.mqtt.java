@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttClientPersistence;
-import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttPingSender;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
@@ -396,7 +395,7 @@ public class ClientState implements MqttState {
 							outboundQoS1.put(Integer.valueOf(sendMessage.getMessageId()), sendMessage);
 						}
 					}
-					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
+					MqttToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()),
 							Integer.valueOf(sendMessage.getMessageId()));
@@ -425,7 +424,7 @@ public class ClientState implements MqttState {
 
 					}
 
-					MqttDeliveryToken tok = tokenStore.restoreToken(sendMessage);
+					MqttToken tok = tokenStore.restoreToken(sendMessage);
 					tok.internalTok.setClient(clientComms.getClient());
 					inUseMsgIds.put(Integer.valueOf(sendMessage.getMessageId()),
 							Integer.valueOf(sendMessage.getMessageId()));
@@ -513,8 +512,8 @@ public class ClientState implements MqttState {
 		}
 		// Set Topic Alias if required
 		if (message instanceof MqttPublish && ((MqttPublish) message).getTopicName() != null 
-				&& this.mqttConnection.getOutgoingTopicAliasMaximum() > 0) {
-			String topic = ((MqttPublish) message).getTopicName();
+	        		&& this.mqttConnection != null && this.mqttConnection.getOutgoingTopicAliasMaximum() > 0) {
+                        String topic = ((MqttPublish) message).getTopicName();
 			if (outgoingTopicAliases.containsKey(topic)) {
 				// Existing Topic Alias, Assign it and remove the topic string
 				((MqttPublish) message).getProperties().setTopicAlias(outgoingTopicAliases.get(topic));
@@ -1380,7 +1379,7 @@ public class ClientState implements MqttState {
 					tok.internalTok.setException(shutReason);
 				}
 			}
-			if (!(tok instanceof MqttDeliveryToken)) {
+			if (!(tok.internalTok.isDeliveryToken())) {
 				// If not a delivery token it is not valid on
 				// restart so remove
 				tokenStore.removeToken(tok.internalTok.getKey());

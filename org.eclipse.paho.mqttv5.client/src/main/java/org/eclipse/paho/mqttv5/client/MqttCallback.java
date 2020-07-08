@@ -104,7 +104,7 @@ public interface MqttCallback {
 	 * @param token
 	 *            the delivery token associated with the message.
 	 */
-    void deliveryComplete(IMqttDeliveryToken token);
+    void deliveryComplete(IMqttToken token);
 
 	/**
 	 * Called when the connection to the server is completed successfully.

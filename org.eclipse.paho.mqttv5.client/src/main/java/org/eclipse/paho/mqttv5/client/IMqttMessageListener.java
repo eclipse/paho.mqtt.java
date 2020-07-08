@@ -54,5 +54,5 @@ public interface IMqttMessageListener {
 	 * @throws Exception if a terminal error has occurred, and the client should be
 	 * shut down.
 	 */
-    void messageArrived(String topic, MqttMessage message) throws Exception;
+        public void messageArrived(String topic, MqttMessage message) throws Exception;
 }

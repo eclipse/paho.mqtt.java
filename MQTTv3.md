@@ -12,8 +12,7 @@ Add the repository definition and the dependency definition shown below to your 
 
 Replace %REPOURL% with either ``` https://repo.eclipse.org/content/repositories/paho-releases/ ``` for the official releases, or ``` https://repo.eclipse.org/content/repositories/paho-snapshots/  ``` for the nightly snapshots. Replace %VERSION% with the level required .
 
-The latest release version is ```1.2.4``` and the current snapshot version is ```1.2.5-SNAPSHOT```.
-
+The latest release version is ```1.2.5``` and the current snapshot version is ```1.2.6-SNAPSHOT```.
 
 ```
 <project ...>
