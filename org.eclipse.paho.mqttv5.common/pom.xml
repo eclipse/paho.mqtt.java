@@ -12,7 +12,6 @@
 
     <artifactId>org.eclipse.paho.mqttv5.common</artifactId>
     <name>org.eclipse.paho.mqttv5.common</name>
-    <packaging>eclipse-plugin</packaging>
 
     <dependencies>
         <dependency>

@@ -357,8 +357,6 @@
         <module>org.eclipse.paho.mqttv5.common</module>
         <module>org.eclipse.paho.mqttv5.client</module>
         <module>org.eclipse.paho.mqttv5.client.test</module>
-        <module>org.eclipse.paho.mqttv5.client.repository</module>
-        <module>org.eclipse.paho.mqttv5.common.repository</module>
     </modules>
 </project>
 
