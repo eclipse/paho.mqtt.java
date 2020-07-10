@@ -12,6 +12,7 @@
 
     <artifactId>org.eclipse.paho.mqttv5.common</artifactId>
     <name>org.eclipse.paho.mqttv5.common</name>
+    <packaging>eclipse-plugin</packaging>
 
     <dependencies>
         <dependency>
@@ -41,8 +42,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
@@ -98,8 +99,8 @@
                 <artifactId>tycho-compiler-plugin</artifactId>
                 <version>${tycho.version}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 

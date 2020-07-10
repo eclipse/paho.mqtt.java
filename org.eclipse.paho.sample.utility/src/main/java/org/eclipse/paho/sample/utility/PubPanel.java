@@ -164,7 +164,7 @@ public class PubPanel implements ActionListener, DocumentListener {
         pubPanel.add( buttonLayout, BorderLayout.EAST );
 	}	
 
-    /**
+    /*
      * For any requests to add a topic to the subscribe drop down box
      * use the updateComboBoxList method in class MQTTFrame to do the job.
      */

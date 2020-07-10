@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+    <bundle id="org.eclipse.paho.client.mqttv3" version="1.2.5" />
+    <bundle id="org.eclipse.paho.mqttv5.common" version="1.2.5" />
+    <bundle id="org.eclipse.paho.mqttv5.client" version="1.2.5" />
+    <category-def name="Paho MQTT Java" label="Paho MQTT Java">
+	<description>
+The Eclipse Paho project provides open-source client implementations of MQTT and MQTT-SN messaging protocols aimed at new, existing, and emerging applications for the Internet of Things (IoT).
+	</description>
+    </category-def>
+</site>

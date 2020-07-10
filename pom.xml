@@ -8,12 +8,12 @@
 
     <properties>
         <!-- source & target java version for MQTT Client -->
-        <mqttclient.java.version>1.7</mqttclient.java.version>
+        <mqttclient.java.version>1.8</mqttclient.java.version>
         <!-- source & target java version for others modules -->
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build.level>${maven.build.timestamp}</build.level>
-        <tycho.version>1.5.1</tycho.version>
+        <tycho.version>1.7.0</tycho.version>
         <junit.version>4.12</junit.version>
         <javadoc.version>3.2.0</javadoc.version>
         <mvnsource.version>3.2.0</mvnsource.version>
@@ -357,6 +357,7 @@
         <module>org.eclipse.paho.mqttv5.common</module>
         <module>org.eclipse.paho.mqttv5.client</module>
         <module>org.eclipse.paho.mqttv5.client.test</module>
+        <module>org.eclipse.paho.repository</module>
     </modules>
 </project>
 

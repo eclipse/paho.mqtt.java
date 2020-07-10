@@ -207,7 +207,7 @@ public class SubPanel implements ActionListener {
 
    	}	
 		
-    /**
+    /*
      * For any requests to add a topic to the publish drop down box
      * use the updateComboBoxList method in class MQIsdpFrame to do the job.
      */
@@ -274,7 +274,7 @@ public class SubPanel implements ActionListener {
     	}	
     }    
     
-    /**
+    /*
      * This method is passed a received publication. It then:
      * <UL><LI>Switches the display to text if was in hex display mode
      * <LI>Updates the display with the new data
