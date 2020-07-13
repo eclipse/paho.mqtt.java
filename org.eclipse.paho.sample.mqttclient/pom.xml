@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.mqttv5.client</artifactId>
-			<version>1.2.2</version>
+			<version>1.2.5-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -49,8 +49,8 @@
 		        <artifactId>maven-compiler-plugin</artifactId>
 		        <configuration>
 		          <!-- or whatever version you use -->
-		          <source>1.9</source>
-		          <target>1.9</target>
+		          <source>1.8</source>
+		          <target>1.8</target>
 		        </configuration>
 		      </plugin>
 			<plugin>
@@ -91,3 +91,4 @@
 		</plugins>
 	</build>
 </project>
+

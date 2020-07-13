@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %bundle.name
+Bundle-Name: org.eclipse.paho.client.mqttv3
 Bundle-SymbolicName: org.eclipse.paho.client.mqttv3
 Bundle-Version: 1.2.5.qualifier
 Bundle-Localization: bundle

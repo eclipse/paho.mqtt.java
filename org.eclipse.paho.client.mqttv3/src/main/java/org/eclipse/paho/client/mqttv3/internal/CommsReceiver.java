@@ -168,7 +168,7 @@ public class CommsReceiver implements Runnable {
 						}  
                                                 else {
                                                     // fix for bug 719
-                                                    if (!clientComms.isConnected()) {
+                                                    if (!clientComms.isConnected() && !clientComms.isConnecting()) {
                                                          throw new IOException("Connection is lost.");
                                                     }
                                                 }

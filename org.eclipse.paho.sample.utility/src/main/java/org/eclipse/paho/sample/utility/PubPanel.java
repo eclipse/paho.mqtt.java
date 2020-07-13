@@ -164,7 +164,7 @@ public class PubPanel implements ActionListener, DocumentListener {
         pubPanel.add( buttonLayout, BorderLayout.EAST );
 	}	
 
-    /**
+    /*
      * For any requests to add a topic to the subscribe drop down box
      * use the updateComboBoxList method in class MQTTFrame to do the job.
      */
@@ -172,7 +172,7 @@ public class PubPanel implements ActionListener, DocumentListener {
         return mqttMgr.updateComboBoxList( topic, topicName );
     }
     	    		
-    /**
+    /*
      * ActionListener interface<BR>
      * Listen out for the Publish button, the Hex/Text button being pressed or the File button being pressed
      * <BR>Publishing data involves:<BR>
