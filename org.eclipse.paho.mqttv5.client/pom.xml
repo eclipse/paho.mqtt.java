@@ -14,14 +14,6 @@
     <name>org.eclipse.paho.mqttv5.client</name>
     <packaging>eclipse-plugin</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -65,7 +57,6 @@
 
             <!--
                 Submit code coverage report to coveralls.io
-                https://coveralls.io/github/ibm-watson-iot/iot-java
                 See: https://github.com/trautonen/coveralls-maven-plugin
             -->
             <plugin>
@@ -93,12 +84,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-maven-plugin</artifactId>
-            </plugin>
-
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -194,8 +179,8 @@ aven build itself.-->
                 </plugin>
             </plugins>
         </pluginManagement>
-
     </build>
+    <version>1.2.5</version>
 </project>
 
 
