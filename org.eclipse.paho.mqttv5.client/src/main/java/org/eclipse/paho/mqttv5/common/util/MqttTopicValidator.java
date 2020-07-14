@@ -46,6 +46,8 @@ public class MqttTopicValidator {
 	 *            topic name or filter
 	 * @param wildcardAllowed
 	 *            true if validate topic filter, false otherwise
+	 * @param sharedSubAllowed
+	 *            true if shared subscription is allowed
 	 * @throws IllegalArgumentException
 	 *             if the topic is invalid
 	 */
