@@ -55,10 +55,8 @@ public class MqttException extends Exception {
 	 * <code>MqttCallback.disconnected</code> callback is the intended disconnect
 	 * notification mechanism.
          *
-	 * @param reasonCode
-	 *            the reason code associated with the exception
-	 * @param disconnect 
-	 *            the disconnect data
+	 * @param reasonCode   the reason code for the exception.
+	 * @param disconnect   diconnect flag
 	 */
 	public MqttException(int reasonCode, MqttDisconnect disconnect) {
 		super();

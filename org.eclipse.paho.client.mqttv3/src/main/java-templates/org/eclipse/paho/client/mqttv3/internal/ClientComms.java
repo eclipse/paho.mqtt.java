@@ -93,7 +93,7 @@ public class ClientComms {
 	 * @param persistence the {@link MqttClientPersistence} layer.
 	 * @param pingSender the {@link MqttPingSender}
 	 * @param executorService the {@link ExecutorService}
-         * @param highResolutionTimer User specified high resolution timer
+	 * @param highResolutionTimer the {@link HighResolutionTimer}
 	 * @throws MqttException if an exception occurs whilst communicating with the server
 	 */
 	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender,

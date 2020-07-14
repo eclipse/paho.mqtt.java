@@ -172,7 +172,7 @@ public class PubPanel implements ActionListener, DocumentListener {
         return mqttMgr.updateComboBoxList( topic, topicName );
     }
     	    		
-    /**
+    /*
      * ActionListener interface<BR>
      * Listen out for the Publish button, the Hex/Text button being pressed or the File button being pressed
      * <BR>Publishing data involves:<BR>

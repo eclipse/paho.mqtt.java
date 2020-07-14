@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.cli.CommandLine;
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
@@ -157,7 +156,7 @@ public class MqttV5Executor implements MqttCallback {
 		MqttMessage v5Message = new MqttMessage(payload);
 		v5Message.setQos(qos);
 		v5Message.setRetained(retain);
-		IMqttDeliveryToken deliveryToken = v5Client.publish(topic, v5Message);
+		IMqttToken deliveryToken = v5Client.publish(topic, v5Message);
 		deliveryToken.waitForCompletion(actionTimeout);
 	}
 
@@ -253,10 +252,8 @@ public class MqttV5Executor implements MqttCallback {
 	}
 
 	@Override
-	public void deliveryComplete(IMqttDeliveryToken token) {
-		// No Required Implementation
-		// logMessage(String.format("Message %d was delivered.", token.getMessageId()),
-		// true);
+	public void deliveryComplete(IMqttToken token) {
+		logMessage(String.format("Message %d was delivered.", token.getMessageId()), true);
 	}
 
 	@Override

@@ -215,7 +215,7 @@ public class SubPanel implements ActionListener {
         return mqttMgr.updateComboBoxList( topic, topicName );
     }
 
-    /**
+    /*
      * ActionListener interface<BR>
      * Listen out for the Subscribe button, Unsubscribe button, Save button or the Hex/Text button being pressed
      * <BR>Subscribing / Unsubscribing for data involves:<BR>
