@@ -18,11 +18,8 @@ public class MqttException extends Exception {
 	// New MQTTv5 Packet Errors
 	public static final int REASON_CODE_INVALID_IDENTIFIER = 50000; // Invalid Identifier in the IV fields
 	public static final int REASON_CODE_INVALID_RETURN_CODE = 50001; // Invalid Return code
-	public static final int REASON_CODE_MALFORMED_PACKET = 50002; // Packet was somehow malformed and did not comply to
-																	// the MQTTv5 specification
-	public static final int REASON_CODE_UNSUPPORTED_PROTOCOL_VERSION = 50003; // The CONNECT packet did not contain the
-																				// correct protocol name or version
-	
+	public static final int REASON_CODE_MALFORMED_PACKET = 50002; // Packet was somehow malformed and did not comply to the MQTTv5 specification
+	public static final int REASON_CODE_UNSUPPORTED_PROTOCOL_VERSION = 50003; // The CONNECT packet did not contain the correct protocol name or version
 
 	/**
 	 * The Server sent a publish message with an invalid topic alias.

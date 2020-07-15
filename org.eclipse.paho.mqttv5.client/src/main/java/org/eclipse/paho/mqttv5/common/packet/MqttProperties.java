@@ -1157,7 +1157,7 @@ public class MqttProperties {
 	 * Payload Format. See {@link MqttProperties#getPayloadFormat()}
 	 * 
 	 * @param payloadFormat
-         *             true if Payload forat is set
+         *        true if payload format is set, otherwise false
 	 */
 	public void setPayloadFormat(boolean payloadFormat) {
 		this.payloadFormat = payloadFormat;

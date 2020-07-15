@@ -29,11 +29,6 @@ The latest release version is ```1.2.5``` and the current snapshot version is ``
         <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
         <version>%VERSION%</version>
     </dependency>
-    <dependency>
-        <groupId>org.eclipse.paho</groupId>
-        <artifactId>org.eclipse.paho.mqttv5.common</artifactId>
-        <version>%VERSION%</version>
-    </dependency>
 </dependencies>
 </project>
 
@@ -47,7 +42,7 @@ There are two active branches on the Paho Java git repository, ```master``` whic
 
 To then build the library run the following maven command: ```mvn package -DskipTests```
 
-This will build the client library without running the tests. The jars for the library, source and javadoc can be found in the ```org.eclipse.paho.mqttv5.client/target``` and ```org.eclipse.paho.mqttv5.common/target``` directories.
+This will build the client library without running the tests. The jars for the library, source and javadoc can be found in the ```org.eclipse.paho.mqttv5.client/target``` directory.
 
 ## Documentation
 Reference documentation is online at: [http://www.eclipse.org/paho/files/javadoc/index.html](http://www.eclipse.org/paho/files/javadoc/index.html)
