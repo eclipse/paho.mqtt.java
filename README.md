@@ -70,11 +70,6 @@ The latest release version is ```1.2.5``` and the current snapshot version is ``
         <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
         <version>%VERSION%</version>
     </dependency>
-    <dependency>
-        <groupId>org.eclipse.paho</groupId>
-        <artifactId>org.eclipse.paho.mqttv5.common</artifactId>
-        <version>%VERSION%</version>
-    </dependency>
 </dependencies>
 </project>
 ```
@@ -91,7 +86,6 @@ This will build the client library without running the tests. The jars for the l
 ```
 org.eclipse.paho.client.mqttv3/target
 org.eclipse.paho.mqttv5.client/target
-org.eclipse.paho.mqttv5.common/target
 ```
 
 ## Documentation
