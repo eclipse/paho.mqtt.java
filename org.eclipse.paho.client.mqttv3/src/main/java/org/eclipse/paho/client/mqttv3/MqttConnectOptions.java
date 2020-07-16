@@ -715,7 +715,7 @@ public class MqttConnectOptions {
 	 */
 	public void setNetworkInterface(String networkInterface) {
 	 	if ((networkInterface == null) || networkInterface.isEmpty()) {
-                        throw new IllegalArgumentException();
+                        throw new IllegalArgumentException("Set network interface options must be valid strings. Null and empty strings are not acceptable.");
                 }
 		this.networkInterface = networkInterface;
 	}
