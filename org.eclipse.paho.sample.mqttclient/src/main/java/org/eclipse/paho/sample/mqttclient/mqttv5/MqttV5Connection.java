@@ -70,7 +70,7 @@ public class MqttV5Connection {
 		}
 
 		// If the client ID was not set, generate one ourselves
-		if (clientID == null || clientID == "") {
+		if (clientID == null || clientID.equals("") ) {
 			// No client ID provided, generate one from the process ID
 			long pid = Thread.currentThread().getId(); //ProcessHandle.current().pid();
 			clientID = "mqtt-client-" + pid;
