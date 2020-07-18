@@ -183,15 +183,13 @@ public abstract class MqttWireMessage {
 	}
 
 	private static MqttWireMessage createWireMessage(InputStream inputStream) throws MqttException {
-		try {
+		try (DataInputStream in = new DataInputStream(counter)) {
 			CountingInputStream counter = new CountingInputStream(inputStream);
-			DataInputStream in = new DataInputStream(counter);
 			int first = in.readUnsignedByte();
 			byte type = (byte) (first >> 4);
-			byte info = (byte) (first &= 0x0f);
+			byte info = (byte) (first &= 0xf);
 			long remLen = readMBI(in).getValue();
 			long totalToRead = counter.getCounter() + remLen;
-
 			MqttWireMessage result;
 			long remainder = totalToRead - counter.getCounter();
 			byte[] data = new byte[0];
@@ -200,7 +198,6 @@ public abstract class MqttWireMessage {
 				data = new byte[(int) remainder];
 				in.readFully(data, 0, data.length);
 			}
-
 			if (type == MqttWireMessage.MESSAGE_TYPE_CONNECT) {
 				result = new MqttConnect(info, data);
 			} else if (type == MqttWireMessage.MESSAGE_TYPE_PUBLISH) {
