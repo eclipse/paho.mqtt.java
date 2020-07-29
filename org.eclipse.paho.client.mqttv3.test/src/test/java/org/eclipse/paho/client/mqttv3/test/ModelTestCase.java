@@ -349,38 +349,42 @@ public class ModelTestCase implements MqttCallback {
     Pattern pPublish = Pattern
         .compile("^.*? publish \\[topic:(.+)\\]\\[payload:(.+)\\]\\[qos:(.+)\\]\\[retained:(.+)\\]\\[subscribed:(.+)\\]\\[waitForCompletion:(.+)\\]$");
     Pattern pPendingDeliveryTokens = Pattern.compile("^.*? pendingDeliveryTokens \\[count:(.+)\\]$");
-    BufferedReader in = new BufferedReader(new FileReader(filename));
-    String line;
-    try {
-      while ((line = in.readLine()) != null) {
-        Matcher m = pConnect.matcher(line);
-        if (m.matches()) {
-          connect(Boolean.parseBoolean(m.group(1)));
-        }
-        else if ((m = pDisconnect.matcher(line)).matches()) {
-          disconnect(Boolean.parseBoolean(m.group(1)), Boolean.parseBoolean(m.group(2)));
-        }
-        else if ((m = pSubscribe.matcher(line)).matches()) {
-          subscribe(m.group(1), Integer.parseInt(m.group(2)), Boolean.parseBoolean(m.group(3)));
-        }
-        else if ((m = pUnsubscribe.matcher(line)).matches()) {
-          unsubscribe(m.group(1), Boolean.parseBoolean(m.group(2)));
-        }
-        else if ((m = pPublish.matcher(line)).matches()) {
-          publish(m.group(1), m.group(2), Integer.parseInt(m.group(3)), Boolean.parseBoolean(m
-              .group(4)), Boolean.parseBoolean(m.group(5)), Boolean.parseBoolean(m.group(6)));
-        }
-        else if ((m = pPendingDeliveryTokens.matcher(line)).matches()) {
-          pendingDeliveryTokens(Integer.parseInt(m.group(1)));
-        }
-      }
-    }
-    catch (Exception e) {
-      if (client.isConnected()) {
-        client.disconnect();
-      }
-      throw e;
-    }
+		try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.FileReader(filename))) {
+			java.lang.String line;
+			try {
+				while ((line = in.readLine()) != null) {
+					java.util.regex.Matcher m = pConnect.matcher(line);
+					if (m.matches()) {
+						connect(java.lang.Boolean.parseBoolean(m.group(1)));
+					} else {
+						if ((m = pDisconnect.matcher(line)).matches()) {
+							disconnect(java.lang.Boolean.parseBoolean(m.group(1)), java.lang.Boolean.parseBoolean(m.group(2)));
+						} else {
+							if ((m = pSubscribe.matcher(line)).matches()) {
+								subscribe(m.group(1), java.lang.Integer.parseInt(m.group(2)), java.lang.Boolean.parseBoolean(m.group(3)));
+							} else {
+								if ((m = pUnsubscribe.matcher(line)).matches()) {
+									unsubscribe(m.group(1), java.lang.Boolean.parseBoolean(m.group(2)));
+								} else {
+									if ((m = pPublish.matcher(line)).matches()) {
+										publish(m.group(1), m.group(2), java.lang.Integer.parseInt(m.group(3)), java.lang.Boolean.parseBoolean(m.group(4)), java.lang.Boolean.parseBoolean(m.group(5)), java.lang.Boolean.parseBoolean(m.group(6)));
+									} else {
+										if ((m = pPendingDeliveryTokens.matcher(line)).matches()) {
+											pendingDeliveryTokens(java.lang.Integer.parseInt(m.group(1)));
+										}
+									}
+								}
+							}
+						}
+					}
+				} 
+			} catch (java.lang.Exception e) {
+				if (client.isConnected()) {
+					client.disconnect();
+				}
+				throw e;
+			}
+		}
   }
 
   /**

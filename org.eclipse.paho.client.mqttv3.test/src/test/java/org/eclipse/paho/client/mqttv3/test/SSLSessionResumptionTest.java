@@ -171,14 +171,14 @@ public class SSLSessionResumptionTest {
 	}
 
 	private static SSLSocketFactory getSocketFactory() throws Exception {
-		InputStream keyStoreStream = new FileInputStream(TestProperties.getClientKeyStore());
-		SSLContext sslContext = SSLContext.getInstance("TLS");
-		TrustManagerFactory trustManagerFactory = TrustManagerFactory
-				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		keyStore.load(keyStoreStream, TestProperties.getClientKeyStorePassword().toCharArray());
-		trustManagerFactory.init(keyStore);
-		sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
-		return sslContext.getSocketFactory();
+		try (java.io.InputStream keyStoreStream = new java.io.FileInputStream(org.eclipse.paho.client.mqttv3.test.properties.TestProperties.getClientKeyStore())) {
+			javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
+			javax.net.ssl.TrustManagerFactory trustManagerFactory = javax.net.ssl.TrustManagerFactory.getInstance(javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());
+			java.security.KeyStore keyStore = java.security.KeyStore.getInstance(java.security.KeyStore.getDefaultType());
+			keyStore.load(keyStoreStream, org.eclipse.paho.client.mqttv3.test.properties.TestProperties.getClientKeyStorePassword().toCharArray());
+			trustManagerFactory.init(keyStore);
+			sslContext.init(null, trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
+			return sslContext.getSocketFactory();
+		}
 	}
 }

@@ -183,58 +183,81 @@ public abstract class MqttWireMessage {
 	}
 
 	private static MqttWireMessage createWireMessage(InputStream inputStream) throws MqttException {
-		try {
-			CountingInputStream counter = new CountingInputStream(inputStream);
-			DataInputStream in = new DataInputStream(counter);
+		try (java.io.DataInputStream in = new java.io.DataInputStream(counter)) {
+			org.eclipse.paho.client.mqttv3.internal.wire.CountingInputStream counter = new org.eclipse.paho.client.mqttv3.internal.wire.CountingInputStream(inputStream);
 			int first = in.readUnsignedByte();
-			byte type = (byte) (first >> 4);
-			byte info = (byte) (first &= 0x0f);
-			long remLen = readMBI(in).getValue();
+			byte type = ((byte) (first >> 4));
+			byte info = ((byte) (first &= 0xf));
+			long remLen = org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.readMBI(in).getValue();
 			long totalToRead = counter.getCounter() + remLen;
-
-			MqttWireMessage result;
+			org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage result;
 			long remainder = totalToRead - counter.getCounter();
 			byte[] data = new byte[0];
 			// The remaining bytes must be the payload...
 			if (remainder > 0) {
-				data = new byte[(int) remainder];
+				data = new byte[((int) (remainder))];
 				in.readFully(data, 0, data.length);
 			}
+			if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_CONNECT) {
+				result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect(info, data);
+			} else
+				if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_PUBLISH) {
+					result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish(info, data);
+				} else
+					if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_PUBACK) {
+						result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttPubAck(info, data);
+					} else
+						if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_PUBCOMP) {
+							result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp(info, data);
+						} else
+							if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_CONNACK) {
+								result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack(info, data);
+							} else
+								if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_PINGREQ) {
+									result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq(info, data);
+								} else
+									if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_PINGRESP) {
+										result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttPingResp(info, data);
+									} else
+										if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE) {
+											result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe(info, data);
+										} else
+											if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_SUBACK) {
+												result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback(info, data);
+											} else
+												if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE) {
+													result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe(info, data);
+												} else
+													if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_UNSUBACK) {
+														result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubAck(info, data);
+													} else
+														if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_PUBREL) {
+															result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel(info, data);
+														} else
+															if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_PUBREC) {
+																result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec(info, data);
+															} else
+																if (type == org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage.MESSAGE_TYPE_DISCONNECT) {
+																	result = new org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect(info, data);
+																} else {
+																	throw org.eclipse.paho.client.mqttv3.internal.ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
+																}
 
-			if (type == MqttWireMessage.MESSAGE_TYPE_CONNECT) {
-				result = new MqttConnect(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_PUBLISH) {
-				result = new MqttPublish(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_PUBACK) {
-				result = new MqttPubAck(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_PUBCOMP) {
-				result = new MqttPubComp(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_CONNACK) {
-				result = new MqttConnack(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_PINGREQ) {
-				result = new MqttPingReq(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_PINGRESP) {
-				result = new MqttPingResp(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_SUBSCRIBE) {
-				result = new MqttSubscribe(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_SUBACK) {
-				result = new MqttSuback(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_UNSUBSCRIBE) {
-				result = new MqttUnsubscribe(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_UNSUBACK) {
-				result = new MqttUnsubAck(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_PUBREL) {
-				result = new MqttPubRel(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_PUBREC) {
-				result = new MqttPubRec(info, data);
-			} else if (type == MqttWireMessage.MESSAGE_TYPE_DISCONNECT) {
-				result = new MqttDisconnect(info, data);
-			} else {
-				throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_UNEXPECTED_ERROR);
-			}
+
+
+
+
+
+
+
+
+
+
+
+
 			return result;
-		} catch (IOException io) {
-			throw new MqttException(io);
+		} catch (java.io.IOException io) {
+			throw new org.eclipse.paho.client.mqttv3.MqttException(io);
 		}
 	}
 
