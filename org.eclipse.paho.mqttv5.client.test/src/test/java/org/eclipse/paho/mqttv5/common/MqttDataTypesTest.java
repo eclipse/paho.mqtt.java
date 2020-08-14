@@ -204,7 +204,7 @@ public class MqttDataTypesTest {
 	 */
 	@Test
 	public void testICanEatGlass() throws IOException, MqttException {
-		ClassLoader classLoader = getClass().getClassLoader();
+		ClassLoader classLoader = java.lang.Thread.currentThread().getContextClassLoader();
 		File file = new File(classLoader.getResource("i_can_eat_glass.txt").getFile());
 
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
