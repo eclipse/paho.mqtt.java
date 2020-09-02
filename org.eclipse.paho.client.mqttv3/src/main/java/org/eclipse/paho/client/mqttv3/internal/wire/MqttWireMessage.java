@@ -375,13 +375,13 @@ public abstract class MqttWireMessage {
 	 * 
 	 * @param input
 	 *            - The Input String
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException - thrown if input String contains illegal characters or character sequences.
 	 */
 	private static void validateUTF8String(String input) throws IllegalArgumentException {
 		for (int i = 0; i < input.length(); i++) {
 			boolean isBad = false;
 			char c = input.charAt(i);
-			/* Check for mismatched surrogates */
+			// Check for mismatched surrogates
 			if (Character.isHighSurrogate(c)) {
 				if (++i == input.length()) {
 					isBad = true; /* Trailing high surrogate */
