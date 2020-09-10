@@ -61,7 +61,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
 public class MqttClient implements IMqttClient { 
 
 	protected MqttAsyncClient aClient = null;  // Delegate implementation to MqttAsyncClient
-	protected long timeToWait = -1;				// How long each method should wait for action to complete
+	protected long timeToWait = 60000;				// How long each method should wait for action to complete
 
 	/**
 	 * Create an MqttClient that can be used to communicate with an MQTT server.
