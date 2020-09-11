@@ -892,7 +892,7 @@ public interface IMqttClient extends AutoCloseable { //extends IMqttAsyncClient 
 	 * @throws IllegalArgumentException if the topic contains a '+' or '#'
 	 * wildcard character.
 	 */
-    MqttTopic getTopic(String topic);
+	public MqttTopic getTopic(String topic) throws MqttException;
 
 	/**
 	 * Determines if this client is currently connected to the server.

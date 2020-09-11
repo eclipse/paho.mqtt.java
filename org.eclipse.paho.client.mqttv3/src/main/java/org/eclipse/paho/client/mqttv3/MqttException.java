@@ -39,9 +39,21 @@ public class MqttException extends Exception {
 	/** The broker was not available to handle the request. */
 	public static final short REASON_CODE_BROKER_UNAVAILABLE             = 0x03;
 	/** Authentication with the server has failed, due to a bad user name or password. */
-	public static final short REASON_CODE_FAILED_AUTHENTICATION			= 0x04; 
+	public static final short REASON_CODE_FAILED_AUTHENTICATION			= 0x04;
 	/** Not authorized to perform the requested operation */
 	public static final short REASON_CODE_NOT_AUTHORIZED				= 0x05;
+	/** Not authorized to perform the requested operation */
+	public static final short REASON_CODE_INVALID_ARGUMENT				= 0x55;
+	/** Unsupported character encoding */
+	public static final short REASON_CODE_UNSUPPORTED_ENCODING = 0x07;
+	/** Topic length should between 1 and 65535 */
+	public static final short REASON_CODE_INVALID_TOPIC_LENGTH = 0x08;
+	/** Invalid usage of multi level wildcard */
+	public static final short INVALID_USAGE_OF_MULTI_LEVEL_WILDCARD = 0x09;
+	/** The topic name MUST NOT contain any wildcard characters (#+) */
+	public static final short INVALID_USAGE_OF_TOPIC_NAME = 0x10;
+	/** Invalid usage of single-level wildcard in topic */
+	public static final short INVALID_USAGE_OF_SINGLE_LEVEL_WILDCARD = 0x11;
 
 	/** An unexpected error has occurred. */
 	public static final short REASON_CODE_UNEXPECTED_ERROR				= 0x06;

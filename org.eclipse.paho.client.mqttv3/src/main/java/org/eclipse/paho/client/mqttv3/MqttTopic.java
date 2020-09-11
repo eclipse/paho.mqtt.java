@@ -162,15 +162,15 @@ public class MqttTopic {
 	 *            topic name or filter
 	 * @param wildcardAllowed
 	 *            true if validate topic filter, false otherwise
-	 * @throws IllegalArgumentException
+	 * @throws MqttException
 	 *             if the topic is invalid
 	 */
-	public static void validate(String topicString, boolean wildcardAllowed) throws IllegalArgumentException {
+	public static void validate(String topicString, boolean wildcardAllowed) throws MqttException {
 		int topicLen = 0;
 		try {
 			topicLen = topicString.getBytes("UTF-8").length;
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException(e.getMessage());
+			throw new MqttException(MqttException.REASON_CODE_UNSUPPORTED_ENCODING, e);
 		}
 
 		// Spec: length check
@@ -179,8 +179,7 @@ public class MqttTopic {
 		// - Topic Names and Topic Filters are UTF-8 encoded strings, they MUST
 		// NOT encode to more than 65535 bytes
 		if (topicLen < MIN_TOPIC_LEN || topicLen > MAX_TOPIC_LEN) {
-			throw new IllegalArgumentException(String.format("Invalid topic length, should be in range[%d, %d]!",
-					new Object[] { Integer.valueOf(MIN_TOPIC_LEN), Integer.valueOf(MAX_TOPIC_LEN) }));
+			throw new MqttException(MqttException.REASON_CODE_INVALID_TOPIC_LENGTH);
 		}
 
 		// *******************************************************************************
@@ -203,8 +202,7 @@ public class MqttTopic {
 			if (Strings.countMatches(topicString, MULTI_LEVEL_WILDCARD) > 1
 					|| (topicString.contains(MULTI_LEVEL_WILDCARD)
 							&& !topicString.endsWith(MULTI_LEVEL_WILDCARD_PATTERN))) {
-				throw new IllegalArgumentException(
-						"Invalid usage of multi-level wildcard in topic string: " + topicString);
+				throw new MqttException(MqttException.INVALID_USAGE_OF_MULTI_LEVEL_WILDCARD);
 			}
 
 			// 2) Check single-level wildcard
@@ -223,11 +221,11 @@ public class MqttTopic {
 		// 2) This is a topic name string that MUST NOT contains any wildcard characters
 		// *******************************************************************************
 		if (Strings.containsAny(topicString, TOPIC_WILDCARDS)) {
-			throw new IllegalArgumentException("The topic name MUST NOT contain any wildcard characters (#+)");
+			throw new MqttException(MqttException.INVALID_USAGE_OF_TOPIC_NAME);
 		}
 	}
 
-	private static void validateSingleLevelWildcard(String topicString) {
+	private static void validateSingleLevelWildcard(String topicString) throws MqttException{
 		char singleLevelWildcardChar = SINGLE_LEVEL_WILDCARD.charAt(0);
 		char topicLevelSeparatorChar = TOPIC_LEVEL_SEPARATOR.charAt(0);
 
@@ -241,9 +239,7 @@ public class MqttTopic {
 			if (chars[i] == singleLevelWildcardChar) {
 				// prev and next can be only '/' or none
 				if (prev != topicLevelSeparatorChar && prev != NUL || next != topicLevelSeparatorChar && next != NUL) {
-					throw new IllegalArgumentException(
-							String.format("Invalid usage of single-level wildcard in topic string '%s'!",
-									new Object[] { topicString }));
+					throw new MqttException(MqttException.INVALID_USAGE_OF_SINGLE_LEVEL_WILDCARD);
 
 				}
 			}
@@ -261,7 +257,7 @@ public class MqttTopic {
 	 * @throws IllegalArgumentException
 	 *             if the topic name or filter is invalid
 	 */
-	public static boolean isMatched(String topicFilter, String topicName) throws IllegalArgumentException {
+	public static boolean isMatched(String topicFilter, String topicName) throws IllegalArgumentException, MqttException {
 		int topicPos = 0;
 		int filterPos = 0;
 		int topicLen = topicName.length();
