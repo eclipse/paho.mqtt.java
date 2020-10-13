@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build.level>${maven.build.timestamp}</build.level>
         <tycho.version>1.7.0</tycho.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <javadoc.version>3.2.0</javadoc.version>
         <mvnsource.version>3.2.0</mvnsource.version>
         <jacoco.version>0.8.2</jacoco.version>
