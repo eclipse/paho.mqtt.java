@@ -4,9 +4,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.paho.mqttv5.client.IMqttMessageListener;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.test.client.MqttClientFactoryPaho;
@@ -67,7 +71,7 @@ public class SubscribeTests {
 		}
 	}
 
-	
+
 	@Test
 	public void testPublishRecieveUserProperties() throws Exception {
 		String methodName = Utility.getMethodName();
@@ -105,7 +109,37 @@ public class SubscribeTests {
 		log.info("Received User Property: " + recievedUserProps.toString());
 
 		TestClientUtilities.disconnectAndCloseClient(asyncClient, 5000);
-
 	}
 
+	@Test
+	public void testSubscribeWithNoProperties() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		String clientId = methodName;
+		MqttV5Receiver mqttV5Receiver = new MqttV5Receiver(clientId, LoggingUtilities.getPrintStream());
+		MqttAsyncClient asyncClient = TestClientUtilities.connectAndGetClient(serverURI.toString(), clientId, mqttV5Receiver, null, 5000);
+
+		// Subscribe to a topic
+		log.info("Subscribing to: " + topicPrefix + methodName);
+		MqttSubscription subscription = new MqttSubscription(topicPrefix + methodName);
+		CountDownLatch countDownLatch = new CountDownLatch(1);
+		AtomicReference<String> receivedPayload = new AtomicReference<>();
+		IMqttToken subscribeToken = asyncClient.subscribe(subscription, (topic, message) -> {
+			receivedPayload.set(new String(message.getPayload()));
+			countDownLatch.countDown();
+		});
+		subscribeToken.waitForCompletion(5000);
+
+		// Publish a message to a random topic
+		MqttMessage testMessage = new MqttMessage("Test Payload".getBytes(), 2, false, new MqttProperties());
+		log.info("Publishing Message to: " + topicPrefix + methodName);
+		IMqttToken deliveryToken = asyncClient.publish(topicPrefix + methodName, testMessage);
+		deliveryToken.waitForCompletion(5000);
+
+		log.info("Waiting for delivery and validating message.");
+		countDownLatch.await(5, TimeUnit.SECONDS);
+		Assert.assertEquals("Test Payload", receivedPayload.get());
+
+		TestClientUtilities.disconnectAndCloseClient(asyncClient, 5000);
+	}
 }
