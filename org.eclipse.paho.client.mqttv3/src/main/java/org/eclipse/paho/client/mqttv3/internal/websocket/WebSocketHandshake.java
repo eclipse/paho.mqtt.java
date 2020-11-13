@@ -88,7 +88,7 @@ public class WebSocketHandshake {
 	 */
 	private void sendHandshakeRequest(String key) throws IOException{
 		try {
-			String path = "/mqtt";
+			String path = "/messaging/mqtt";
 			URI srvUri = new URI(uri);
 			if (srvUri.getRawPath() != null && !srvUri.getRawPath().isEmpty()) { 
 				path = srvUri.getRawPath();

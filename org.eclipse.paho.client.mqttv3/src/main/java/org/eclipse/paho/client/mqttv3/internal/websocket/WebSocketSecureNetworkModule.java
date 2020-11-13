@@ -55,7 +55,6 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 		this.host = host;
 		this.port = port;
 		this.customWebSocketHeaders = customWebSocketHeaders;
-		this.pipedInputStream = new PipedInputStream();
 		log.setResourceName(clientId);
 	}
 
@@ -63,6 +62,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 		super.start();
 		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port, customWebSocketHeaders);
 		handshake.execute();
+		this.pipedInputStream = new PipedInputStream();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("WssSocketReceiver");
 

@@ -48,12 +48,12 @@ public class CommsReceiver implements Runnable {
 	
 	private ClientState clientState = null;
 	private ClientComms clientComms = null;
-	private MqttInputStream in;
+	private NetworkModule networkModule = null;
 	private CommsTokenStore tokenStore = null;
 	private Thread recThread	= null;
 
-	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, InputStream in) {
-		this.in = new MqttInputStream(clientState, in);
+	public CommsReceiver(ClientComms clientComms, ClientState clientState,CommsTokenStore tokenStore, NetworkModule networkModule) {
+		this.networkModule = networkModule;
 		this.clientComms = clientComms;
 		this.clientState = clientState;
 		this.tokenStore = tokenStore;
@@ -111,6 +111,7 @@ public class CommsReceiver implements Runnable {
 	 * Run loop to receive messages from the server.
 	 */
 	public void run() {
+
 		recThread = Thread.currentThread();
 		recThread.setName(threadName);
 		final String methodName = "run";
@@ -125,8 +126,9 @@ public class CommsReceiver implements Runnable {
 			synchronized (lifecycle) {
 				my_target = target_state;
 			}
-			while (my_target == State.RUNNING && (in != null)) {
+			while (my_target == State.RUNNING) {
 				try {
+					MqttInputStream in = new MqttInputStream(this.clientState, this.networkModule.getInputStream());
 					//@TRACE 852=network read message
 					log.fine(CLASS_NAME,methodName,"852");
 					if (in.available() > 0) {
