@@ -33,8 +33,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	
 	private static final String CLASS_NAME = WebSocketSecureNetworkModule.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
-	
-	private PipedInputStream pipedInputStream;
+
 	private WebSocketReceiver webSocketReceiver;
 	private String uri;
 	private String host;
@@ -55,7 +54,6 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 		this.host = host;
 		this.port = port;
 		this.customWebSocketHeaders = customWebSocketHeaders;
-		this.pipedInputStream = new PipedInputStream();
 		log.setResourceName(clientId);
 	}
 
@@ -63,7 +61,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 		super.start();
 		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port, customWebSocketHeaders);
 		handshake.execute();
-		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
+		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream());
 		webSocketReceiver.start("WssSocketReceiver");
 
 	}
@@ -77,7 +75,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	}
 	
 	public InputStream getInputStream() throws IOException {
-		return pipedInputStream;
+		return this.webSocketReceiver.getInputStream();
 	}
 	
 	public OutputStream getOutputStream() throws IOException {

@@ -383,7 +383,8 @@ public class ClientComms {
 				}
 			}
 		} catch (Exception ioe) {
-			// Ignore as we are shutting down
+			// @TRACE 227=Error while stopping at least one of the network modules (protocol handlers), during connection shutdown - {0} : {1}. Ignoring.
+			log.fine(CLASS_NAME, methodName, "227", new String[] {ioe.getClass().getName(), ioe.getLocalizedMessage()});
 		}
 
 		// Stop any new tokens being saved by app and throwing an exception if they do
@@ -400,7 +401,8 @@ public class ClientComms {
 			if (clientState.getCleanSession())
 				callback.removeMessageListeners();
 		}catch(Exception ex) {
-			// Ignore as we are shutting down
+			// @TRACE 228=Error while cleaning sessions, during connection shutdown - {0} : {1}. Ignoring.
+			log.fine(CLASS_NAME, methodName, "228", new String[] {ex.getClass().getName(), ex.getLocalizedMessage()});
 		}
 
 		if (sender != null) { sender.stop(); }
@@ -415,7 +417,8 @@ public class ClientComms {
 			}
 			
 		}catch(Exception ex) {
-			// Ignore as we are shutting down
+			// @TRACE 229=Error while closing persistance objects, during connection shutdown - {0} : {1}. Ignoring.
+			log.fine(CLASS_NAME, methodName, "229", new String[] {ex.getClass().getName(), ex.getLocalizedMessage()});
 		}
 		// All disconnect logic has been completed allowing the
 		// client to be marked as disconnected.
@@ -447,6 +450,8 @@ public class ClientComms {
 				try {
 					close(true);
 				} catch (Exception e) { // ignore any errors as closing
+					// @TRACE 230=Error while closing pending, during connection shutdown - {0} : {1}. Ignoring.
+					log.fine(CLASS_NAME, methodName, "230", new String[] {e.getClass().getName(), e.getLocalizedMessage()});
 				}
 			}
 		}
@@ -490,6 +495,8 @@ public class ClientComms {
 			}
 		}catch(Exception ex) {
 			// Ignore as we are shutting down
+			// @TRACE 231=Error while cleanup, during connection shutdown - {0} : {1}. Ignoring.
+			log.fine(CLASS_NAME, methodName, "231", new String[] {ex.getClass().getName(), ex.getLocalizedMessage()});
 		}
 		return tokToNotifyLater;
 	}
@@ -536,6 +543,7 @@ public class ClientComms {
 	 * @throws MqttException if an error occurs whilst disconnecting
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket) throws MqttException {
+		final String methodName = "disconnectForcibly";
 		conState = DISCONNECTING;
 		// Allow current inbound and outbound work to complete
 		if (clientState != null) {
@@ -553,6 +561,8 @@ public class ClientComms {
 		}
 		catch (Exception ex) {
 			// ignore, probably means we failed to send the disconnect packet.
+			// @TRACE 232=Error while forcibly disconnecting. Probable failure to send the disconnect packet. - {0} : {1}.
+			log.fine(CLASS_NAME, methodName, "232", new String[] {ex.getClass().getName(), ex.getLocalizedMessage()});
 		}
 		finally {
 			token.internalTok.markComplete(null, null);
@@ -722,7 +732,7 @@ public class ClientComms {
 				// packet.
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
-				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream());
+				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule);
 				receiver.start("MQTT Rec: "+getClient().getClientId(), executorService);
 				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream());
 				sender.start("MQTT Snd: "+getClient().getClientId(), executorService);
@@ -783,6 +793,8 @@ public class ClientComms {
 				}
 			}
 			catch (MqttException ex) {
+				//@TRACE 226=connect failed: unexpected exception
+				log.fine(CLASS_NAME, methodName, "226", null, ex);
 			}
 			finally {
 				token.internalTok.markComplete(null, null);
