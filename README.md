@@ -30,7 +30,7 @@ Eclipse hosts a Nexus repository for those who want to use Maven to manage their
 
 Add the repository definition and the dependency definition shown below to your pom.xml.
 
-Replace %REPOURL% with either ``` https://repo.eclipse.org/content/repositories/paho-releases/ ``` for the official releases, or ``` https://repo.eclipse.org/content/repositories/paho-snapshots/  ``` for the nightly snapshots. Replace %VERSION% with the level required .
+Replace %REPOURL% with either ``` https://repo.eclipse.org/content/repositories/paho-releases/org/eclipse/paho/ ``` for the official releases, or ``` https://repo.eclipse.org/content/repositories/paho-snapshots/  ``` for the nightly snapshots. Replace %VERSION% with the level required .
 
 The latest release version is ```1.2.5``` and the current snapshot version is ```1.2.6-SNAPSHOT```.
 
@@ -99,27 +99,26 @@ The included code below is a very basic sample that connects to a server and pub
 
 
 ```
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.client.MqttClient;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 
-public class MqttPublishSample {
+public class Application {
 
     public static void main(String[] args) {
-
         String topic        = "MQTT Examples";
         String content      = "Message from MqttPublishSample";
         int qos             = 2;
-        String broker       = "tcp://iot.eclipse.org:1883";
+        String broker       = "tcp://localhost:1883";
         String clientId     = "JavaSample";
         MemoryPersistence persistence = new MemoryPersistence();
 
         try {
             MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
-            MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setCleanSession(true);
+            MqttConnectionOptions connOpts = new MqttConnectionOptions();
+            connOpts.setCleanStart(true);
             System.out.println("Connecting to broker: "+broker);
             sampleClient.connect(connOpts);
             System.out.println("Connected");
