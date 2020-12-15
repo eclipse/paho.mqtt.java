@@ -54,6 +54,7 @@ public class WebSocketNetworkModuleFactory implements NetworkModuleFactory {
 		WebSocketNetworkModule netModule = new WebSocketNetworkModule(factory, brokerUri.toString(), host, port,
 				clientId, options.getCustomWebSocketHeaders());
 		netModule.setConnectTimeout(options.getConnectionTimeout());
+		netModule.setSoTimeout(options.getSoTimeout());
 		return netModule;
 	}
 }
