@@ -39,7 +39,6 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	private String host;
 	private int port;
 	private Properties customWebsocketHeaders;
-	private PipedInputStream pipedInputStream;
 	private WebSocketReceiver webSocketReceiver;
 	ByteBuffer recievedPayload;
 	
@@ -56,7 +55,6 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 		this.host = host;
 		this.port = port;
 		this.customWebsocketHeaders = customWebsocketHeaders;
-		this.pipedInputStream = new PipedInputStream();
 		
 		log.setResourceName(resourceContext);
 	}
@@ -65,7 +63,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 		super.start();
 		WebSocketHandshake handshake = new WebSocketHandshake(getSocketInputStream(), getSocketOutputStream(), uri, host, port, customWebsocketHeaders);
 		handshake.execute();
-		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
+		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream());
 		webSocketReceiver.start("webSocketReceiver");
 	}
 	
@@ -78,7 +76,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	}
 	
 	public InputStream getInputStream() throws IOException {
-		return pipedInputStream;
+		return this.webSocketReceiver.getInputStream();
 	}
 	
 	public OutputStream getOutputStream() throws IOException {

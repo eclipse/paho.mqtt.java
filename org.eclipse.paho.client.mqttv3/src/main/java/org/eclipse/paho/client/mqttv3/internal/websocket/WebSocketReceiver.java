@@ -36,9 +36,11 @@ public class WebSocketReceiver implements Runnable{
 	private Thread receiverThread = null;
 	private volatile boolean receiving;
 	private PipedOutputStream pipedOutputStream;
+	private PipedInputStream pipedInputStream;
 
-	public WebSocketReceiver(InputStream input, PipedInputStream pipedInputStream) throws IOException{
+	public WebSocketReceiver(InputStream input) throws IOException{
 		this.input = input;
+		this.pipedInputStream = new PipedInputStream();
 		this.pipedOutputStream = new PipedOutputStream();
 		pipedInputStream.connect(pipedOutputStream);
 	}
@@ -85,7 +87,8 @@ public class WebSocketReceiver implements Runnable{
 		        //This must not happen in the synchronized block, otherwise we can deadlock ourselves!
 				receiverThread.join();
 			} catch (InterruptedException ex) {
-				// Interrupted Exception
+				// @TRACE 860=Interrupted while waiting to stop reading from web socket {0}. Continuing without waiting any longer.
+				log.fine(CLASS_NAME, methodName, "860", new String[] {ex.getLocalizedMessage()});
 			}
 		}
 		receiverThread = null;
@@ -116,21 +119,29 @@ public class WebSocketReceiver implements Runnable{
 
 				receiving = false;
 			} catch (SocketTimeoutException ex) {
-				// Ignore SocketTimeoutException 
+				// @TRACE 861=Socket timed out while reading from websocket  - {0} : {1}
+				log.fine(CLASS_NAME, methodName, "861", new String[] {ex.getClass().getName(), ex.getLocalizedMessage()});
 			} catch (IOException ex) {
-				// Exception occurred whilst reading the stream.
+				// @TRACE 862=Error while reading from websocket - {0} : {1}. Stopping the websocket communication.
+				log.severe(CLASS_NAME, methodName, "862", new String[] {ex.getClass().getName(), ex.getLocalizedMessage()});
 				this.stop();
 			}
 		}
 	}
 
 	private void closeOutputStream(){
+		final String methodName = "closeOutputStream";
 		try {
 			pipedOutputStream.close();
 		} catch (IOException e) {
+			// @TRACE 863=Input/Output error while closing network connection stream - {0} : {1}. Ignoring and continuing.
+			log.fine(CLASS_NAME, methodName, "863", new String[] {e.getClass().getName(), e.getLocalizedMessage()});
 		}
 	}
 
+	public InputStream getInputStream() {
+		return this.pipedInputStream;
+	}
 
 	public boolean isRunning() {
 		return running;
