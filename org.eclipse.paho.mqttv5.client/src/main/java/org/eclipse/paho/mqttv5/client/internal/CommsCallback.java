@@ -562,8 +562,12 @@ public class CommsCallback implements Runnable {
 	 */
 	public void removeMessageListener(String topicFilter) {
 		Integer callbackId = this.callbackTopicMap.get(topicFilter);
-		this.callbackMap.remove(callbackId);
-		this.callbackTopicMap.remove(topicFilter);
+		if(callbackId!=null){
+			this.callbackMap.remove(callbackId);
+		}
+		if(topicFilter!=null){
+			this.callbackTopicMap.remove(topicFilter);
+		}
 
 		// Reverse lookup the subscription ID if it exists to remove that as well
 		for (Map.Entry<Integer, Integer> entry : this.subscriptionIdMap.entrySet()) {
@@ -585,8 +589,13 @@ public class CommsCallback implements Runnable {
 	 */
 	public void removeMessageListener(Integer subscriptionId) {
 		Integer callbackId = this.subscriptionIdMap.get(subscriptionId);
-		this.subscriptionIdMap.remove(callbackId);
-		this.callbackMap.remove(callbackId);
+		if(callbackId!=null){
+			this.subscriptionIdMap.remove(callbackId);
+		}
+		if(callbackId!=null){
+			this.callbackMap.remove(callbackId);
+		}
+
 
 		// Reverse lookup the topic if it exists to remove that as well
 		for (Map.Entry<String, Integer> entry : this.callbackTopicMap.entrySet()) {
