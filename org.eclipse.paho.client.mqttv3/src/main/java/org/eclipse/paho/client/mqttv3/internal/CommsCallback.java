@@ -498,7 +498,7 @@ public class CommsCallback implements Runnable {
 	
 	public void removeMessageListeners() {
 		this.callbacksWildcards.clear();
-		this.callbacksWildcards.clear();
+		this.callbacksDirect.clear();
 	}
 	
 	
