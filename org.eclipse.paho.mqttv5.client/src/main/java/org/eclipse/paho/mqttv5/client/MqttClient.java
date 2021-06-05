@@ -18,8 +18,10 @@
  */
 package org.eclipse.paho.mqttv5.client;
 
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.IntStream;
 
 import javax.net.SocketFactory;
 
@@ -522,7 +524,11 @@ public class MqttClient implements IMqttClient {
 
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
-		return this.subscribe(topicFilters, qos, messageListeners);
+		MqttSubscription[] subscriptions = Arrays.asList(IntStream.range(0, topicFilters.length)
+				.mapToObj(x -> new MqttSubscription(topicFilters[x], qos[x])))
+				.toArray(new MqttSubscription[topicFilters.length]);
+
+		return this.subscribe(subscriptions, messageListeners);
 	}
 
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException {
