@@ -674,7 +674,9 @@ public class ClientComms {
 	}
 
 	public void clear() {
-		disconnectedMessageBuffer.clear();
+		if (disconnectedMessageBuffer != null) {
+			disconnectedMessageBuffer.clear();
+		}
 	}
 
 
