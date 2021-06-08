@@ -112,6 +112,12 @@ public class DisconnectedMessageBuffer implements Runnable {
 		}
 	}
 
+	public void clear() {
+		synchronized (bufLock) {
+			buffer.clear();
+		}
+	}
+
 	private int mycount = 0;
 	/**
 	 * Flushes the buffer of messages into an open connection
@@ -151,7 +157,7 @@ public class DisconnectedMessageBuffer implements Runnable {
 		return bufferOpts.isPersistBuffer();
 	}
 
-        public void setMessageDiscardedCallBack(IDiscardedBufferMessageCallback callback) {
+	public void setMessageDiscardedCallBack(IDiscardedBufferMessageCallback callback) {
 		this.messageDiscardedCallBack = callback;
 	}
 

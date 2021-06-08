@@ -226,6 +226,7 @@ public class ClientState {
 		log.fine(CLASS_NAME, methodName,">");
 
 		persistence.clear();
+		clientComms.clear();
 		inUseMsgIds.clear();
 		pendingMessages.clear();
 		pendingFlows.clear();

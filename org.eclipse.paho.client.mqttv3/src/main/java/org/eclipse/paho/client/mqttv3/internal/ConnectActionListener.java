@@ -175,6 +175,7 @@ public class ConnectActionListener implements IMqttActionListener {
 
     if (options.isCleanSession()) {
       persistence.clear();
+      comms.clear();
     }
     
     if (options.getMqttVersion() == MqttConnectOptions.MQTT_VERSION_DEFAULT) {
