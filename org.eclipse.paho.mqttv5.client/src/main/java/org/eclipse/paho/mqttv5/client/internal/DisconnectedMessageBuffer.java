@@ -95,6 +95,12 @@ public class DisconnectedMessageBuffer implements Runnable {
 			return buffer.size();
 		}
 	}
+
+	public void clear() {
+		synchronized (bufLock) {
+			buffer.clear();
+		}
+	}
 	
 	/**
 	 * Flushes the buffer of messages into an open connection
