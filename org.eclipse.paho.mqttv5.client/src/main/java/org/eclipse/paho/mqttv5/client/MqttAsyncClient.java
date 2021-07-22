@@ -1273,8 +1273,12 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, Object userContext, MqttActionListener callback,
 			IMqttMessageListener messageListener, MqttProperties subscriptionProperties) throws MqttException {
 
-		int subId = subscriptionProperties.getSubscriptionIdentifiers().get(0);
-
+		int subId = 0;
+		try {
+			subId = subscriptionProperties.getSubscriptionIdentifiers().get(0);
+		} catch (IndexOutOfBoundsException e) {
+			log.fine(CLASS_NAME, "subscribe", "No sub subscription property(s)");
+		}
 		// Automatic Subscription Identifier Assignment is enabled
 		if (connOpts.useSubscriptionIdentifiers() && this.mqttConnection.isSubscriptionIdentifiersAvailable()) {
 
