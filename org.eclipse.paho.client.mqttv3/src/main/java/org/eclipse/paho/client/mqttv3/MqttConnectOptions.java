@@ -74,6 +74,7 @@ public class MqttConnectOptions {
 	private boolean automaticReconnect = false;
 	private int maxReconnectDelay = 128000;
 	private Properties customWebSocketHeaders = null;
+	private String[] enabledCipherSuites = null;
 
 	// Client Operation Parameters
 	private int executorServiceTimeout = 1; // How long to wait in seconds when terminating the executor service.
@@ -700,5 +701,23 @@ public class MqttConnectOptions {
 	public String toString() {
 		return Debug.dumpProperties(getDebug(), "Connection options");
 	}
-	
+
+	/**
+	 * Returns the enabled cipher suites.
+	 *
+	 * @return a string array of enabled Cipher suites
+	 */
+	public String[] getEnabledCipherSuites() {
+		return enabledCipherSuites;
+	}
+
+	/**
+	 * Sets the enabled cipher suites on the underlying network socket.
+	 *
+	 * @param enabledCipherSuites
+	 *            a String array of cipher suites to enable
+	 */
+	public void setEnabledCipherSuites(String[] enabledCipherSuites) {
+		this.enabledCipherSuites = enabledCipherSuites;
+	}
 }

@@ -1203,11 +1203,13 @@ public class SSLSocketFactoryFactory {
 				
 				if(keyStoreName!=null && keyStoreType!=null  && keyMgrAlgo!=null) {
 					try {
-						keyStore=KeyStore.getInstance(keyStoreType);
-						keyStore.load(new FileInputStream(keyStoreName), keyStorePwd);
-						if(keyMgrProvider!=null) {
+						if (keyMgrProvider != null) {
+							keyStore = KeyStore.getInstance(keyStoreType, keyMgrProvider);
+							keyStore.load(new FileInputStream(keyStoreName), keyStorePwd);
 							keyMgrFact = KeyManagerFactory.getInstance(keyMgrAlgo, keyMgrProvider);
 						} else {
+							keyStore = KeyStore.getInstance(keyStoreType);
+							keyStore.load(new FileInputStream(keyStoreName), keyStorePwd);
 							keyMgrFact = KeyManagerFactory.getInstance(keyMgrAlgo);
 						}
 						if (logger != null) {
@@ -1269,11 +1271,13 @@ public class SSLSocketFactoryFactory {
 					
 			if(trustStoreName!=null && trustStoreType!=null && trustMgrAlgo!=null) {
 				try {
-					trustStore=KeyStore.getInstance(trustStoreType);
-					trustStore.load(new FileInputStream(trustStoreName), trustStorePwd);
-					if(trustMgrProvider!=null) {
+					if (trustMgrProvider != null) {
+						trustStore = KeyStore.getInstance(trustStoreType, trustMgrProvider);
+						trustStore.load(new FileInputStream(trustStoreName), trustStorePwd);
 						trustMgrFact = TrustManagerFactory.getInstance(trustMgrAlgo, trustMgrProvider);
 					} else {
+						trustStore = KeyStore.getInstance(trustStoreType);
+						trustStore.load(new FileInputStream(trustStoreName), trustStorePwd);
 						trustMgrFact = TrustManagerFactory.getInstance(trustMgrAlgo);
 					}
 					if (logger != null) {
