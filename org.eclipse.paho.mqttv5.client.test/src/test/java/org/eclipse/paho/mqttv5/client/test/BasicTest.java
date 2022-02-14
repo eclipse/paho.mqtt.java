@@ -1,6 +1,7 @@
 package org.eclipse.paho.mqttv5.client.test;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +16,7 @@ import org.eclipse.paho.mqttv5.client.test.utilities.TestClientUtilities;
 import org.eclipse.paho.mqttv5.client.test.utilities.Utility;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -202,5 +204,52 @@ public class BasicTest {
 	    }
 	    Assert.assertEquals(before_thread_count, after_count);
 	  }
+	@Test
+	public void testValidPassword() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		MqttAsyncClient asyncClient = new MqttAsyncClient("tcp://localhost:1883", methodName);
+		try {
+			MqttConnectionOptions mqttConnectOptions = new MqttConnectionOptions();
+			mqttConnectOptions.setAutomaticReconnect(true);
+			mqttConnectOptions.setCleanStart(true);
+			mqttConnectOptions.setUserName("username");
+			mqttConnectOptions.setPassword("password".getBytes(StandardCharsets.UTF_8));
+			asyncClient.connect(mqttConnectOptions).waitForCompletion();
+			asyncClient.disconnect();
+		}
+		catch (MqttException exception) {
+			log.log(Level.SEVERE, "caught exception:", exception);
+			Assert.fail("Unexpected exception: " + exception);
+		}
+		finally {
+			if (asyncClient != null) {
+				log.info("Close...");
 
+				asyncClient.close();
+			}
+		}
+	}
+	@Test(expected =  MqttSecurityException.class)
+	public void testInvalidValidPassword() throws Exception {
+		String methodName = Utility.getMethodName();
+		LoggingUtilities.banner(log, cclass, methodName);
+		MqttAsyncClient asyncClient = new MqttAsyncClient("tcp://localhost:1883", methodName);
+		try {
+			MqttConnectionOptions mqttConnectOptions = new MqttConnectionOptions();
+			mqttConnectOptions.setAutomaticReconnect(true);
+			mqttConnectOptions.setCleanStart(true);
+			mqttConnectOptions.setUserName("username");
+			mqttConnectOptions.setPassword("Invalid Pwd".getBytes(StandardCharsets.UTF_8));
+			asyncClient.connect(mqttConnectOptions).waitForCompletion();
+			asyncClient.disconnect();
+		}
+		finally {
+			if (asyncClient != null) {
+				log.info("Close...");
+
+				asyncClient.close();
+			}
+		}
+	}
 }

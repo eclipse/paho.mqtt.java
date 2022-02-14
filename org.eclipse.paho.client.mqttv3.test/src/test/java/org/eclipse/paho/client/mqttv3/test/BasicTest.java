@@ -28,6 +28,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.test.client.MqttClientFactoryPaho;
 import org.eclipse.paho.client.mqttv3.test.logging.LoggingUtilities;
@@ -514,6 +515,66 @@ public class BasicTest {
     catch (MqttException exception) {
       log.log(Level.SEVERE, "caught exception:", exception);
       Assert.fail("Unexpected exception: " + exception);
+    }
+    finally {
+      if (client != null) {
+        log.info("Close...");
+        client.close();
+      }
+    }
+  }
+
+  @Test
+  public void testValidPassword() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttClient client = null;
+    try {
+      String clientId = methodName;
+
+      MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+      mqttConnectOptions.setAutomaticReconnect(true);
+      mqttConnectOptions.setCleanSession(true);
+      mqttConnectOptions.setUserName("username");
+      mqttConnectOptions.setPassword("password".toCharArray());
+      client = clientFactory.createMqttClient(serverURI, clientId);
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect(mqttConnectOptions);
+      client.disconnect();
+    }
+    catch (MqttException exception) {
+      log.log(Level.SEVERE, "caught exception:", exception);
+      Assert.fail("Unexpected exception: " + exception);
+    }
+    finally {
+      if (client != null) {
+        log.info("Close...");
+        client.close();
+      }
+    }
+  }
+
+  @Test(expected =  MqttSecurityException.class)
+  public void testInvalidPassword() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    IMqttClient client = null;
+    try {
+      String clientId = methodName;
+
+      MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+      mqttConnectOptions.setAutomaticReconnect(true);
+      mqttConnectOptions.setCleanSession(true);
+      mqttConnectOptions.setUserName("username");
+      mqttConnectOptions.setPassword("Invalid Pwd".toCharArray());
+      client = clientFactory.createMqttClient(serverURI, clientId);
+
+      log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + clientId);
+      client.connect(mqttConnectOptions);
+      client.disconnect();
     }
     finally {
       if (client != null) {
