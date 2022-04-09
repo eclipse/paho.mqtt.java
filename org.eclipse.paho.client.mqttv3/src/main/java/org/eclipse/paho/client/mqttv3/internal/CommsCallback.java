@@ -57,10 +57,10 @@ public class CommsCallback implements Runnable {
 	private final Vector<MqttWireMessage> messageQueue;
 	private final Vector<MqttToken> completeQueue;
 	
-	private enum State {STOPPED, RUNNING, QUIESCING}
+	private enum State {READY, RUNNING, QUIESCING, STOPPED}
 
-	private State current_state = State.STOPPED;
-	private State target_state = State.STOPPED;
+	private State current_state = State.READY;
+	private State target_state = State.READY;
 	private final Object lifecycle = new Object();
 	private Thread callbackThread;
 	private String threadName;
@@ -92,7 +92,7 @@ public class CommsCallback implements Runnable {
 		this.threadName = threadName;
 
 		synchronized (lifecycle) {
-			if (current_state == State.STOPPED) {
+			if (current_state == State.READY) {
 				// Preparatory work before starting the background thread.
 				// For safety ensure any old events are cleared.
 				messageQueue.clear();
@@ -108,6 +108,9 @@ public class CommsCallback implements Runnable {
 		}
 		while (!isRunning()) {
 			try { Thread.sleep(100); } catch (Exception e) { }
+			if (current_state == State.STOPPED) {
+				break;
+			}
 		}			
 	}
 	

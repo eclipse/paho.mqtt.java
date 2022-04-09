@@ -38,10 +38,10 @@ public class CommsReceiver implements Runnable {
 	private static final String CLASS_NAME = CommsReceiver.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
-	private enum State {STOPPED, RUNNING, STARTING, RECEIVING}
+	private enum State {READY, RUNNING, STARTING, RECEIVING, STOPPED}
 
-	private State current_state = State.STOPPED;
-	private State target_state = State.STOPPED;
+	private State current_state = State.READY;
+	private State target_state = State.READY;
 	private final Object lifecycle = new Object();
 	private String threadName;
 	private Future<?> receiverFuture;
@@ -71,7 +71,7 @@ public class CommsReceiver implements Runnable {
 		//@TRACE 855=starting
 		log.fine(CLASS_NAME,methodName, "855");
 		synchronized (lifecycle) {
-			if (current_state == State.STOPPED && target_state == State.STOPPED) {
+			if (current_state == State.READY && target_state == State.READY) {
 				target_state = State.RUNNING;
 				if (executorService == null) {
 					new Thread(this).start();
@@ -82,6 +82,9 @@ public class CommsReceiver implements Runnable {
 		}
 		while (!isRunning()) {
 			try { Thread.sleep(100); } catch (Exception e) { }
+			if (current_state == State.STOPPED) {
+				break;
+			}
 		}
 	}
 
