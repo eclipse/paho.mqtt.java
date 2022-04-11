@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttToken;
@@ -34,11 +35,13 @@ public class CommsSender implements Runnable {
 	private static final String CLASS_NAME = CommsSender.class.getName();
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
-	//Sends MQTT packets to the server on its own thread
-	private enum State {READY, RUNNING, STARTING, STOPPED}
+	public static final int MAX_STOPPED_STATE_TO_STOP_THREAD = 300;	// 30 seconds
 
-    private State current_state = State.READY;
-	private State target_state = State.READY;
+	//Sends MQTT packets to the server on its own thread
+	private enum State {STOPPED, RUNNING, STARTING}
+
+    private State current_state = State.STOPPED;
+	private State target_state = State.STOPPED;
 	private final Object lifecycle = new Object();
 	private Thread 	sendThread		= null;
 	private String threadName;
@@ -66,7 +69,7 @@ public class CommsSender implements Runnable {
 	public void start(String threadName, ExecutorService executorService) {
 		this.threadName = threadName;
 		synchronized (lifecycle) {
-			if (current_state == State.READY && target_state == State.READY) {
+			if (current_state == State.STOPPED && target_state == State.STOPPED) {
 				target_state = State.RUNNING;
 				if (executorService == null) {
 					new Thread(this).start();
@@ -75,10 +78,15 @@ public class CommsSender implements Runnable {
 				}
 			}
 		}
+		AtomicInteger stoppedStateCounter = new AtomicInteger(0);
 		while (!isRunning()) {
 			try { Thread.sleep(100); } catch (Exception e) { }
 			if (current_state == State.STOPPED) {
-				break;
+				if (stoppedStateCounter.incrementAndGet() > MAX_STOPPED_STATE_TO_STOP_THREAD) {
+					break;
+				}
+			} else {
+				stoppedStateCounter.set(0);
 			}
 		}
 	}
