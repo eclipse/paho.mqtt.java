@@ -38,7 +38,7 @@ public class MqttTopicTest {
 		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player1" },
 				{ "sport/tennis/player1/#", "sport/tennis/player1/ranking" },
 				{ "sport/tennis/player1/#", "sport/tennis/player1/score/wimbledon" }, { "sport/#", "sport" },
-				{ "#", "sport/tennis/player1" } };
+				{ "#", "sport/tennis/player1" } , {"sport/+/player1/ranking/#","sport/tennis/player1/ranking"} };
 
 		for (String[] pair : matchingTopics) {
 			Assert.assertTrue(pair[0] + " should match " + pair[1], MqttTopicValidator.isMatched(pair[0], pair[1]));
