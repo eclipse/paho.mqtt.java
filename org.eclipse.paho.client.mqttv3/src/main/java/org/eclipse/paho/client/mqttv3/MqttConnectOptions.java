@@ -96,6 +96,26 @@ public class MqttConnectOptions {
 	public MqttConnectOptions() {
 		// Initialise Base MqttConnectOptions Object
 	}
+	
+	/**
+	 * Constructs a new <code>MqttConnectOptions</code> object with username and password using the default
+	 * values.
+	 *
+	 * The defaults are:
+	 * <ul>
+	 * <li>The keepalive interval is 60 seconds</li>
+	 * <li>Clean Session is true</li>
+	 * <li>The message delivery retry interval is 15 seconds</li>
+	 * <li>The connection timeout period is 30 seconds</li>
+	 * <li>No Will message is set</li>
+	 * <li>A standard SocketFactory is used</li>
+	 * </ul>
+	 * More information about these values can be found in the setter methods.
+	 */
+	public MqttConnectOptions(String userName, char[] password) {
+		this.userName = userName;
+		this.password = password.clone();
+	}
 
 	/**
 	 * Returns the password to use for the connection.
