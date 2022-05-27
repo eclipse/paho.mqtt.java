@@ -71,7 +71,7 @@ public class SSLNetworkModuleFactory implements NetworkModuleFactory {
 		}
 
 		// Create the network module...
-		SSLNetworkModule netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId);
+		SSLNetworkModule netModule = new SSLNetworkModule((SSLSocketFactory) factory, host, port, clientId, options.getDns());
 		netModule.setSSLhandshakeTimeout(options.getConnectionTimeout());
 		netModule.setSSLHostnameVerifier(options.getSSLHostnameVerifier());
 		netModule.setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());

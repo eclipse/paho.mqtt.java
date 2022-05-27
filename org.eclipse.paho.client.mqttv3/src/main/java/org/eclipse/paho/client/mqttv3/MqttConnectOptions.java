@@ -74,6 +74,7 @@ public class MqttConnectOptions {
 	private boolean automaticReconnect = false;
 	private int maxReconnectDelay = 128000;
 	private Properties customWebSocketHeaders = null;
+	private IMqttDns dns = null;
 
 	// Client Operation Parameters
 	private int executorServiceTimeout = 1; // How long to wait in seconds when terminating the executor service.
@@ -646,6 +647,14 @@ public class MqttConnectOptions {
 		return executorServiceTimeout;
 	}
 
+	public IMqttDns getDns() {
+		return dns;
+	}
+
+	public void setDns(IMqttDns dns) {
+		this.dns = dns;
+	}
+
 	/**
 	 * Set the time in seconds that the executor service should wait when
 	 * terminating before forcefully terminating. It is not recommended to change
@@ -678,6 +687,11 @@ public class MqttConnectOptions {
 			p.put("SSLProperties", strNull);
 		} else {
 			p.put("SSLProperties", getSSLProperties());
+		}
+		if (getDns() == null) {
+			p.put("Dns", strNull);
+		} else {
+			p.put("Dns", getDns());
 		}
 		return p;
 	}

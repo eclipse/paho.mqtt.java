@@ -56,7 +56,7 @@ public class TCPNetworkModuleFactory implements NetworkModuleFactory {
 		} else if (factory instanceof SSLSocketFactory) {
 			throw ExceptionHelper.createMqttException(MqttException.REASON_CODE_SOCKET_FACTORY_MISMATCH);
 		}
-		TCPNetworkModule networkModule = new TCPNetworkModule(factory, host, port, clientId);
+		TCPNetworkModule networkModule = new TCPNetworkModule(factory, host, port, clientId, options.getDns());
 		networkModule.setConnectTimeout(options.getConnectionTimeout());
 		return networkModule;
 	}
