@@ -8,9 +8,11 @@
 
     <properties>
         <!-- source & target java version for MQTT Client -->
-        <mqttclient.java.version>1.8</mqttclient.java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- mqttclient.java.version>1.8</mqttclient.java.version -->
         <!-- source & target java version for others modules -->
-        <java.version>1.8</java.version>
+        <!-- java.version>1.8</java.version -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build.level>${maven.build.timestamp}</build.level>
         <tycho.version>1.7.0</tycho.version>
@@ -123,8 +125,9 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.2.0</version>
                     <configuration>
+                        <javadocExecutable>/usr/bin/javadoc</javadocExecutable>
                         <source>8</source>
                     </configuration>
                 </plugin>
