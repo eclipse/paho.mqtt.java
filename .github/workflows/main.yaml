@@ -21,14 +21,14 @@ jobs:
         java: [ 8.0.192 ]
       fail-fast: false
       max-parallel: 4
-    name: Test MQTT Paho Java on JDK ${{ matrix.java }}, ${{ matrix.os }}
+    name: Build MQTT Paho Java on JDK ${{ matrix.java }}, ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK ${{ matrix.java }} ${{ matrix.os }}
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-          java-package: jdk # optional (jdk, jre, jdk+fx or jre+fx)
+          java-package: jdk
       - name: Package with Maven skip tests
-        run: mvn package -DskipTests
+        run: mvn -B package --file pom.xml -DskipTests
 
