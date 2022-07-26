@@ -542,6 +542,9 @@ public class ClientState {
 						persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
 						tokenStore.saveToken(token, message);
 						break;
+					case 0:
+						tokenStore.saveToken(token, message);
+						break;
 				}
 				pendingMessages.addElement(message);
 				queueLock.notifyAll();
