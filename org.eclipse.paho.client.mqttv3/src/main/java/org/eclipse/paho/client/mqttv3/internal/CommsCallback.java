@@ -52,8 +52,9 @@ public class CommsCallback implements Runnable {
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
 	private MqttCallbackExtended reconnectInternalCallback;
-	private Hashtable<String, IMqttMessageListener> callbacks; // topicFilter -> messageHandler
-	private ClientComms clientComms;
+	private final Hashtable<String, IMqttMessageListener> callbacksWildcards; // topicFilter with wildcards -> messageHandler
+	private final Hashtable<String, IMqttMessageListener> callbacksDirect; // topicFilter without wildcards -> messageHandler
+	private final ClientComms clientComms;
 	private final Vector<MqttWireMessage> messageQueue;
 	private final Vector<MqttToken> completeQueue;
 	
@@ -75,7 +76,8 @@ public class CommsCallback implements Runnable {
 		this.clientComms = clientComms;
 		this.messageQueue = new Vector<MqttWireMessage>(INBOUND_QUEUE_SIZE);
 		this.completeQueue = new Vector<MqttToken>(INBOUND_QUEUE_SIZE);
-		this.callbacks = new Hashtable<String, IMqttMessageListener>();
+		this.callbacksWildcards = new Hashtable<String, IMqttMessageListener>();
+		this.callbacksDirect = new Hashtable<String, IMqttMessageListener>();
 		log.setResourceName(clientComms.getClient().getClientId());
 	}
 
@@ -351,7 +353,7 @@ public class CommsCallback implements Runnable {
 	 */
 	public void messageArrived(MqttPublish sendMessage) {
 		final String methodName = "messageArrived";
-		if (mqttCallback != null || callbacks.size() > 0) {
+		if (mqttCallback != null || !callbacksWildcards.isEmpty() || !callbacksDirect.isEmpty()) {
 			// If we already have enough messages queued up in memory, wait
 			// until some more queue space becomes available. This helps 
 			// the client protect itself from getting flooded by messages 
@@ -481,16 +483,22 @@ public class CommsCallback implements Runnable {
 
 
 	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
-		this.callbacks.put(topicFilter, messageListener);
+		if (topicFilter.contains("#") || topicFilter.contains("+")) {
+			this.callbacksWildcards.put(topicFilter, messageListener);
+		} else {
+			this.callbacksDirect.put(topicFilter, messageListener);
+		}
 	}
 	
 	
 	public void removeMessageListener(String topicFilter) {
-		this.callbacks.remove(topicFilter); // no exception thrown if the filter was not present
+		this.callbacksWildcards.remove(topicFilter); // no exception thrown if the filter was not present
+		this.callbacksDirect.remove(topicFilter); // no exception thrown if the filter was not present
 	}
 	
 	public void removeMessageListeners() {
-		this.callbacks.clear(); 
+		this.callbacksWildcards.clear();
+		this.callbacksDirect.clear();
 	}
 	
 	
@@ -498,17 +506,24 @@ public class CommsCallback implements Runnable {
 	{		
 		boolean delivered = false;
 		
-		Enumeration<String> keys = callbacks.keys();
+		IMqttMessageListener callback = this.callbacksDirect.get(topicName);
+		if (callback != null) {
+			aMessage.setId(messageId);
+			callback.messageArrived(topicName, aMessage);
+			delivered = true;
+		}
+		
+		Enumeration<String> keys = callbacksWildcards.keys();
 		while (keys.hasMoreElements()) {
 			String topicFilter = (String)keys.nextElement();
 			// callback may already have been removed in the meantime, so a null check is necessary
-			IMqttMessageListener callback = callbacks.get(topicFilter);
+			callback = callbacksWildcards.get(topicFilter);
 			if(callback == null) {
 				continue;
 			}
 			if (MqttTopic.isMatched(topicFilter, topicName)) {
 				aMessage.setId(messageId);
-				((IMqttMessageListener)callback).messageArrived(topicName, aMessage);
+				callback.messageArrived(topicName, aMessage);
 				delivered = true;
 			}
 		}
