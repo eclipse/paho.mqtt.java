@@ -857,24 +857,11 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be
-	 * useful when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none
-	 * MQTT server and it will certainly fail to send the disconnect packet.
-	 *
-	 * @param quiesceTimeout
-	 *            the amount of time in milliseconds to allow for existing work
-	 *            to finish before disconnecting. A value of zero or less means
-	 *            the client will not quiesce.
-	 * @param disconnectTimeout
-	 *            the amount of time in milliseconds to allow send disconnect
-	 *            packet to server.
-	 * @param sendDisconnectPacket
-	 *            if true, will send the disconnect packet to the server
-	 * @throws MqttException
-	 *             if any unexpected error
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long, boolean)
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket)
 			throws MqttException {
