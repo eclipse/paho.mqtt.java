@@ -30,6 +30,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.eclipse.paho.client.mqttv3.IMqttDns;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
@@ -64,8 +65,8 @@ public class SSLNetworkModule extends TCPNetworkModule {
 	 * @param resourceContext
 	 *            Resource Context
 	 */
-	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext) {
-		super(factory, host, port, resourceContext);
+	public SSLNetworkModule(SSLSocketFactory factory, String host, int port, String resourceContext, IMqttDns dns) {
+		super(factory, host, port, resourceContext, dns);
 		this.host = host;
 		this.port = port;
 		log.setResourceName(resourceContext);

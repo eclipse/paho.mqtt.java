@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.Properties;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.eclipse.paho.client.mqttv3.IMqttDns;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
@@ -49,8 +50,8 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	 */
 	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
 
-	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, Properties customWebSocketHeaders) {
-		super(factory, host, port, clientId);
+	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, IMqttDns dns, Properties customWebSocketHeaders) {
+		super(factory, host, port, clientId, dns);
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
