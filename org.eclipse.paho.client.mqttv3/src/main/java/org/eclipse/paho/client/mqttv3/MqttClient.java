@@ -673,6 +673,13 @@ public class MqttClient implements IMqttClient {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#isConnected()
+	 */
+	public boolean isConnecting() {
+		return aClient.isConnecting();
+	}
+
+	/* (non-Javadoc)
 	 * @see org.eclipse.paho.client.mqttv3.IMqttClient#setCallback(org.eclipse.paho.client.mqttv3.MqttCallback)
 	 */
 	public void setCallback(MqttCallback callback) {
