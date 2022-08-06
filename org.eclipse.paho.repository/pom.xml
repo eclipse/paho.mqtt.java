@@ -1,15 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.eclipse.paho</groupId>
-        <artifactId>java-parent</artifactId>
-        <version>1.2.6</version>
+    <groupId>org.eclipse.paho</groupId>
+    <artifactId>java-parent</artifactId>
+    <version>1.2.5</version>
     </parent>
 
-    <artifactId>org.eclipse.paho.mqttv5.client.repository</artifactId>
-    <version>1.2.6</version>
+    <artifactId>org.eclipse.paho.repository</artifactId>
+    <version>1.2.5</version>
     <packaging>eclipse-repository</packaging>
-
     <name>Paho P2 Repository</name>
 
     <build>
@@ -44,25 +43,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- <plugin>
-                <groupId>org.eclipse.tycho.extras</groupId>
-                <artifactId>tycho-p2-extras-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>update-main-p2-repo</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>publish-features-and-bundles</goal>
-                        </goals>
-                        <configuration>
-                            <append>true</append>
-                            <artifactRepositoryLocation>/shared/technology/paho/Java</artifactRepositoryLocation>
-                            <metadataRepositoryLocation>/shared/technology/paho/Java</metadataRepositoryLocation>
-                            <sourceLocation>${project.build.directory}/repository</sourceLocation>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin> -->
         </plugins>
     </build>
 </project>

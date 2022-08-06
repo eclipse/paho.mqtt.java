@@ -17,6 +17,7 @@ package org.eclipse.paho.client.mqttv3.internal;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,7 +47,7 @@ public class CommsSender implements Runnable {
 	private Thread 	sendThread		= null;
 	private String threadName;
 	private Future<?> senderFuture;
-	
+
 	private ClientState clientState = null;
 	private MqttOutputStream out;
 	private ClientComms clientComms = null;
@@ -71,13 +72,18 @@ public class CommsSender implements Runnable {
 		synchronized (lifecycle) {
 			if (current_state == State.STOPPED && target_state == State.STOPPED) {
 				target_state = State.RUNNING;
+				current_state = State.RUNNING;
 				if (executorService == null) {
-					new Thread(this).start();
+					senderFuture = null;
+					sendThread = new Thread(this);
+					sendThread.start();
 				} else {
+					sendThread = null;
 					senderFuture = executorService.submit(this);
 				}
 			}
 		}
+    
 		AtomicInteger stoppedStateCounter = new AtomicInteger(0);
 		while (!isRunning()) {
 			try { Thread.sleep(100); } catch (Exception e) { }
@@ -96,39 +102,44 @@ public class CommsSender implements Runnable {
 	 */
 	public void stop() {
 		final String methodName = "stop";
-		
+		boolean isRunning;
+
 		if (!isRunning()) {
 			return;
 		}
-			
+
 		synchronized (lifecycle) {
-			if (senderFuture != null) {
-				senderFuture.cancel(true);
-			}
 			//@TRACE 800=stopping sender
 			log.fine(CLASS_NAME,methodName,"800");
-			if (isRunning()) {
+			isRunning = isRunning();
+			if (isRunning) {
 				target_state = State.STOPPED;
 				clientState.notifyQueueLock();
 			}
 		}
-		while (isRunning()) {
-			try { Thread.sleep(100); } catch (Exception e) { }
-			clientState.notifyQueueLock();
+		// This and the clause above will prevent a thread from waiting for itself.
+		if (isRunning) {
+			if (senderFuture != null) {
+				try {
+					senderFuture.get();
+				} catch (ExecutionException | InterruptedException e) {
+				}
+			} else {
+				try {
+					sendThread.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		//@TRACE 801=stopped
 		log.fine(CLASS_NAME,methodName,"801");
 	}
 
 	public void run() {
-		sendThread = Thread.currentThread();
-		sendThread.setName(threadName);
+		Thread.currentThread().setName(threadName);
 		final String methodName = "run";
 		MqttWireMessage message = null;
-		
-		synchronized (lifecycle) {
-			current_state = State.RUNNING;
-		}
 
 		try {
 			State my_target;
@@ -188,7 +199,6 @@ public class CommsSender implements Runnable {
 		} finally {
 			synchronized (lifecycle) {
 				current_state = State.STOPPED;
-				sendThread = null;
 			}
 		}
 

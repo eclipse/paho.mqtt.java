@@ -542,6 +542,9 @@ public class ClientState {
 						persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
 						tokenStore.saveToken(token, message);
 						break;
+					case 0:
+						tokenStore.saveToken(token, message);
+						break;
 				}
 				pendingMessages.addElement(message);
 				queueLock.notifyAll();
@@ -1366,8 +1369,12 @@ public class ClientState {
 			// Quiesce time up or inflight messages delivered.  Ensure pending delivery
 			// vectors are cleared ready for disconnect to be sent as the final flow.
 			synchronized (queueLock) {
-				pendingMessages.clear();				
-				pendingFlows.clear();
+				if (pendingMessages != null) {
+					pendingMessages.clear();
+				}
+				if (pendingFlows != null) {
+					pendingFlows.clear();
+				}
 				quiescing = false;
 				actualInFlight = 0;
 			}

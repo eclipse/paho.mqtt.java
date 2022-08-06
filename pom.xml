@@ -4,10 +4,12 @@
 	<groupId>org.eclipse.paho</groupId>
 	<artifactId>java-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.2.6-SNAPSHOT</version>
+	<version>1.2.6</version>
 
     <properties>
         <!-- source & target java version for MQTT Client -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <mqttclient.java.version>1.8</mqttclient.java.version>
         <!-- source & target java version for others modules -->
         <java.version>1.8</java.version>
@@ -113,7 +115,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>2.7.1</version>
                     <configuration>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <source>${java.version}</source>
@@ -123,8 +125,9 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.2.0</version>
                     <configuration>
+                        <javadocExecutable>/usr/bin/javadoc</javadocExecutable>
                         <source>8</source>
                     </configuration>
                 </plugin>
@@ -351,11 +354,8 @@
     </profiles>
     <modules>
         <module>org.eclipse.paho.client.mqttv3</module>
-        <module>org.eclipse.paho.client.mqttv3.test</module>
         <module>org.eclipse.paho.client.mqttv3.repository</module>
-        <module>org.eclipse.paho.sample.utility</module>
         <module>org.eclipse.paho.mqttv5.client</module>
-        <module>org.eclipse.paho.mqttv5.client.test</module>
         <module>org.eclipse.paho.mqttv5.client.repository</module>
     </modules>
 </project>
