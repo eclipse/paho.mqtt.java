@@ -136,12 +136,11 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		socket.setSoTimeout(this.handshakeTimeoutSecs * 1000);
 		
 		// SNI support.  Should be automatic under some circumstances - not all, apparently
+		SSLParameters sslParameters = ((SSLSocket)socket).getSSLParameters();
 		try {
-			SSLParameters sslParameters = new SSLParameters();
 			List<SNIServerName> sniHostNames = new ArrayList<SNIServerName>(1);
 			sniHostNames.add(new SNIHostName(host));
 			sslParameters.setServerNames(sniHostNames);
-			((SSLSocket)socket).setSSLParameters(sslParameters);
 		} catch(NoClassDefFoundError e) {
 			// Android < 7.0
 		}
@@ -149,13 +148,13 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		// If default Hostname verification is enabled, use the same method that is used with HTTPS
 		if(this.httpsHostnameVerificationEnabled) {
 			try {
-				SSLParameters sslParams = new SSLParameters();
-				sslParams.setEndpointIdentificationAlgorithm("HTTPS");
-				((SSLSocket) socket).setSSLParameters(sslParams);
+				sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
 			} catch(NoSuchMethodError e) {
 				// Android < 7.0
 			}
 		}
+		((SSLSocket)socket).setSSLParameters(sslParameters);
+
 		((SSLSocket) socket).startHandshake();
 		if (hostnameVerifier != null && !this.httpsHostnameVerificationEnabled) {
 			SSLSession session = ((SSLSocket) socket).getSession();

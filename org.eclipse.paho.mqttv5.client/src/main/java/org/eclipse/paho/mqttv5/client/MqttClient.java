@@ -516,13 +516,27 @@ public class MqttClient implements IMqttClient {
 	 * @see org.eclipse.paho.mqttv5.client.IMqttClient#subscribe(java.lang.String,
 	 * int)
 	 */
-	public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException {
-		return this.subscribe(new String[] { topicFilter }, new int[] { qos }, new IMqttMessageListener[] { messageListener });
+	public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener)
+			throws MqttException {
+		MqttSubscription subscription = new MqttSubscription(topicFilter);
+		subscription.setQos(qos);
+		IMqttToken token = aClient.subscribe(subscription, messageListener);
+		token.waitForCompletion();
+		return token;
 	}
 
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
-		return this.subscribe(topicFilters, qos, messageListeners);
+		if (topicFilters.length != qos.length) {
+			throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
+		}
+
+		MqttSubscription[] subscriptions = new MqttSubscription[topicFilters.length];
+		for (int i = 0; i < topicFilters.length; ++i) {
+			subscriptions[i] = new MqttSubscription(topicFilters[i], qos[i]);
+		}
+
+		return this.subscribe(subscriptions, messageListeners);
 	}
 
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException {

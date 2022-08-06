@@ -64,7 +64,7 @@ public class WebSocketSecureNetworkModuleFactory implements NetworkModuleFactory
 
 		// Create the network module...
 		WebSocketSecureNetworkModule netModule = new WebSocketSecureNetworkModule((SSLSocketFactory) factory,
-				brokerUri.toString(), host, port, clientId, options.getCustomWebSocketHeaders());
+				brokerUri.toString(), host, port, clientId, options.getCustomWebSocketHeaders(), options.isSkipPortDuringHandshake());
 		netModule.setSSLhandshakeTimeout(options.getConnectionTimeout());
 		netModule.setSSLHostnameVerifier(options.getSSLHostnameVerifier());
 		netModule.setHttpsHostnameVerificationEnabled(options.isHttpsHostnameVerificationEnabled());
