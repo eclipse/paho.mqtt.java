@@ -39,6 +39,7 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	private String uri;
 	private String host;
 	private int port;
+	private final boolean skipPortDuringHandshake;
 	private Map<String, String> customWebSocketHeaders;
 	ByteBuffer recievedPayload;
 	
@@ -49,19 +50,20 @@ public class WebSocketSecureNetworkModule extends SSLNetworkModule{
 	 */
 	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
 
-	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, Map<String, String> customWebSocketHeaders) {
+	public WebSocketSecureNetworkModule(SSLSocketFactory factory, String uri, String host, int port, String clientId, Map<String, String> customWebSocketHeaders, boolean skipPortDuringHandshake) {
 		super(factory, host, port, clientId);
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
 		this.customWebSocketHeaders = customWebSocketHeaders;
 		this.pipedInputStream = new PipedInputStream();
+		this.skipPortDuringHandshake = skipPortDuringHandshake;
 		log.setResourceName(clientId);
 	}
 
 	public void start() throws IOException, MqttException {
 		super.start();
-		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port, customWebSocketHeaders);
+		WebSocketHandshake handshake = new WebSocketHandshake(super.getInputStream(), super.getOutputStream(), uri, host, port, customWebSocketHeaders, skipPortDuringHandshake);
 		handshake.execute();
 		this.webSocketReceiver = new WebSocketReceiver(getSocketInputStream(), pipedInputStream);
 		webSocketReceiver.start("WssSocketReceiver");

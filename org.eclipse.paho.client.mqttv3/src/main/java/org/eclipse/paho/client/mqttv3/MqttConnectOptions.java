@@ -74,6 +74,7 @@ public class MqttConnectOptions {
 	private int mqttVersion = MQTT_VERSION_DEFAULT;
 	private boolean automaticReconnect = false;
 	private int maxReconnectDelay = 128000;
+	private boolean skipPortDuringHandshake = false;
 	private Map<String, String> customWebSocketHeaders = null;
 
 	// Client Operation Parameters
@@ -100,7 +101,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the password to use for the connection.
-	 * 
+	 *
 	 * @return the password to use for the connection.
 	 */
 	public char[] getPassword() {
@@ -109,7 +110,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Sets the password to use for the connection.
-	 * 
+	 *
 	 * @param password
 	 *            A Char Array of the password
 	 */
@@ -119,7 +120,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the user name to use for the connection.
-	 * 
+	 *
 	 * @return the user name to use for the connection.
 	 */
 	public String getUserName() {
@@ -128,7 +129,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Sets the user name to use for the connection.
-	 * 
+	 *
 	 * @param userName
 	 *            The Username as a String
 	 */
@@ -138,7 +139,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Get the maximum time (in millis) to wait between reconnects
-	 * 
+	 *
 	 * @return Get the maximum time (in millis) to wait between reconnects
 	 */
 	public int getMaxReconnectDelay() {
@@ -147,7 +148,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Set the maximum time to wait between reconnects
-	 * 
+	 *
 	 * @param maxReconnectDelay
 	 *            the duration (in millis)
 	 */
@@ -207,7 +208,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Sets up the will information, based on the supplied parameters.
-	 * 
+	 *
 	 * @param topic
 	 *            the topic to send the LWT message to
 	 * @param msg
@@ -228,7 +229,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the "keep alive" interval.
-	 * 
+	 *
 	 * @see #setKeepAliveInterval(int)
 	 * @return the keep alive interval.
 	 */
@@ -238,7 +239,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the MQTT version.
-	 * 
+	 *
 	 * @see #setMqttVersion(int)
 	 * @return the MQTT version.
 	 */
@@ -274,7 +275,7 @@ public class MqttConnectOptions {
 	/**
 	 * Returns the "max inflight". The max inflight limits to how many messages we
 	 * can send without receiving acknowledgments.
-	 * 
+	 *
 	 * @see #setMaxInflight(int)
 	 * @return the max inflight
 	 */
@@ -288,7 +289,7 @@ public class MqttConnectOptions {
 	 * <p>
 	 * The default value is 10
 	 * </p>
-	 * 
+	 *
 	 * @param maxInflight
 	 *            the number of maxInfligt messages
 	 */
@@ -301,7 +302,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the connection timeout value.
-	 * 
+	 *
 	 * @see #setConnectionTimeout(int)
 	 * @return the connection timeout value.
 	 */
@@ -315,7 +316,7 @@ public class MqttConnectOptions {
 	 * the MQTT server to be established. The default timeout is 30 seconds. A value
 	 * of 0 disables timeout processing meaning the client will wait until the
 	 * network connection is made successfully or fails.
-	 * 
+	 *
 	 * @param connectionTimeout
 	 *            the timeout value, measured in seconds. It must be &gt;0;
 	 */
@@ -329,7 +330,7 @@ public class MqttConnectOptions {
 	/**
 	 * Returns the socket factory that will be used when connecting, or
 	 * <code>null</code> if one has not been set.
-	 * 
+	 *
 	 * @return The Socket Factory
 	 */
 	public SocketFactory getSocketFactory() {
@@ -341,7 +342,7 @@ public class MqttConnectOptions {
 	 * apply its own policies around the creation of network sockets. If using an
 	 * SSL connection, an <code>SSLSocketFactory</code> can be used to supply
 	 * application-specific security settings.
-	 * 
+	 *
 	 * @param socketFactory
 	 *            the factory to use.
 	 */
@@ -351,7 +352,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the topic to be used for last will and testament (LWT).
-	 * 
+	 *
 	 * @return the MqttTopic to use, or <code>null</code> if LWT is not set.
 	 * @see #setWill(MqttTopic, byte[], int, boolean)
 	 */
@@ -363,7 +364,7 @@ public class MqttConnectOptions {
 	 * Returns the message to be sent as last will and testament (LWT). The returned
 	 * object is "read only". Calling any "setter" methods on the returned object
 	 * will result in an <code>IllegalStateException</code> being thrown.
-	 * 
+	 *
 	 * @return the message to use, or <code>null</code> if LWT is not set.
 	 */
 	public MqttMessage getWillMessage() {
@@ -372,7 +373,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the SSL properties for the connection.
-	 * 
+	 *
 	 * @return the properties for the SSL connection
 	 */
 	public Properties getSSLProperties() {
@@ -448,7 +449,7 @@ public class MqttConnectOptions {
 	 * object instead of using the default algorithm available in the platform.
 	 * Example values: "PKIX" or "IBMJ9X509".</dd>
 	 * </dl>
-	 * 
+	 *
 	 * @param props
 	 *            The SSL {@link Properties}
 	 */
@@ -466,7 +467,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Returns the HostnameVerifier for the SSL connection.
-	 * 
+	 *
 	 * @return the HostnameVerifier for the SSL connection
 	 */
 	public HostnameVerifier getSSLHostnameVerifier() {
@@ -480,7 +481,7 @@ public class MqttConnectOptions {
 	 * <p>
 	 * There is no default HostnameVerifier
 	 * </p>
-	 * 
+	 *
 	 * @param hostnameVerifier
 	 *            the {@link HostnameVerifier}
 	 */
@@ -491,7 +492,7 @@ public class MqttConnectOptions {
 	/**
 	 * Returns whether the client and server should remember state for the client
 	 * across reconnects.
-	 * 
+	 *
 	 * @return the clean session flag
 	 */
 	public boolean isCleanSession() {
@@ -518,7 +519,7 @@ public class MqttConnectOptions {
 	 * <li>The server will treat a subscription as non-durable
 	 * </ul>
 	 * </ul>
-	 * 
+	 *
 	 * @param cleanSession
 	 *            Set to True to enable cleanSession
 	 */
@@ -528,7 +529,7 @@ public class MqttConnectOptions {
 
 	/**
 	 * Return a list of serverURIs the client may connect to
-	 * 
+	 *
 	 * @return the serverURIs or null if not set
 	 */
 	public String[] getServerURIs() {
@@ -581,7 +582,7 @@ public class MqttConnectOptions {
 	 * </p>
 	 * </li>
 	 * </ol>
-	 * 
+	 *
 	 * @param serverURIs
 	 *            to be used by the client
 	 */
@@ -616,7 +617,7 @@ public class MqttConnectOptions {
 	/**
 	 * Returns whether the client will automatically attempt to reconnect to the
 	 * server if the connection is lost
-	 * 
+	 *
 	 * @return the automatic reconnection flag.
 	 */
 	public boolean isAutomaticReconnect() {
@@ -635,14 +636,14 @@ public class MqttConnectOptions {
 	 * double until it is at 2 minutes at which point the delay will stay at 2
 	 * minutes.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param automaticReconnect
 	 *            If set to True, Automatic Reconnect will be enabled
 	 */
 	public void setAutomaticReconnect(boolean automaticReconnect) {
 		this.automaticReconnect = automaticReconnect;
 	}
-	
+
 	public int getExecutorServiceTimeout() {
 		return executorServiceTimeout;
 	}
@@ -651,12 +652,30 @@ public class MqttConnectOptions {
 	 * Set the time in seconds that the executor service should wait when
 	 * terminating before forcefully terminating. It is not recommended to change
 	 * this value unless you are absolutely sure that you need to.
-	 * 
+	 *
 	 * @param executorServiceTimeout the time in seconds to wait when shutting down.Ï
 	 */
 	public void setExecutorServiceTimeout(int executorServiceTimeout) {
 		this.executorServiceTimeout = executorServiceTimeout;
 	}
+
+	/**
+	 * Returns whether to skip a port during a handshake
+	 *
+	 * @return skipPortDuringHandshake
+	 */
+    public boolean isSkipPortDuringHandshake() {
+        return skipPortDuringHandshake;
+    }
+
+    /**
+     * Sets a flag that indicates whether to add a port to the host during a handshake
+     *
+     * @param skip if set to True, the port will not be added
+     */
+    public void setSkipPortDuringHandshake(boolean skip) {
+        this.skipPortDuringHandshake = skip;
+    }
 
 	/**
 	 * @return The Debug Properties
@@ -680,6 +699,7 @@ public class MqttConnectOptions {
 		} else {
 			p.put("SSLProperties", getSSLProperties());
 		}
+		p.put("SkipPortDuringHandshake", isSkipPortDuringHandshake());
 		return p;
 	}
 
@@ -700,5 +720,5 @@ public class MqttConnectOptions {
 	public String toString() {
 		return Debug.dumpProperties(getDebug(), "Connection options");
 	}
-	
+
 }

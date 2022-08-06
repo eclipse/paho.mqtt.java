@@ -50,6 +50,8 @@ public class WebSocketHandshake {
 	private static final String HTTP_HEADER_CONNECTION_VALUE = "upgrade";
 	private static final String HTTP_HEADER_SEC_WEBSOCKET_PROTOCOL = "sec-websocket-protocol";
 
+	private final boolean skipPortDuringHandshake;
+
 	InputStream input;
 	OutputStream output;
 	String uri;
@@ -57,13 +59,14 @@ public class WebSocketHandshake {
 	int port;
 	Map<String, String> customWebSocketHeaders;
 
-	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Map<String, String> customWebSocketHeaders){
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Map<String, String> customWebSocketHeaders, boolean skipPortDuringHandshake){
 		this.input = input;
 		this.output = output;
 		this.uri = uri;
 		this.host = host;
 		this.port = port;
 		this.customWebSocketHeaders = customWebSocketHeaders;
+		this.skipPortDuringHandshake = skipPortDuringHandshake;
 	}
 
 
@@ -99,7 +102,7 @@ public class WebSocketHandshake {
 
 			PrintWriter pw = new PrintWriter(output);
 			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
-			if (port != 80) {
+			if (port != 80 && !skipPortDuringHandshake) {
 				pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
 			}
 			else {
