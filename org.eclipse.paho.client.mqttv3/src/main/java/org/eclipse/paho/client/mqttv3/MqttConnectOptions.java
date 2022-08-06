@@ -706,7 +706,7 @@ public class MqttConnectOptions {
 	/**
 	 * Sets the Custom WebSocket Headers for the WebSocket Connection.
 	 *
-	 * @param props The custom WebSocket headers {@link Map<String, String>}
+	 * @param props The custom WebSocket headers
 	 */
 
 	public void setCustomWebSocketHeaders(Map<String, String> props) {
