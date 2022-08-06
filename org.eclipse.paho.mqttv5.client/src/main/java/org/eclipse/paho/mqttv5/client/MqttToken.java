@@ -18,6 +18,7 @@ package org.eclipse.paho.mqttv5.client;
 
 import org.eclipse.paho.mqttv5.client.internal.Token;
 import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
@@ -32,14 +33,19 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
  */
 
 public class MqttToken implements IMqttToken {
+        private MqttAsyncClient client = null;
 	/**
 	 * A reference to the the class that provides most of the implementation of the
 	 * MqttToken. MQTT application programs must not use the internal class.
 	 */
 	public Token internalTok = null;
 
-	public MqttToken() {
-	}
+        public MqttToken() {
+        }
+
+        public MqttToken(MqttAsyncClient client) {
+                this.client = client;
+        }
 
 	public MqttToken(String logContext) {
 		internalTok = new Token(logContext);
@@ -102,13 +108,41 @@ public class MqttToken implements IMqttToken {
 		return internalTok.getResponse();
 	}
 
-	public MqttProperties getMessageProperties() {
+	public MqttProperties getResponseProperties() {
 		return (internalTok.getWireMessage() == null) ? null : internalTok.getWireMessage().getProperties();
 	}
+
+        public MqttWireMessage getRequestMessage() {
+                return internalTok.getRequestMessage();
+        }
+
+        public void setRequestMessage(MqttWireMessage request) {
+                internalTok.setRequestMessage(request);
+        }
+
+        public MqttProperties getRequestProperties() {
+		return (internalTok.getRequestMessage() == null) ? null : internalTok.getRequestMessage().getProperties();
+        }
 
 	@Override
 	public int[] getReasonCodes() {
 		return internalTok.getReasonCodes();
 	}
+
+        /**
+         * Returns the message associated with this token.
+         * <p>Until the message has been delivered, the message being delivered will
+         * be returned. Once the message has been delivered <code>null</code> will be
+         * returned.
+         * @return the message associated with this token or null if already delivered.
+         * @throws MqttException if there was a problem completing retrieving the message
+         */
+        public MqttMessage getMessage() throws MqttException {
+                return internalTok.getMessage();
+        }
+
+        protected void setMessage(MqttMessage msg) {
+                internalTok.setMessage(msg);
+        }
 
 }

@@ -93,9 +93,11 @@ public class ClientComms {
 	 * @param persistence the {@link MqttClientPersistence} layer.
 	 * @param pingSender the {@link MqttPingSender}
 	 * @param executorService the {@link ExecutorService}
+	 * @param highResolutionTimer the {@link HighResolutionTimer}
 	 * @throws MqttException if an exception occurs whilst communicating with the server
 	 */
-	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender, ExecutorService executorService) throws MqttException {
+	public ClientComms(IMqttAsyncClient client, MqttClientPersistence persistence, MqttPingSender pingSender,
+					   ExecutorService executorService, HighResolutionTimer highResolutionTimer) throws MqttException {
 		this.conState = DISCONNECTED;
 		this.client 	= client;
 		this.persistence = persistence;
@@ -105,7 +107,7 @@ public class ClientComms {
 
 		this.tokenStore = new CommsTokenStore(getClient().getClientId());
 		this.callback 	= new CommsCallback(this);
-		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender);
+		this.clientState = new ClientState(persistence, tokenStore, this.callback, this, pingSender, highResolutionTimer);
 
 		callback.setClientState(clientState);
 		log.setResourceName(getClient().getClientId());
@@ -184,7 +186,9 @@ public class ClientComms {
 				//@TRACE 507=Client Connected, Offline Buffer available, but not empty. Adding message to buffer. message={0}
 				log.fine(CLASS_NAME, methodName, "507", new Object[] {message.getKey()});
 				if(disconnectedMessageBuffer.isPersistBuffer()){
-					this.clientState.persistBufferedMessage(message);
+					if (message instanceof MqttPublish) {
+						this.clientState.persistBufferedMessage(message);
+					}
 				}
 				disconnectedMessageBuffer.putMessage(message, token);
 			} else {

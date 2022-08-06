@@ -55,7 +55,7 @@ public class NetworkModuleService {
 	 * @throws IllegalArgumentException is case the URI is invalid or there is no {@link NetworkModule} installed for
 	 * the URI scheme
 	 */
-	public synchronized static void validateURI(String brokerUri) throws IllegalArgumentException {
+	public static void validateURI(String brokerUri) throws IllegalArgumentException {
 		try {
 			URI uri = new URI(brokerUri);
 			String scheme = uri.getScheme();
@@ -63,10 +63,12 @@ public class NetworkModuleService {
 				throw new IllegalArgumentException("missing scheme in broker URI: " + brokerUri);
 			}
 			scheme = scheme.toLowerCase();
-			for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
-				if (factory.getSupportedUriSchemes().contains(scheme)) {
-					factory.validateURI(uri);
-					return;
+			synchronized (FACTORY_SERVICE_LOADER) {
+				for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
+					if (factory.getSupportedUriSchemes().contains(scheme)) {
+						factory.validateURI(uri);
+						return;
+					}
 				}
 			}
 			throw new IllegalArgumentException("no NetworkModule installed for scheme \"" + scheme
@@ -93,9 +95,11 @@ public class NetworkModuleService {
 			URI brokerUri = new URI(address);
 			applyRFC3986AuthorityPatch(brokerUri);
 			String scheme = brokerUri.getScheme().toLowerCase();
-			for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
-				if (factory.getSupportedUriSchemes().contains(scheme)) {
-					return factory.createNetworkModule(brokerUri, options, clientId);
+			synchronized (FACTORY_SERVICE_LOADER) {
+				for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
+					if (factory.getSupportedUriSchemes().contains(scheme)) {
+						return factory.createNetworkModule(brokerUri, options, clientId);
+					}
 				}
 			}
 			/*

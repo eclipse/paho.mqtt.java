@@ -57,9 +57,9 @@ public class WebSocketHandshake {
 	String uri;
 	String host;
 	int port;
-	Properties customWebSocketHeaders;
+	Map<String, String> customWebSocketHeaders;
 
-	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Properties customWebSocketHeaders, boolean skipPortDuringHandshake){
+	public WebSocketHandshake(InputStream input, OutputStream output, String uri, String host, int port, Map<String, String> customWebSocketHeaders, boolean skipPortDuringHandshake){
 		this.input = input;
 		this.output = output;
 		this.uri = uri;
@@ -116,12 +116,9 @@ public class WebSocketHandshake {
 			pw.print("Sec-WebSocket-Version: 13" + LINE_SEPARATOR);
 
 			if (customWebSocketHeaders != null) {
-				Set keys = customWebSocketHeaders.keySet();
-				Iterator i = keys.iterator();
-				while (i.hasNext()) {
-					String k = (String) i.next();
-					String value = customWebSocketHeaders.getProperty(k);
-					pw.print(k + ": " + value + LINE_SEPARATOR);
+				for (String headerKey : customWebSocketHeaders.keySet()) {
+					String headerValue = customWebSocketHeaders.get(headerKey);
+					pw.print(headerKey + ": " + headerValue + LINE_SEPARATOR);
 				}
 			}
 

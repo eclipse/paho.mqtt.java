@@ -1,7 +1,6 @@
 package org.eclipse.paho.client.mqttv3.test;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -73,6 +72,25 @@ public class MqttDataTypesTest {
 	}
 
 	@Test
+	public void TestEncodeAndDecodeUTF8StringWithSurrogates() throws MqttException {
+		String testString = "\uD801\uDC37";
+		String decodedUTF8 = encodeAndDecodeString(testString);
+		Assert.assertEquals(testString, decodedUTF8);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void TestEncodeAndDecodeUTF8StringWithTrailingHighSurrogate() throws MqttException {
+		String testString = "\uD801";
+		encodeAndDecodeString(testString);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void TestEncodeAndDecodeUTF8StringWithLowSurrogate() throws MqttException {
+		String testString = "\uDC37";
+		encodeAndDecodeString(testString);
+	}
+
+	@Test
 	public void TestEncodeAndDecodeUTF8String() throws MqttException {
 		String testString = "Answer to life the universe and everything";
 		// System.out.println(String.format("'%s' is %d bytes, %d chars long",
@@ -91,14 +109,11 @@ public class MqttDataTypesTest {
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void TestEncodeAndDecodeEmojiString() throws MqttException {
 		String testString = "👁🐝Ⓜ️️";
-		// System.out.println(String.format("'%s' is %d bytes, %d chars long",
-		// testString, testString.getBytes().length, testString.length()));
 		String decodedUTF8 = encodeAndDecodeString(testString);
 		Assert.assertEquals(testString, decodedUTF8);
-
 	}
 
 	@Test
@@ -121,7 +136,7 @@ public class MqttDataTypesTest {
 	 */
 	@Test
 	public void testICanEatGlass() throws IOException, MqttException {
-		ClassLoader classLoader = getClass().getClassLoader();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		String encodedFileName = classLoader.getResource("i_can_eat_glass.txt").getFile();
 		String decodedFileName;
 		try {

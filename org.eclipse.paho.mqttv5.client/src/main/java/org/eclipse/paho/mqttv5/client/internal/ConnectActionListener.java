@@ -114,30 +114,30 @@ public class ConnectActionListener implements MqttActionListener {
 	public void onSuccess(IMqttToken token) {
 		// Set properties imposed on us by the Server
 		MqttToken myToken = (MqttToken) token;
-		if (myToken.getMessageProperties() != null) {
-			mqttConnection.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
-			mqttConnection.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
-			mqttConnection.setRetainAvailable(myToken.getMessageProperties().isRetainAvailable());
-			mqttConnection.setOutgoingMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
+		if (myToken.getResponseProperties() != null) {
+			mqttConnection.setReceiveMaximum(myToken.getResponseProperties().getReceiveMaximum());
+			mqttConnection.setMaximumQoS(myToken.getResponseProperties().getMaximumQoS());
+			mqttConnection.setRetainAvailable(myToken.getResponseProperties().isRetainAvailable());
+			mqttConnection.setOutgoingMaximumPacketSize(myToken.getResponseProperties().getMaximumPacketSize());
 			mqttConnection.setIncomingMaximumPacketSize(options.getMaximumPacketSize());
-			mqttConnection.setOutgoingTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
+			mqttConnection.setOutgoingTopicAliasMaximum(myToken.getResponseProperties().getTopicAliasMaximum());
 			mqttConnection
-			.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
+			.setWildcardSubscriptionsAvailable(myToken.getResponseProperties().isWildcardSubscriptionsAvailable());
 			mqttConnection.setSubscriptionIdentifiersAvailable(
-					myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
-			mqttConnection.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
+					myToken.getResponseProperties().isSubscriptionIdentifiersAvailable());
+			mqttConnection.setSharedSubscriptionsAvailable(myToken.getResponseProperties().isSharedSubscriptionAvailable());
 
 			// If provided, set the server keep alive value.
-			if(myToken.getMessageProperties().getServerKeepAlive() != null) {
-				mqttConnection.setKeepAliveSeconds(myToken.getMessageProperties().getServerKeepAlive());
+			if(myToken.getResponseProperties().getServerKeepAlive() != null) {
+				mqttConnection.setKeepAliveSeconds(myToken.getResponseProperties().getServerKeepAlive());
 			}
 
 			// If we are assigning the client ID post connect, then we need to re-initialise
 			// our persistence layer.
-			if (myToken.getMessageProperties().getAssignedClientIdentifier() != null) {
-				mqttSession.setClientId(myToken.getMessageProperties().getAssignedClientIdentifier());
+			if (myToken.getResponseProperties().getAssignedClientIdentifier() != null) {
+				mqttSession.setClientId(myToken.getResponseProperties().getAssignedClientIdentifier());
 				try {
-					persistence.open(myToken.getMessageProperties().getAssignedClientIdentifier());
+					persistence.open(myToken.getResponseProperties().getAssignedClientIdentifier());
 
 					if (options.isCleanStart()) {
 						persistence.clear();

@@ -1,19 +1,12 @@
-sudo: true
+sudo: required
 language: java
 install: true
-matrix:
+
+jobs:
   include:
     - os: linux
       dist: trusty
-      sudo: required
       jdk: oraclejdk8
-#    - os: osx
-#      jdk: oraclejdk8
-
-
-
-
-sudo: required
 
 before_install:
   - ./start-broker.sh
@@ -21,11 +14,5 @@ before_install:
 script:
   - mvn -B clean -q
   - mvn -B --projects org.eclipse.paho.client.mqttv3,org.eclipse.paho.client.mqttv3.test test -q
-# - mvn -B --projects org.eclipse.paho.mqttv5.common,org.eclipse.paho.mqttv5.client,org.eclipse.paho.mqttv5.client.test test -q
+  - mvn -B --projects org.eclipse.paho.mqttv5.client,org.eclipse.paho.mqttv5.client.test test -q
 
-#addons:
-#  apt:
-#    sources:
-#      - sourceline: 'ppa:mosquitto-dev/mosquitto-ppa'
-#    packages:
-#      - mosquitto

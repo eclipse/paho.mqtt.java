@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.nio.ByteBuffer;
-import java.util.Properties;
+import java.util.Map;
 
 import javax.net.SocketFactory;
 
@@ -38,7 +38,7 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	private String uri;
 	private String host;
 	private int port;
-	private Properties customWebsocketHeaders;
+	private Map<String, String> customWebsocketHeaders;
 	private PipedInputStream pipedInputStream;
 	private WebSocketReceiver webSocketReceiver;
 	private final boolean skipPortDuringHandshake;
@@ -50,8 +50,8 @@ public class WebSocketNetworkModule extends TCPNetworkModule {
 	 *  Frame before passing it through to the real socket.
 	 */
 	private ByteArrayOutputStream outputStream = new ExtendedByteArrayOutputStream(this);
-
-	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext, Properties customWebsocketHeaders, boolean skipPortDuringHandshake){
+  
+	public WebSocketNetworkModule(SocketFactory factory, String uri, String host, int port, String resourceContext, Map<String, String> customWebsocketHeaders, boolean skipPortDuringHandshake){
 		super(factory, host, port, resourceContext);
 		this.uri = uri;
 		this.host = host;
