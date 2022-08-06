@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  *******************************************************************************/
 
@@ -18,6 +18,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
@@ -203,7 +204,7 @@ public class MqttV3Receiver implements MqttCallback {
     log.entering(className, methodName, new Object[]{
         sendTopics, expectedQosList, sentBytes});
 
-    int expectedMessageNumbers[] = new int[nPublishers];
+    int[] expectedMessageNumbers = new int[nPublishers];
     for (int i = 0; i < nPublishers; i++) {
       expectedMessageNumbers[i] = 0;
     }
@@ -213,13 +214,13 @@ public class MqttV3Receiver implements MqttCallback {
     long totWait = 0;
     int messageNo = 0;
     while (true) {
-      long startWait = System.currentTimeMillis();
+      long startWait = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
       ReceivedMessage receivedMessage = receiveNext(waitMilliseconds);
       if (receivedMessage == null) {
         break;
       }
       messageNo++;
-      totWait += (System.currentTimeMillis() - startWait);
+      totWait += (TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) - startWait);
 
       // Calculate new wait time based on experience, but not allowing it
       // to get too small

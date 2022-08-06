@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    James Sutton - Bug 459142 - WebSocket support for the Java client.
@@ -99,7 +99,7 @@ public class WebSocketHandshake {
 
 			PrintWriter pw = new PrintWriter(output);
 			pw.print("GET " + path + " HTTP/1.1" + LINE_SEPARATOR);
-			if (port != 80 && port != 443) {
+			if (port != 80) {
 				pw.print("Host: " + host + ":" + port + LINE_SEPARATOR);
 			}
 			else {

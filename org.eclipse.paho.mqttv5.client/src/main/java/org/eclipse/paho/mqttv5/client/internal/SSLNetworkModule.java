@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -16,8 +16,12 @@
 package org.eclipse.paho.mqttv5.client.internal;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SNIHostName;
+import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -33,7 +37,7 @@ import org.eclipse.paho.mqttv5.common.MqttException;
  */
 public class SSLNetworkModule extends TCPNetworkModule {
 	private static final String CLASS_NAME = SSLNetworkModule.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private String[] enabledCiphers;
 	private int handshakeTimeoutSecs;
@@ -125,12 +129,18 @@ public class SSLNetworkModule extends TCPNetworkModule {
 		// RTC 765: Set a timeout to avoid the SSL handshake being blocked indefinitely
 		socket.setSoTimeout(this.handshakeTimeoutSecs * 1000);
 
-		// If default Hostname verification is enabled, use the same method that is used
-		// with HTTPS
+		// SNI support.  Should be automatic under some circumstances - not all, apparently
+		SSLParameters sslParameters = new SSLParameters();
+		List<SNIServerName> sniHostNames = new ArrayList<SNIServerName>(1);
+		sniHostNames.add(new SNIHostName(host));
+		sslParameters.setServerNames(sniHostNames);
+		((SSLSocket)socket).setSSLParameters(sslParameters);
+
+		// If default Hostname verification is enabled, use the same method that is used with HTTPS
 		if (this.httpsHostnameVerificationEnabled) {
 			SSLParameters sslParams = new SSLParameters();
 			sslParams.setEndpointIdentificationAlgorithm("HTTPS");
-			((SSLSocket) socket).setSSLParameters(sslParams);
+			((SSLSocket) socket).setSSLParameters(sslParams);	
 		}
 
 		((SSLSocket) socket).startHandshake();

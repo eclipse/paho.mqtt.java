@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -34,8 +34,8 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  * <code>MqttWireMessage</code>. 
  */
 public class MqttInputStream extends InputStream {
-	private static final String CLASS_NAME = MqttInputStream.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private final String CLASS_NAME = MqttInputStream.class.getName();
+	private final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private ClientState clientState = null;
 	private DataInputStream in;	
@@ -117,8 +117,8 @@ public class MqttInputStream extends InputStream {
 				byte[] header = bais.toByteArray();
 				System.arraycopy(header,0,packet,0, header.length);
 				message = MqttWireMessage.createWireMessage(packet);
-				// @TRACE 501= received {0} 
-				log.fine(CLASS_NAME, methodName, "501",new Object[] {message});
+				// @TRACE 301= received {0} 
+				log.fine(CLASS_NAME, methodName, "301",new Object[] {message});
 			}
 		} catch (SocketTimeoutException e) {
 			// ignore socket read timeout

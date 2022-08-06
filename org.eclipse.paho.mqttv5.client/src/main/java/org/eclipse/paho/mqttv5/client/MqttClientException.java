@@ -138,7 +138,7 @@ public class MqttClientException {
 	 * defined value.
 	 */
 	public static final int REASON_CODE_INCOMING_PACKET_TOO_LARGE = 51001;
-	public static final int REASON_CODE_OUTGOING_PACKET_TOO_LARGE = 51001;
+	public static final int REASON_CODE_OUTGOING_PACKET_TOO_LARGE = 51002;
 
 	// CONNACK return codes
 	/** The protocol version requested is not supported by the server. */

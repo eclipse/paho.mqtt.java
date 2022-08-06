@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2017 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -115,6 +115,10 @@ public class MqttConnectionOptions {
 	private Properties sslClientProps = null; // SSL Client Properties
 	private HostnameVerifier sslHostnameVerifier = null; // SSL Hostname Verifier
 	private Map<String, String> customWebSocketHeaders;
+
+	// Client Operation Parameters
+	private int executorServiceTimeout = 1; // How long to wait in seconds when terminating the executor service.
+
 	/**
 	 * Returns the MQTT version.
 	 * 
@@ -410,10 +414,11 @@ public class MqttConnectionOptions {
 	 * </li>
 	 * </ol>
 	 * 
-	 * @param serverURIs to be used by the client
+	 * @param serverURIs
+	 *            to be used by the client
 	 */
 	public void setServerURIs(String[] serverURIs) {
-		for (String serverURI:serverURIs) {
+		for (String serverURI : serverURIs) {
 			NetworkModuleService.validateURI(serverURI);
 		}
 		this.serverURIs = serverURIs.clone();
@@ -926,7 +931,8 @@ public class MqttConnectionOptions {
 	/**
 	 * Sets the Custom WebSocket Headers for the WebSocket Connection.
 	 *
-	 * @param headers The custom websocket headers {@link Properties}
+	 * @param headers
+	 *            The custom websocket headers {@link Properties}
 	 */
 	public void setCustomWebSocketHeaders(Map<String, String> headers) {
 		this.customWebSocketHeaders = Collections.unmodifiableMap(headers);
@@ -940,15 +946,26 @@ public class MqttConnectionOptions {
 		return Debug.dumpProperties(getDebug(), "Connection options");
 	}
 
-	public static String generateClientId() {
-		return CLIENT_ID_PREFIX + System.nanoTime();
-	}
-
 	public boolean isSendReasonMessages() {
 		return sendReasonMessages;
 	}
 
 	public void setSendReasonMessages(boolean sendReasonMessages) {
 		this.sendReasonMessages = sendReasonMessages;
+	}
+
+	public int getExecutorServiceTimeout() {
+		return executorServiceTimeout;
+	}
+
+	/**
+	 * Set the time in seconds that the executor service should wait when
+	 * terminating before forcefully terminating. It is not recommended to change
+	 * this value unless you are absolutely sure that you need to.
+	 * 
+	 * @param executorServiceTimeout the time in seconds to wait when shutting down.Ï
+	 */
+	public void setExecutorServiceTimeout(int executorServiceTimeout) {
+		this.executorServiceTimeout = executorServiceTimeout;
 	}
 }

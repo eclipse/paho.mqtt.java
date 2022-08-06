@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistable;
+import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
 
 /**
@@ -50,10 +51,10 @@ public abstract class MqttWireMessage {
 
 	protected static final Charset STRING_ENCODING = StandardCharsets.UTF_8;
 
-	private static final String PACKET_NAMES[] = { "reserved", "CONNECT", "CONNACK", "PUBLISH", "PUBACK", "PUBREC",
+	private static final String[] PACKET_NAMES = {"reserved", "CONNECT", "CONNACK", "PUBLISH", "PUBACK", "PUBREC",
 			"PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK", "UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP",
-			"DISCONNECT" };
-	
+			"DISCONNECT"};
+
 
 	private static final long FOUR_BYTE_INT_MAX = 4294967295L;
 	private static final int VARIABLE_BYTE_INT_MAX = 268435455;
@@ -64,6 +65,14 @@ public abstract class MqttWireMessage {
 	protected int msgId;
 
 	protected boolean duplicate = false;
+
+	/**
+	 * The token associated with the message. It needs to be stored here,
+	 * because QoS 0 messages do not have an ID, and tokens for these messages
+	 * can thus not be stored in the Token Store.
+	 */
+	private MqttToken token;
+
 
 	public MqttWireMessage(byte type) {
 		this.type = type;
@@ -366,24 +375,61 @@ public abstract class MqttWireMessage {
 	 * 
 	 * @param input
 	 *            - The Input String
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException - thrown if input String contains illegal characters or character sequences.
 	 */
 	private static void validateUTF8String(String input) throws IllegalArgumentException {
 		for (int i = 0; i < input.length(); i++) {
+			boolean isBad = false;
 			char c = input.charAt(i);
-			if (Character.getType(c) == Character.CONTROL || Character.getType(c) == Character.UNASSIGNED) {
-				throw new IllegalArgumentException("Invalid UTF-8 character : " + c);
+			// Check for mismatched surrogates
+			if (Character.isHighSurrogate(c)) {
+				if (++i == input.length()) {
+					isBad = true; /* Trailing high surrogate */
+				} else {
+					char c2 = input.charAt(i);
+					if (Character.isLowSurrogate(c2)) {
+						int ch = ((((int) c) & 0x3ff) << 10) | (c2 & 0x3ff);
+						if ((ch & 0xffff) == 0xffff || (ch & 0xffff) == 0xfffe) {
+							isBad = true; /* Noncharacter in base plane */
+						}
+					} else {
+						isBad = true; /* No low surrogate */
+					}
+				}
+			} else if (Character.isISOControl(c) // Control character
+					|| Character.isLowSurrogate(c) // or no high surrogate
+					|| c >= 0xfdd0 && (c <= 0xfddf || c >= 0xfffe)) { // non-character in other nonbase plane
+				isBad = true;
+			}
+			if (isBad) {
+				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: [%04x]", (int) c));
 			}
 		}
 	}
-	
+
 	public static void validateVariableByteInt(int value) throws IllegalArgumentException {
-		if (value >= 0 && value <= VARIABLE_BYTE_INT_MAX) {
-			return;
-		} else {
+		if (value < 0 || value > VARIABLE_BYTE_INT_MAX) {
 			throw new IllegalArgumentException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
 		}
 
+	}
+
+	/**
+	 * Get the token associated with the message.
+	 *
+	 * @return The token associated with the message.
+	 */
+	public MqttToken getToken() {
+		return token;
+	}
+
+	/**
+	 * Set the token associated with the message.
+	 *
+	 * @param token the token associated with the message.
+	 */
+	public void setToken(MqttToken token) {
+		this.token = token;
 	}
 
 	public String toString() {

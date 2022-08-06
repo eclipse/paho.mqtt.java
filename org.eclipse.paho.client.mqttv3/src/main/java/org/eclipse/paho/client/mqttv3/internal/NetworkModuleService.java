@@ -1,12 +1,14 @@
 /*
+ * Copyright (c) 2009, 2019 IBM Corp.
+ * 
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+ * https://www.eclipse.org/org/documents/edl-v10.php
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
@@ -31,7 +33,7 @@ import org.eclipse.paho.client.mqttv3.spi.NetworkModuleFactory;
  * @author Maik Scheibler
  */
 public class NetworkModuleService {
-	private static final Logger LOG = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,
+	private static Logger LOG = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,
 			NetworkModuleService.class.getSimpleName());
 	private static final ServiceLoader<NetworkModuleFactory> FACTORY_SERVICE_LOADER = ServiceLoader.load(
 			NetworkModuleFactory.class, NetworkModuleService.class.getClassLoader());
@@ -61,10 +63,12 @@ public class NetworkModuleService {
 				throw new IllegalArgumentException("missing scheme in broker URI: " + brokerUri);
 			}
 			scheme = scheme.toLowerCase();
-			for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
-				if (factory.getSupportedUriSchemes().contains(scheme)) {
-					factory.validateURI(uri);
-					return;
+			synchronized (FACTORY_SERVICE_LOADER) {
+				for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
+					if (factory.getSupportedUriSchemes().contains(scheme)) {
+						factory.validateURI(uri);
+						return;
+					}
 				}
 			}
 			throw new IllegalArgumentException("no NetworkModule installed for scheme \"" + scheme
@@ -91,9 +95,11 @@ public class NetworkModuleService {
 			URI brokerUri = new URI(address);
 			applyRFC3986AuthorityPatch(brokerUri);
 			String scheme = brokerUri.getScheme().toLowerCase();
-			for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
-				if (factory.getSupportedUriSchemes().contains(scheme)) {
-					return factory.createNetworkModule(brokerUri, options, clientId);
+			synchronized (FACTORY_SERVICE_LOADER) {
+				for (NetworkModuleFactory factory : FACTORY_SERVICE_LOADER) {
+					if (factory.getSupportedUriSchemes().contains(scheme)) {
+						return factory.createNetworkModule(brokerUri, options, clientId);
+					}
 				}
 			}
 			/*

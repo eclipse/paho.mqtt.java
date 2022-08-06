@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -18,6 +18,8 @@ package org.eclipse.paho.client.mqttv3.internal.security;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -133,11 +135,11 @@ public class SSLSocketFactoryFactory {
 	
 
 	public static final String DEFAULT_PROTOCOL = "TLS";  // "SSL_TLS" is not supported by DesktopEE
-	
-	private static final String propertyKeys[] = { SSLPROTOCOL, JSSEPROVIDER,
-			KEYSTORE, KEYSTOREPWD, KEYSTORETYPE, KEYSTOREPROVIDER, KEYSTOREMGR, 
-			TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER, 
-			TRUSTSTOREMGR, CIPHERSUITES, CLIENTAUTH};
+
+    private static final String[] propertyKeys = {SSLPROTOCOL, JSSEPROVIDER,
+            KEYSTORE, KEYSTOREPWD, KEYSTORETYPE, KEYSTOREPROVIDER, KEYSTOREMGR,
+            TRUSTSTORE, TRUSTSTOREPWD, TRUSTSTORETYPE, TRUSTSTOREPROVIDER,
+            TRUSTSTOREMGR, CIPHERSUITES, CLIENTAUTH};
 
 	private Hashtable configs; // a hashtable that maps configIDs to properties.
 
@@ -818,7 +820,7 @@ public class SSLSocketFactoryFactory {
 	private String getPropertyFromConfig(String configID, String ibmKey) {
 		String res = null;
 		Properties p =null;
-		if(configID!=null) {;
+		if(configID!=null) {
 			p = (Properties) configs.get(configID);
 		}
 		if (p != null) {
@@ -1005,7 +1007,15 @@ public class SSLSocketFactoryFactory {
 	 * @return The name of the file that contains the truststore.
 	 */
 	public String getTrustStore(String configID) {
-		return getProperty(configID, TRUSTSTORE, SYSTRUSTSTORE);
+		String encodedPath = getProperty(configID, TRUSTSTORE, SYSTRUSTSTORE);
+		try {
+			String decodedPath = java.net.URLDecoder.decode( encodedPath, StandardCharsets.UTF_8.name());
+			return decodedPath;
+		}
+		catch( Exception e ) {
+                        // To maintain backword compatibility, return encodedPath for any exception
+			return encodedPath;
+		}
 	}
 
 	/**

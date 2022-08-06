@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -19,7 +19,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.eclipse.paho.mqttv5.client.MqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
 import org.eclipse.paho.mqttv5.client.logging.LoggerFactory;
@@ -45,10 +44,10 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
  */
 public class CommsTokenStore {
 	private static final String CLASS_NAME = CommsTokenStore.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	// Maps message-specific data (usually message IDs) to tokens
-	private Hashtable<String, MqttToken> tokens;
+	private final Hashtable<String, MqttToken> tokens;
 	private String logContext;
 	private MqttException closedResponse = null;
 
@@ -103,19 +102,20 @@ public class CommsTokenStore {
 	 * for a SEND of CONFIRM, but either way, the original SEND is what's 
 	 * needed to re-build the token.
 	 * @param message The {@link MqttPublish} message to restore
-	 * @return {@link MqttDeliveryToken}
+	 * @return {@link MqttToken}
 	 */
-	protected MqttDeliveryToken restoreToken(MqttPublish message) {
+	protected MqttToken restoreToken(MqttPublish message) {
 		final String methodName = "restoreToken";
-		MqttDeliveryToken token;
+		MqttToken token;
 		synchronized(tokens) {
-			String key = new Integer(message.getMessageId()).toString();
+			String key = Integer.valueOf(message.getMessageId()).toString();
 			if (this.tokens.containsKey(key)) {
-				token = (MqttDeliveryToken)this.tokens.get(key);
+				token = this.tokens.get(key);
 				//@TRACE 302=existing key={0} message={1} token={2}
 				log.fine(CLASS_NAME,methodName, "302",new Object[]{key, message,token});
 			} else {
-				token = new MqttDeliveryToken(logContext);
+				token = new MqttToken(logContext);
+                                token.internalTok.setDeliveryToken(true);
 				token.internalTok.setKey(key);
 				this.tokens.put(key, token);
 				//@TRACE 303=creating new token key={0} message={1} token={2}
@@ -176,7 +176,7 @@ public class CommsTokenStore {
 		}
 	}
 
-	public MqttDeliveryToken[] getOutstandingDelTokens() {
+	public MqttToken[] getOutstandingDelTokens() {
 		final String methodName = "getOutstandingDelTokens";
 
 		synchronized(tokens) {
@@ -189,15 +189,15 @@ public class CommsTokenStore {
 			while(enumeration.hasMoreElements()) {
 				token = (MqttToken)enumeration.nextElement();
 				if (token != null 
-					&& token instanceof MqttDeliveryToken 
+					&& token.internalTok.isDeliveryToken() == true
 					&& !token.internalTok.isNotified()) {
 					
 					list.addElement(token);
 				}
 			}
 	
-			MqttDeliveryToken[] result = new MqttDeliveryToken[list.size()];
-			return (MqttDeliveryToken[]) list.toArray(result);
+			MqttToken[] result = new MqttToken[list.size()];
+			return (MqttToken[]) list.toArray(result);
 		}
 	}
 	
@@ -227,7 +227,7 @@ public class CommsTokenStore {
 	public void clear() {
 		final String methodName = "clear";
 		//@TRACE 305=> {0} tokens
-		log.fine(CLASS_NAME, methodName, "305", new Object[] {new Integer(tokens.size())});
+		log.fine(CLASS_NAME, methodName, "305", new Object[] { Integer.valueOf(tokens.size())});
 		synchronized(tokens) {
 			tokens.clear();
 		}

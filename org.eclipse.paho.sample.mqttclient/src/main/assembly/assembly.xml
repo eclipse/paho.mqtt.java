@@ -1,0 +1,32 @@
+<assembly>
+    <id>bin</id>
+    <!-- Specifies that our binary distribution is a zip package -->
+    <formats>
+        <format>zip</format>
+    </formats>
+ 
+    <fileSets>
+        <!--
+            Adds startup scripts to the root directory of zip package. The startup
+            scripts are copied from the src/main/scripts directory.
+        -->
+        <fileSet>
+            <directory>${project.build.scriptSourceDirectory}</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>mqtt-client</include>
+            </includes>
+        </fileSet>
+        <!--
+            Adds the jar file of our example application to the root directory
+            of the created zip package.
+        -->
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -21,9 +21,10 @@ package org.eclipse.paho.client.mqttv3.internal;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
@@ -37,8 +38,11 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubAck;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
+import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
 import org.eclipse.paho.client.mqttv3.logging.Logger;
 import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+
+import static org.eclipse.paho.client.mqttv3.internal.CommsSender.MAX_STOPPED_STATE_TO_STOP_THREAD;
 
 /**
  * Bridge between Receiver and the external API. This class gets called by
@@ -47,32 +51,37 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class CommsCallback implements Runnable {
 	private static final String CLASS_NAME = CommsCallback.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
 	private MqttCallbackExtended reconnectInternalCallback;
-	private Hashtable callbacks; // topicFilter -> messageHandler
-	private ClientComms clientComms;
-	private Vector messageQueue;
-	private Vector completeQueue;
-	public boolean running = false;
-	private boolean quiescing = false;
-	private Object lifecycle = new Object();
+	private final Hashtable<String, IMqttMessageListener> callbacksWildcards; // topicFilter with wildcards -> messageHandler
+	private final Hashtable<String, IMqttMessageListener> callbacksDirect; // topicFilter without wildcards -> messageHandler
+	private final ClientComms clientComms;
+	private final Vector<MqttWireMessage> messageQueue;
+	private final Vector<MqttToken> completeQueue;
+	
+	private enum State {STOPPED, RUNNING, QUIESCING}
+
+	private State current_state = State.STOPPED;
+	private State target_state = State.STOPPED;
+	private final Object lifecycle = new Object();
 	private Thread callbackThread;
-	private Object workAvailable = new Object();
-	private Object spaceAvailable = new Object();
+	private String threadName;
+	private Future<?> callbackFuture;
+	
+	private final Object workAvailable = new Object();
+	private final Object spaceAvailable = new Object();
 	private ClientState clientState;
 	private boolean manualAcks = false;
-	private String threadName;
-	private final Semaphore runningSemaphore = new Semaphore(1);
-	private Future callbackFuture;
 
 	CommsCallback(ClientComms clientComms) {
 		this.clientComms = clientComms;
-		this.messageQueue = new Vector(INBOUND_QUEUE_SIZE);
-		this.completeQueue = new Vector(INBOUND_QUEUE_SIZE);
-		this.callbacks = new Hashtable();
+		this.messageQueue = new Vector<MqttWireMessage>(INBOUND_QUEUE_SIZE);
+		this.completeQueue = new Vector<MqttToken>(INBOUND_QUEUE_SIZE);
+		this.callbacksWildcards = new Hashtable<String, IMqttMessageListener>();
+		this.callbacksDirect = new Hashtable<String, IMqttMessageListener>();
 		log.setResourceName(clientComms.getClient().getClientId());
 	}
 
@@ -87,18 +96,38 @@ public class CommsCallback implements Runnable {
 	 */
 	public void start(String threadName, ExecutorService executorService) {
 		this.threadName = threadName;
+
 		synchronized (lifecycle) {
-			if (!running) {
+			if (current_state == State.STOPPED) {
 				// Preparatory work before starting the background thread.
 				// For safety ensure any old events are cleared.
 				messageQueue.clear();
 				completeQueue.clear();
-
-				running = true;
-				quiescing = false;
-				callbackFuture = executorService.submit(this);
+				
+				target_state = State.RUNNING;
+				current_state = State.RUNNING;
+				if (executorService == null) {
+					callbackFuture = null;
+					callbackThread = new Thread(this);
+					callbackThread.start();
+				} else {
+					callbackThread = null;
+					callbackFuture = executorService.submit(this);
+				}
 			}
 		}
+
+		AtomicInteger stoppedStateCounter = new AtomicInteger(0);
+		while (!isRunning()) {
+			try { Thread.sleep(100); } catch (Exception e) { }
+			if (current_state == State.STOPPED) {
+				if (stoppedStateCounter.incrementAndGet() > MAX_STOPPED_STATE_TO_STOP_THREAD) {
+					break;
+				}
+			} else {
+				stoppedStateCounter.set(0);
+			}
+		}			
 	}
 
 	/**
@@ -107,31 +136,34 @@ public class CommsCallback implements Runnable {
 	 */
 	public void stop() {
 		final String methodName = "stop";
-		synchronized (lifecycle) {
-			if (callbackFuture != null) {
-				callbackFuture.cancel(true);
+
+		if (isRunning()) {
+			// @TRACE 700=stopping
+			log.fine(CLASS_NAME, methodName, "700");
+			synchronized (lifecycle) {
+				target_state = State.STOPPED;
 			}
-			if (running) {
-				// @TRACE 700=stopping
-				log.fine(CLASS_NAME, methodName, "700");
-				running = false;
-				if (!Thread.currentThread().equals(callbackThread)) {
+			// Do not allow a thread to wait for itself.
+			if (!Thread.currentThread().equals(callbackThread)) {
+				synchronized (workAvailable) {
+					// @TRACE 701=notify workAvailable and wait for run
+					// to finish
+					log.fine(CLASS_NAME, methodName, "701");
+					workAvailable.notifyAll();
+				}
+				// Wait for the thread to finish.
+				if (callbackFuture != null) {
 					try {
-						synchronized (workAvailable) {
-							// @TRACE 701=notify workAvailable and wait for run
-							// to finish
-							log.fine(CLASS_NAME, methodName, "701");
-							workAvailable.notifyAll();
-						}
-						// Wait for the thread to finish.
-						runningSemaphore.acquire();
-					} catch (InterruptedException ex) {
-					} finally {
-						runningSemaphore.release();
+						callbackFuture.get();
+					} catch (ExecutionException | InterruptedException e) {
+					}
+				} else {
+					try {
+						callbackThread.join();
+					} catch (InterruptedException e) {
 					}
 				}
 			}
-			callbackThread = null;
 			// @TRACE 703=stopped
 			log.fine(CLASS_NAME, methodName, "703");
 		}
@@ -154,19 +186,12 @@ public class CommsCallback implements Runnable {
 		callbackThread = Thread.currentThread();
 		callbackThread.setName(threadName);
 
-		try {
-			runningSemaphore.acquire();
-		} catch (InterruptedException e) {
-			running = false;
-			return;
-		}
-
-		while (running) {
+		while (isRunning()) {
 			try {
 				// If no work is currently available, then wait until there is some...
 				try {
 					synchronized (workAvailable) {
-						if (running && messageQueue.isEmpty()
+						if (isRunning() && messageQueue.isEmpty()
 								&& completeQueue.isEmpty()) {
 							// @TRACE 704=wait for workAvailable
 							log.fine(CLASS_NAME, methodName, "704");
@@ -176,7 +201,7 @@ public class CommsCallback implements Runnable {
 				} catch (InterruptedException e) {
 				}
 
-				if (running) {
+				if (isRunning()) {
 					// Check for deliveryComplete callbacks...
 					MqttToken token = null;
 					synchronized (completeQueue) {
@@ -207,7 +232,7 @@ public class CommsCallback implements Runnable {
 					}
 				}
 
-				if (quiescing) {
+				if (isQuiescing()) {
 					clientState.checkQuiesceLock();
 				}
 				
@@ -216,10 +241,10 @@ public class CommsCallback implements Runnable {
 				// of class NoClassDefFoundError
 				// @TRACE 714=callback threw exception
 				log.fine(CLASS_NAME, methodName, "714", null, ex);
-				running = false;
+
 				clientComms.shutdownConnection(null, new MqttException(ex));
 			} finally {
-				runningSemaphore.release();
+
 			    synchronized (spaceAvailable) {
                     // Notify the spaceAvailable lock, to say that there's now
                     // some space on the queue...
@@ -229,6 +254,9 @@ public class CommsCallback implements Runnable {
                     spaceAvailable.notifyAll();
                 }
 			}
+		}
+		synchronized (lifecycle) {
+			current_state = State.STOPPED;
 		}
 	}
 
@@ -339,13 +367,13 @@ public class CommsCallback implements Runnable {
 	 */
 	public void messageArrived(MqttPublish sendMessage) {
 		final String methodName = "messageArrived";
-		if (mqttCallback != null || callbacks.size() > 0) {
+		if (mqttCallback != null || !callbacksWildcards.isEmpty() || !callbacksDirect.isEmpty()) {
 			// If we already have enough messages queued up in memory, wait
 			// until some more queue space becomes available. This helps 
 			// the client protect itself from getting flooded by messages 
 			// from the server.
 			synchronized (spaceAvailable) {
-				while (running && !quiescing && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
+				while (isRunning() && !isQuiescing() && messageQueue.size() >= INBOUND_QUEUE_SIZE) {
 					try {
 						// @TRACE 709=wait for spaceAvailable
 						log.fine(CLASS_NAME, methodName, "709");
@@ -354,7 +382,7 @@ public class CommsCallback implements Runnable {
 					}
 				}
 			}
-			if (!quiescing) {
+			if (!isQuiescing()) {
 				messageQueue.addElement(sendMessage);
 				// Notify the CommsCallback thread that there's work to do...
 				synchronized (workAvailable) {
@@ -373,7 +401,10 @@ public class CommsCallback implements Runnable {
 	 */
 	public void quiesce() {
 		final String methodName = "quiesce";
-		this.quiescing = true;
+		synchronized (lifecycle) {
+			if (current_state == State.RUNNING)
+			current_state = State.QUIESCING;
+		}
 		synchronized (spaceAvailable) {
 			// @TRACE 711=quiesce notify spaceAvailable
 			log.fine(CLASS_NAME, methodName, "711");
@@ -383,7 +414,7 @@ public class CommsCallback implements Runnable {
 	}
 
 	public boolean isQuiesced() {
-		if (quiescing && completeQueue.size() == 0 && messageQueue.size() == 0) {
+		if (isQuiescing() && completeQueue.size() == 0 && messageQueue.size() == 0) {
 			return true;
 		}
 		return false;
@@ -431,7 +462,7 @@ public class CommsCallback implements Runnable {
 	public void asyncOperationComplete(MqttToken token) {
 		final String methodName = "asyncOperationComplete";
 
-		if (running) {
+		if (isRunning()) {
 			// invoke callbacks on callback thread
 			completeQueue.addElement(token);
 			synchronized (workAvailable) {
@@ -466,16 +497,22 @@ public class CommsCallback implements Runnable {
 
 
 	public void setMessageListener(String topicFilter, IMqttMessageListener messageListener) {
-		this.callbacks.put(topicFilter, messageListener);
+		if (topicFilter.contains("#") || topicFilter.contains("+")) {
+			this.callbacksWildcards.put(topicFilter, messageListener);
+		} else {
+			this.callbacksDirect.put(topicFilter, messageListener);
+		}
 	}
 	
 	
 	public void removeMessageListener(String topicFilter) {
-		this.callbacks.remove(topicFilter); // no exception thrown if the filter was not present
+		this.callbacksWildcards.remove(topicFilter); // no exception thrown if the filter was not present
+		this.callbacksDirect.remove(topicFilter); // no exception thrown if the filter was not present
 	}
 	
 	public void removeMessageListeners() {
-		this.callbacks.clear(); 
+		this.callbacksWildcards.clear();
+		this.callbacksDirect.clear();
 	}
 	
 	
@@ -483,12 +520,24 @@ public class CommsCallback implements Runnable {
 	{		
 		boolean delivered = false;
 		
-		Enumeration keys = callbacks.keys();
+		IMqttMessageListener callback = this.callbacksDirect.get(topicName);
+		if (callback != null) {
+			aMessage.setId(messageId);
+			callback.messageArrived(topicName, aMessage);
+			delivered = true;
+		}
+		
+		Enumeration<String> keys = callbacksWildcards.keys();
 		while (keys.hasMoreElements()) {
 			String topicFilter = (String)keys.nextElement();
+			// callback may already have been removed in the meantime, so a null check is necessary
+			callback = callbacksWildcards.get(topicFilter);
+			if(callback == null) {
+				continue;
+			}
 			if (MqttTopic.isMatched(topicFilter, topicName)) {
 				aMessage.setId(messageId);
-				((IMqttMessageListener)(callbacks.get(topicFilter))).messageArrived(topicName, aMessage);
+				callback.messageArrived(topicName, aMessage);
 				delivered = true;
 			}
 		}
@@ -502,5 +551,21 @@ public class CommsCallback implements Runnable {
 		
 		return delivered;
 	}
-
+	
+	public boolean isRunning() {
+		boolean result;
+		synchronized (lifecycle) {
+			result = ((current_state == State.RUNNING || current_state == State.QUIESCING)
+					&& target_state == State.RUNNING);
+		}
+		return result;
+	}
+	
+	public boolean isQuiescing() {
+		boolean result;
+		synchronized (lifecycle) {
+			result = (current_state == State.QUIESCING);
+		}
+		return result;
+	}
 }

@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corp.
+ * Copyright (c) 2014, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *   
  * Contributors:
  *   Ian Craggs - MQTT 3.1.1 support
@@ -35,17 +35,18 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 public class Token {
 	private static final String CLASS_NAME = Token.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private volatile boolean completed = false;
 	private boolean pendingComplete = false;
 	private boolean sent = false;
 
-	private Object responseLock = new Object();
-	private Object sentLock = new Object();
+	private final Object responseLock = new Object();
+	private final Object sentLock = new Object();
 
 	protected MqttMessage message = null;
 	private MqttWireMessage response = null;
+	private MqttWireMessage request = null;
 	private MqttException exception = null;
 	private String[] topics = null;
 
@@ -61,6 +62,8 @@ public class Token {
 
 	private int[] reasonCodes = null;
 
+        private boolean deliveryToken = false;
+
 	public Token(String logContext) {
 		log.setResourceName(logContext);
 	}
@@ -72,6 +75,14 @@ public class Token {
 	public void setMessageID(int messageID) {
 		this.messageID = messageID;
 	}
+
+	public void setDeliveryToken(boolean deliveryToken) {
+		this.deliveryToken = deliveryToken;
+	}
+
+        public boolean isDeliveryToken() {
+                return this.deliveryToken;
+        }
 
 	public boolean checkResult() throws MqttException {
 		if (getException() != null) {
@@ -112,9 +123,17 @@ public class Token {
 	public void waitForCompletion(long timeout) throws MqttException {
 		final String methodName = "waitForCompletion";
 		// @TRACE 407=key={0} wait max={1} token={2}
-		log.fine(CLASS_NAME, methodName, "407", new Object[] { getKey(), new Long(timeout), this });
+		log.fine(CLASS_NAME, methodName, "407", new Object[] { getKey(), Long.valueOf(timeout), this });
 
-		MqttWireMessage resp = waitForResponse(timeout);
+		MqttWireMessage resp = null;
+		try {
+			resp = waitForResponse(timeout);
+		} catch (MqttException e) {
+			if (e.getReasonCode() != MqttClientException.REASON_CODE_CLIENT_DISCONNECTING /*||
+					message.getId() != MqttWireMessage.MESSAGE_TYPE_DISCONNECT*/) {
+				throw e;
+			}
+		}
 		if (resp == null && !completed) {
 			// @TRACE 406=key={0} timed out token={1}
 			log.fine(CLASS_NAME, methodName, "406", new Object[] { getKey(), this });
@@ -144,15 +163,15 @@ public class Token {
 			// @TRACE 400=>key={0} timeout={1} sent={2} completed={3} hasException={4}
 			// response={5} token={6}
 			log.fine(
-					CLASS_NAME, methodName, "400", new Object[] { getKey(), new Long(timeout), new Boolean(sent),
-							new Boolean(completed), (exception == null) ? "false" : "true", response, this },
+					CLASS_NAME, methodName, "400", new Object[] { getKey(), Long.valueOf(timeout), Boolean.valueOf(sent),
+							Boolean.valueOf(completed), (exception == null) ? "false" : "true", response, this },
 					exception);
 
 			while (!this.completed) {
 				if (this.exception == null) {
 					try {
 						// @TRACE 408=key={0} wait max={1}
-						log.fine(CLASS_NAME, methodName, "408", new Object[] { getKey(), new Long(timeout) });
+						log.fine(CLASS_NAME, methodName, "408", new Object[] { getKey(), Long.valueOf(timeout) });
 
 						if (timeout <= 0) {
 							responseLock.wait();
@@ -236,7 +255,6 @@ public class Token {
 		log.fine(CLASS_NAME, methodName, "404", new Object[] { getKey(), msg, ex });
 
 		synchronized (responseLock) {
-
 			// If reason codes are available, store them here.
 			if (msg instanceof MqttPubAck || msg instanceof MqttPubComp || msg instanceof MqttPubRec
 					|| msg instanceof MqttPubRel || msg instanceof MqttSubAck || msg instanceof MqttUnsubAck) {
@@ -443,7 +461,9 @@ public class Token {
 		int[] val = new int[0];
 		if (response instanceof MqttSubAck) {
 			// TODO - Work out how to map multiple returncodes
-			val = ((MqttSubAck) response).getReturnCodes();
+                        if (response != null) {
+			        val = ((MqttSubAck) response).getReturnCodes();
+                        }
 		}
 		return val;
 	}
@@ -451,7 +471,9 @@ public class Token {
 	public boolean getSessionPresent() {
 		boolean val = false;
 		if (response instanceof MqttConnAck) {
-			val = ((MqttConnAck) response).getSessionPresent();
+                        if (response != null) {
+			     val = ((MqttConnAck) response).getSessionPresent();
+                        }
 		}
 		return val;
 	}
@@ -482,5 +504,13 @@ public class Token {
 	public int[] getReasonCodes() {
 		return reasonCodes;
 	}
+
+        public void setRequestMessage(MqttWireMessage requestMessage) {
+                this.request = requestMessage;
+        }
+
+        public MqttWireMessage getRequestMessage() {
+                return this.request;
+        }
 
 }

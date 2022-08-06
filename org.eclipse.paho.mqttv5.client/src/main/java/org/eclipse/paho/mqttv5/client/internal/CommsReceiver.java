@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttToken;
@@ -36,19 +35,21 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
  */
 public class CommsReceiver implements Runnable {
 	private static final String CLASS_NAME = CommsReceiver.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
-	private boolean running = false;
-	private Object lifecycle = new Object();
+	private enum State {STOPPED, RUNNING, STARTING, RECEIVING}
+
+	private State current_state = State.STOPPED;
+	private State target_state = State.STOPPED;
+	private final Object lifecycle = new Object();
+	private String threadName;
+	private Future<?> receiverFuture;
+	
 	private ClientState clientState = null;
 	private ClientComms clientComms = null;
 	private MqttInputStream in;
 	private CommsTokenStore tokenStore = null;
 	private Thread recThread = null;
-	private volatile boolean receiving;
-	private final Semaphore runningSemaphore = new Semaphore(1);
-	private String threadName;
-	private Future<?> receiverFuture;
 
 	public CommsReceiver(ClientComms clientComms, ClientState clientState, CommsTokenStore tokenStore, InputStream in) {
 		this.in = new MqttInputStream(clientState, in, clientComms.getClient().getClientId());
@@ -72,10 +73,17 @@ public class CommsReceiver implements Runnable {
 		// @TRACE 855=starting
 		log.fine(CLASS_NAME, methodName, "855");
 		synchronized (lifecycle) {
-			if (!running) {
-				running = true;
-				receiverFuture = executorService.submit(this);
+			if (current_state == State.STOPPED && target_state == State.STOPPED) {
+				target_state = State.RUNNING;
+				if (executorService == null) {
+					new Thread(this).start();
+				} else {
+					receiverFuture = executorService.submit(this);
+				}
 			}
+		}
+		while (!isRunning()) {
+			try { Thread.sleep(100); } catch (Exception e) { }
 		}
 	}
 
@@ -88,25 +96,17 @@ public class CommsReceiver implements Runnable {
 			if (receiverFuture != null) {
 				receiverFuture.cancel(true);
 			}
-			// @TRACE 850=stopping
-			log.fine(CLASS_NAME, methodName, "850");
-			if (running) {
-				running = false;
-				receiving = false;
-				if (!Thread.currentThread().equals(recThread)) {
-					try {
-						// Wait for the thread to finish.
-						runningSemaphore.acquire();
-					} catch (InterruptedException ex) {
-					} finally {
-						runningSemaphore.release();
-					}
-				}
+			//@TRACE 850=stopping
+			log.fine(CLASS_NAME,methodName, "850");
+			if (isRunning()) {
+				target_state = State.STOPPED;
 			}
 		}
-		recThread = null;
-		// @TRACE 851=stopped
-		log.fine(CLASS_NAME, methodName, "851");
+		while (isRunning()) {
+			try { Thread.sleep(100); } catch (Exception e) { }
+		}
+		//@TRACE 851=stopped
+		log.fine(CLASS_NAME,methodName,"851");
 	}
 
 	/**
@@ -118,76 +118,112 @@ public class CommsReceiver implements Runnable {
 		final String methodName = "run";
 		MqttToken token = null;
 
-		try {
-			runningSemaphore.acquire();
-		} catch (InterruptedException e) {
-			running = false;
-			return;
+		synchronized (lifecycle) {
+			current_state = State.RUNNING;
 		}
-
-		while (running && (in != null)) {
-			try {
-				// @TRACE 852=network read message
-				log.fine(CLASS_NAME, methodName, "852");
-				receiving = in.available() > 0;
-				MqttWireMessage message = in.readMqttWireMessage();
-				receiving = false;
-
-				// instanceof checks if message is null
-				if (message instanceof MqttAck) {
-					token = tokenStore.getToken(message);
-					if (token != null) {
-						synchronized (token) {
-							// Ensure the notify processing is done under a lock on the token
-							// This ensures that the send processing can complete before the
-							// receive processing starts! ( request and ack and ack processing
-							// can occur before request processing is complete if not!
-							clientState.notifyReceivedAck((MqttAck) message);
+		
+		try {
+			State my_target;
+			synchronized (lifecycle) {
+				my_target = target_state;
+			}
+			while (my_target == State.RUNNING && (in != null)) {
+				try {
+					//@TRACE 852=network read message
+					log.fine(CLASS_NAME,methodName,"852");
+					if (in.available() > 0) {
+						synchronized (lifecycle) {
+							current_state = State.RECEIVING;
 						}
-					} else {
-						// This is an ack for a message we no longer have a ticket for.
-						log.fine(CLASS_NAME, methodName, "857");
-						clientState.handleOrphanedAcks((MqttAck) message);
-					} 
-				} else if (message != null && message instanceof MqttDisconnect) {
-					// This is a Disconnect Message
+					}
+					MqttWireMessage message = in.readMqttWireMessage();
+					synchronized (lifecycle) {
+						current_state = State.RUNNING;
+					}
+
+					// instanceof checks if message is null
+					if (message instanceof MqttAck) {
+						token = tokenStore.getToken(message);
+						if (token != null) {
+							synchronized (token) {
+								// Ensure the notify processing is done under a lock on the token
+								// This ensures that the send processing can complete before the
+								// receive processing starts! ( request and ack and ack processing
+								// can occur before request processing is complete if not!
+								clientState.notifyReceivedAck((MqttAck) message);
+							}
+						} else {
+							// This is an ack for a message we no longer have a ticket for.
+							log.fine(CLASS_NAME, methodName, "857");
+							clientState.handleOrphanedAcks((MqttAck) message);
+						} 
+					} else if (message != null && message instanceof MqttDisconnect) {
+						// This is a Disconnect Message
 						clientComms.shutdownConnection(null, new MqttException(MqttClientException.REASON_CODE_SERVER_DISCONNECTED, (MqttDisconnect) message), (MqttDisconnect) message);
-				} else {
-					if (message != null) {
-						// A new message has arrived
-						clientState.notifyReceivedMsg(message);
+					} else {
+						if (message != null) {
+							// A new message has arrived
+							clientState.notifyReceivedMsg(message);
+						}
+                                                else {
+                                                    if (!clientComms.isConnected() && !clientComms.isConnecting()) {
+                                                         throw new IOException("Connection is lost.");
+                                                    }
+                                                }
+					}
+				} 
+				catch (MqttException ex) {
+					// @TRACE 856=Stopping, MQttException
+					log.fine(CLASS_NAME, methodName, "856", null, ex);
+					synchronized (lifecycle) {
+						target_state = State.STOPPED;
+					}
+					// Token maybe null but that is handled in shutdown
+					clientComms.shutdownConnection(token, ex, null);
+				} 
+				catch (IOException ioe) {
+					// @TRACE 853=Stopping due to IOException
+					log.fine(CLASS_NAME, methodName, "853");
+                                        if (target_state != State.STOPPED) {
+					    synchronized (lifecycle) {
+						target_state = State.STOPPED;
+					    }
+					    // An EOFException could be raised if the broker processes the
+					    // DISCONNECT and ends the socket before we complete. As such,
+					    // only shutdown the connection if we're not already shutting down.
+					    if (!clientComms.isDisconnecting()) {
+						clientComms.shutdownConnection(token,
+							new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ioe), null);
+					    }
+                                        }
+				}
+				finally {
+					synchronized (lifecycle) {
+						current_state = State.RUNNING;
 					}
 				}
-			} catch (MqttException ex) {
-				// @TRACE 856=Stopping, MQttException
-				log.fine(CLASS_NAME, methodName, "856", null, ex);
-				running = false;
-				// Token maybe null but that is handled in shutdown
-				clientComms.shutdownConnection(token, ex, null);
-			} catch (IOException ioe) {
-				// @TRACE 853=Stopping due to IOException
-				log.fine(CLASS_NAME, methodName, "853");
-
-				running = false;
-				// An EOFException could be raised if the broker processes the
-				// DISCONNECT and ends the socket before we complete. As such,
-				// only shutdown the connection if we're not already shutting down.
-				if (!clientComms.isDisconnecting()) {
-					clientComms.shutdownConnection(token,
-							new MqttException(MqttClientException.REASON_CODE_CONNECTION_LOST, ioe), null);
+				synchronized (lifecycle) {
+					my_target = target_state;
 				}
-			} finally {
-				receiving = false;
-				runningSemaphore.release();
+			} // end while
+		} finally {
+			synchronized (lifecycle) {
+				current_state = State.STOPPED;
 			}
-		}
+		} // end try
 
-		// @TRACE 854=<
-		log.fine(CLASS_NAME, methodName, "854");
+		recThread = null;
+		//@TRACE 854=<
+		log.fine(CLASS_NAME,methodName,"854");
 	}
 
 	public boolean isRunning() {
-		return running;
+		boolean result;
+		synchronized (lifecycle) {
+			result = ((current_state == State.RUNNING || current_state == State.RECEIVING)
+					&& target_state == State.RUNNING);
+		}
+		return result;
 	}
 
 	/**
@@ -196,6 +232,10 @@ public class CommsReceiver implements Runnable {
 	 * @return true if the receiver is receiving data, false otherwise.
 	 */
 	public boolean isReceiving() {
-		return receiving;
+		boolean result;
+		synchronized (lifecycle) {
+			result = (current_state == State.RECEIVING);
+		}
+		return result;
 	}
 }

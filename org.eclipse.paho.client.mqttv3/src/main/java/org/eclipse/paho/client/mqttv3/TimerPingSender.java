@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corp.
+ * Copyright (c) 2014, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  */
 
 package org.eclipse.paho.client.mqttv3;
@@ -31,7 +31,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
  */
 public class TimerPingSender implements MqttPingSender {
 	private static final String CLASS_NAME = TimerPingSender.class.getName();
-	private static final  Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
 	private ClientComms comms;
 	private Timer timer;
@@ -75,7 +75,7 @@ public class TimerPingSender implements MqttPingSender {
 		
 		public void run() {
 			//@Trace 660=Check schedule at {0}
-			log.fine(CLASS_NAME, methodName, "660", new Object[]{Long.valueOf(System.currentTimeMillis())});
+			log.fine(CLASS_NAME, methodName, "660", new Object[]{Long.valueOf(System.nanoTime())});
 			comms.checkForActivity();			
 		}
 	}

@@ -1,20 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
- *    Dave Locke - initial API and implementation and/or initial documentation
- *    Ian Craggs - MQTT 3.1.1 support
- *    Ian Craggs - per subscription message handlers (bug 466579)
- *    Ian Craggs - ack control (bug 472172)
+ *    James Sutton - MQTT V5 support
  */
 
 package org.eclipse.paho.mqttv5.client;
@@ -76,7 +73,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * @throws MqttException  for non security related problems
 	 * @see #connect(MqttConnectionOptions)
 	 */
-  public void connect() throws MqttSecurityException, MqttException;
+        public void connect() throws MqttSecurityException, MqttException;
 
 	/**
 	 * Connects to an MQTT server using the specified options.
@@ -92,7 +89,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-  public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
+        public void connect(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
   
 	/**
 	 * Connects to an MQTT server using the specified options.
@@ -109,7 +106,7 @@ public interface IMqttClient { //extends IMqttAsyncClient {
 	 * reasons
 	 * @throws MqttException  for non security related problems including communication errors
 	 */
-public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
+        public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSecurityException, MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -123,7 +120,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 *
 	 * @throws MqttException if a problem is encountered while disconnecting
 	 */
-  public void disconnect() throws MqttException;
+        public void disconnect() throws MqttException;
 
 	/**
 	 * Disconnects from the server.
@@ -144,9 +141,9 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * means the client will not quiesce.
 	 * @throws MqttException if a problem is encountered while disconnecting
 	 */
-  public void disconnect(long quiesceTimeout) throws MqttException;
+        public void disconnect(long quiesceTimeout) throws MqttException;
   
-  /**
+        /**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
 	 * <p>
 	 * Because the client is able to establish the TCP/IP connection to a none MQTT server and it will certainly fail to
@@ -156,7 +153,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly() throws MqttException;
+        public void disconnectForcibly() throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -168,7 +165,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long disconnectTimeout) throws MqttException;
+        public void disconnectForcibly(long disconnectTimeout) throws MqttException;
 	
 	/**
 	 * Disconnects from the server forcibly to reset all the states. Could be useful when disconnect attempt failed.
@@ -182,28 +179,7 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * @throws MqttException if any unexpected error
 	 * @since 0.4.1
 	 */
-	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
-
-	/**
-	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
-	 *
-	 * @see #subscribe(String[], int[])
-	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @throws MqttException if there was an error registering the subscription.
-	 * @throws MqttSecurityException if the client is not authorized to register the subscription
-	 */
-  public void subscribe(String topicFilter) throws MqttException, MqttSecurityException;
-
-	/**
-	 * Subscribes to a one or more topics, which may include wildcards using a QoS of 1.
-	 *
-	 * @see #subscribe(String[], int[])
-	 *
-	 * @param topicFilters the topic to subscribe to, which can include wildcards.
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-  public void subscribe(String[] topicFilters) throws MqttException;
+        public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout) throws MqttException;
 
 	/**
 	 * Subscribe to a topic, which may include wildcards.
@@ -215,9 +191,10 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-  public void subscribe(String topicFilter, int qos) throws MqttException;
+        public IMqttToken subscribe(String topicFilter, int qos) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -312,48 +289,24 @@ public IMqttToken connectWithResult(MqttConnectionOptions options) throws MqttSe
 	 * published at a lower quality of service will be received at the published
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-  public void subscribe(String[] topicFilters, int[] qos) throws MqttException;
+        public IMqttToken subscribe(String[] topicFilters, int[] qos) throws MqttException;
   
-	/**
-	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
-	 *
-	 * @see #subscribe(String[], int[])
-	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param messageListener a callback to handle incoming messages
-	 * @throws MqttException if there was an error registering the subscription.
-	 * @throws MqttSecurityException if the client is not authorized to register the subscription
-	 */
-public void subscribe(String topicFilter, IMqttMessageListener messageListener) throws MqttException, MqttSecurityException;
-
 	/**
 	 * Subscribes to a one or more topics, which may include wildcards using a QoS of 1.
 	 *
 	 * @see #subscribe(String[], int[])
 	 *
-	 * @param topicFilters the topic to subscribe to, which can include wildcards.
-	 * @param messageListener one callbacks to handle incoming messages
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-public void subscribe(String[] topicFilters, IMqttMessageListener messageListener) throws MqttException;
-
-	/**
-	 * Subscribe to a topic, which may include wildcards.
-	 *
-	 * @see #subscribe(String[], int[])
-	 *
 	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @param qos the maximum quality of service at which to subscribe. Messages
-	 * published at a lower quality of service will be received at the published
-	 * QoS.  Messages published at a higher quality of service will be received using
-	 * the QoS specified on the subscribe.
-	 * @param messageListener a callback to handle incoming messages
+	 * @param qos QoS
+	 * @param messageListener one callbacks to handle incoming messages
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 */
-public void subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
+        public IMqttToken subscribe(String topicFilter, int qos, IMqttMessageListener messageListener) throws MqttException;
 
 	/**
 	 * Subscribes to multiple topics, each of which may include wildcards.
@@ -447,210 +400,11 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * QoS.  Messages published at a higher quality of service will be received using
 	 * the QoS specified on the subscribe.
 	 * @param messageListeners one or more callbacks to handle incoming messages
+	 * @return a token
 	 * @throws MqttException if there was an error registering the subscription.
 	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
 	 */
-	public void subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
-
-	/**
-	 * Subscribe to a topic, which may include wildcards using a QoS of 1.
-	 *
-	 * @see #subscribeWithResponse(MqttSubscription[], IMqttMessageListener[])
-	 *
-	 * @param topicFilter the topic to subscribe to, which can include wildcards.
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws MqttException if there was an error registering the subscription.
-	 */
-	public IMqttToken subscribeWithResponse(String topicFilter) throws MqttException;
-	
-	/**
-	 * Subscribes to multiple topics, each of which may include wildcards.
-	 * <p>The {@link #setCallback(MqttCallback)} method
-	 * should be called before this method, otherwise any received messages
-	 * will be discarded.
-	 * </p>
-	 * <p>
-	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
-	 * when when connecting to the server then the subscription remains in place
-	 * until either:</p>
-	 * <ul>
-	 * <li>The client disconnects</li>
-	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
-	 * </ul>
-	 * <p>
-	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
-	 * when when connecting to the server then the subscription remains in place
-	 * until either:</p>
-	 * <ul>
-	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The client connects with cleanStart set to true</li>
-	 * </ul>
-	 * <p>
-	 * With cleanStart set to false the MQTT server will store messages on
-	 * behalf of the client when the client is not connected. The next time the
-	 * client connects with the <b>same client ID</b> the server will
-	 * deliver the stored messages to the client.
-	 * </p>
-	 *
-	 * <p>The "topic filter" string used when subscribing
-	 * may contain special characters, which allow you to subscribe to multiple topics
-	 * at once.</p>
-	 * <p>The topic level separator is used to introduce structure into the topic, and
-	 * can therefore be specified within the topic for that purpose.  The multi-level
-	 * wildcard and single-level wildcard can be used for subscriptions, but they
-	 * cannot be used within a topic by the publisher of a message.
-	 * <dl>
-	 * 	<dt>Topic level separator</dt>
-	 * 	<dd>The forward slash (/) is used to separate each level within
-	 * 	a topic tree and provide a hierarchical structure to the topic space. The
-	 * 	use of the topic level separator is significant when the two wildcard characters
-	 * 	are encountered in topics specified by subscribers.</dd>
-	 *
-	 * 	<dt>Multi-level wildcard</dt>
-	 * 	<dd><p>The number sign (#) is a wildcard character that matches
-	 * 	any number of levels within a topic. For example, if you subscribe to
-	 *  <span><span class="filepath">finance/stock/ibm/#</span></span>, you receive
-	 * 	messages on these topics:</p>
-	 * <ul>
-	 * <li><pre>finance/stock/ibm</pre></li>
-	 * <li><pre>finance/stock/ibm/closingprice</pre></li>
-	 * <li><pre>finance/stock/ibm/currentprice</pre></li>
-	 * </ul>
-	 *  <p>The multi-level wildcard
-	 *  can represent zero or more levels. Therefore, <em>finance/#</em> can also match
-	 * 	the singular <em>finance</em>, where <em>#</em> represents zero levels. The topic
-	 * 	level separator is meaningless in this context, because there are no levels
-	 * 	to separate.</p>
-	 *
-	 * 	<p>The <span>multi-level</span> wildcard can
-	 * 	be specified only on its own or next to the topic level separator character.
-	 * 	Therefore, <em>#</em> and <em>finance/#</em> are both valid, but <em>finance#</em> is
-	 * 	not valid. <span>The multi-level wildcard must be the last character
-	 *  used within the topic tree. For example, <em>finance/#</em> is valid but
-	 *  <em>finance/#/closingprice</em> is 	not valid.</span></p></dd>
-	 *
-	 * 	<dt>Single-level wildcard</dt>
-	 * 	<dd><p>The plus sign (+) is a wildcard character that matches only one topic
-	 * 	level. For example, <em>finance/stock/+</em> matches
-	 * <em>finance/stock/ibm</em> and <em>finance/stock/xyz</em>,
-	 * 	but not <em>finance/stock/ibm/closingprice</em>. Also, because the single-level
-	 * 	wildcard matches only a single level, <em>finance/+</em> does not match <em>finance</em>.</p>
-	 *
-	 * 	<p>Use
-	 * 	the single-level wildcard at any level in the topic tree, and in conjunction
-	 * 	with the multilevel wildcard. Specify the single-level wildcard next to the
-	 * 	topic level separator, except when it is specified on its own. Therefore,
-	 *  <em>+</em> and <em>finance/+</em> are both valid, but <em>finance+</em> is
-	 *  not valid. <span>The single-level wildcard can be used at the end of the
-	 *  topic tree or within the topic tree.
-	 * 	For example, <em>finance/+</em> and <em>finance/+/ibm</em> are both valid.</span></p>
-	 * 	</dd>
-	 * </dl>
-	 *
-	 * <p>This is a blocking method that returns once subscribe completes</p>
-	 *
-	 * @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
-	 * @throws MqttException if there was an error registering the subscription.
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
-	 */
-	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions) throws MqttException;
-
-	/**
-	 * Subscribes to multiple topics, each of which may include wildcards.
-	 * <p>The {@link #setCallback(MqttCallback)} method
-	 * should be called before this method, otherwise any received messages
-	 * will be discarded.
-	 * </p>
-	 * <p>
-	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to true
-	 * when when connecting to the server then the subscription remains in place
-	 * until either:</p>
-	 * <ul>
-	 * <li>The client disconnects</li>
-	 * <li>An unsubscribe method is called to un-subscribe the topic</li>
-	 * </ul>
-	 * 
-	 * <p>
-	 * If (@link MqttConnectOptions#setCleanStart(boolean)} was set to false
-	 * when when connecting to the server then the subscription remains in place
-	 * until either:</p>
-	 * <ul>
-	 * <li>An unsubscribe method is called to unsubscribe the topic</li>
-	 * <li>The client connects with cleanStart set to true</li>
-	 * </ul>
-	 * <p>
-	 * With cleanStart set to false the MQTT server will store messages on
-	 * behalf of the client when the client is not connected. The next time the
-	 * client connects with the <b>same client ID</b> the server will
-	 * deliver the stored messages to the client.
-	 * </p>
-	 *
-	 * <p>The "topic filter" string used when subscribing
-	 * may contain special characters, which allow you to subscribe to multiple topics
-	 * at once.</p>
-	 * <p>The topic level separator is used to introduce structure into the topic, and
-	 * can therefore be specified within the topic for that purpose.  The multi-level
-	 * wildcard and single-level wildcard can be used for subscriptions, but they
-	 * cannot be used within a topic by the publisher of a message.
-	 * <dl>
-	 * 	<dt>Topic level separator</dt>
-	 * 	<dd>The forward slash (/) is used to separate each level within
-	 * 	a topic tree and provide a hierarchical structure to the topic space. The
-	 * 	use of the topic level separator is significant when the two wildcard characters
-	 * 	are encountered in topics specified by subscribers.</dd>
-	 *
-	 * 	<dt>Multi-level wildcard</dt>
-	 * 	<dd><p>The number sign (#) is a wildcard character that matches
-	 * 	any number of levels within a topic. For example, if you subscribe to
-	 *  <span><span class="filepath">finance/stock/ibm/#</span></span>, you receive
-	 * 	messages on these topics:</p>
-	 * <ul>
-	 * <li><pre>finance/stock/ibm</pre></li>
-	 * <li><pre>finance/stock/ibm/closingprice</pre></li>
-	 * <li><pre>finance/stock/ibm/currentprice</pre></li>
-	 * </ul>
-	 *  <p>The multi-level wildcard
-	 *  can represent zero or more levels. Therefore, <em>finance/#</em> can also match
-	 * 	the singular <em>finance</em>, where <em>#</em> represents zero levels. The topic
-	 * 	level separator is meaningless in this context, because there are no levels
-	 * 	to separate.</p>
-	 *
-	 * 	<p>The <span>multi-level</span> wildcard can
-	 * 	be specified only on its own or next to the topic level separator character.
-	 * 	Therefore, <em>#</em> and <em>finance/#</em> are both valid, but <em>finance#</em> is
-	 * 	not valid. <span>The multi-level wildcard must be the last character
-	 *  used within the topic tree. For example, <em>finance/#</em> is valid but
-	 *  <em>finance/#/closingprice</em> is 	not valid.</span></p></dd>
-	 *
-	 * 	<dt>Single-level wildcard</dt>
-	 * 	<dd><p>The plus sign (+) is a wildcard character that matches only one topic
-	 * 	level. For example, <em>finance/stock/+</em> matches
-	 * <em>finance/stock/ibm</em> and <em>finance/stock/xyz</em>,
-	 * 	but not <em>finance/stock/ibm/closingprice</em>. Also, because the single-level
-	 * 	wildcard matches only a single level, <em>finance/+</em> does not match <em>finance</em>.</p>
-	 *
-	 * 	<p>Use
-	 * 	the single-level wildcard at any level in the topic tree, and in conjunction
-	 * 	with the multilevel wildcard. Specify the single-level wildcard next to the
-	 * 	topic level separator, except when it is specified on its own. Therefore,
-	 *  <em>+</em> and <em>finance/+</em> are both valid, but <em>finance+</em> is
-	 *  not valid. <span>The single-level wildcard can be used at the end of the
-	 *  topic tree or within the topic tree.
-	 * 	For example, <em>finance/+</em> and <em>finance/+/ibm</em> are both valid.</span></p>
-	 * 	</dd>
-	 * </dl>
-
-	 *
-	 * <p>This is a blocking method that returns once subscribe completes</p>
-	 *
-	 * @param subscriptions one or more {@link MqttSubscription} defining the subscription to be made.
-	 * @param messageListeners one or more callbacks to handle incoming messages
-	 * @throws MqttException if there was an error registering the subscription.
-	 * @return token used to track the subscribe after it has completed.
-	 * @throws IllegalArgumentException if the two supplied arrays are not the same size.
-	 */
-	public IMqttToken subscribeWithResponse(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException;
+        public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners) throws MqttException;
 	
 	/**
 	 * Requests the server unsubscribe the client from a topic.
@@ -660,7 +414,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * specified on the subscribe.
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-  public void unsubscribe(String topicFilter) throws MqttException;
+        public void unsubscribe(String topicFilter) throws MqttException;
 
 	/**
 	 * Requests the server unsubscribe the client from one or more topics.
@@ -680,7 +434,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * must match one specified on a subscribe
 	 * @throws MqttException if there was an error unregistering the subscription.
 	 */
-  public void unsubscribe(String[] topicFilters) throws MqttException;
+        public void unsubscribe(String[] topicFilters) throws MqttException;
 
 
 	/**
@@ -703,7 +457,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @see MqttMessage#setQos(int)
 	 * @see MqttMessage#setRetained(boolean)
 	 */
-	public void publish(String topic, byte[] payload, int qos, boolean retained) throws MqttException, MqttPersistenceException;
+        public void publish(String topic, byte[] payload, int qos, boolean retained) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Publishes a message to a topic on the server.
@@ -724,7 +478,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * <ul>
 	 * <li>Register a {@link #setCallback(MqttCallback)} callback on the client and the delivery complete
 	 * callback will be notified once a delivery of a message completes
-	 * <li>or call {@link #getPendingDeliveryTokens()} which will return a token for each message that
+	 * <li>or call {@link #getPendingTokens()} which will return a token for each message that
 	 * is in-flight.  The token can be used to wait for delivery to complete.
 	 * </ul>
 	 *
@@ -764,7 +518,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @throws MqttException for other errors encountered while publishing the message.
 	 * For instance client not connected.
 	 */
-	public void publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException;
+        public void publish(String topic, MqttMessage message) throws MqttException, MqttPersistenceException;
 
 	/**
 	 * Sets the callback listener to use for events that happen asynchronously.
@@ -780,13 +534,13 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @see MqttCallback
 	 * @param callback the class to callback when for events related to the client
 	 */
-	public void setCallback(MqttCallback callback);
+        public void setCallback(MqttCallback callback);
 
 	/**
 	 * Get a topic object which can be used to publish messages.
 	 * <p>An alternative method that should be used in preference to this one when publishing a message is:</p>
 	 * <ul>
-	 * <li>{@link MqttLegacyBlockingClient#publish(String, MqttMessage)} to publish a message in a blocking manner
+	 * <li>{@link MqttClient#publish(String, MqttMessage)} to publish a message in a blocking manner
 	 * <li>or use publish methods on the non-blocking client like {@link IMqttAsyncClient#publish(String, MqttMessage, Object, MqttActionListener)}
 	 * </ul>
 	 * <p>When building an application,
@@ -822,14 +576,14 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @throws IllegalArgumentException if the topic contains a '+' or '#'
 	 * wildcard character.
 	 */
-	public MqttTopic getTopic(String topic);
+        public MqttTopic getTopic(String topic);
 
 	/**
 	 * Determines if this client is currently connected to the server.
 	 *
 	 * @return <code>true</code> if connected, <code>false</code> otherwise.
 	 */
-	public boolean isConnected();
+        public boolean isConnected();
 
 	/**
 	 * Returns the client ID used by this client.
@@ -839,7 +593,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 *
 	 * @return the client ID used by this client.
 	 */
-	public String getClientId();
+        public String getClientId();
 
 	/**
 	 * Returns the address of the server used by this client, as a URI.
@@ -849,14 +603,14 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @return the server's address, as a URI String.
 	 * @see MqttAsyncClient#MqttAsyncClient(String, String)
 	 */
-	public String getServerURI();
+        public String getServerURI();
 
 	/**
 	 * Returns the delivery tokens for any outstanding publish operations.
 	 * <p>If a client has been restarted and there are messages that were in the
 	 * process of being delivered when the client stopped this method will
 	 * return a token for each message enabling the delivery to be tracked
-	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttDeliveryToken)}
+	 * Alternately the {@link MqttCallback#deliveryComplete(IMqttToken)}
 	 * callback can be used to track the delivery of outstanding messages.
 	 * </p>
 	 * <p>If a client connects with cleanStart true then there will be no
@@ -865,7 +619,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * set to false</P>
 	 * @return zero or more delivery tokens
 	 */
-	public IMqttDeliveryToken[] getPendingDeliveryTokens();
+        public IMqttToken[] getPendingTokens();
 	
 	/**
 	 * If manualAcks is set to true, then on completion of the messageArrived callback
@@ -876,8 +630,14 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * callback method.
 	 * @param manualAcks if set to true, MQTT acknowledgements are not sent.
 	 */
-	public void setManualAcks(boolean manualAcks);
+        public void setManualAcks(boolean manualAcks);
 	
+	/**
+	 * Will attempt to reconnect to the server after the client has lost connection.
+	 * @throws MqttException if an error occurs attempting to reconnect
+	 */
+        public void reconnect() throws MqttException;
+
 	/**
 	 * Indicate that the application has completed processing the message with id messageId.
 	 * This will cause the MQTT acknowledgement to be sent to the server.
@@ -885,7 +645,7 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * @param qos the MQTT QoS of the message to be acknowledged
 	 * @throws MqttException if there was a problem sending the acknowledgement
 	 */
-	public void messageArrivedComplete(int messageId, int qos) throws MqttException;
+        public void messageArrivedComplete(int messageId, int qos) throws MqttException;
 
 	/**
 	 * Close the client
@@ -893,5 +653,5 @@ public void subscribe(String topicFilter, int qos, IMqttMessageListener messageL
 	 * been closed it cannot be reused. For instance attempts to connect will fail.
 	 * @throws MqttException  if the client is not disconnected.
 	 */
-	public void close() throws MqttException;
+        public void close() throws MqttException;
 }

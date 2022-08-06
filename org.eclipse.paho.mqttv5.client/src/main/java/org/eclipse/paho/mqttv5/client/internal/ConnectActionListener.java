@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2019 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *   Ian Craggs - MQTT 3.1.1 support
@@ -114,43 +114,45 @@ public class ConnectActionListener implements MqttActionListener {
 	public void onSuccess(IMqttToken token) {
 		// Set properties imposed on us by the Server
 		MqttToken myToken = (MqttToken) token;
-		mqttConnection.setReceiveMaximum(myToken.getMessageProperties().getReceiveMaximum());
-		mqttConnection.setMaximumQoS(myToken.getMessageProperties().getMaximumQoS());
-		mqttConnection.setRetainAvailable(myToken.getMessageProperties().isRetainAvailable());
-		mqttConnection.setOutgoingMaximumPacketSize(myToken.getMessageProperties().getMaximumPacketSize());
-		mqttConnection.setIncomingMaximumPacketSize(options.getMaximumPacketSize());
-		mqttConnection.setOutgoingTopicAliasMaximum(myToken.getMessageProperties().getTopicAliasMaximum());
-		mqttConnection
-				.setWildcardSubscriptionsAvailable(myToken.getMessageProperties().isWildcardSubscriptionsAvailable());
-		mqttConnection.setSubscriptionIdentifiersAvailable(
-				myToken.getMessageProperties().isSubscriptionIdentifiersAvailable());
-		mqttConnection.setSharedSubscriptionsAvailable(myToken.getMessageProperties().isSharedSubscriptionAvailable());
-		
-		// If provided, set the server keep alive value.
-		if(myToken.getMessageProperties().getServerKeepAlive() != null) {
-			mqttConnection.setKeepAliveSeconds(myToken.getMessageProperties().getServerKeepAlive());
-		}
+		if (myToken.getResponseProperties() != null) {
+			mqttConnection.setReceiveMaximum(myToken.getResponseProperties().getReceiveMaximum());
+			mqttConnection.setMaximumQoS(myToken.getResponseProperties().getMaximumQoS());
+			mqttConnection.setRetainAvailable(myToken.getResponseProperties().isRetainAvailable());
+			mqttConnection.setOutgoingMaximumPacketSize(myToken.getResponseProperties().getMaximumPacketSize());
+			mqttConnection.setIncomingMaximumPacketSize(options.getMaximumPacketSize());
+			mqttConnection.setOutgoingTopicAliasMaximum(myToken.getResponseProperties().getTopicAliasMaximum());
+			mqttConnection
+			.setWildcardSubscriptionsAvailable(myToken.getResponseProperties().isWildcardSubscriptionsAvailable());
+			mqttConnection.setSubscriptionIdentifiersAvailable(
+					myToken.getResponseProperties().isSubscriptionIdentifiersAvailable());
+			mqttConnection.setSharedSubscriptionsAvailable(myToken.getResponseProperties().isSharedSubscriptionAvailable());
 
-		// If we are assigning the client ID post connect, then we need to re-initialise
-		// our persistence layer.
-		if (myToken.getMessageProperties().getAssignedClientIdentifier() != null) {
-			mqttSession.setClientId(myToken.getMessageProperties().getAssignedClientIdentifier());
-			try {
-				persistence.open(myToken.getMessageProperties().getAssignedClientIdentifier());
+			// If provided, set the server keep alive value.
+			if(myToken.getResponseProperties().getServerKeepAlive() != null) {
+				mqttConnection.setKeepAliveSeconds(myToken.getResponseProperties().getServerKeepAlive());
+			}
 
-				if (options.isCleanStart()) {
-					persistence.clear();
-				}
-			} catch (MqttPersistenceException exception) {
-
-				// If we fail to open persistence at this point, our best bet is to immediately
-				// close the connection.
+			// If we are assigning the client ID post connect, then we need to re-initialise
+			// our persistence layer.
+			if (myToken.getResponseProperties().getAssignedClientIdentifier() != null) {
+				mqttSession.setClientId(myToken.getResponseProperties().getAssignedClientIdentifier());
 				try {
-					client.disconnect();
-				} catch (MqttException ex) {
+					persistence.open(myToken.getResponseProperties().getAssignedClientIdentifier());
+
+					if (options.isCleanStart()) {
+						persistence.clear();
+					}
+				} catch (MqttPersistenceException exception) {
+
+					// If we fail to open persistence at this point, our best bet is to immediately
+					// close the connection.
+					try {
+						client.disconnect();
+					} catch (MqttException ex) {
+					}
+					onFailure(token, exception);
+					return;
 				}
-				onFailure(token, exception);
-				return;
 			}
 		}
 

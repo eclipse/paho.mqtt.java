@@ -2,13 +2,13 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -275,8 +275,16 @@ public class MqttTopic {
 		}
 
 		while (filterPos < filterLen && topicPos < topicLen) {
+			if (topicFilter.charAt(filterPos) == '#') {
+				/*
+				 * next 'if' will break when topicFilter = topic/# and topicName topic/A/,
+				 * but they are matched
+				 */
+				topicPos = topicLen;
+				filterPos = filterLen;
+				break;
+			}
 			if (topicName.charAt(topicPos) == '/' && topicFilter.charAt(filterPos) != '/')
-
 				break;
 			if (topicFilter.charAt(filterPos) != '+' && topicFilter.charAt(filterPos) != '#'
 					&& topicFilter.charAt(filterPos) != topicName.charAt(topicPos))
@@ -285,8 +293,8 @@ public class MqttTopic {
 				int nextpos = topicPos + 1;
 				while (nextpos < topicLen && topicName.charAt(nextpos) != '/')
 					nextpos = ++topicPos + 1;
-			} else if (topicFilter.charAt(filterPos) == '#')
-				topicPos = topicLen - 1; // skip until end of string
+			}
+
 			filterPos++;
 			topicPos++;
 		}
@@ -298,11 +306,11 @@ public class MqttTopic {
 			 * https://github.com/eclipse/paho.mqtt.java/issues/418
 			 * Covers edge case to match sport/# to sport
 			 */
-			if ((topicFilter.length() - topicName.length()) == 2 &&
-					topicFilter.substring(topicFilter.length() -2, topicFilter.length()).equals("/#")) {
-				String filterSub = topicFilter.substring(0, topicFilter.length() - 2);
-				if (filterSub.equals(topicName)) {
-					System.err.println("filterSub equals topicName: " + filterSub + " == " + topicName);
+			if ((topicFilter.length() - filterPos > 0) && (topicPos == topicLen)) {
+				if (topicName.charAt(topicPos - 1) == '/' && topicFilter.charAt(filterPos) == '#')
+					return true;
+				if (topicFilter.length() - filterPos > 1
+						&& topicFilter.substring(filterPos, filterPos + 2).equals("/#")) {
 					return true;
 				}
 			}

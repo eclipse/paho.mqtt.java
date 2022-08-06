@@ -2,27 +2,25 @@
  * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution. 
  *
  * The Eclipse Public License is available at 
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at 
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  *******************************************************************************/
 
 package org.eclipse.paho.client.mqttv3.test.properties;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -336,7 +334,15 @@ public class TestProperties {
 
   public static String getClientKeyStore() {
     URL keyStore = cclass.getClassLoader().getResource(getInstance().getProperty(KEY_CLIENT_KEY_STORE));
-    return keyStore.getPath();
+    String encodedPath=keyStore.getPath();
+    try {
+      return java.net.URLDecoder.decode( encodedPath, StandardCharsets.UTF_8.name());
+    }
+    catch (Exception e ) {
+      // likely the property value is malformed. Return it as is, hoping that
+      // the requester knows what to make of it.
+      return encodedPath;
+    }
   }
 
   /**
@@ -429,8 +435,8 @@ public class TestProperties {
 
     List<String> list2 = new ArrayList<String>();
 
-    for (int i = 0; i < list1.size(); i++) {
-      list2.add(list1.get(i).toString());
+    for (URI uri : list1) {
+      list2.add(uri.toString());
     }
 
     return list2;

@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -33,6 +33,8 @@ import org.eclipse.paho.client.mqttv3.internal.ClientComms;
 import org.eclipse.paho.client.mqttv3.internal.ConnectActionListener;
 import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
 import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
+import org.eclipse.paho.client.mqttv3.internal.HighResolutionTimer;
+import org.eclipse.paho.client.mqttv3.internal.SystemHighResolutionTimer;
 import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.NetworkModuleService;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
@@ -44,6 +46,7 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 
 /**
  * Lightweight client for talking to an MQTT server using non-blocking methods
@@ -91,7 +94,7 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
  */
 public class MqttAsyncClient implements IMqttAsyncClient {
 	private static final String CLASS_NAME = MqttAsyncClient.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private static final String CLIENT_ID_PREFIX = "paho";
 	private static final long QUIESCE_TIMEOUT = 30000; // ms
@@ -110,7 +113,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	private static int reconnectDelay = 1000; // Reconnect delay, starts at 1
 												// second
 	private boolean reconnecting = false;
-	private static Object clientLock = new Object(); // Simple lock
+	private static final Object clientLock = new Object(); // Simple lock
 
 	private ScheduledExecutorService executorService;
 
@@ -420,8 +423,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 * @param pingSender
 	 *            Custom {@link MqttPingSender} implementation.
 	 * @param executorService
-	 *            used for managing threads. If null then a newScheduledThreadPool
-	 *            is used.
+	 *            used for managing threads. If null no executor service is used.
 	 * @throws IllegalArgumentException
 	 *             if the URI does not start with "tcp://", "ssl://" or
 	 *             "local://"
@@ -433,6 +435,124 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 */
 	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence,
 			MqttPingSender pingSender, ScheduledExecutorService executorService) throws MqttException {
+		this(serverURI, clientId, persistence, pingSender, executorService, null);
+	}
+	/**
+	 * Create an MqttAsyncClient that is used to communicate with an MQTT
+	 * server.
+	 * <p>
+	 * The address of a server can be specified on the constructor.
+	 * Alternatively a list containing one or more servers can be specified
+	 * using the {@link MqttConnectOptions#setServerURIs(String[])
+	 * setServerURIs} method on MqttConnectOptions.
+	 *
+	 * <p>
+	 * The <code>serverURI</code> parameter is typically used with the the
+	 * <code>clientId</code> parameter to form a key. The key is used to store
+	 * and reference messages while they are being delivered. Hence the
+	 * serverURI specified on the constructor must still be specified even if a
+	 * list of servers is specified on an MqttConnectOptions object. The
+	 * serverURI on the constructor must remain the same across restarts of the
+	 * client for delivery of messages to be maintained from a given client to a
+	 * given server or set of servers.
+	 *
+	 * <p>
+	 * The address of the server to connect to is specified as a URI. Two types
+	 * of connection are supported <code>tcp://</code> for a TCP connection and
+	 * <code>ssl://</code> for a TCP connection secured by SSL/TLS. For example:
+	 * </p>
+	 * <ul>
+	 * <li><code>tcp://localhost:1883</code></li>
+	 * <li><code>ssl://localhost:8883</code></li>
+	 * </ul>
+	 * <p>
+	 * If the port is not specified, it will default to 1883 for
+	 * <code>tcp://</code>" URIs, and 8883 for <code>ssl://</code> URIs.
+	 * </p>
+	 *
+	 * <p>
+	 * A client identifier <code>clientId</code> must be specified and be less
+	 * that 65535 characters. It must be unique across all clients connecting to
+	 * the same server. The clientId is used by the server to store data related
+	 * to the client, hence it is important that the clientId remain the same
+	 * when connecting to a server if durable subscriptions or reliable
+	 * messaging are required.
+	 * <p>
+	 * A convenience method is provided to generate a random client id that
+	 * should satisfy this criteria - {@link #generateClientId()}. As the client
+	 * identifier is used by the server to identify a client when it reconnects,
+	 * the client must use the same identifier between connections if durable
+	 * subscriptions or reliable delivery of messages is required.
+	 * </p>
+	 * <p>
+	 * In Java SE, SSL can be configured in one of several ways, which the
+	 * client will use in the following order:
+	 * </p>
+	 * <ul>
+	 * <li><strong>Supplying an <code>SSLSocketFactory</code></strong> -
+	 * applications can use
+	 * {@link MqttConnectOptions#setSocketFactory(SocketFactory)} to supply a
+	 * factory with the appropriate SSL settings.</li>
+	 * <li><strong>SSL Properties</strong> - applications can supply SSL
+	 * settings as a simple Java Properties using
+	 * {@link MqttConnectOptions#setSSLProperties(Properties)}.</li>
+	 * <li><strong>Use JVM settings</strong> - There are a number of standard
+	 * Java system properties that can be used to configure key and trust
+	 * stores.</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * In Java ME, the platform settings are used for SSL connections.
+	 * </p>
+	 * <p>
+	 * A persistence mechanism is used to enable reliable messaging. For
+	 * messages sent at qualities of service (QoS) 1 or 2 to be reliably
+	 * delivered, messages must be stored (on both the client and server) until
+	 * the delivery of the message is complete. If messages are not safely
+	 * stored when being delivered then a failure in the client or server can
+	 * result in lost messages. A pluggable persistence mechanism is supported
+	 * via the {@link MqttClientPersistence} interface. An implementer of this
+	 * interface that safely stores messages must be specified in order for
+	 * delivery of messages to be reliable. In addition
+	 * {@link MqttConnectOptions#setCleanSession(boolean)} must be set to false.
+	 * In the event that only QoS 0 messages are sent or received or
+	 * cleanSession is set to true then a safe store is not needed.
+	 * </p>
+	 * <p>
+	 * An implementation of file-based persistence is provided in class
+	 * {@link MqttDefaultFilePersistence} which will work in all Java SE based
+	 * systems. If no persistence is needed, the persistence parameter can be
+	 * explicitly set to <code>null</code>.
+	 * </p>
+	 *
+	 * @param serverURI
+	 *            the address of the server to connect to, specified as a URI.
+	 *            Can be overridden using
+	 *            {@link MqttConnectOptions#setServerURIs(String[])}
+	 * @param clientId
+	 *            a client identifier that is unique on the server being
+	 *            connected to
+	 * @param persistence
+	 *            the persistence class to use to store in-flight message. If
+	 *            null then the default persistence mechanism is used
+	 * @param pingSender
+	 *            Custom {@link MqttPingSender} implementation.
+	 * @param executorService
+	 *            used for managing threads. If null no executor service is used.
+	 * @param highResolutionTimer
+	 * 			  used for providing time values for keepalive ping scheduling. If {@code null}, a default timer is used
+	 * @throws IllegalArgumentException
+	 *             if the URI does not start with "tcp://", "ssl://" or
+	 *             "local://"
+	 * @throws IllegalArgumentException
+	 *             if the clientId is null or is greater than 65535 characters
+	 *             in length
+	 * @throws MqttException
+	 *             if any other problem was encountered
+	 */
+	public MqttAsyncClient(String serverURI, String clientId, MqttClientPersistence persistence,
+						   MqttPingSender pingSender, ScheduledExecutorService executorService,
+						   HighResolutionTimer highResolutionTimer) throws MqttException {
 		final String methodName = "MqttAsyncClient";
 
 		log.setResourceName(clientId);
@@ -461,16 +581,17 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			this.persistence = new MemoryPersistence();
 		}
 
-		this.executorService = executorService;
-		if (this.executorService == null) {
-			this.executorService = Executors.newScheduledThreadPool(10);
+		if (highResolutionTimer == null) {
+			highResolutionTimer = new SystemHighResolutionTimer();
 		}
+
+		this.executorService = executorService;
 
 		// @TRACE 101=<init> ClientID={0} ServerURI={1} PersistenceType={2}
 		log.fine(CLASS_NAME, methodName, "101", new Object[] { clientId, serverURI, persistence });
 
 		this.persistence.open(clientId, serverURI);
-		this.comms = new ClientComms(this, this.persistence, pingSender, this.executorService);
+		this.comms = new ClientComms(this, this.persistence, pingSender, this.executorService, highResolutionTimer);
 		this.persistence.close();
 		this.topics = new Hashtable();
 
@@ -620,7 +741,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		// @TRACE 103=cleanSession={0} connectionTimeout={1} TimekeepAlive={2}
 		// userName={3} password={4} will={5} userContext={6} callback={7}
 		log.fine(CLASS_NAME, methodName, "103",
-				new Object[] { Boolean.valueOf(options.isCleanSession()), new Integer(options.getConnectionTimeout()),
+				new Object[] { Boolean.valueOf(options.isCleanSession()), Integer.valueOf(options.getConnectionTimeout()),
 						Integer.valueOf(options.getKeepAliveInterval()), options.getUserName(),
 						((null == options.getPassword()) ? "[null]" : "[notnull]"),
 						((null == options.getWillMessage()) ? "[null]" : "[notnull]"), userContext, callback });
@@ -736,24 +857,11 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		comms.disconnectForcibly(quiesceTimeout, disconnectTimeout);
 	}
 
-	/**
-	 * Disconnects from the server forcibly to reset all the states. Could be
-	 * useful when disconnect attempt failed.
-	 * <p>
-	 * Because the client is able to establish the TCP/IP connection to a none
-	 * MQTT server and it will certainly fail to send the disconnect packet.
-	 *
-	 * @param quiesceTimeout
-	 *            the amount of time in milliseconds to allow for existing work
-	 *            to finish before disconnecting. A value of zero or less means
-	 *            the client will not quiesce.
-	 * @param disconnectTimeout
-	 *            the amount of time in milliseconds to allow send disconnect
-	 *            packet to server.
-	 * @param sendDisconnectPacket
-	 *            if true, will send the disconnect packet to the server
-	 * @throws MqttException
-	 *             if any unexpected error
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.paho.client.mqttv3.IMqttAsyncClient#disconnectForcibly(long, long, boolean)
 	 */
 	public void disconnectForcibly(long quiesceTimeout, long disconnectTimeout, boolean sendDisconnectPacket)
 			throws MqttException {
@@ -925,19 +1033,25 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 */
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
 			throws MqttException {
-		final String methodName = "subscribe";
 
 		if (topicFilters.length != qos.length) {
 			throw new IllegalArgumentException();
 		}
 
 		// remove any message handlers for individual topics and validate topicFilter
-		for (int i = 0; i < topicFilters.length; ++i) {
+		for (String topicFilter : topicFilters) {
 			// Check if the topic filter is valid before subscribing
-			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
-			this.comms.removeMessageListener(topicFilters[i]);
+			MqttTopic.validate(topicFilter, true/* allow wildcards */);
+			this.comms.removeMessageListener(topicFilter);
 		}
+		
+		return this.subscribeBase(topicFilters, qos, userContext, callback);
+	}
 
+	private IMqttToken subscribeBase(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback)
+			throws MqttException {
+		final String methodName = "subscribe";
+				
 		// Only Generate Log string if we are logging at FINE level
 		if (log.isLoggable(Logger.FINE)) {
 			StringBuffer subs = new StringBuffer();
@@ -945,9 +1059,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 				if (i > 0) {
 					subs.append(", ");
 				}
-				subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);
-
-				
+				subs.append("topic=").append(topicFilters[i]).append(" qos=").append(qos[i]);			
 			}
 			// @TRACE 106=Subscribe topicFilter={0} userContext={1} callback={2}
 			log.fine(CLASS_NAME, methodName, "106", new Object[] { subs.toString(), userContext, callback });
@@ -1007,15 +1119,14 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, Object userContext, IMqttActionListener callback,
 			IMqttMessageListener[] messageListeners) throws MqttException {
 
-		if ((messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
+		if (messageListeners != null && (messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
 			throw new IllegalArgumentException();
 		}
 
-		IMqttToken token = this.subscribe(topicFilters, qos, userContext, callback);
-
 		// add or remove message handlers to the list for this client
 		for (int i = 0; i < topicFilters.length; ++i) {
-            if (messageListeners[i] == null) {
+			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
+            if (messageListeners == null || messageListeners[i] == null) {
                 this.comms.removeMessageListener(topicFilters[i]);
             }
             else {
@@ -1023,6 +1134,16 @@ public class MqttAsyncClient implements IMqttAsyncClient {
             }
 		}
 
+		IMqttToken token = null;
+		try 	{
+			token = this.subscribeBase(topicFilters, qos, userContext, callback);
+		} catch(Exception e) {
+			// if the subscribe fails, then we have to remove the message handlers
+			for (String topicFilter : topicFilters) {
+				this.comms.removeMessageListener(topicFilter);
+			}
+			throw e;
+		}
 		return token;
 	}
 
@@ -1087,17 +1208,17 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			log.fine(CLASS_NAME, methodName, "107", new Object[] { subs, userContext, callback });
 		}
 
-		for (int i = 0; i < topicFilters.length; i++) {
+		for (String topicFilter : topicFilters) {
 			// Check if the topic filter is valid before unsubscribing
 			// Although we already checked when subscribing, but invalid
 			// topic filter is meanless for unsubscribing, just prohibit it
 			// to reduce unnecessary control packet send to broker.
-			MqttTopic.validate(topicFilters[i], true/* allow wildcards */);
+			MqttTopic.validate(topicFilter, true/* allow wildcards */);
 		}
 
 		// remove message handlers from the list for this client
-		for (int i = 0; i < topicFilters.length; ++i) {
-			this.comms.removeMessageListener(topicFilters[i]);
+		for (String topicFilter : topicFilters) {
+			this.comms.removeMessageListener(topicFilter);
 		}
 
 		MqttToken token = new MqttToken(getClientId());

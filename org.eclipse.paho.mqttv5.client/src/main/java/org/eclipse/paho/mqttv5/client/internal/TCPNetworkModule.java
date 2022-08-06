@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corp.
+ * Copyright (c) 2009, 2018 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
  * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
+ *    https://www.eclipse.org/legal/epl-2.0
  * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
+ *   https://www.eclipse.org/org/documents/edl-v10.php
  *
  * Contributors:
  *    Dave Locke - initial API and implementation and/or initial documentation
@@ -24,7 +24,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.logging.Logger;
@@ -36,7 +35,7 @@ import org.eclipse.paho.mqttv5.common.MqttException;
  */
 public class TCPNetworkModule implements NetworkModule {
 	private static final String CLASS_NAME = TCPNetworkModule.class.getName();
-	private static final Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
+	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT,CLASS_NAME);
 
 	protected Socket socket;
 	private SocketFactory factory;
@@ -69,25 +68,12 @@ public class TCPNetworkModule implements NetworkModule {
 	public void start() throws IOException, MqttException {
 		final String methodName = "start";
 		try {
-//			InetAddress localAddr = InetAddress.getLocalHost();
-//			socket = factory.createSocket(host, port, localAddr, 0);
 			// @TRACE 252=connect to host {0} port {1} timeout {2}
-			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, new Integer(port), new Long(conTimeout*1000)});
+			log.fine(CLASS_NAME,methodName, "252", new Object[] {host, Integer.valueOf(port), Long.valueOf(conTimeout*1000)});
 			SocketAddress sockaddr = new InetSocketAddress(host, port);
-			if (factory instanceof SSLSocketFactory) {
-				// SNI support
-				Socket tempsocket = new Socket();
-				tempsocket.connect(sockaddr, conTimeout*1000);
-				socket = ((SSLSocketFactory)factory).createSocket(tempsocket, host, port, true);
-			} else {
-				socket = factory.createSocket();
-				socket.connect(sockaddr, conTimeout*1000);
-			}
+			socket = factory.createSocket();
+			socket.connect(sockaddr, conTimeout*1000);
 			socket.setSoTimeout(1000);
-
-			// SetTcpNoDelay was originally set ot true disabling Nagle's algorithm.
-			// This should not be required.
-//			socket.setTcpNoDelay(true);	// TCP_NODELAY on, which means we do not use Nagle's algorithm
 		}
 		catch (ConnectException ex) {
 			//@TRACE 250=Failed to create TCP socket

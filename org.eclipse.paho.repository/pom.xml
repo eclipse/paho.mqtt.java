@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+    <groupId>org.eclipse.paho</groupId>
+    <artifactId>java-parent</artifactId>
+    <version>1.2.5</version>
+    </parent>
+
+    <artifactId>org.eclipse.paho.repository</artifactId>
+    <version>1.2.5</version>
+    <packaging>eclipse-repository</packaging>
+    <name>Paho P2 Repository</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete includeemptydirs="false" quiet="true">
+                                    <fileset dir="${download.location}">
+                                        <include name="**" />
+                                    </fileset>
+                                </delete>
+                                <copy includeemptydirs="false" todir="${download.location}">
+                                    <fileset dir="${project.build.directory}/repository/">
+                                        <include name="**" />
+                                    </fileset>
+                                </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
