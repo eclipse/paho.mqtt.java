@@ -8,8 +8,8 @@
 	<!-- classpath.folder = ship.folder of org.eclipse.paho.client.mqttv3 build.xml -->
 	<property name="classpath.folder" value="../org.eclipse.paho.client.mqttv3/target/ship" />
 	
-	<property name="client.release.version" value="1.2.5" />
-	<property name="bundleVersion" value="1.2.5" />
+	<property name="client.release.version" value="1.2.6" />
+	<property name="bundleVersion" value="1.2.6" />
 
 	<property name="bundleVendor" value="Eclipse.org" />
 	<property name="build.level" value="LYYMMDD" />

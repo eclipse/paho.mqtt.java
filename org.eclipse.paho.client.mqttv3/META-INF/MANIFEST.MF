@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.paho.client.mqttv3
 Bundle-SymbolicName: org.eclipse.paho.client.mqttv3
-Bundle-Version: 1.2.5
+Bundle-Version: 1.2.6
 Bundle-Localization: bundle
-Export-Package: org.eclipse.paho.client.mqttv3;version="1.2.5",
- org.eclipse.paho.client.mqttv3.logging;version="1.2.5",
- org.eclipse.paho.client.mqttv3.persist;version="1.2.5",
- org.eclipse.paho.client.mqttv3.util;version="1.2.5"
+Export-Package: org.eclipse.paho.client.mqttv3;version="1.2.6",
+ org.eclipse.paho.client.mqttv3.logging;version="1.2.6",
+ org.eclipse.paho.client.mqttv3.persist;version="1.2.6",
+ org.eclipse.paho.client.mqttv3.util;version="1.2.6"
 Bundle-Vendor: %bundle.provider
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

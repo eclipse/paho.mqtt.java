@@ -9,4 +9,4 @@ You can either build the Jar locally by calling `mvn package -DskipTests` from t
  - [Release Repository](https://repo.eclipse.org/content/repositories/paho-releases/org/eclipse/paho/org.eclipse.paho.mqtt.utility/)
  - [Snapshot Repository](https://repo.eclipse.org/content/repositories/paho-snapshots/org/eclipse/paho/org.eclipse.paho.mqtt.utility/)
 
-Once you have the Jar, run it by executing: `java -jar org.eclipse.paho.mqtt.utility-1.1.1.jar` substituting the correct filename depending on the version.
+Once you have the Jar, run it by executing: `java -jar org.eclipse.paho.mqtt.utility-1.2.6-SNAPSHOT.jar` substituting the correct filename depending on the version.

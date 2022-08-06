@@ -54,7 +54,7 @@ public abstract class MqttWireMessage {
 	private static final String[] PACKET_NAMES = {"reserved", "CONNECT", "CONNACK", "PUBLISH", "PUBACK", "PUBREC",
 			"PUBREL", "PUBCOMP", "SUBSCRIBE", "SUBACK", "UNSUBSCRIBE", "UNSUBACK", "PINGREQ", "PINGRESP",
 			"DISCONNECT"};
-	
+
 
 	private static final long FOUR_BYTE_INT_MAX = 4294967295L;
 	private static final int VARIABLE_BYTE_INT_MAX = 268435455;
@@ -375,44 +375,40 @@ public abstract class MqttWireMessage {
 	 * 
 	 * @param input
 	 *            - The Input String
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException - thrown if input String contains illegal characters or character sequences.
 	 */
 	private static void validateUTF8String(String input) throws IllegalArgumentException {
 		for (int i = 0; i < input.length(); i++) {
 			boolean isBad = false;
 			char c = input.charAt(i);
-			/* Check for mismatched surrogates */
+			// Check for mismatched surrogates
 			if (Character.isHighSurrogate(c)) {
 				if (++i == input.length()) {
 					isBad = true; /* Trailing high surrogate */
 				} else {
 					char c2 = input.charAt(i);
 					if (Character.isLowSurrogate(c2)) {
-						isBad = true; /* No low surrogate */
-					} else {
 						int ch = ((((int) c) & 0x3ff) << 10) | (c2 & 0x3ff);
 						if ((ch & 0xffff) == 0xffff || (ch & 0xffff) == 0xfffe) {
 							isBad = true; /* Noncharacter in base plane */
 						}
+					} else {
+						isBad = true; /* No low surrogate */
 					}
 				}
-			} else {
-				if (Character.isISOControl(c) || Character.isLowSurrogate(c)) {
-					isBad = true; /* Control character or no high surrogate */
-				} else if (c >= 0xfdd0 && (c == 0xfffe || c >= 0xfdd0 || c <= 0xfddf)) {
-					isBad = true; /* Noncharacter in other nonbase plane */
-				}
+			} else if (Character.isISOControl(c) // Control character
+					|| Character.isLowSurrogate(c) // or no high surrogate
+					|| c >= 0xfdd0 && (c <= 0xfddf || c >= 0xfffe)) { // non-character in other nonbase plane
+				isBad = true;
 			}
 			if (isBad) {
-				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: [%x]", (int) c));
+				throw new IllegalArgumentException(String.format("Invalid UTF-8 char: [%04x]", (int) c));
 			}
 		}
 	}
-	
+
 	public static void validateVariableByteInt(int value) throws IllegalArgumentException {
-		if (value >= 0 && value <= VARIABLE_BYTE_INT_MAX) {
-			return;
-		} else {
+		if (value < 0 || value > VARIABLE_BYTE_INT_MAX) {
 			throw new IllegalArgumentException("This property must be a number between 0 and " + VARIABLE_BYTE_INT_MAX);
 		}
 

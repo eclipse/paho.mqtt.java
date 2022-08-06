@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Paho Mqtt Client
 Bundle-SymbolicName: org.eclipse.paho.mqttv5.client
-Bundle-Version: 1.2.5
+Bundle-Version: 1.2.6
 Bundle-Localization: bundle
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: org.eclipse.paho.mqttv5.client;version="1.2.5"
+Export-Package: org.eclipse.paho.mqttv5.client;version="1.2.6"
 Bundle-Vendor: Paho
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.net;resolution:=optional,

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.eclipse.paho</groupId>
         <artifactId>java-parent</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     </parent>
 
     <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
@@ -133,6 +133,6 @@
             </plugins>
         </pluginManagement>
     </build>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
 </project>
 

@@ -3,11 +3,11 @@
     <parent>
         <groupId>org.eclipse.paho</groupId>
         <artifactId>java-parent</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     </parent>
 
     <artifactId>org.eclipse.paho.client.mqttv3.repository</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <packaging>eclipse-repository</packaging>
 
     <name>Paho P2 Repository for mqttv3 client</name>

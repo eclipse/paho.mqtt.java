@@ -4,11 +4,11 @@
 	<parent>
         <groupId>org.eclipse.paho</groupId>
         <artifactId>java-parent</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     </parent>
 
     <artifactId>org.eclipse.paho.mqtt.utility</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     <packaging>jar</packaging>
 
     <build>

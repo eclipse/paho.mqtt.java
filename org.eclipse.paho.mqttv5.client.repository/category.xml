@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-	<bundle id="org.eclipse.paho.mqttv5.client" version="1.2.5.qualifier">
+	<bundle id="org.eclipse.paho.mqttv5.client" version="1.2.6.qualifier">
 		<category name="Paho MQTT Java"/>
 	</bundle>
 	<category-def name="Paho MQTT Java" label="Paho MQTT Java">
