@@ -527,7 +527,16 @@ public class MqttClient implements IMqttClient {
 
 	public IMqttToken subscribe(String[] topicFilters, int[] qos, IMqttMessageListener[] messageListeners)
 			throws MqttException {
-		return this.subscribe(topicFilters, qos, messageListeners);
+		if (topicFilters.length != qos.length) {
+			throw new MqttException(MqttClientException.REASON_CODE_UNEXPECTED_ERROR);
+		}
+
+		MqttSubscription[] subscriptions = new MqttSubscription[topicFilters.length];
+		for (int i = 0; i < topicFilters.length; ++i) {
+			subscriptions[i] = new MqttSubscription(topicFilters[i], qos[i]);
+		}
+
+		return this.subscribe(subscriptions, messageListeners);
 	}
 
 	public IMqttToken subscribe(MqttSubscription[] subscriptions, IMqttMessageListener[] messageListeners) throws MqttException {
