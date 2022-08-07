@@ -10,6 +10,6 @@ Export-Package: org.eclipse.paho.client.mqttv3;version="1.2.6",
  org.eclipse.paho.client.mqttv3.util;version="1.2.6"
 Bundle-Vendor: %bundle.provider
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.net;resolution:=optional,
  javax.net.ssl;resolution:=optional

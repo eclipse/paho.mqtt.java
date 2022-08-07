@@ -172,6 +172,25 @@
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>target-platform-configuration</artifactId>
                     <version>${tycho.version}</version>
+                    <configuration>
+                      <environments>
+                        <environment>
+                          <os>win32</os>
+                          <ws>win32</ws>
+                          <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                          <os>linux</os>
+                          <ws>gtk</ws>
+                          <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                          <os>macosx</os>
+                          <ws>cocoa</ws>
+                          <arch>x86_64</arch>
+                        </environment>
+                      </environments>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
@@ -361,6 +380,7 @@
         <module>org.eclipse.paho.client.mqttv3.test</module>
         <module>org.eclipse.paho.mqttv5.client</module>
         <module>org.eclipse.paho.mqttv5.client.repository</module>
+        <module>org.eclipse.paho.mqttv5.client.test</module>
     </modules>
 </project>
 
