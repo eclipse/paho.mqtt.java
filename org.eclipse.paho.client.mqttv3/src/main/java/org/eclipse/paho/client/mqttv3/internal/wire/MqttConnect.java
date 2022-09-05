@@ -42,6 +42,14 @@ public class MqttConnect extends MqttWireMessage {
 	private int mqttVersion;
 
 	/**
+	 * allow to change password after new MqttConnect, use dynamic password to connect server.
+	 * @param password
+	 */
+	public void setPassword(char[] password){
+		this.password = password;
+	}
+
+	/**
 	 * Constructor for an on the wire MQTT connect message
 	 * 
 	 * @param info
