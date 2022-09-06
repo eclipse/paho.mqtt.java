@@ -25,22 +25,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.paho.client.mqttv3.BufferedMessage;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.eclipse.paho.client.mqttv3.MqttPingSender;
-import org.eclipse.paho.client.mqttv3.MqttToken;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
@@ -717,13 +702,26 @@ public class ClientComms {
 				}
 
 				// Save the connect token in tokenStore as failure can occur before send
-				tokenStore.saveToken(conToken,conPacket);
+				//tokenStore.saveToken(conToken,conPacket);
 
 				// Connect to the server at the network level e.g. TCP socket and then
 				// start the background processing threads before sending the connect
 				// packet.
 				NetworkModule networkModule = networkModules[networkModuleIndex];
 				networkModule.start();
+
+				//use passHandler to change password before connect, and get networkModule real info to generate signature like JWT etc.
+				PasswdHandler passwdHandler = PasswdHandler.Factory.getInstance();
+				if(null != passwdHandler){
+					String pwd = PasswdHandler.Factory.getInstance().handler(networkModule);
+					if(null != pwd && !"".equals(pwd)){
+						conPacket.setPassword(pwd.toCharArray());
+					}
+					tokenStore.saveToken(conToken,conPacket);
+				}else{
+					tokenStore.saveToken(conToken,conPacket);
+				}
+
 				receiver = new CommsReceiver(clientComms, clientState, tokenStore, networkModule.getInputStream());
 				receiver.start("MQTT Rec: "+getClient().getClientId(), executorService);
 				sender = new CommsSender(clientComms, clientState, tokenStore, networkModule.getOutputStream());
