@@ -51,6 +51,7 @@ import org.eclipse.paho.mqttv5.common.util.MqttTopicValidator;
  */
 public class CommsCallback implements Runnable {
 	private static final String CLASS_NAME = CommsCallback.class.getName();
+	private static final int MAX_STOPPED_STATE_TO_STOP_THREAD = 300; //30s
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	private static final int INBOUND_QUEUE_SIZE = 10;
@@ -119,8 +120,16 @@ public class CommsCallback implements Runnable {
 				}
 			}
 		}
+		AtomicInteger stoppedStateCounter = new AtomicInteger(0);
 		while (!isRunning()) {
 			try { Thread.sleep(100); } catch (Exception e) { }
+			if (current_state == State.STOPPED) {
+				if (stoppedStateCounter.incrementAndGet() > MAX_STOPPED_STATE_TO_STOP_THREAD) {
+					break;
+				}
+			} else {
+				stoppedStateCounter.set(0);
+			}
 		}			
 	}
 
