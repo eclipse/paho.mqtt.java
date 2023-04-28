@@ -481,10 +481,17 @@ public class CommsCallback implements Runnable {
 		deliverMessage(destName, publishMessage.getMessageId(), publishMessage.getMessage());
 
 		// If we are not in manual ACK mode:
-		if (!this.manualAcks && publishMessage.getMessage().getQos() == 1) {
-			this.clientComms.internalSend(new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS,
-					publishMessage.getMessageId(), new MqttProperties()),
-					new MqttToken(clientComms.getClient().getClientId()));
+		if (!this.manualAcks) {
+			if (publishMessage.getMessage().getQos() == 1) {
+				this.clientComms.internalSend(new MqttPubAck(MqttReturnCode.RETURN_CODE_SUCCESS,
+						publishMessage.getMessageId(), new MqttProperties()),
+						new MqttToken(clientComms.getClient().getClientId()));
+			} else if (publishMessage.getMessage().getQos() == 2) {
+				this.clientComms.deliveryComplete(publishMessage.getMessageId());
+				MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS,
+						publishMessage.getMessageId(), new MqttProperties());
+				this.clientComms.internalSend(pubComp, new MqttToken(clientComms.getClient().getClientId()));
+			}
 		}
 	}
 
