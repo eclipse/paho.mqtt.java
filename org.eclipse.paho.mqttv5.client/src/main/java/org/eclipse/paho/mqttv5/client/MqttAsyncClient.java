@@ -1161,7 +1161,7 @@ public class MqttAsyncClient implements MqttClientInterface, IMqttAsyncClient {
 		token.setActionCallback(callback);
 		token.setUserContext(userContext);
 		// TODO - Somehow refactor this....
-		// token.internalTok.setTopics(topicFilters);
+		token.internalTok.setTopics(topicFilters);
 		// TODO - Build up MQTT Subscriptions properly here
 
 		MqttSubscribe register = new MqttSubscribe(subscriptions, subscriptionProperties);
