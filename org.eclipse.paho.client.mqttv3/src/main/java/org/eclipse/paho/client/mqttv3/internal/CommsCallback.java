@@ -258,6 +258,12 @@ public class CommsCallback implements Runnable {
 		synchronized (lifecycle) {
 			current_state = State.STOPPED;
 		}
+
+		for (MqttToken token : completeQueue) {
+			log.warning(CLASS_NAME, methodName, String.format("uncompleted action %s %s %x", token, token.internalTok, token.internalTok.hashCode()));
+			token.getActionCallback().onFailure(token, new MqttException(MqttException.REASON_CODE_CLIENT_CLOSED));
+
+		}
 	}
 
 	private void handleActionComplete(MqttToken token)
