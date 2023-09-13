@@ -567,7 +567,12 @@ public class MqttClient implements IMqttClient {
 	 */
 	public void publish(String topic, MqttMessage message) throws MqttException,
 			MqttPersistenceException {
-		aClient.publish(topic, message, null, null).waitForCompletion(getTimeToWait());
+		if (message.getQos() == 0){
+			getTopic(topic).publish(message);
+		}else{
+			aClient.publish(topic, message, null, null).waitForCompletion(getTimeToWait());
+		}
+
 	}
 
 	/**
