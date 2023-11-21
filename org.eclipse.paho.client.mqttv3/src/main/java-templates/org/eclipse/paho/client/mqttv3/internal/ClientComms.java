@@ -700,14 +700,14 @@ public class ClientComms {
 		}
 
 		void start() throws MqttException {
-			Future<?> test = null;
+			Future<?> exceptionFuture = null;
 			if (executorService == null) {
-				test = Executors.newSingleThreadExecutor().submit(this);
+				exceptionFuture = Executors.newSingleThreadExecutor().submit(this);
 			} else {
-				test = executorService.submit(this);
+				exceptionFuture = executorService.submit(this);
 			}
 			try {
-				Object g = test.get();;
+				Object g = exceptionFuture.get();;
 			} catch (Exception e) {
 				throw new MqttException(MqttException.REASON_CODE_SERVER_CONNECT_ERROR);
 			}
