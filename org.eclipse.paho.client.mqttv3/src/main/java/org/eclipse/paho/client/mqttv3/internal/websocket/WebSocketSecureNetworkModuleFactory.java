@@ -75,6 +75,10 @@ public class WebSocketSecureNetworkModuleFactory implements NetworkModuleFactory
 				((SSLNetworkModule) netModule).setEnabledCiphers(enabledCiphers);
 			}
 		}
+
+		netModule.configHttpProxy(options.getHttpProxyHost(), options.getHttpProxyPort(),
+				options.getHttpProxyUser(), options.getHttpProxyPassword());
+
 		return netModule;
 	}
 }

@@ -76,6 +76,10 @@ public class MqttConnectOptions {
 	private int maxReconnectDelay = 128000;
 	private boolean skipPortDuringHandshake = false;
 	private Map<String, String> customWebSocketHeaders = null;
+	private String httpProxyHost;
+	private int httpProxyPort;
+	private String httpProxyUser;
+	private String httpProxyPassword;
 
 	// Client Operation Parameters
 	private int executorServiceTimeout = 1; // How long to wait in seconds when terminating the executor service.
@@ -716,6 +720,38 @@ public class MqttConnectOptions {
 	public Map<String, String> getCustomWebSocketHeaders() {
 		return customWebSocketHeaders;
 	}
+	public String getHttpProxyHost() {
+		return httpProxyHost;
+	}
+
+	public void setHttpProxyHost(String httpProxyHost) {
+		this.httpProxyHost = httpProxyHost;
+	}
+
+	public int getHttpProxyPort() {
+		return httpProxyPort;
+	}
+
+	public void setHttpProxyPort(int httpProxyPort) {
+		this.httpProxyPort = httpProxyPort;
+	}
+
+	public String getHttpProxyUser() {
+		return httpProxyUser;
+	}
+
+	public void setHttpProxyUser(String httpProxyUser) {
+		this.httpProxyUser = httpProxyUser;
+	}
+
+	public String getHttpProxyPassword() {
+		return httpProxyPassword;
+	}
+
+	public void setHttpProxyPassword(String httpProxyPassword) {
+		this.httpProxyPassword = httpProxyPassword;
+	}
+
 
 	public String toString() {
 		return Debug.dumpProperties(getDebug(), "Connection options");
