@@ -522,6 +522,44 @@ public class BasicTest {
       }
     }
   }
+  
+  @Test
+  public void testMqttConnectOptionsConstructorWithCredentials() throws Exception {
+    String methodName = Utility.getMethodName();
+    LoggingUtilities.banner(log, cclass, methodName);
+
+    int before_thread_count = Thread.activeCount();
+    URI uri = new URI("tcp://iot.eclipse.org:1882");
+    IMqttAsyncClient client = clientFactory.createMqttAsyncClient(uri, "client-1");
+    
+    String username = "foo";
+    char[] password = "bar".toCharArray();
+
+    MqttConnectOptions options = new MqttConnectOptions(username, password);
+    options.setAutomaticReconnect(true);
+    options.setConnectionTimeout(2);
+    client.connect(options);
+
+    Thread.sleep(1000);
+
+    try {
+    	  // this would deadlock before fix
+      client.disconnect(0).waitForCompletion();
+    } finally {
+      client.close();
+    }
+    
+    int after_count = Thread.activeCount();
+    Thread[] tarray = new Thread[after_count];
+    while (after_count > before_thread_count) {
+      after_count = Thread.enumerate(tarray);
+      for (int i = 0; i < after_count; ++i) {
+    	    log.info(i + " " + tarray[i].getName());
+      }
+      Thread.sleep(100);
+    }
+    Assert.assertEquals(before_thread_count, after_count);
+  }
 
 
 
