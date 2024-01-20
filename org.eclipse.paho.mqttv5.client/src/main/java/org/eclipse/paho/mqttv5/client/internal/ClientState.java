@@ -215,6 +215,7 @@ public class ClientState implements MqttState {
 		log.fine(CLASS_NAME, methodName, ">");
 
 		persistence.clear();
+		clientComms.clear();
 		inUseMsgIds.clear();
 		pendingMessages.clear();
 		pendingFlows.clear();

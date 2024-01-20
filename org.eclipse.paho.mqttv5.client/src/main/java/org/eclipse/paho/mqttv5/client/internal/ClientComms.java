@@ -733,7 +733,13 @@ public class ClientComms {
 		return props;
 	}
 
-	// Kick off the connect processing in the background so that it does not block.
+	public void clear() {
+		if (disconnectedMessageBuffer != null) {
+			disconnectedMessageBuffer.clear();
+		}
+	}
+
+    // Kick off the connect processing in the background so that it does not block.
 	// For instance
 	// the socket could take time to create.
 	private class ConnectBG implements Runnable {

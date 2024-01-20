@@ -239,6 +239,7 @@ public class ConnectActionListener implements MqttActionListener {
 
 			if (options.isCleanStart()) {
 				persistence.clear();
+				comms.clear();
 			}
 		}
 

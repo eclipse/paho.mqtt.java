@@ -675,6 +675,11 @@ public class ClientComms {
 		return props;
 	}
 
+	public void clear() {
+		if (disconnectedMessageBuffer != null) {
+			disconnectedMessageBuffer.clear();
+		}
+	}
 
 
 	// Kick off the connect processing in the background so that it does not block. For instance
