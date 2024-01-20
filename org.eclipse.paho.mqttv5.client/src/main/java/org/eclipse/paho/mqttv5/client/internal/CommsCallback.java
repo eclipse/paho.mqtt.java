@@ -21,6 +21,7 @@ package org.eclipse.paho.mqttv5.client.internal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,9 +57,9 @@ public class CommsCallback implements Runnable {
 	private static final int INBOUND_QUEUE_SIZE = 10;
 	private MqttCallback mqttCallback;
 	private MqttCallback reconnectInternalCallback;
-	private HashMap<Integer, IMqttMessageListener> callbackMap; // Map of message handler callbacks to internal IDs
-	private HashMap<String, Integer> callbackTopicMap; // Map of Topic Strings to internal callback Ids
-	private HashMap<Integer, Integer> subscriptionIdMap; // Map of Subscription Ids to callback Ids
+	private ConcurrentHashMap<Integer, IMqttMessageListener> callbackMap; // Map of message handler callbacks to internal IDs
+	private ConcurrentHashMap<String, Integer> callbackTopicMap; // Map of Topic Strings to internal callback Ids
+	private ConcurrentHashMap<Integer, Integer> subscriptionIdMap; // Map of Subscription Ids to callback Ids
 	private AtomicInteger messageHandlerId = new AtomicInteger(0);
 	private ClientComms clientComms;
 	private ArrayList<MqttPublish> messageQueue;
@@ -83,9 +84,9 @@ public class CommsCallback implements Runnable {
 		this.clientComms = clientComms;
 		this.messageQueue = new ArrayList<>(INBOUND_QUEUE_SIZE);
 		this.completeQueue = new ArrayList<>(INBOUND_QUEUE_SIZE);
-		this.callbackMap = new HashMap<>();
-		this.callbackTopicMap = new HashMap<>();
-		this.subscriptionIdMap = new HashMap<>();
+		this.callbackMap = new ConcurrentHashMap<>();
+		this.callbackTopicMap = new ConcurrentHashMap<>();
+		this.subscriptionIdMap = new ConcurrentHashMap<>();
 		log.setResourceName(clientComms.getClient().getClientId());
 	}
 
@@ -561,8 +562,12 @@ public class CommsCallback implements Runnable {
 	 */
 	public void removeMessageListener(String topicFilter) {
 		Integer callbackId = this.callbackTopicMap.get(topicFilter);
-		this.callbackMap.remove(callbackId);
-		this.callbackTopicMap.remove(topicFilter);
+		if(callbackId!=null){
+			this.callbackMap.remove(callbackId);
+		}
+		if(topicFilter!=null){
+			this.callbackTopicMap.remove(topicFilter);
+		}
 
 		// Reverse lookup the subscription ID if it exists to remove that as well
 		for (Map.Entry<Integer, Integer> entry : this.subscriptionIdMap.entrySet()) {
@@ -584,8 +589,13 @@ public class CommsCallback implements Runnable {
 	 */
 	public void removeMessageListener(Integer subscriptionId) {
 		Integer callbackId = this.subscriptionIdMap.get(subscriptionId);
-		this.subscriptionIdMap.remove(callbackId);
-		this.callbackMap.remove(callbackId);
+		if(callbackId!=null){
+			this.subscriptionIdMap.remove(callbackId);
+		}
+		if(callbackId!=null){
+			this.callbackMap.remove(callbackId);
+		}
+
 
 		// Reverse lookup the topic if it exists to remove that as well
 		for (Map.Entry<String, Integer> entry : this.callbackTopicMap.entrySet()) {
