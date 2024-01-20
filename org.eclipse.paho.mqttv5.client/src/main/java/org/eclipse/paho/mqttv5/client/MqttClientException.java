@@ -153,7 +153,7 @@ public class MqttClientException {
 	 */
 	public static final short REASON_CODE_FAILED_AUTHENTICATION = 0x04;
 	/** Not authorized to perform the requested operation */
-	public static final short REASON_CODE_NOT_AUTHORIZED = 0x05;
+	public static final short REASON_CODE_NOT_AUTHORIZED = 0x87;
 
 	/** An unexpected error has occurred. */
 	public static final short REASON_CODE_UNEXPECTED_ERROR = 0x06;
