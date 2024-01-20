@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttToken;
@@ -33,6 +34,7 @@ import org.eclipse.paho.mqttv5.common.packet.MqttWireMessage;
 
 public class CommsSender implements Runnable {
 	private static final String CLASS_NAME = CommsSender.class.getName();
+	private static final int MAX_STOPPED_STATE_TO_STOP_THREAD = 300; //30s
 	private Logger log = LoggerFactory.getLogger(LoggerFactory.MQTT_CLIENT_MSG_CAT, CLASS_NAME);
 
 	//Sends MQTT packets to the server on its own thread
@@ -76,8 +78,16 @@ public class CommsSender implements Runnable {
 				}
 			}
 		}
+		AtomicInteger stoppedStateCounter = new AtomicInteger(0);
 		while (!isRunning()) {
 			try { Thread.sleep(100); } catch (Exception e) { }
+			if (current_state == State.STOPPED) {
+				if (stoppedStateCounter.incrementAndGet() > MAX_STOPPED_STATE_TO_STOP_THREAD) {
+					break;
+				}
+			} else {
+				stoppedStateCounter.set(0);
+			}
 		}
 	}
 
