@@ -141,6 +141,7 @@ public class CommsCallback implements Runnable {
 			// @TRACE 700=stopping
 			log.fine(CLASS_NAME, methodName, "700");
 			synchronized (lifecycle) {
+				current_state = State.STOPPED;
 				target_state = State.STOPPED;
 			}
 			// Do not allow a thread to wait for itself.
