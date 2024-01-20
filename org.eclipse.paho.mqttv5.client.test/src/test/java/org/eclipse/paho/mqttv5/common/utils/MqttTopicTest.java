@@ -46,6 +46,18 @@ public class MqttTopicTest {
 	}
 
 	@Test
+	public void testShareMatchTopicFilterWildcards() throws Exception {
+		String[][] matchingTopics = new String[][] {{ "$share/group/sport/tennis/player1/#", "sport/tennis/player1" },
+				{ "$share/group/sport/tennis/player1/#", "sport/tennis/player1/ranking" },
+				{ "$share/group/sport/tennis/player1/#", "sport/tennis/player1/score/wimbledon" }, { "$share/group/sport/#", "sport" },
+				{ "$share/group/#", "sport/tennis/player1" }, { "$share/group/sport", "sport"} };
+
+		for (String[] pair : matchingTopics) {
+			Assert.assertTrue(pair[0] + " should match " + pair[1], MqttTopicValidator.isMatched(pair[0], pair[1]));
+		}
+	}
+
+	@Test
 	public void testNonMatchedTopicFilterWildcards() throws Exception {
 		String[][] matchingTopics = new String[][] { { "sport/tennis/player1/#", "sport/tennis/player2" },
 				{ "sport1/#", "sport2" }, { "sport/tennis1/player/#", "sport/tennis2/player" } };

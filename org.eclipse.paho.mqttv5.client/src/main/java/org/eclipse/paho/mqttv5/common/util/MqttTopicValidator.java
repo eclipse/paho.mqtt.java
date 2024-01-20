@@ -157,6 +157,12 @@ public class MqttTopicValidator {
 	public static boolean isMatched(String topicFilter, String topicName) throws IllegalArgumentException {
 		int topicPos = 0;
 		int filterPos = 0;
+
+		// remove $share/groupname from $share/groupname/topic to topic
+		if (topicFilter.startsWith("$share/")) {
+			topicFilter = topicFilter.substring(topicFilter.indexOf("/", topicFilter.indexOf("/") + 1) + 1);
+		}
+
 		int topicLen = topicName.length();
 		int filterLen = topicFilter.length();
 
