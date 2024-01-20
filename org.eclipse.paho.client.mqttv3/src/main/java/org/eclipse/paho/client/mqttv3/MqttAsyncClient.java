@@ -763,7 +763,11 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		}
 
 		comms.setNetworkModuleIndex(0);
-		connectActionListener.connect();
+		try {
+			connectActionListener.connect();
+		} catch (MqttException e) {
+			throw e;
+		}
 
 		return userToken;
 	}

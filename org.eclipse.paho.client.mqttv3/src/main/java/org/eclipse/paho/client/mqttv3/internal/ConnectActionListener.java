@@ -136,7 +136,7 @@ public class ConnectActionListener implements IMqttActionListener {
       try {
         connect();
       }
-      catch (MqttPersistenceException e) {
+      catch (MqttException e) {
         onFailure(token, e); // try the next URI in the list
       }
     }
@@ -166,7 +166,7 @@ public class ConnectActionListener implements IMqttActionListener {
    * Start the connect processing
    * @throws MqttPersistenceException if an error is thrown whilst setting up persistence 
    */
-  public void connect() throws MqttPersistenceException {
+  public void connect() throws MqttException {
     MqttToken token = new MqttToken(client.getClientId());
     token.setActionCallback(this);
     token.setUserContext(this);
@@ -185,6 +185,8 @@ public class ConnectActionListener implements IMqttActionListener {
       comms.connect(options, token);
     }
     catch (MqttException e) {
+      if(e.getReasonCode() == MqttException.REASON_CODE_SERVER_CONNECT_ERROR)
+        throw e;
       onFailure(token, e);
     }
   }
