@@ -1143,12 +1143,20 @@ public class ClientState implements MqttState {
 					new Object[] { pubRel.getMessageId(), pubRel.toString(), pubRel.getReasonCodes()[0] });
 			throw new MqttException(pubRel.getReasonCodes()[0]);
 		} else {
-			// Currently this client has no need of the properties, so this is left empty.
-			MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS, pubRel.getMessageId(),
-					new MqttProperties());
-			// @TRACE 668=Creating MqttPubComp: {0}
-			log.info(CLASS_NAME, methodName, "668", new Object[] { pubComp.toString() });
-			this.send(pubComp, null);
+      MqttPublish sendMsg = (MqttPublish) inboundQoS2.get(Integer.valueOf(pubRel.getMessageId()));
+      if (sendMsg != null) {
+        if (callback != null) {
+          callback.messageArrived(sendMsg);
+        }
+      } else {
+        // Original publish has already been delivered.
+        // Currently this client has no need of the properties, so this is left empty.
+        MqttPubComp pubComp = new MqttPubComp(MqttReturnCode.RETURN_CODE_SUCCESS,
+            pubRel.getMessageId(), new MqttProperties());
+        // @TRACE 668=Creating MqttPubComp: {0}
+        log.info(CLASS_NAME, methodName, "668", new Object[] { pubComp.toString() });
+        this.send(pubComp, null);
+      }
 		}
 	}
 
@@ -1219,9 +1227,6 @@ public class ClientState implements MqttState {
 				case 2:
 					persistence.put(getReceivedPersistenceKey(message), (MqttPublish) message);
 					inboundQoS2.put(Integer.valueOf(send.getMessageId()), send);
-					if (callback != null) {
-						callback.messageArrived(send);
-					}
 					// Currently this client has no need of the properties, so this is left empty.
 					this.send(new MqttPubRec(MqttReturnCode.RETURN_CODE_SUCCESS, send.getMessageId(),
 							new MqttProperties()), null);
