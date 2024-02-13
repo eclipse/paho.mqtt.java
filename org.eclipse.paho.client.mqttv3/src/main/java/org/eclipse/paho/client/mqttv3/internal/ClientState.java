@@ -523,8 +523,12 @@ public class ClientState {
 				if (actualInFlight >= this.maxInflight) {
 					//@TRACE 613= sending {0} msgs at max inflight window
 					log.fine(CLASS_NAME, methodName, "613", new Object[]{ Integer.valueOf(actualInFlight)});
-
-					throw new MqttException(MqttException.REASON_CODE_MAX_INFLIGHT);
+					try {
+						queueLock.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+//					throw new MqttException(MqttException.REASON_CODE_MAX_INFLIGHT);
 				}
 				
 				MqttMessage innerMessage = ((MqttPublish) message).getMessage();
