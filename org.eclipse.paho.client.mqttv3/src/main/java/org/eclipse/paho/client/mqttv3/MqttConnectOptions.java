@@ -291,7 +291,7 @@ public class MqttConnectOptions {
 	 * </p>
 	 *
 	 * @param maxInflight
-	 *            the number of maxInfligt messages
+	 *            the number of maxInflight messages
 	 */
 	public void setMaxInflight(int maxInflight) {
 		if (maxInflight < 0) {
