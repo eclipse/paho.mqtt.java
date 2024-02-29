@@ -170,7 +170,7 @@ public class MqttConnectOptions {
 	 * @param retained
 	 *            whether or not the message should be retained.
 	 */
-	public void setWill(MqttTopic topic, byte[] payload, int qos, boolean retained) {
+	public void setWill(MqttTopic topic, byte[] payload, int qos, boolean retained) throws MqttException{
 		String topicS = topic.getName();
 		validateWill(topicS, payload);
 		this.setWill(topicS, new MqttMessage(payload), qos, retained);
@@ -190,7 +190,7 @@ public class MqttConnectOptions {
 	 * @param retained
 	 *            whether or not the message should be retained.
 	 */
-	public void setWill(String topic, byte[] payload, int qos, boolean retained) {
+	public void setWill(String topic, byte[] payload, int qos, boolean retained) throws MqttException{
 		validateWill(topic, payload);
 		this.setWill(topic, new MqttMessage(payload), qos, retained);
 	}
@@ -198,7 +198,7 @@ public class MqttConnectOptions {
 	/**
 	 * Validates the will fields.
 	 */
-	private void validateWill(String dest, Object payload) {
+	private void validateWill(String dest, Object payload) throws MqttException{
 		if ((dest == null) || (payload == null)) {
 			throw new IllegalArgumentException();
 		}

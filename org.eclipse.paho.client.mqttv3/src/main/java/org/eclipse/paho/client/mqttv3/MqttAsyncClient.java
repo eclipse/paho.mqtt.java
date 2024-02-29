@@ -969,7 +969,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 	 * @throws IllegalArgumentException
 	 *             if the topic contains a '+' or '#' wildcard character.
 	 */
-	protected MqttTopic getTopic(String topic) {
+	protected MqttTopic getTopic(String topic) throws MqttException{
 		MqttTopic.validate(topic, false/* wildcards NOT allowed */);
 
 		MqttTopic result = (MqttTopic) topics.get(topic);
@@ -1130,7 +1130,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			IMqttMessageListener[] messageListeners) throws MqttException {
 
 		if (messageListeners != null && (messageListeners.length != qos.length) || (qos.length != topicFilters.length)) {
-			throw new IllegalArgumentException();
+			throw new MqttException(MqttException.REASON_CODE_INVALID_ARGUMENT);
 		}
 
 		// add or remove message handlers to the list for this client
@@ -1147,7 +1147,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 		IMqttToken token = null;
 		try 	{
 			token = this.subscribeBase(topicFilters, qos, userContext, callback);
-		} catch(Exception e) {
+		} catch(MqttException e) {
 			// if the subscribe fails, then we have to remove the message handlers
 			for (String topicFilter : topicFilters) {
 				this.comms.removeMessageListener(topicFilter);
